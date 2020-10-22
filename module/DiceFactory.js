@@ -7,7 +7,6 @@ export class DiceFactory {
 	constructor() {
 		this.dice = {};
 		this.geometries = {};
-		this.meshes = {};
 
 		this.baseScale = 50;
 
@@ -349,8 +348,6 @@ export class DiceFactory {
 
 	setScale(scale){
 		this.baseScale = scale;
-		this.geometries = {};
-		this.meshes = {};
 	}
 
 	setBumpMapping(bumpMapping){
@@ -587,11 +584,6 @@ export class DiceFactory {
 	get(type) {
 		return this.dice[type];
 	}
-
-	getGeometry(type) {
-		return this.geometries[type];
-	}
-
 	createMaterials(scopedTextureCache, baseTextureCacheString, diceobj , margin, d4specialindex = null) {
 		if(this.baseTextureCache[baseTextureCacheString])
 			return this.baseTextureCache[baseTextureCacheString];

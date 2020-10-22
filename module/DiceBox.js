@@ -96,9 +96,6 @@ export class DiceBox {
 
 		this.rethrowFunctions = {};
 		this.afterThrowFunctions = {};
-
-		//clean cache
-		this.dicefactory.disposeCachedMaterials(config.boxType);
 	}
 
 	preloadSounds(){
@@ -168,18 +165,27 @@ export class DiceBox {
 			else
 				this.speed = parseInt(globalAnimationSpeed,10);
 			this.throwingForce = this.config.throwingForce;
-
-			this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference:"high-performance"});
-			if(this.dicefactory.bumpMapping){
-				this.renderer.physicallyCorrectLights = true;
-				this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-				this.renderer.toneMappingExposure = 0.9;
-				this.renderer.outputEncoding = THREE.sRGBEncoding;
-			}
-
 			this.scene = new THREE.Scene();
-			await this.loadContextScopedTextures(this.config.boxType);
-			this.dicefactory.initializeMaterials();
+			if(game.dice3dRenderers[this.config.boxType] != null){
+				this.renderer = game.dice3dRenderers[this.config.boxType];
+				this.scene.environment = this.renderer.scopedTextureCache.textureCube;
+				this.scene.traverse(object => {
+					if(object.type === 'Mesh') object.material.needsUpdate = true;
+				});
+			}
+			else{
+				this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference:"high-performance"});
+				if(this.dicefactory.bumpMapping){
+					this.renderer.physicallyCorrectLights = true;
+					this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+					this.renderer.toneMappingExposure = 0.9;
+					this.renderer.outputEncoding = THREE.sRGBEncoding;
+				}
+				await this.loadContextScopedTextures(this.config.boxType);
+				this.dicefactory.initializeMaterials();
+				game.dice3dRenderers[this.config.boxType] = this.renderer;
+			}
+			
 			/*this.rendererStats	= new THREEx.RendererStats()
 
 			this.rendererStats.domElement.style.position	= 'absolute';
@@ -236,12 +242,12 @@ export class DiceBox {
 
 	loadContextScopedTextures(type){
 		return new Promise(resolve => {
-			this.scopedTextureCache = {type:type};
+			this.renderer.scopedTextureCache = {type:type};
 			if(this.dicefactory.bumpMapping){
 				let textureLoader = new THREE.TextureLoader();
-				this.scopedTextureCache.roughnessMap_fingerprint = textureLoader.load('modules/dice-so-nice/textures/roughnessMap_finger.webp');
-				this.scopedTextureCache.roughnessMap_wood = textureLoader.load('modules/dice-so-nice/textures/roughnessMap_wood.webp');
-				this.scopedTextureCache.roughnessMap_metal = textureLoader.load('modules/dice-so-nice/textures/roughnessMap_metal.webp');
+				this.renderer.scopedTextureCache.roughnessMap_fingerprint = textureLoader.load('modules/dice-so-nice/textures/roughnessMap_finger.webp');
+				this.renderer.scopedTextureCache.roughnessMap_wood = textureLoader.load('modules/dice-so-nice/textures/roughnessMap_wood.webp');
+				this.renderer.scopedTextureCache.roughnessMap_metal = textureLoader.load('modules/dice-so-nice/textures/roughnessMap_metal.webp');
 
 				this.pmremGenerator = new THREE.PMREMGenerator(this.renderer);
 				this.pmremGenerator.compileEquirectangularShader();
@@ -250,11 +256,7 @@ export class DiceBox {
 				.setDataType( THREE.UnsignedByteType )
 				.setPath( 'modules/dice-so-nice/textures/equirectangular/' )
 				.load('foyer.hdr', function ( texture ) {
-					this.scopedTextureCache.textureCube = this.pmremGenerator.fromEquirectangular(texture).texture;
-					this.scene.environment = this.scopedTextureCache.textureCube;
-					this.scene.traverse(object => {
-						if(object.type === 'Mesh') object.material.needsUpdate = true;
-					});
+					this.renderer.scopedTextureCache.textureCube = this.pmremGenerator.fromEquirectangular(texture).texture;
 	
 					texture.dispose();
 					this.pmremGenerator.dispose();
@@ -265,7 +267,7 @@ export class DiceBox {
 				let loader = new THREE.CubeTextureLoader();
 				loader.setPath('modules/dice-so-nice/textures/cubemap/');
 
-				this.scopedTextureCache.textureCube = loader.load( [
+				this.renderer.scopedTextureCache.textureCube = loader.load( [
 					'px.webp', 'nx.webp',
 					'py.webp', 'ny.webp',
 					'pz.webp', 'nz.webp'
@@ -529,7 +531,7 @@ export class DiceBox {
 			colorset = dicedata.options.flavor;
 		}
 
-		let dicemesh = this.dicefactory.create(this.scopedTextureCache, diceobj.type, colorset);
+		let dicemesh = this.dicefactory.create(this.renderer.scopedTextureCache, diceobj.type, colorset);
 		if(!dicemesh) return;
 
 		let mass = diceobj.mass;
@@ -896,6 +898,17 @@ export class DiceBox {
 		//setTimeout(() => { this.renderer.render(this.scene, this.camera); }, 100);
 	}
 
+	clearScene(){
+		while(this.scene.children.length > 0){ 
+			this.scene.remove(this.scene.children[0]); 
+		}
+		this.desk.material.dispose();
+		this.desk.geometry.dispose();
+		this.light.shadow.map.dispose();
+		if(this.light_amb)
+			this.light_amb.shadow.map.dispose();
+	}
+
 	rollDice(throws, callback){
 
 		this.camera.position.z = this.cameraHeight.far;
@@ -979,7 +992,7 @@ export class DiceBox {
 				posy--;
 			}
 
-			let dicemesh = this.dicefactory.create(this.scopedTextureCache, selectordice[i]);
+			let dicemesh = this.dicefactory.create(this.renderer.scopedTextureCache, selectordice[i]);
 			dicemesh.position.set(posx * step, posy * step, step * 0.5);
 			dicemesh.castShadow = this.shadows;
 			dicemesh.userData = selectordice[i];

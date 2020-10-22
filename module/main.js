@@ -400,6 +400,10 @@ export class Dice3D {
      */
     constructor() {
         Hooks.call("diceSoNiceInit", this);
+        game.dice3dRenderers = {
+            "board":null,
+            "showcase":null
+        }
         this._buildCanvas();
         this._initListeners();
         this._buildDiceBox();
@@ -491,6 +495,7 @@ export class Dice3D {
             this._timeout = false;
             //resize ended probably, lets remake the canvas
             this.canvas[0].remove();
+            this.box.clearScene();
             this._buildCanvas();
             this._resizeCanvas();
             let config = Dice3D.ALL_CONFIG();
@@ -867,7 +872,7 @@ class DiceConfig extends FormApplication {
                 system: $('select[name="system"]').val(),
                 throwingForce:$('select[name="throwingForce"]').val()
             };
-
+		    this.box.dicefactory.disposeCachedMaterials("showcase");
             this.box.update(config);
             this.box.showcase(config);
         }, 100);
@@ -892,5 +897,9 @@ class DiceConfig extends FormApplication {
         await game.user.setFlag("dice-so-nice", "appearance", appearance);
         ui.notifications.info(game.i18n.localize("DICESONICE.saveMessage"));
     }
-
+    close(){
+        super.close();
+        this.box.clearScene();
+		this.box.dicefactory.disposeCachedMaterials("showcase");
+    }
 }
