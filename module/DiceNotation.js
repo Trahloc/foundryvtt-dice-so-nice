@@ -57,17 +57,17 @@ export class DiceNotation {
 			//For d100, we create two d10 dice
 			if(isd10of100) {
 				dieValue = dieValue%10;
-				dsnDie.resultLabel = fvttDie.constructor.getResultLabel(dieValue);
+				dsnDie.resultLabel = fvttDie.constructor.getResultLabel(dieValue).toString();
 			}
 			else {
 				dieValue = parseInt(dieValue/10);
-				dsnDie.resultLabel = fvttDie.constructor.getResultLabel(dieValue*10);
+				dsnDie.resultLabel = fvttDie.constructor.getResultLabel(dieValue*10).toString();
 				//On a d100, 0 is 10, because.
 				if(dieValue==10)
 					dieValue=0;
 			}
 		} else
-			dsnDie.resultLabel = fvttDie.constructor.getResultLabel(dieValue);
+			dsnDie.resultLabel = fvttDie.constructor.getResultLabel(dieValue).toString();
 		dsnDie.result = dieValue;
 
 		//If it is not a standard die ("d"), we need to prepend "d" to the denominator. If it is, we append the number of face
