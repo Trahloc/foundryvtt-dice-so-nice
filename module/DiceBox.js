@@ -904,9 +904,11 @@ export class DiceBox {
 		}
 		this.desk.material.dispose();
 		this.desk.geometry.dispose();
-		this.light.shadow.map.dispose();
-		if(this.light_amb)
-			this.light_amb.shadow.map.dispose();
+		if(this.shadows){
+			this.light.shadow.map.dispose();
+			if(this.light_amb)
+				this.light_amb.shadow.map.dispose();
+		}
 	}
 
 	rollDice(throws, callback){
