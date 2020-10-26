@@ -356,6 +356,7 @@ export class DiceBox {
 		shadowplane.opacity = 0.5;
 		this.desk = new THREE.Mesh(new THREE.PlaneGeometry(this.display.containerWidth * 6, this.display.containerHeight * 6, 1, 1), shadowplane);
 		this.desk.receiveShadow = this.shadows;
+		this.desk.position.set(0, 0, -1);
 		this.scene.add(this.desk);
 
 		this.renderer.render(this.scene, this.camera);
@@ -565,6 +566,10 @@ export class DiceBox {
 		dicemesh.body_sim.addEventListener('collide', this.eventCollide.bind(this));
 		dicemesh.body_sim.stepQuaternions = new Array(1000);
 		dicemesh.body_sim.stepPositions = new Array(1000);
+
+		//We add some informations about the dice to the CANNON body to be used in the collide event
+		dicemesh.body_sim.diceType = diceobj.type;
+		dicemesh.body_sim.diceMaterial = this.dicefactory.material_rand;
 
 		//dicemesh.meshCannon = this.body2mesh(dicemesh.body_sim,true);
 
@@ -906,8 +911,6 @@ export class DiceBox {
 		this.desk.geometry.dispose();
 		if(this.shadows){
 			this.light.shadow.map.dispose();
-			if(this.light_amb)
-				this.light_amb.shadow.map.dispose();
 		}
 	}
 
