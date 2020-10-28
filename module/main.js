@@ -25,7 +25,7 @@ Hooks.once('init', () => {
         config: false,
         onChange: settings => {
             if (game.dice3d) {
-                if((game.dice3d.currentCanvasPosition != settings.canvasZIndex)||(game.dice3d.currentBumpMapping != settings.bumpMapping))
+                if((game.dice3d.currentCanvasPosition != settings.canvasZIndex)||(game.dice3d.currentBumpMapping != settings.bumpMapping)||(game.dice3d.currentUseHighDPI != settings.useHighDPI))
                     location.reload();
                 else
                     game.dice3d.update(settings);
@@ -111,6 +111,15 @@ Hooks.once('init', () => {
         config: true
     });
 
+    game.settings.register("dice-so-nice", "animateRollTable", {
+        name: "DICESONICE.animateRollTable",
+        hint: "DICESONICE.animateRollTableHint",
+        scope: "world",
+        type: Boolean,
+        default: false,
+        config: true
+    });
+
 });
 
 /**
@@ -131,7 +140,7 @@ Hooks.on('createChatMessage', (chatMessage) => {
         !chatMessage.isContentVisible ||
         !game.dice3d ||
         game.dice3d.messageHookDisabled ||
-        chatMessage.getFlag("core", "RollTable")) {
+        (chatMessage.getFlag("core", "RollTable") && !game.settings.get("dice-so-nice", "animateRollTable"))) {
         return;
     }
 
@@ -284,7 +293,8 @@ export class Dice3D {
             soundsSurface: 'felt',
             soundsVolume: 0.5,
             canvasZIndex:'over',
-            throwingForce:'medium'
+            throwingForce:'medium',
+            useHighDPI:true
         };
     }
 
@@ -431,6 +441,7 @@ export class Dice3D {
         }
         this.currentCanvasPosition = Dice3D.CONFIG.canvasZIndex;
         this.currentBumpMapping =  Dice3D.CONFIG.bumpMapping;
+        this.currentUseHighDPI = Dice3D.CONFIG.useHighDPI;
         this._resizeCanvas();
     }
 
@@ -870,7 +881,8 @@ class DiceConfig extends FormApplication {
                 material: $('select[name="material"]').val(),
                 sounds: $('input[name="sounds"]').is(':checked'),
                 system: $('select[name="system"]').val(),
-                throwingForce:$('select[name="throwingForce"]').val()
+                throwingForce:$('select[name="throwingForce"]').val(),
+                useHighDPI:$('input[name="useHighDPI"]').is(':checked')
             };
 		    this.box.dicefactory.disposeCachedMaterials("showcase");
             this.box.update(config);
