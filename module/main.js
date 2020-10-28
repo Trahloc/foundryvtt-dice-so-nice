@@ -264,12 +264,12 @@ class Utils {
 
     static prepareSystemList() {
         let systems = game.dice3d.box.dicefactory.systems;
+        let hasExclusive = game.dice3d.box.dicefactory.systemsHaveExclusive;
         return Object.keys(systems).reduce((i18nCfg, key) => {
-            if (!game.dice3d.box.dicefactory.systemForced || game.dice3d.box.dicefactory.systemActivated == key)
+            if ((!game.dice3d.box.dicefactory.systemForced || game.dice3d.box.dicefactory.systemActivated == key)&&(!hasExclusive || systems[key].mode=="exclusive"))
                 i18nCfg[key] = game.i18n.localize(systems[key].name);
             return i18nCfg;
-        }, {}
-        );
+        }, {});
     };
 }
 
@@ -333,12 +333,15 @@ export class Dice3D {
      * The id is to be used with addDicePreset
      * The name can be a localized string
      * @param {Object} system {id, name}
-     * @param {Boolean} forceActivate Will force activate this model. Other models won't be available
+     * @param {Boolean} mode "force, exclusive, default". Force will prevent any other systems from being enabled. exclusive will list only "exclusive" systems in the dropdown . Default will add the system as a choice
      */
-    addSystem(system, forceActivate = false) {
-        this.box.dicefactory.addSystem(system);
-        if (forceActivate)
-            this.box.dicefactory.setSystem(system.id, forceActivate);
+    addSystem(system, mode = "default") {
+        //retrocompatibility with  API version < 3.1
+        if(typeof mode == "boolean"){
+            mode = mode ? "force":"default";
+        }
+
+        this.box.dicefactory.addSystem(system, mode);
     }
 
     /**

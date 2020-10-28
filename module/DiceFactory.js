@@ -12,6 +12,7 @@ export class DiceFactory {
 
 		this.systemForced = false;
 		this.systemActivated = "standard";
+		this.systemsHaveExclusive = false;
 
 		this.loadedFonts = [];
 		this.cache_hits = 0;
@@ -34,10 +35,10 @@ export class DiceFactory {
 		};
 
 		this.systems = {
-			'standard': {id: 'standard', name: game.i18n.localize("DICESONICE.System.Standard"), dice:[]},
-			'foundry_vtt': {id: 'foundry_vtt', name: game.i18n.localize("DICESONICE.System.FoundryVTT"), dice:[]},
-			'dot': {id: 'dot', name: game.i18n.localize("DICESONICE.System.Dot"), dice:[]},
-			'dot_b': {id: 'dot_b', name: game.i18n.localize("DICESONICE.System.DotBlack"), dice:[]}
+			'standard': {id: 'standard', name: game.i18n.localize("DICESONICE.System.Standard"), dice:[], mode:"default"},
+			'foundry_vtt': {id: 'foundry_vtt', name: game.i18n.localize("DICESONICE.System.FoundryVTT"), dice:[], mode:"default"},
+			'dot': {id: 'dot', name: game.i18n.localize("DICESONICE.System.Dot"), dice:[], mode:"default"},
+			'dot_b': {id: 'dot_b', name: game.i18n.localize("DICESONICE.System.DotBlack"), dice:[], mode:"default"}
 		};
 		let diceobj;
 		diceobj = new DicePreset('d2');
@@ -363,9 +364,18 @@ export class DiceFactory {
 	}
 
 	//{id: 'standard', name: game.i18n.localize("DICESONICE.System.Standard")}
-	addSystem(system){
+	addSystem(system, mode="default"){
 		system.dice = [];
+		system.mode = mode;
 		this.systems[system.id] = system;
+		if(mode == "exclusive"){
+			this.systemsHaveExclusive = true;
+			if(this.systems[this.systemActivated] && this.systems[this.systemActivated].mode != "exclusive")
+				this.setSystem(system.id, false);
+		}
+		else if(mode=="force")
+			this.setSystem(system.id, true);
+		
 	}
 	//{type:"",labels:[],system:""}
 	//Should have been called "addDicePresetFromModel" but ¯\_(ツ)_/¯
