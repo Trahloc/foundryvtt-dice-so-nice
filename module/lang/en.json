@@ -29,6 +29,7 @@
     "DICESONICE.edgeColor": "Edge Color",
     "DICESONICE.texture": "Texture",
     "DICESONICE.material": "Material",
+    "DICESONICE.font" : "Font",
     "DICESONICE.colorset" : "Theme",
     "DICESONICE.colorsetDesc" : "If you prefer a custom color, select 'Custom' in this list",
     "DICESONICE.Low" : "Low",
@@ -130,6 +131,8 @@
     "DICESONICE.MaterialWood": "Wood",
     "DICESONICE.MaterialChrome" : "Chrome",
     "DICESONICE.MaterialAuto": "Auto (Theme/Texture)",
+
+    "DICESONICE.FontAuto": "Auto (Theme)",
 
     "DICESONICE.System.Standard" : "Standard",
     "DICESONICE.System.FoundryVTT" : "Foundry VTT",

@@ -862,6 +862,7 @@ export class DiceBox {
 	applyColorsForRoll(dsnConfig){
 		let texture = null;
 		let material = null;
+		let font = null;
 		if(dsnConfig.colorset == "custom")
 			DiceColors.setColorCustom(dsnConfig.labelColor, dsnConfig.diceColor, dsnConfig.outlineColor, dsnConfig.edgeColor);
 
@@ -881,7 +882,15 @@ export class DiceBox {
 			material = set.material;
 		}
 
-		DiceColors.applyColorSet(this.dicefactory, dsnConfig.colorset, texture, material);
+		if(dsnConfig.font != "auto")
+			font = dsnConfig.font;
+		else if(dsnConfig.colorset != "custom")
+		{
+			let set = DiceColors.getColorSet(dsnConfig.colorset);
+			font = set.font;
+		}
+
+		DiceColors.applyColorSet(this.dicefactory, dsnConfig.colorset, texture, material, font);
 	}
 
 	clearDice() {

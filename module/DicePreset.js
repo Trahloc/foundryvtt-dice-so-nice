@@ -9,7 +9,6 @@ export class DicePreset {
 		this.name = '';
 		this.shape = shape || type;
 		this.scale = 1;
-		this.font = 'Arial';
 		this.color = '';
 		this.labels = [];
 		this.valueMap = null;

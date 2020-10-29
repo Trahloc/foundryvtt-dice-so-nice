@@ -619,6 +619,8 @@ export class DiceColors {
 				COLORSETS[name].texture.id = data.texture;
 			if(!COLORSETS[name].material)
 				COLORSETS[name].material = '';
+			if(!COLORSETS[name].font)
+				COLORSETS[name].font = 'Arial';
 		}
 		
 		// generate the colors and textures for the random set
@@ -655,7 +657,7 @@ export class DiceColors {
 		COLORSETS['custom'].edge = edge;
 	}
 
-	static applyColorSet(dicefactory, colorset, texture = null, material = null) {
+	static applyColorSet(dicefactory, colorset, texture = null, material = null, font = null) {
 		var colordata = DiceColors.getColorSet(colorset);
 		
 		if (colorset && colorset.length > 0) {
@@ -675,6 +677,10 @@ export class DiceColors {
 
 		if (material || colordata.material) {
 			dicefactory.applyMaterial((material || colordata.material));
+		}
+
+		if (font || colordata.font) {
+			dicefactory.applyFont((font || colordata.font));
 		}
 	}
 }

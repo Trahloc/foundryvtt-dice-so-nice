@@ -14,7 +14,6 @@ export class DiceFactory {
 		this.systemActivated = "standard";
 		this.systemsHaveExclusive = false;
 
-		this.loadedFonts = [];
 		this.cache_hits = 0;
 		this.cache_misses = 0;
 
@@ -26,6 +25,18 @@ export class DiceFactory {
 		this.bumpMapping = true;
 
 		this.baseTextureCache = {};
+		this.fontFamilies = [
+			"Arial",
+			"Verdana",
+			"Trebuchet MS",
+			"Times New Roman",
+			"Didot",
+			"American Typewriter",
+			"Andale Mono",
+			"Courier",
+			"Bradley Hand",
+			"Luminari"
+		];
 
 		// fixes texture rotations on specific dice models
 		this.rotate = {
@@ -402,8 +413,8 @@ export class DiceFactory {
 		if(this.systemActivated == dice.system)
 			this.setSystem(dice.system);
 
-		if(dice.font && !this.loadedFonts.includes(dice.font)){
-			this._loadFont(dice.font);
+		if(dice.font && !this.fontFamilies.includes(dice.font)){
+			this.fontFamilies.push(dice.font);
 		}
 	}
 
@@ -466,20 +477,19 @@ export class DiceFactory {
 		}
 	}
 
-	//Since FVTT will remove their fontloading method in 0.8, we're using our own.
-	_loadFont(fontname){
-		var canvas = document.createElement("canvas");
-		//Setting the height and width is not really required
-		canvas.width = 16;
-		canvas.height = 16;
-		var ctx = canvas.getContext("2d");
-	
-		//There is no need to attach the canvas anywhere,
-		//calling fillText is enough to make the browser load the active font
-	
-		ctx.font = "4px "+fontname;
-		ctx.fillText("text", 0, 8);
-		this.loadedFonts.push(fontname);
+	/**
+	 * Copied from FVTT core and modified for DsN
+	 * @return {Promise<void>}
+	 * @private
+	 */
+	async _loadFonts() {
+		for (let font of this.fontFamilies) {
+			document.fonts.load(`1rem ${font}`);
+		}
+		const timeout = new Promise(resolve => setTimeout(resolve, 3000));
+		return Promise.race([document.fonts.ready, timeout]).then(() => {
+			console.log(`Dice So Nice! fonts are loaded`);
+		});
 	}
 
 	// returns a dicemesh (THREE.Mesh) object
@@ -627,6 +637,9 @@ export class DiceFactory {
 			if(materialSelected.scopedOptions.roughnessMap)
 				mat.roughnessMap = scopedTextureCache[materialSelected.scopedOptions.roughnessMap];
 		}
+
+		let font = diceobj.font ? diceobj.font : this.font_rand;
+
 		let canvas = document.createElement("canvas");
 		let context = canvas.getContext("2d", {alpha: true});
 		context.globalAlpha = 0;
@@ -655,11 +668,11 @@ export class DiceFactory {
 				let texture = {name:"none"};
 				if(dice_texture.composite != "source-over")
 					texture = dice_texture;
-				this.createTextMaterial(context, contextBump, x, y, sizeTexture, diceobj, labels, normals, i, margin, texture, this.label_color_rand, this.label_outline_rand, this.edge_color_rand);
+				this.createTextMaterial(context, contextBump, x, y, sizeTexture, diceobj, labels, font, i, margin, texture, this.label_color_rand, this.label_outline_rand, this.edge_color_rand);
 			}
 			else
 			{
-				this.createTextMaterial(context, contextBump, x, y, sizeTexture, diceobj, labels, normals, i, margin, this.dice_texture_rand, this.label_color_rand, this.label_outline_rand, this.dice_color_rand);
+				this.createTextMaterial(context, contextBump, x, y, sizeTexture, diceobj, labels, font, i, margin, this.dice_texture_rand, this.label_color_rand, this.label_outline_rand, this.dice_color_rand);
 			}
 			texturesOnThisLine++;
 			x += sizeTexture;
@@ -671,7 +684,7 @@ export class DiceFactory {
 					x = 0;
 					texturesOnThisLine = 0;
 				}
-				this.createTextMaterial(context, contextBump, x, y, sizeTexture, diceobj, labels, normals, i, margin, this.dice_texture_rand, this.label_color_rand, this.label_outline_rand, this.dice_color_rand, 2);
+				this.createTextMaterial(context, contextBump, x, y, sizeTexture, diceobj, labels, font, i, margin, this.dice_texture_rand, this.label_color_rand, this.label_outline_rand, this.dice_color_rand, 2);
 				texturesOnThisLine++;
 				x += sizeTexture;
 			}
@@ -708,7 +721,7 @@ export class DiceFactory {
 		this.baseTextureCache[baseTextureCacheString] = mat;
 		return mat;
 	}
-	createTextMaterial(context, contextBump, x, y, ts, diceobj, labels, normals, index, margin, texture, forecolor, outlinecolor, backcolor, repeat = 1) {
+	createTextMaterial(context, contextBump, x, y, ts, diceobj, labels, font, index, margin, texture, forecolor, outlinecolor, backcolor, repeat = 1) {
 		if (labels[index] === undefined) return null;
 
 		texture = texture || this.dice_texture_rand;
@@ -720,7 +733,7 @@ export class DiceFactory {
 		backcolor = backcolor || this.dice_color_rand;
 		
 		let text = labels[index];
-		let normal = normals[index];
+		let normal = diceobj.normals[index];
 		let isTexture = false;
 
 		// create color
@@ -793,7 +806,7 @@ export class DiceFactory {
 				}
 
 				//fix Arial strange alignment
-				if(diceobj.font == "Arial"){
+				if(font == "Arial"){
 					switch(diceobj.shape){
 						case 'd2':
 							//textstarty = textstarty*1.1;
@@ -807,21 +820,21 @@ export class DiceFactory {
 					}
 				}
 
-				context.font =  fontsize+ 'pt '+diceobj.font;
-				contextBump.font =  fontsize+ 'pt '+diceobj.font;
+				context.font =  fontsize+ 'pt '+font;
+				contextBump.font =  fontsize+ 'pt '+font;
 				var lineHeight = fontsize;
 				
 				let textlines = text.split("\n");
 
 				if (textlines.length > 1) {
 					fontsize = fontsize / textlines.length;
-					context.font =  fontsize+ 'pt '+diceobj.font;
-					contextBump.font =  fontsize+ 'pt '+diceobj.font;
+					context.font =  fontsize+ 'pt '+font;
+					contextBump.font =  fontsize+ 'pt '+font;
 
 					//to find the correct text height for every possible fonts, we have no choice but to use the great (and complex) pixi method
 					//First we create a PIXI.TextStyle object, to pass later to the measure method
 					let pixiStyle = new PIXI.TextStyle({
-						fontFamily: diceobj.font,
+						fontFamily: font,
 						fontSize: fontsize,
 						stroke: "#0000FF",
 						strokeThickness: (outlinecolor != 'none' && outlinecolor != backcolor) ? 1:0
@@ -876,8 +889,8 @@ export class DiceFactory {
 			var hw = (ts / 2);
 			var hh = (ts / 2);
 
-			context.font =  (ts / 128 * 24)+'pt '+diceobj.font;
-			contextBump.font =  (ts / 128 * 24)+'pt '+diceobj.font;
+			context.font =  (ts / 128 * 24)+'pt '+font;
+			contextBump.font =  (ts / 128 * 24)+'pt '+font;
 
 			//draw the numbers
 			let wShift = 1;
@@ -941,6 +954,7 @@ export class DiceFactory {
 		this.label_outline = colordata.outline ? colordata.outline:"none";
 		this.dice_texture = colordata.texture;
 		this.material = colordata.material;
+		this.font = colordata.font;
 		this.edge_color = colordata.hasOwnProperty("edge") && colordata.edge != '' ? colordata.edge:colordata.background;
 	}
 
@@ -952,11 +966,16 @@ export class DiceFactory {
 		this.material = material;
 	}
 
+	applyFont(font) {
+		this.font = font;
+	}
+
 	setMaterialInfo(colorset = '') {
 
 		let prevcolordata = this.colordata;
 		let prevtexture = this.dice_texture;
 		let prevmaterial = this.material;
+		let prevfont = this.font;
 
 		if (colorset) {
 			let colordata = DiceColors.getColorSet(colorset);
@@ -973,12 +992,13 @@ export class DiceFactory {
 				colordata.material = prevmaterial;
 			if(colordata.texture == "custom")
 				colordata.texture = prevtexture;
+			if(colordata.texture == "custom")
+				colordata.font = prevfont;
 
 
 			if (this.colordata.id != colordata.id) {
 				this.applyColorSet(colordata);
 			}
-			let colordata2 = DiceColors.getColorSet(colorset);
 		}
 
 		//reset random choices
@@ -988,6 +1008,7 @@ export class DiceFactory {
 		this.dice_texture_rand = '';
 		this.edge_color_rand = '';
 		this.material_rand = '';
+		this.font_rand = '';
 		
 
 		// set base color first
@@ -1072,14 +1093,22 @@ export class DiceFactory {
 			this.material_rand = this.colordata.material;
 		else if(baseTexture && baseTexture.material)
 			this.material_rand = baseTexture.material;
+
+		//for font, we priorize the dicepreset font, then custom, then coloret
+		if(this.font){
+			this.font_rand = this.font;
+		}
+		else if(this.colordata.font)
+			this.material_rand = this.colordata.font;
 		
 		
 		if (this.colordata.id != prevcolordata.id) {
 			this.applyColorSet(prevcolordata);
 			this.applyTexture(prevtexture);
 			this.applyMaterial(prevmaterial);
+			this.applyFont(prevfont);
 		}
-		return this.dice_color_rand+this.label_color_rand+this.label_outline_rand+this.dice_texture_rand.name+this.edge_color_rand+this.material_rand;
+		return this.dice_color_rand+this.label_color_rand+this.label_outline_rand+this.dice_texture_rand.name+this.edge_color_rand+this.material_rand+this.font_rand;
 	}
 
 	calc_texture_size(approx, ceil = false) {

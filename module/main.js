@@ -236,6 +236,16 @@ class Utils {
         );
     };
 
+    static prepareFontList() {
+        let fontList = {
+            "auto": game.i18n.localize("DICESONICE.FontAuto")
+        };
+        game.dice3d.box.dicefactory.fontFamilies.forEach(font => {
+            fontList[font] = font;
+        });
+        return fontList;
+    };
+
     static prepareColorsetList() {
         let sets = {};
         if (DiceColors.colorsetForced)
@@ -306,6 +316,7 @@ export class Dice3D {
             edgeColor: user.color,
             texture: "none",
             material: "auto",
+            font:"auto",
             colorset: "custom",
             system: "standard"
         };
@@ -387,7 +398,8 @@ export class Dice3D {
             outline:"custom",
             edge:"custom",
             texture:"custom",
-            material:"custom"
+            material:"custom",
+            font:"custom"
         }
         colorset = mergeObject(defaultValues, colorset);
         COLORSETS[colorset.name] = colorset;
@@ -420,9 +432,10 @@ export class Dice3D {
         this._buildCanvas();
         this._initListeners();
         this._buildDiceBox();
-        DiceColors.loadTextures(TEXTURELIST, (images) => {
+        DiceColors.loadTextures(TEXTURELIST, async (images) => {
             DiceColors.initColorSets();
             Hooks.call("diceSoNiceReady", this);
+            await this.DiceFactory._loadFonts();
         });
         this._startQueueHandler();
         this._nextAnimationHandler();
@@ -779,6 +792,7 @@ class DiceConfig extends FormApplication {
                 "wood": "DICESONICE.MaterialWood",
                 "chrome": "DICESONICE.MaterialChrome"
             }),
+            fontList: Utils.prepareFontList(),
             colorsetList: Utils.prepareColorsetList(),
             shadowQualityList: Utils.localize({
                 "none": "DICESONICE.None",
@@ -882,6 +896,7 @@ class DiceConfig extends FormApplication {
                 colorset: $('select[name="colorset"]').val(),
                 texture: $('select[name="texture"]').val(),
                 material: $('select[name="material"]').val(),
+                font: $('select[name="font"]').val(),
                 sounds: $('input[name="sounds"]').is(':checked'),
                 system: $('select[name="system"]').val(),
                 throwingForce:$('select[name="throwingForce"]').val(),
