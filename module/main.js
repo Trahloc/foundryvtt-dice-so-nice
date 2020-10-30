@@ -352,7 +352,7 @@ export class Dice3D {
             mode = mode ? "force":"default";
         }
 
-        this.box.dicefactory.addSystem(system, mode);
+        this.DiceFactory.addSystem(system, mode);
     }
 
     /**
@@ -364,7 +364,7 @@ export class Dice3D {
      * @param {Object} dice {type:"",labels:[],system:""}
      */
     addDicePreset(dice, shape = null) {
-        this.box.dicefactory.addDicePreset(dice, shape);
+        this.DiceFactory.addDicePreset(dice, shape);
     }
 
     /**
@@ -391,7 +391,7 @@ export class Dice3D {
      * @param {Object} colorset 
      * @param {Object} apply = "no", "default", "force"
      */
-    addColorset(colorset, apply = "no") {
+    async addColorset(colorset, apply = "no") {
         let defaultValues = {
             foreground:"custom",
             background:"custom",
@@ -399,11 +399,17 @@ export class Dice3D {
             edge:"custom",
             texture:"custom",
             material:"custom",
-            font:"custom"
+            font:"custom",
+            fontScale:{}
         }
         colorset = mergeObject(defaultValues, colorset);
         COLORSETS[colorset.name] = colorset;
         DiceColors.initColorSets(colorset);
+
+        if(colorset.font && !this.DiceFactory.fontFamilies.includes(colorset.font)){
+            this.DiceFactory.fontFamilies.push(colorset.font);
+            await this.DiceFactory._loadFonts();
+		}
 
         switch (apply) {
             case "force":

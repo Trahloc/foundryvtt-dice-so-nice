@@ -1,5 +1,5 @@
 import {DicePreset} from './DicePreset.js';
-import {DiceColors} from './DiceColors.js';
+import {DiceColors, DICE_SCALE} from './DiceColors.js';
 import {DICE_MODELS} from './DiceModels.js';
 import * as THREE from './libs/three.module.js';
 export class DiceFactory {
@@ -91,7 +91,6 @@ export class DiceFactory {
 		diceobj.setLabels(['1', '2', '3', '4', '5', '6']);
 		diceobj.setValues(1,6);
 		diceobj.scale = 0.9;
-		diceobj.fontScale = 1.3;
 		this.register(diceobj);
 
 		diceobj = new DicePreset('d3', 'd6');
@@ -99,7 +98,6 @@ export class DiceFactory {
 		diceobj.setLabels(['1', '2', '3', '1', '2', '3']);
 		diceobj.setValues(1,3);
 		diceobj.scale = 0.9;
-		diceobj.fontScale = 1.3;
 		this.register(diceobj);
 
 		diceobj = new DicePreset('df', 'd6');
@@ -108,14 +106,12 @@ export class DiceFactory {
 		diceobj.setValues(-1,1);
 		diceobj.setValueMap({"-1":1,"0":2,"1":3});
 		diceobj.scale = 0.9;
-		diceobj.fontScale = 2;
 		this.register(diceobj);
 
 		diceobj = new DicePreset('d8');
 		diceobj.name = 'd8';
 		diceobj.setLabels(['1','2','3','4','5','6','7','8']);
 		diceobj.setValues(1,8);
-		diceobj.fontScale = 1.1;
 		this.register(diceobj);
 
 		diceobj = new DicePreset('d10');
@@ -125,7 +121,6 @@ export class DiceFactory {
 		diceobj.mass = 450;
 		diceobj.inertia = 9;
 		diceobj.scale = 0.9;
-		diceobj.fontScale = 1;
 		this.register(diceobj);
 
 		diceobj = new DicePreset('d5','d10');
@@ -135,7 +130,6 @@ export class DiceFactory {
 		diceobj.mass = 450;
 		diceobj.inertia = 9;
 		diceobj.scale = 0.9;
-		diceobj.fontScale = 1;
 		this.register(diceobj);
 
 		diceobj = new DicePreset('d100', 'd10');
@@ -145,7 +139,6 @@ export class DiceFactory {
 		diceobj.mass = 450;
 		diceobj.inertia = 9;
 		diceobj.scale = 0.9;
-		diceobj.fontScale = 0.75;
 		this.register(diceobj);
 
 		diceobj = new DicePreset('d12');
@@ -155,7 +148,6 @@ export class DiceFactory {
 		diceobj.mass = 450;
 		diceobj.inertia = 8;
 		diceobj.scale = 0.9;
-		diceobj.fontScale = 1.1;
 		this.register(diceobj);
 
 		diceobj = new DicePreset('d20');
@@ -404,9 +396,13 @@ export class DiceFactory {
 		preset.scale = model.scale;
 		preset.inertia = model.inertia;
 		preset.system = dice.system;
-		preset.font = dice.font || 'Arial';
-		preset.fontScale = dice.fontScale || 1;
+		preset.font = dice.font;
+		preset.fontScale = dice.fontScale || null;
 		preset.colorset = dice.colorset || null;
+		//If it overrides an existing model, set a font scale to prevent undesired fontScale from previous model
+		if(!preset.fontScale && this.systems["standard"].dice.find(el => el.type == dice.type))
+			preset.fontScale = DICE_SCALE[shape];
+		
 		if(dice.bumpMaps && dice.bumpMaps.length)
 			preset.setBumpMaps(dice.bumpMaps);
 		this.register(preset);
@@ -487,9 +483,7 @@ export class DiceFactory {
 			document.fonts.load(`1rem ${font}`);
 		}
 		const timeout = new Promise(resolve => setTimeout(resolve, 3000));
-		return Promise.race([document.fonts.ready, timeout]).then(() => {
-			console.log(`Dice So Nice! fonts are loaded`);
-		});
+		return Promise.race([document.fonts.ready, timeout]);
 	}
 
 	// returns a dicemesh (THREE.Mesh) object
@@ -521,12 +515,12 @@ export class DiceFactory {
 			//We use either (by order of priority): a flavor/targeted colorset, the colorset of the diceobj, the colorset configured by the player
 			let cacheString = "";
 			if(colorset){
-				cacheString = this.setMaterialInfo(colorset);
+				cacheString = this.setMaterialInfo(diceobj, colorset);
 			}
 			else if (diceobj.colorset) {
-				cacheString = this.setMaterialInfo(diceobj.colorset);
+				cacheString = this.setMaterialInfo(diceobj, diceobj.colorset);
 			} else {
-				cacheString = this.setMaterialInfo();
+				cacheString = this.setMaterialInfo(diceobj);
 			}
 
 			let baseTextureCacheString = scopedTextureCache.type+this.systemActivated+type+cacheString;
@@ -609,7 +603,6 @@ export class DiceFactory {
 			return this.baseTextureCache[baseTextureCacheString];
 
 		let labels = diceobj.labels;
-		let normals = diceobj.normals;
 		if (diceobj.shape == 'd4') {
 			labels = diceobj.labels[0];
 		}
@@ -637,8 +630,21 @@ export class DiceFactory {
 			if(materialSelected.scopedOptions.roughnessMap)
 				mat.roughnessMap = scopedTextureCache[materialSelected.scopedOptions.roughnessMap];
 		}
-
-		let font = diceobj.font ? diceobj.font : this.font_rand;
+		let font = {
+			"type":diceobj.font,
+			"scale": diceobj.fontScale ? diceobj.fontScale:null
+		};
+		
+		if(!font.type){
+			font.type = this.font_rand;
+		}
+		if(!font.scale){
+			if(this.font_scale_rand[diceobj.type])
+				font.scale = this.font_scale_rand[diceobj.type];
+			else{
+				font.scale = DICE_SCALE[diceobj.shape];
+			}	
+		}
 
 		let canvas = document.createElement("canvas");
 		let context = canvas.getContext("2d", {alpha: true});
@@ -689,6 +695,7 @@ export class DiceFactory {
 				x += sizeTexture;
 			}
 		}
+
 		//var img    = canvasBump.toDataURL("image/png");
 		//document.write('<img src="'+img+'"/>');
 		//generate basetexture for caching
@@ -784,10 +791,8 @@ export class DiceFactory {
 				let textstarty = (ts / 2);
 				let textstartx = (ts / 2);
 
-				if(diceobj.fontScale)
-					fontsize *= diceobj.fontScale;
-				else
-					diceobj.fontScale = 1;
+				if(font.scale)
+					fontsize *= font.scale;
 
 				//Needed for every fonts
 				switch(diceobj.shape){
@@ -797,6 +802,9 @@ export class DiceFactory {
 					case 'd8':
 						textstarty = textstarty*1.1;
 						break;
+					case 'd12':
+						textstarty = textstarty*1.08;
+						break;
 					case 'd20':
 						textstarty = textstartx*1.2;
 						break;
@@ -805,36 +813,21 @@ export class DiceFactory {
 						break;
 				}
 
-				//fix Arial strange alignment
-				if(font == "Arial"){
-					switch(diceobj.shape){
-						case 'd2':
-							//textstarty = textstarty*1.1;
-							break;
-						case 'd20':
-							
-							break;
-						case 'd12':
-							textstarty = textstarty*1.08;
-							break;
-					}
-				}
-
-				context.font =  fontsize+ 'pt '+font;
-				contextBump.font =  fontsize+ 'pt '+font;
+				context.font =  fontsize+ 'pt '+font.type;
+				contextBump.font =  fontsize+ 'pt '+font.type;
 				var lineHeight = fontsize;
 				
 				let textlines = text.split("\n");
 
 				if (textlines.length > 1) {
 					fontsize = fontsize / textlines.length;
-					context.font =  fontsize+ 'pt '+font;
-					contextBump.font =  fontsize+ 'pt '+font;
+					context.font =  fontsize+ 'pt '+font.type;
+					contextBump.font =  fontsize+ 'pt '+font.type;
 
 					//to find the correct text height for every possible fonts, we have no choice but to use the great (and complex) pixi method
 					//First we create a PIXI.TextStyle object, to pass later to the measure method
 					let pixiStyle = new PIXI.TextStyle({
-						fontFamily: font,
+						fontFamily: font.type,
 						fontSize: fontsize,
 						stroke: "#0000FF",
 						strokeThickness: (outlinecolor != 'none' && outlinecolor != backcolor) ? 1:0
@@ -888,9 +881,11 @@ export class DiceFactory {
 
 			var hw = (ts / 2);
 			var hh = (ts / 2);
-
-			context.font =  (ts / 128 * 24)+'pt '+font;
-			contextBump.font =  (ts / 128 * 24)+'pt '+font;
+			let fontsize = (ts / 128 * 24);
+			if(font.scale)
+				fontsize *= font.scale;
+			context.font =  fontsize+'pt '+font.type;
+			contextBump.font =  fontsize+'pt '+font.type;
 
 			//draw the numbers
 			let wShift = 1;
@@ -970,7 +965,7 @@ export class DiceFactory {
 		this.font = font;
 	}
 
-	setMaterialInfo(colorset = '') {
+	setMaterialInfo(diceobj, colorset = '') {
 
 		let prevcolordata = this.colordata;
 		let prevtexture = this.dice_texture;
@@ -992,9 +987,8 @@ export class DiceFactory {
 				colordata.material = prevmaterial;
 			if(colordata.texture == "custom")
 				colordata.texture = prevtexture;
-			if(colordata.texture == "custom")
+			if(colordata.font == "custom")
 				colordata.font = prevfont;
-
 
 			if (this.colordata.id != colordata.id) {
 				this.applyColorSet(colordata);
@@ -1009,6 +1003,7 @@ export class DiceFactory {
 		this.edge_color_rand = '';
 		this.material_rand = '';
 		this.font_rand = '';
+		this.font_scale_rand = {};
 		
 
 		// set base color first
@@ -1098,8 +1093,12 @@ export class DiceFactory {
 		if(this.font){
 			this.font_rand = this.font;
 		}
-		else if(this.colordata.font)
+		else if(this.colordata.font){
 			this.material_rand = this.colordata.font;
+		}
+
+		if(this.colordata.fontScale && Object.entries(this.colordata.fontScale).length)
+			this.font_scale_rand = this.colordata.fontScale;
 		
 		
 		if (this.colordata.id != prevcolordata.id) {
@@ -1108,7 +1107,12 @@ export class DiceFactory {
 			this.applyMaterial(prevmaterial);
 			this.applyFont(prevfont);
 		}
-		return this.dice_color_rand+this.label_color_rand+this.label_outline_rand+this.dice_texture_rand.name+this.edge_color_rand+this.material_rand+this.font_rand;
+		let cacheString = this.dice_color_rand+this.label_color_rand+this.label_outline_rand+this.dice_texture_rand.name+this.edge_color_rand+this.material_rand;
+		if(diceobj.font)
+			cacheString += diceobj.font;
+		else
+			cacheString += this.font_rand;
+		return cacheString;
 	}
 
 	calc_texture_size(approx, ceil = false) {
