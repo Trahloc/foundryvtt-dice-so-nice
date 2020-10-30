@@ -59,6 +59,8 @@
     "DICESONICE.useHighDPI" : "Enable 'high density' screen support",
     "DICESONICE.animateRollTable" : "Enable 3D dice on Roll Tables",
     "DICESONICE.animateRollTableHint" : "When possible, show a 3D dice when rolling on a Roll Table. Make sure to disable 'animate roll tables' in the core settings.",
+    "DICESONICE.hideNpcRolls" : "Disable 3D dice on NPC rolls",
+    "DICESONICE.hideNpcRollsHint" : "Don't show 3d dice for any roll coming from an NPC.",
 
     "DICESONICE.TextureClouds" : "Clouds",
     "DICESONICE.TextureCloudsTransparent" : "Clouds (Transparent)",

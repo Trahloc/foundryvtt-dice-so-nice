@@ -120,6 +120,15 @@ Hooks.once('init', () => {
         config: true
     });
 
+    game.settings.register("dice-so-nice", "hideNpcRolls", {
+        name: "DICESONICE.hideNpcRolls",
+        hint: "DICESONICE.hideNpcRollsHint",
+        scope: "world",
+        type: Boolean,
+        default: false,
+        config: true
+    });
+
 });
 
 /**
@@ -141,6 +150,11 @@ Hooks.on('createChatMessage', (chatMessage) => {
         !game.dice3d ||
         game.dice3d.messageHookDisabled ||
         (chatMessage.getFlag("core", "RollTable") && !game.settings.get("dice-so-nice", "animateRollTable"))) {
+        return;
+    }
+
+    const isNpc = game.actors.get(chatMessage.data.speaker.actor).data.type === 'npc';
+    if(isNpc && game.settings.get("dice-so-nice", "hideNpcRolls")) {
         return;
     }
 
