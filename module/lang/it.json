@@ -29,6 +29,7 @@
     "DICESONICE.edgeColor": "Colore Bordo",
     "DICESONICE.texture": "Texture",
     "DICESONICE.material": "Materiale",
+    "DICESONICE.font" : "Font",
     "DICESONICE.colorset" : "Tema",
     "DICESONICE.colorsetDesc" : "Se preferisci un colore personalizzato, seleziona \"Personalizzato\" in questo elenco",
     "DICESONICE.Low" : "Bassa",
@@ -54,7 +55,12 @@
     "DICESONICE.canvasZIndex": "Posizione del piano 3D",
     "DICESONICE.immediatelyDisplayChatMessages": "Visualizza immediatamente il messaggio in chat",
     "DICESONICE.immediatelyDisplayChatMessagesHint": "Quando abilitato, non viene atteso il termine dell'animazione per mostrare la chat relativa al tiro",
-    "DICESONICE.throwingForce" : "Forza di lancio",
+    "DICESONICE.throwingForce" : "Forza del lancio",
+    "DICESONICE.useHighDPI" : "Abilita il supporto per schermi \"ad alta densità\"",
+    "DICESONICE.animateRollTable" : "Abilita i dadi 3D sei tiri delle tabelle",
+    "DICESONICE.animateRollTableHint" : "Quando possibile, mostra i dadi 3D quando usi le tabelle. Assicurati di disabilitare l'animazione del risultato della tabella nelle impostazioni.",
+    "DICESONICE.hideNpcRolls" : "Disabilita i dadi 3D sui tiri dei PNG",
+    "DICESONICE.hideNpcRollsHint" : "Non mostrare i dadi 3d per nessuno dei tiri proveniente da un PNG.",
 
     "DICESONICE.TextureClouds" : "Nuvole",
     "DICESONICE.TextureCloudsTransparent" : "Nuvole (Trasparenti)",
@@ -127,6 +133,8 @@
     "DICESONICE.MaterialWood": "Legno",
     "DICESONICE.MaterialChrome" : "Cromato",
     "DICESONICE.MaterialAuto": "Auto (Tema/Texture)",
+
+    "DICESONICE.FontAuto": "Auto (Theme)",
 
     "DICESONICE.System.Standard" : "Standard",
     "DICESONICE.System.FoundryVTT" : "Foundry VTT",
