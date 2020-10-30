@@ -152,8 +152,8 @@ Hooks.on('createChatMessage', (chatMessage) => {
         (chatMessage.getFlag("core", "RollTable") && !game.settings.get("dice-so-nice", "animateRollTable"))) {
         return;
     }
-
-    const isNpc = game.actors.get(chatMessage.data.speaker.actor).data.type === 'npc';
+    let actor = game.actors.get(chatMessage.data.speaker.actor);
+    const isNpc =  actor ? actor.data.type === 'npc' : false;
     if(isNpc && game.settings.get("dice-so-nice", "hideNpcRolls")) {
         return;
     }
