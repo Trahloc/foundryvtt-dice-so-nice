@@ -399,8 +399,8 @@ export class DiceFactory {
 		preset.font = dice.font;
 		preset.fontScale = dice.fontScale || null;
 		preset.colorset = dice.colorset || null;
-		//If it overrides an existing model, set a font scale to prevent undesired fontScale from previous model
-		if(!preset.fontScale && this.systems["standard"].dice.find(el => el.type == dice.type))
+		//If it overrides an existing model that isn't a numbered die, set a font scale to prevent undesired fontScale from previous model
+		if(!preset.fontScale && !["d2","d4","d6","d8","d10","d12","d20","d100"].includes(dice.type) && this.systems["standard"].dice.find(el => el.type == dice.type))
 			preset.fontScale = DICE_SCALE[shape];
 		
 		if(dice.bumpMaps && dice.bumpMaps.length)
