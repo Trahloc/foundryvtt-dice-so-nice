@@ -175,7 +175,7 @@ export class DiceBox {
 			}
 			else{
 				this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference:"high-performance"});
-				if(this.useHighDPI)
+				if(this.config.useHighDPI)
 					this.renderer.setPixelRatio(window.devicePixelRatio);
 				if(this.dicefactory.bumpMapping){
 					this.renderer.physicallyCorrectLights = true;
