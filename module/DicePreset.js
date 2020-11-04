@@ -115,7 +115,6 @@ export class DicePreset {
 					node.castShadow = true; 
 				}
 			});
-			
 			this.model = gltf;
 			this.modelLoaded = true;
 		});
