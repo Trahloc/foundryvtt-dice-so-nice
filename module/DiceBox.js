@@ -259,7 +259,7 @@ export class DiceBox {
 				.setPath( 'modules/dice-so-nice/textures/equirectangular/' )
 				.load('foyer.hdr', function ( texture ) {
 					this.renderer.scopedTextureCache.textureCube = this.pmremGenerator.fromEquirectangular(texture).texture;
-	
+					this.scene.environment = this.renderer.scopedTextureCache.textureCube;
 					texture.dispose();
 					this.pmremGenerator.dispose();
 					resolve();

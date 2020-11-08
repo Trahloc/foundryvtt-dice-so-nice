@@ -427,7 +427,7 @@ export class DiceFactory {
 		preset.name = diceobj.name;
 		let labels = [];
 		for(let i = 1;i<= diceobj.faces;i++){
-			labels.push(diceobj.constructor.getResultLabel(i));
+			labels.push(diceobj.constructor.getResultLabel(i).toString());
 		}
 		preset.setLabels(labels);
 		preset.setValues(1,diceobj.faces);

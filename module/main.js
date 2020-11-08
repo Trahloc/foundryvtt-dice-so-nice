@@ -947,8 +947,8 @@ class DiceConfig extends FormApplication {
         await game.user.setFlag("dice-so-nice", "appearance", appearance);
         ui.notifications.info(game.i18n.localize("DICESONICE.saveMessage"));
     }
-    close(){
-        super.close();
+    close(options){
+        super.close(options);
         this.box.clearScene();
 		this.box.dicefactory.disposeCachedMaterials("showcase");
     }
