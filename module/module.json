@@ -9,11 +9,12 @@
 	"authors": [
 		{
 			"name": "Simone",
-			"url": "https://discord.com/users/565475825785503755"
+			"discord": "Simone [UTC +2]#6710"
 		},
 		{
 			"name": "JDW",
-			"url": "https://discord.com/users/184744164049682433"
+			"discord": "JDW#6422",
+			"reddit":"u/jidewe"
 		}
 	],
 	"esmodules": [
@@ -55,6 +56,28 @@
 		"name": "Français",
 		"path": "./lang/fr.json"
 	}],
+	"media":[
+		{
+			"type":"cover",
+			"link":"https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/raw/master/cover.jpg"
+		},
+		{
+			"type":"screenshot",
+			"link":"https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/raw/master/screenshot1.jpg"
+		},
+		{
+			"type":"screenshot",
+			"link":"https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/raw/master/screenshot2.jpg"
+		},
+		{
+			"type":"screenshot",
+			"link":"https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/raw/master/screenshot3.jpg"
+		},
+		{
+			"type":"screenshot",
+			"link":"https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/raw/master/screenshot4.jpg"
+		}
+	],
 	"url": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice",
 	"manifest": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/raw/master/module/module.json",
 	"download": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/jobs/artifacts/3.1.0/raw/dice-so-nice.zip?job=build",
