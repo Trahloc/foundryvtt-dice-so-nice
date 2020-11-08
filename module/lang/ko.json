@@ -29,6 +29,7 @@
     "DICESONICE.edgeColor": "테두리 색상",
     "DICESONICE.texture": "텍스처",
     "DICESONICE.material": "소재",
+    "DICESONICE.font" : "글꼴",
     "DICESONICE.colorset" : "테마",
     "DICESONICE.colorsetDesc" : "사용자 지정 색상을 원하는 경우 목록에서 'Custom'을 선택하십시오.",
     "DICESONICE.Low" : "낮음",
@@ -55,6 +56,11 @@
     "DICESONICE.immediatelyDisplayChatMessages": "채팅 메시지 즉시 표시",
     "DICESONICE.immediatelyDisplayChatMessagesHint": "활성화할 경우 굴림 채팅 카드를 보기 위해 3D 굴림이 끝날 때까지 기다리지 않아도 된다.",
     "DICESONICE.throwingForce" : "던지는 힘",
+    "DICESONICE.useHighDPI" : "'고밀도' 화면 지원 활성화t",
+    "DICESONICE.animateRollTable" : "굴림표에서 3D 주사위 활성화",
+    "DICESONICE.animateRollTableHint" : "활성화시 굴림표에서 굴림을 할 때 3D 주사위를 표시한다. 코어 설정의 '굴림표 애니메이션 켜기'를 비활성화할 것.",
+    "DICESONICE.hideNpcRolls" : "NPC 굴림에 3D 주사위 비활성화",
+    "DICESONICE.hideNpcRollsHint" : "NPC로부터 비롯된 모든 굴림에 3D 주사위를 표시하지 않는다.",
     
     "DICESONICE.TextureClouds" : "구름",
     "DICESONICE.TextureCloudsTransparent" : "구름 (투명)",
@@ -127,6 +133,8 @@
     "DICESONICE.MaterialWood": "나무",
     "DICESONICE.MaterialChrome" : "크롬",
     "DICESONICE.MaterialAuto": "자동 (테마/텍스처)",
+
+    "DICESONICE.FontAuto": "자동 (테마)",
 
     "DICESONICE.System.Standard" : "일반적",
     "DICESONICE.System.FoundryVTT" : "Foundry VTT",
