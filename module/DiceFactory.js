@@ -362,7 +362,7 @@ export class DiceFactory {
 		if(diceobj.system == "standard")
 			this.dice[diceobj.type] = diceobj;
 		this.systems[diceobj.system].dice.push(diceobj);
-		if(diceobj.system == this.systemActivated && diceobj.modelFile && !diceobj.modelLoaded)
+		if(diceobj.system == this.systemActivated && diceobj.modelFile && !diceobj.modelLoading)
 			diceobj.loadModel();
 	}
 
@@ -450,7 +450,7 @@ export class DiceFactory {
 			dices = this.systems[systemId].dice;
 			for(let i=0;i<dices.length;i++){
 				this.dice[dices[i].type] = dices[i];
-				if(this.dice[dices[i].type].modelFile && !this.dice[dices[i].type].modelLoaded)
+				if(this.dice[dices[i].type].modelFile && !this.dice[dices[i].type].modelLoading)
 					this.dice[dices[i].type].loadModel();
 			}
 		}

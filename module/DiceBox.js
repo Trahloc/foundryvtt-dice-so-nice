@@ -315,7 +315,7 @@ export class DiceBox {
 			case 'throw': case 'afterthrow': default: this.camera.position.z = this.cameraHeight.far;
 
 		}
-
+		this.camera.near = 10;
 		this.camera.lookAt(new THREE.Vector3(0,0,0));
 		
 		const maxwidth = Math.max(this.display.containerWidth, this.display.containerHeight);
@@ -605,8 +605,8 @@ export class DiceBox {
 			save( new Blob( [ buffer ], { type: 'application/octet-stream' } ), filename );
 		}*/
 
-
-		let objectContainer = new THREE.Object3D();
+		
+		let objectContainer = new THREE.Group();
 		objectContainer.add(dicemesh);
 
 		this.diceList.push(dicemesh);

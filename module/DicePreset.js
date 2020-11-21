@@ -108,6 +108,7 @@ export class DicePreset {
 
 	loadModel() {
 		var loader = new GLTFLoader();
+		this.modelLoading = true;
 		// Load a glTF resource
 		loader.load(this.modelFile, gltf => {
 			gltf.scene.traverse(function (node) {
