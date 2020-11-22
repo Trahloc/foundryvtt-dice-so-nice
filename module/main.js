@@ -145,13 +145,39 @@ Hooks.once('ready', () => {
  * Intercepts all roll-type messages hiding the content until the animation is finished
  */
 Hooks.on('createChatMessage', (chatMessage) => {
-    if (!chatMessage.isRoll ||
+    //precheck for better perf
+    let hasInlineRoll = chatMessage.data.content.indexOf('inline-roll') !== -1;
+    if ((!chatMessage.isRoll && !hasInlineRoll) ||
         !chatMessage.isContentVisible ||
         !game.dice3d ||
         game.dice3d.messageHookDisabled ||
         (chatMessage.getFlag("core", "RollTable") && !game.settings.get("dice-so-nice", "animateRollTable"))) {
         return;
     }
+    let roll = chatMessage.roll;
+    if(hasInlineRoll){
+        let JqInlineRolls = $($.parseHTML(chatMessage.data.content)).filter(".inline-roll");
+        if(JqInlineRolls.length == 0 && !chatMessage.isRoll) //it was a false positive
+            return;
+        let inlineRollList = [];
+        JqInlineRolls.each((index,el) => {
+            inlineRollList.push(Roll.fromJSON(unescape(el.dataset.roll)));
+        });
+        if(inlineRollList.length){
+            if(chatMessage.isRoll)
+                inlineRollList.push(chatMessage.roll);
+            let mergingPool = new DicePool({rolls:inlineRollList}).evaluate();
+            roll = Roll.create(mergingPool.formula).evaluate();
+            roll.terms = [mergingPool]
+            //roll._dice = mergingPool.dice;
+            roll.results = [mergingPool.total];
+            roll._total = mergingPool.total;
+            roll._rolled = true;
+        }
+        else if(!chatMessage.isRoll)
+            return;
+    }
+    
     let actor = game.actors.get(chatMessage.data.speaker.actor);
     const isNpc =  actor ? actor.data.type === 'npc' : false;
     if(isNpc && game.settings.get("dice-so-nice", "hideNpcRolls")) {
@@ -164,7 +190,7 @@ Hooks.on('createChatMessage', (chatMessage) => {
     }
 
     chatMessage._dice3danimating = true;
-    game.dice3d.showForRoll(chatMessage.roll, chatMessage.user, false, null, false, chatMessage.id).then(displayed => {
+    game.dice3d.showForRoll(roll, chatMessage.user, false, null, false, chatMessage.id).then(displayed => {
         delete chatMessage._dice3danimating;
         $(`#chat-log .message[data-message-id="${chatMessage.id}"]`).show();
         Hooks.callAll("diceSoNiceRollComplete", chatMessage.id);
