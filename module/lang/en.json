@@ -61,6 +61,8 @@
     "DICESONICE.animateRollTableHint" : "When possible, show a 3D dice when rolling on a Roll Table. Make sure to disable 'animate roll tables' in the core settings.",
     "DICESONICE.hideNpcRolls" : "Disable 3D dice on NPC rolls",
     "DICESONICE.hideNpcRollsHint" : "Don't show 3d dice for any roll coming from an NPC.",
+    "DICESONICE.animateInlineRoll" : "Enable 3D dice on Inline Rolls",
+    "DICESONICE.animateInlineRollHint" : "When possible, show a 3D dice when an inline roll is detected in the chat.",
 
     "DICESONICE.TextureClouds" : "Clouds",
     "DICESONICE.TextureCloudsTransparent" : "Clouds (Transparent)",

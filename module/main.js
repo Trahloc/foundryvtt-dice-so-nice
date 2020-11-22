@@ -120,6 +120,15 @@ Hooks.once('init', () => {
         config: true
     });
 
+    game.settings.register("dice-so-nice", "animateInlineRoll", {
+        name: "DICESONICE.animateInlineRoll",
+        hint: "DICESONICE.animateInlineRollHint",
+        scope: "world",
+        type: Boolean,
+        default: true,
+        config: true
+    });
+
     game.settings.register("dice-so-nice", "hideNpcRolls", {
         name: "DICESONICE.hideNpcRolls",
         hint: "DICESONICE.hideNpcRollsHint",
@@ -128,6 +137,8 @@ Hooks.once('init', () => {
         default: false,
         config: true
     });
+
+    
 
 });
 
@@ -146,7 +157,7 @@ Hooks.once('ready', () => {
  */
 Hooks.on('createChatMessage', (chatMessage) => {
     //precheck for better perf
-    let hasInlineRoll = chatMessage.data.content.indexOf('inline-roll') !== -1;
+    let hasInlineRoll = game.settings.get("dice-so-nice", "animateInlineRoll") && chatMessage.data.content.indexOf('inline-roll') !== -1;
     if ((!chatMessage.isRoll && !hasInlineRoll) ||
         !chatMessage.isContentVisible ||
         !game.dice3d ||
