@@ -160,8 +160,7 @@ Hooks.on('createChatMessage', (chatMessage) => {
     let hasInlineRoll = game.settings.get("dice-so-nice", "animateInlineRoll") && chatMessage.data.content.indexOf('inline-roll') !== -1;
     if ((!chatMessage.isRoll && !hasInlineRoll) ||
         !chatMessage.isContentVisible ||
-        !game.dice3d ||
-        game.dice3d.messageHookDisabled ||
+        (game.view != "stream" && (!game.dice3d || game.dice3d.messageHookDisabled)) ||
         (chatMessage.getFlag("core", "RollTable") && !game.settings.get("dice-so-nice", "animateRollTable"))) {
         return;
     }
@@ -199,14 +198,22 @@ Hooks.on('createChatMessage', (chatMessage) => {
     if (Dice3D.CONFIG.sounds && chatMessage.data.sound == "sounds/dice.wav") {
         mergeObject(chatMessage.data, { "-=sound": null });
     }
-
     chatMessage._dice3danimating = true;
-    game.dice3d.showForRoll(roll, chatMessage.user, false, null, false, chatMessage.id).then(displayed => {
-        delete chatMessage._dice3danimating;
-        $(`#chat-log .message[data-message-id="${chatMessage.id}"]`).show();
-        Hooks.callAll("diceSoNiceRollComplete", chatMessage.id);
-        ui.chat.scrollBottom();
-    });
+    if(game.view == "stream"){
+        setTimeout(function(){
+            delete chatMessage._dice3danimating;
+            $(`#chat-log .message[data-message-id="${chatMessage.id}"]`).show();
+            Hooks.callAll("diceSoNiceRollComplete", chatMessage.id);
+            ui.chat.scrollBottom();
+        },2500, chatMessage);
+    } else {
+        game.dice3d.showForRoll(roll, chatMessage.user, false, null, false, chatMessage.id).then(displayed => {
+            delete chatMessage._dice3danimating;
+            $(`#chat-log .message[data-message-id="${chatMessage.id}"]`).show();
+            Hooks.callAll("diceSoNiceRollComplete", chatMessage.id);
+            ui.chat.scrollBottom();
+        });
+    }
 });
 
 /**

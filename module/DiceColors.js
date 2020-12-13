@@ -31,18 +31,32 @@ export const TEXTURELIST = {
 		material: "glass"
 	},
 	'water': {
-		name: 'DICESONICE.TextureWater',
+		name: 'DICESONICE.TextureWaterTransparent',
 		composite: 'destination-in',
 		source: 'modules/dice-so-nice/textures/water.webp',
 		bump: 'modules/dice-so-nice/textures/water.webp',
 		material: 'glass',
 	},
+	'water_2': {
+		name: 'DICESONICE.TextureWater',
+		composite: 'multiply',
+		source: 'modules/dice-so-nice/textures/water.webp',
+		bump: 'modules/dice-so-nice/textures/water.webp',
+		material: 'glass',
+	},
 	'ice': {
-		name: 'DICESONICE.TextureIce',
+		name: 'DICESONICE.TextureIceTransparent',
 		composite: 'destination-in',
 		source: 'modules/dice-so-nice/textures/ice.webp',
 		bump: 'modules/dice-so-nice/textures/ice.webp',
 		material: 'glass'
+	},
+	'ice_2': {
+		name: 'DICESONICE.TextureIce',
+		composite: 'multiply',
+		source: 'modules/dice-so-nice/textures/ice.webp',
+		bump: 'modules/dice-so-nice/textures/ice.webp',
+		material: 'metal'
 	},
 	'paper': {
 		name: 'DICESONICE.TexturePaper',
@@ -233,6 +247,15 @@ export const COLORSETS = {
 		background: ['#214fa3','#3c6ac1','#253f70','#0b56e2','#09317a'],
 		outline: 'black',
 		texture: 'ice'
+	},
+	'cold': {
+		name: 'cold',
+		description: 'DICESONICE.ColorCold',
+		category: 'DICESONICE.DamageTypes',
+		foreground: '#60E9FF',
+		background: ['#214fa3','#3c6ac1','#253f70','#0b56e2','#09317a'],
+		outline: 'black',
+		texture: 'ice_2'
 	},
 	'poison': {
 		name: 'poison',
