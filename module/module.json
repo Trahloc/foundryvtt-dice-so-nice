@@ -2,18 +2,19 @@
 	"name": "dice-so-nice",
 	"title": "Dice So Nice!",
 	"description": "Adds the ability to show a nice 3D dice simulation when a roll is made.",
-	"version": "3.0.2",
+	"version": "3.2.1",
 	"minimumCoreVersion" : "0.7.2",
-	"compatibleCoreVersion" : "0.7.5",
+	"compatibleCoreVersion" : "0.7.8",
 	"author": "Simone, JDW",
 	"authors": [
 		{
 			"name": "Simone",
-			"url": "https://discord.com/users/565475825785503755"
+			"discord": "Simone [UTC +2]#6710"
 		},
 		{
 			"name": "JDW",
-			"url": "https://discord.com/users/184744164049682433"
+			"discord": "JDW#6422",
+			"reddit":"u/jidewe"
 		}
 	],
 	"esmodules": [
@@ -54,10 +55,45 @@
 		"lang": "fr",
 		"name": "Français",
 		"path": "./lang/fr.json"
+	}, {
+		"lang": "ja",
+		"name": "日本語",
+		"path": "./lang/ja.json"
 	}],
+	"media":[
+		{
+			"type":"cover",
+			"link":"https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/raw/master/cover.jpg"
+		},
+		{
+			"type":"video",
+			"link":"https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/raw/master/dsnloop-360.webm",
+			"loop": true
+		},
+		{
+			"type":"video",
+			"link":"https://www.youtube.com/watch?v=4b_C5R3t6iw"
+		},
+		{
+			"type":"screenshot",
+			"link":"https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/raw/master/screenshot1.jpg"
+		},
+		{
+			"type":"screenshot",
+			"link":"https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/raw/master/screenshot2.jpg"
+		},
+		{
+			"type":"screenshot",
+			"link":"https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/raw/master/screenshot3.jpg"
+		},
+		{
+			"type":"screenshot",
+			"link":"https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/raw/master/screenshot4.jpg"
+		}
+	],
 	"url": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice",
 	"manifest": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/raw/master/module/module.json",
-	"download": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/jobs/artifacts/3.0.2/raw/dice-so-nice.zip?job=build",
+	"download": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/jobs/artifacts/3.2.1/raw/dice-so-nice.zip?job=build",
 	"bugs": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/issues",
 	"readme": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/blob/master/README.md"
 }

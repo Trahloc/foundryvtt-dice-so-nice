@@ -9,7 +9,6 @@ export class DicePreset {
 		this.name = '';
 		this.shape = shape || type;
 		this.scale = 1;
-		this.font = 'Arial';
 		this.color = '';
 		this.labels = [];
 		this.valueMap = null;
@@ -109,6 +108,7 @@ export class DicePreset {
 
 	loadModel() {
 		var loader = new GLTFLoader();
+		this.modelLoading = true;
 		// Load a glTF resource
 		loader.load(this.modelFile, gltf => {
 			gltf.scene.traverse(function (node) {
@@ -116,7 +116,6 @@ export class DicePreset {
 					node.castShadow = true; 
 				}
 			});
-			
 			this.model = gltf;
 			this.modelLoaded = true;
 		});

@@ -31,18 +31,32 @@ export const TEXTURELIST = {
 		material: "glass"
 	},
 	'water': {
-		name: 'DICESONICE.TextureWater',
+		name: 'DICESONICE.TextureWaterTransparent',
 		composite: 'destination-in',
 		source: 'modules/dice-so-nice/textures/water.webp',
 		bump: 'modules/dice-so-nice/textures/water.webp',
 		material: 'glass',
 	},
+	'water_2': {
+		name: 'DICESONICE.TextureWater',
+		composite: 'multiply',
+		source: 'modules/dice-so-nice/textures/water.webp',
+		bump: 'modules/dice-so-nice/textures/water.webp',
+		material: 'glass',
+	},
 	'ice': {
-		name: 'DICESONICE.TextureIce',
+		name: 'DICESONICE.TextureIceTransparent',
 		composite: 'destination-in',
 		source: 'modules/dice-so-nice/textures/ice.webp',
 		bump: 'modules/dice-so-nice/textures/ice.webp',
 		material: 'glass'
+	},
+	'ice_2': {
+		name: 'DICESONICE.TextureIce',
+		composite: 'multiply',
+		source: 'modules/dice-so-nice/textures/ice.webp',
+		bump: 'modules/dice-so-nice/textures/ice.webp',
+		material: 'metal'
 	},
 	'paper': {
 		name: 'DICESONICE.TexturePaper',
@@ -233,6 +247,15 @@ export const COLORSETS = {
 		background: ['#214fa3','#3c6ac1','#253f70','#0b56e2','#09317a'],
 		outline: 'black',
 		texture: 'ice'
+	},
+	'cold': {
+		name: 'cold',
+		description: 'DICESONICE.ColorCold',
+		category: 'DICESONICE.DamageTypes',
+		foreground: '#60E9FF',
+		background: ['#214fa3','#3c6ac1','#253f70','#0b56e2','#09317a'],
+		outline: 'black',
+		texture: 'ice_2'
 	},
 	'poison': {
 		name: 'poison',
@@ -497,6 +520,20 @@ export const COLORSETS = {
 	}
 };
 
+export const DICE_SCALE = {
+	"d2":1,
+	"d4":1,
+	"d6":1.3,
+	"d8":1.1,
+	"d10":1,
+	"d12":1.1,
+	"d20":1,
+	"d3":1.3,
+	"d5":1,
+	"df":2,
+	"d100":0.75
+};
+
 export class DiceColors {
 
 	static loadTextures(sources, callback) {
@@ -619,6 +656,12 @@ export class DiceColors {
 				COLORSETS[name].texture.id = data.texture;
 			if(!COLORSETS[name].material)
 				COLORSETS[name].material = '';
+			if(!COLORSETS[name].font)
+				COLORSETS[name].font = 'Arial';
+			if(!COLORSETS[name].fontScale)
+				COLORSETS[name].fontScale = DICE_SCALE;
+			else
+				COLORSETS[name].fontScale = mergeObject(DICE_SCALE,COLORSETS[name].fontScale,{inplace:false});
 		}
 		
 		// generate the colors and textures for the random set
@@ -655,7 +698,7 @@ export class DiceColors {
 		COLORSETS['custom'].edge = edge;
 	}
 
-	static applyColorSet(dicefactory, colorset, texture = null, material = null) {
+	static applyColorSet(dicefactory, colorset, texture = null, material = null, font = null) {
 		var colordata = DiceColors.getColorSet(colorset);
 		
 		if (colorset && colorset.length > 0) {
@@ -675,6 +718,10 @@ export class DiceColors {
 
 		if (material || colordata.material) {
 			dicefactory.applyMaterial((material || colordata.material));
+		}
+
+		if (font || colordata.font) {
+			dicefactory.applyFont((font || colordata.font));
 		}
 	}
 }

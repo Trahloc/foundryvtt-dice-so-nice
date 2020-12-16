@@ -175,6 +175,8 @@ export class DiceBox {
 			}
 			else{
 				this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference:"high-performance"});
+				if(this.config.useHighDPI)
+					this.renderer.setPixelRatio(window.devicePixelRatio);
 				if(this.dicefactory.bumpMapping){
 					this.renderer.physicallyCorrectLights = true;
 					this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -257,7 +259,7 @@ export class DiceBox {
 				.setPath( 'modules/dice-so-nice/textures/equirectangular/' )
 				.load('foyer.hdr', function ( texture ) {
 					this.renderer.scopedTextureCache.textureCube = this.pmremGenerator.fromEquirectangular(texture).texture;
-	
+					this.scene.environment = this.renderer.scopedTextureCache.textureCube;
 					texture.dispose();
 					this.pmremGenerator.dispose();
 					resolve();
@@ -313,7 +315,7 @@ export class DiceBox {
 			case 'throw': case 'afterthrow': default: this.camera.position.z = this.cameraHeight.far;
 
 		}
-
+		this.camera.near = 10;
 		this.camera.lookAt(new THREE.Vector3(0,0,0));
 		
 		const maxwidth = Math.max(this.display.containerWidth, this.display.containerHeight);
@@ -356,6 +358,7 @@ export class DiceBox {
 		shadowplane.opacity = 0.5;
 		this.desk = new THREE.Mesh(new THREE.PlaneGeometry(this.display.containerWidth * 6, this.display.containerHeight * 6, 1, 1), shadowplane);
 		this.desk.receiveShadow = this.shadows;
+		this.desk.position.set(0, 0, -1);
 		this.scene.add(this.desk);
 
 		this.renderer.render(this.scene, this.camera);
@@ -566,6 +569,10 @@ export class DiceBox {
 		dicemesh.body_sim.stepQuaternions = new Array(1000);
 		dicemesh.body_sim.stepPositions = new Array(1000);
 
+		//We add some informations about the dice to the CANNON body to be used in the collide event
+		dicemesh.body_sim.diceType = diceobj.type;
+		dicemesh.body_sim.diceMaterial = this.dicefactory.material_rand;
+
 		//dicemesh.meshCannon = this.body2mesh(dicemesh.body_sim,true);
 
 		/*var gltfExporter = new GLTFExporter();
@@ -598,8 +605,8 @@ export class DiceBox {
 			save( new Blob( [ buffer ], { type: 'application/octet-stream' } ), filename );
 		}*/
 
-
-		let objectContainer = new THREE.Object3D();
+		
+		let objectContainer = new THREE.Group();
 		objectContainer.add(dicemesh);
 
 		this.diceList.push(dicemesh);
@@ -855,6 +862,7 @@ export class DiceBox {
 	applyColorsForRoll(dsnConfig){
 		let texture = null;
 		let material = null;
+		let font = null;
 		if(dsnConfig.colorset == "custom")
 			DiceColors.setColorCustom(dsnConfig.labelColor, dsnConfig.diceColor, dsnConfig.outlineColor, dsnConfig.edgeColor);
 
@@ -874,7 +882,15 @@ export class DiceBox {
 			material = set.material;
 		}
 
-		DiceColors.applyColorSet(this.dicefactory, dsnConfig.colorset, texture, material);
+		if(dsnConfig.font != "auto")
+			font = dsnConfig.font;
+		else if(dsnConfig.colorset != "custom")
+		{
+			let set = DiceColors.getColorSet(dsnConfig.colorset);
+			font = set.font;
+		}
+
+		DiceColors.applyColorSet(this.dicefactory, dsnConfig.colorset, texture, material, font);
 	}
 
 	clearDice() {
@@ -906,8 +922,6 @@ export class DiceBox {
 		this.desk.geometry.dispose();
 		if(this.shadows){
 			this.light.shadow.map.dispose();
-			if(this.light_amb)
-				this.light_amb.shadow.map.dispose();
 		}
 	}
 

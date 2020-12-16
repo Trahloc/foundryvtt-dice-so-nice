@@ -25,7 +25,7 @@ Hooks.once('init', () => {
         config: false,
         onChange: settings => {
             if (game.dice3d) {
-                if((game.dice3d.currentCanvasPosition != settings.canvasZIndex)||(game.dice3d.currentBumpMapping != settings.bumpMapping))
+                if((game.dice3d.currentCanvasPosition != settings.canvasZIndex)||(game.dice3d.currentBumpMapping != settings.bumpMapping)||(game.dice3d.currentUseHighDPI != settings.useHighDPI))
                     location.reload();
                 else
                     game.dice3d.update(settings);
@@ -111,6 +111,35 @@ Hooks.once('init', () => {
         config: true
     });
 
+    game.settings.register("dice-so-nice", "animateRollTable", {
+        name: "DICESONICE.animateRollTable",
+        hint: "DICESONICE.animateRollTableHint",
+        scope: "world",
+        type: Boolean,
+        default: false,
+        config: true
+    });
+
+    game.settings.register("dice-so-nice", "animateInlineRoll", {
+        name: "DICESONICE.animateInlineRoll",
+        hint: "DICESONICE.animateInlineRollHint",
+        scope: "world",
+        type: Boolean,
+        default: true,
+        config: true
+    });
+
+    game.settings.register("dice-so-nice", "hideNpcRolls", {
+        name: "DICESONICE.hideNpcRolls",
+        hint: "DICESONICE.hideNpcRollsHint",
+        scope: "world",
+        type: Boolean,
+        default: false,
+        config: true
+    });
+
+    
+
 });
 
 /**
@@ -127,11 +156,41 @@ Hooks.once('ready', () => {
  * Intercepts all roll-type messages hiding the content until the animation is finished
  */
 Hooks.on('createChatMessage', (chatMessage) => {
-    if (!chatMessage.isRoll ||
+    //precheck for better perf
+    let hasInlineRoll = game.settings.get("dice-so-nice", "animateInlineRoll") && chatMessage.data.content.indexOf('inline-roll') !== -1;
+    if ((!chatMessage.isRoll && !hasInlineRoll) ||
         !chatMessage.isContentVisible ||
-        !game.dice3d ||
-        game.dice3d.messageHookDisabled ||
-        chatMessage.getFlag("core", "RollTable")) {
+        (game.view != "stream" && (!game.dice3d || game.dice3d.messageHookDisabled)) ||
+        (chatMessage.getFlag("core", "RollTable") && !game.settings.get("dice-so-nice", "animateRollTable"))) {
+        return;
+    }
+    let roll = chatMessage.roll;
+    if(hasInlineRoll){
+        let JqInlineRolls = $($.parseHTML(chatMessage.data.content)).filter(".inline-roll");
+        if(JqInlineRolls.length == 0 && !chatMessage.isRoll) //it was a false positive
+            return;
+        let inlineRollList = [];
+        JqInlineRolls.each((index,el) => {
+            inlineRollList.push(Roll.fromJSON(unescape(el.dataset.roll)));
+        });
+        if(inlineRollList.length){
+            if(chatMessage.isRoll)
+                inlineRollList.push(chatMessage.roll);
+            let mergingPool = new DicePool({rolls:inlineRollList}).evaluate();
+            roll = Roll.create(mergingPool.formula).evaluate();
+            roll.terms = [mergingPool]
+            //roll._dice = mergingPool.dice;
+            roll.results = [mergingPool.total];
+            roll._total = mergingPool.total;
+            roll._rolled = true;
+        }
+        else if(!chatMessage.isRoll)
+            return;
+    }
+    
+    let actor = game.actors.get(chatMessage.data.speaker.actor);
+    const isNpc =  actor ? actor.data.type === 'npc' : false;
+    if(isNpc && game.settings.get("dice-so-nice", "hideNpcRolls")) {
         return;
     }
 
@@ -139,14 +198,22 @@ Hooks.on('createChatMessage', (chatMessage) => {
     if (Dice3D.CONFIG.sounds && chatMessage.data.sound == "sounds/dice.wav") {
         mergeObject(chatMessage.data, { "-=sound": null });
     }
-
     chatMessage._dice3danimating = true;
-    game.dice3d.showForRoll(chatMessage.roll, chatMessage.user, false, null, false, chatMessage.id).then(displayed => {
-        delete chatMessage._dice3danimating;
-        $(`#chat-log .message[data-message-id="${chatMessage.id}"]`).show();
-        Hooks.callAll("diceSoNiceRollComplete", chatMessage.id);
-        ui.chat.scrollBottom();
-    });
+    if(game.view == "stream"){
+        setTimeout(function(){
+            delete chatMessage._dice3danimating;
+            $(`#chat-log .message[data-message-id="${chatMessage.id}"]`).show();
+            Hooks.callAll("diceSoNiceRollComplete", chatMessage.id);
+            ui.chat.scrollBottom();
+        },2500, chatMessage);
+    } else {
+        game.dice3d.showForRoll(roll, chatMessage.user, false, null, false, chatMessage.id).then(displayed => {
+            delete chatMessage._dice3danimating;
+            $(`#chat-log .message[data-message-id="${chatMessage.id}"]`).show();
+            Hooks.callAll("diceSoNiceRollComplete", chatMessage.id);
+            ui.chat.scrollBottom();
+        });
+    }
 });
 
 /**
@@ -227,6 +294,16 @@ class Utils {
         );
     };
 
+    static prepareFontList() {
+        let fontList = {
+            "auto": game.i18n.localize("DICESONICE.FontAuto")
+        };
+        game.dice3d.box.dicefactory.fontFamilies.forEach(font => {
+            fontList[font] = font;
+        });
+        return fontList;
+    };
+
     static prepareColorsetList() {
         let sets = {};
         if (DiceColors.colorsetForced)
@@ -255,12 +332,12 @@ class Utils {
 
     static prepareSystemList() {
         let systems = game.dice3d.box.dicefactory.systems;
+        let hasExclusive = game.dice3d.box.dicefactory.systemsHaveExclusive;
         return Object.keys(systems).reduce((i18nCfg, key) => {
-            if (!game.dice3d.box.dicefactory.systemForced || game.dice3d.box.dicefactory.systemActivated == key)
+            if ((!game.dice3d.box.dicefactory.systemForced || game.dice3d.box.dicefactory.systemActivated == key)&&(!hasExclusive || systems[key].mode=="exclusive"))
                 i18nCfg[key] = game.i18n.localize(systems[key].name);
             return i18nCfg;
-        }, {}
-        );
+        }, {});
     };
 }
 
@@ -284,7 +361,8 @@ export class Dice3D {
             soundsSurface: 'felt',
             soundsVolume: 0.5,
             canvasZIndex:'over',
-            throwingForce:'medium'
+            throwingForce:'medium',
+            useHighDPI:true
         };
     }
 
@@ -296,6 +374,7 @@ export class Dice3D {
             edgeColor: user.color,
             texture: "none",
             material: "auto",
+            font:"auto",
             colorset: "custom",
             system: "standard"
         };
@@ -323,12 +402,15 @@ export class Dice3D {
      * The id is to be used with addDicePreset
      * The name can be a localized string
      * @param {Object} system {id, name}
-     * @param {Boolean} forceActivate Will force activate this model. Other models won't be available
+     * @param {Boolean} mode "force, exclusive, default". Force will prevent any other systems from being enabled. exclusive will list only "exclusive" systems in the dropdown . Default will add the system as a choice
      */
-    addSystem(system, forceActivate = false) {
-        this.box.dicefactory.addSystem(system);
-        if (forceActivate)
-            this.box.dicefactory.setSystem(system.id, forceActivate);
+    addSystem(system, mode = "default") {
+        //retrocompatibility with  API version < 3.1
+        if(typeof mode == "boolean"){
+            mode = mode ? "force":"default";
+        }
+
+        this.DiceFactory.addSystem(system, mode);
     }
 
     /**
@@ -340,7 +422,7 @@ export class Dice3D {
      * @param {Object} dice {type:"",labels:[],system:""}
      */
     addDicePreset(dice, shape = null) {
-        this.box.dicefactory.addDicePreset(dice, shape);
+        this.DiceFactory.addDicePreset(dice, shape);
     }
 
     /**
@@ -367,18 +449,25 @@ export class Dice3D {
      * @param {Object} colorset 
      * @param {Object} apply = "no", "default", "force"
      */
-    addColorset(colorset, apply = "no") {
+    async addColorset(colorset, apply = "no") {
         let defaultValues = {
             foreground:"custom",
             background:"custom",
             outline:"custom",
             edge:"custom",
             texture:"custom",
-            material:"custom"
+            material:"custom",
+            font:"custom",
+            fontScale:{}
         }
         colorset = mergeObject(defaultValues, colorset);
         COLORSETS[colorset.name] = colorset;
         DiceColors.initColorSets(colorset);
+
+        if(colorset.font && !this.DiceFactory.fontFamilies.includes(colorset.font)){
+            this.DiceFactory.fontFamilies.push(colorset.font);
+            await this.DiceFactory._loadFonts();
+		}
 
         switch (apply) {
             case "force":
@@ -407,9 +496,10 @@ export class Dice3D {
         this._buildCanvas();
         this._initListeners();
         this._buildDiceBox();
-        DiceColors.loadTextures(TEXTURELIST, (images) => {
+        DiceColors.loadTextures(TEXTURELIST, async (images) => {
             DiceColors.initColorSets();
             Hooks.call("diceSoNiceReady", this);
+            await this.DiceFactory._loadFonts();
         });
         this._startQueueHandler();
         this._nextAnimationHandler();
@@ -431,6 +521,7 @@ export class Dice3D {
         }
         this.currentCanvasPosition = Dice3D.CONFIG.canvasZIndex;
         this.currentBumpMapping =  Dice3D.CONFIG.bumpMapping;
+        this.currentUseHighDPI = Dice3D.CONFIG.useHighDPI;
         this._resizeCanvas();
     }
 
@@ -765,6 +856,7 @@ class DiceConfig extends FormApplication {
                 "wood": "DICESONICE.MaterialWood",
                 "chrome": "DICESONICE.MaterialChrome"
             }),
+            fontList: Utils.prepareFontList(),
             colorsetList: Utils.prepareColorsetList(),
             shadowQualityList: Utils.localize({
                 "none": "DICESONICE.None",
@@ -868,9 +960,11 @@ class DiceConfig extends FormApplication {
                 colorset: $('select[name="colorset"]').val(),
                 texture: $('select[name="texture"]').val(),
                 material: $('select[name="material"]').val(),
+                font: $('select[name="font"]').val(),
                 sounds: $('input[name="sounds"]').is(':checked'),
                 system: $('select[name="system"]').val(),
-                throwingForce:$('select[name="throwingForce"]').val()
+                throwingForce:$('select[name="throwingForce"]').val(),
+                useHighDPI:$('input[name="useHighDPI"]').is(':checked')
             };
 		    this.box.dicefactory.disposeCachedMaterials("showcase");
             this.box.update(config);
@@ -897,8 +991,8 @@ class DiceConfig extends FormApplication {
         await game.user.setFlag("dice-so-nice", "appearance", appearance);
         ui.notifications.info(game.i18n.localize("DICESONICE.saveMessage"));
     }
-    close(){
-        super.close();
+    close(options){
+        super.close(options);
         this.box.clearScene();
 		this.box.dicefactory.disposeCachedMaterials("showcase");
     }
