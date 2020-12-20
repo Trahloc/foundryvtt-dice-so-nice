@@ -138,7 +138,17 @@ Hooks.once('init', () => {
         config: true
     });
 
-    
+    game.settings.register("dice-so-nice", "allowInteractivity", {
+        name: "DICESONICE.allowInteractivity",
+        hint: "DICESONICE.allowInteractivityHint",
+        scope: "world",
+        type: Boolean,
+        default: true,
+        config: true,
+        onChange: () => {
+            location.reload();
+        }
+    });
 
 });
 
@@ -505,6 +515,10 @@ export class Dice3D {
         this._nextAnimationHandler();
     }
 
+    get canInteract(){
+        return !this.box.running;
+    }
+
     /**
      * Create and inject the dice box canvas resizing to the window total size.
      *
@@ -565,18 +579,57 @@ export class Dice3D {
             }
         });
 
-        $('body,html').click(() => {
-            const config = Dice3D.CONFIG;
-            if (!config.hideAfterRoll && this.canvas.is(":visible") && !this.box.rolling) {
-                this.canvas.hide();
-                this.box.clearAll();
-            }
-        });
         game.socket.on('module.dice-so-nice', (request) => {
             if (!request.users || request.users.includes(game.user.id)) {
                 this.show(request.data, game.users.get(request.user));
             }
         });
+        if(game.settings.get("dice-so-nice", "allowInteractivity")){
+            $(document).on("mousemove.dicesonice", "#board", this._onMouseMove.bind(this));
+
+            $(document).on("mousedown.dicesonice", "#board", this._onMouseDown.bind(this));
+
+            $(document).on("mouseup.dicesonice", "#board", this._onMouseUp.bind(this));
+        }
+    }
+
+    _mouseNDC(event){
+        let rect = this.canvas[0].getBoundingClientRect();
+        let x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        if(x > 1)
+            x = 1;
+        let y = - ((event.clientY - rect.top) / rect.height) * 2 + 1;
+        return {x:x,y:y};
+    }
+
+    _onMouseMove(event){
+        if(!this.canInteract)
+            return;
+        this.box.onMouseMove(event,this._mouseNDC(event));
+    }
+
+    _onMouseDown(event){
+        if(!this.canInteract)
+            return;
+        let hit = this.box.onMouseDown(event,this._mouseNDC(event));
+        if(hit)
+            this._beforeShow();
+        else{
+            const config = Dice3D.CONFIG;
+            if (!config.hideAfterRoll && this.canvas.is(":visible") && !this.box.rolling) {
+                this.canvas.hide();
+                this.box.clearAll();
+            }
+        }
+
+    }
+
+    _onMouseUp(event){
+        if(!this.canInteract)
+            return;
+        let hit = this.box.onMouseUp(event);
+        if(hit)
+            this._afterShow();
     }
 
     _resizeEnd() {
