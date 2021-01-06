@@ -66,6 +66,7 @@ export class DiceNotation {
 				if(dieValue==10)
 					dieValue=0;
 			}
+			dsnDie.d100Result = fvttDie.results[index].result;
 		} else
 			dsnDie.resultLabel = fvttDie.constructor.getResultLabel(dieValue).toString();
 		dsnDie.result = dieValue;
@@ -93,6 +94,26 @@ export class DiceNotation {
 				mergedRollCommands[i].push(command.params.throws[i]);
 			}
 		});
+		//commands
+		for(let i=0;i<mergedRollCommands.length;i++){
+			//throw
+			for(let j=0;j<mergedRollCommands[i].length;j++){
+				let sfxList = mergedRollCommands[i][j].dsnConfig.specialEffects;
+				if(!sfxList || !sfxList["0"])
+					continue;
+				//dice
+				for(let k=0;k<mergedRollCommands[i][j].dice.length;k++){
+					let specialEffects = Object.values(sfxList).filter(sfx => {
+						return ((sfx.diceType == mergedRollCommands[i][j].dice[k].type && sfx.onResult == mergedRollCommands[i][j].dice[k].result.toString())
+							|| 
+						(sfx.diceType == "d100" && mergedRollCommands[i][j].dice[k].d100Result && mergedRollCommands[i][j].dice[k].d100Result.toString() == sfx.onResult))
+					});
+					if(specialEffects.length)
+						mergedRollCommands[i][j].dice[k].specialEffects = specialEffects;
+				}
+			}
+		}
+
 		return mergedRollCommands;
 	}
 }

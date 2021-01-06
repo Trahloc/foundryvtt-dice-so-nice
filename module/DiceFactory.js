@@ -723,7 +723,7 @@ export class DiceFactory {
 		
 		mat.opacity = 1;
 		mat.transparent = true;
-		mat.depthTest = false;
+		mat.depthTest = true;
 		mat.needUpdate = true;
 		this.baseTextureCache[baseTextureCacheString] = mat;
 		return mat;

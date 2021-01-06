@@ -1,11 +1,12 @@
 {
     "DICESONICE.config": "Paramètres des dés 3D",
-    "DICESONICE.configTitle": "Paramètres des dés 3D",
-    "DICESONICE.configHint": "Configurer les paramètres des dés 3D tels que les couleurs et la taille",
+    "DICESONICE.configTitle": "Modifier mes dés",
+    "DICESONICE.configHint": "C'est ici que chaque joueur peut configurer ses propres dés, ou les désactiver.",
 
     "DICESONICE.settingsAppearance": "Apparence",
-    "DICESONICE.settingsPlayerPreferences": "Préférence",
+    "DICESONICE.settingsPlayerPreferences": "Préférences",
     "DICESONICE.settingsPerformance": "Performance",
+    "DICESONICE.settingsSpecialEffects": "Effets spéciaux",
     "DICESONICE.enable": "Activer les dés 3D",
     "DICESONICE.labelColor": "Couleur du texte",
     "DICESONICE.diceColor": "Couleur des dés",
@@ -57,13 +58,35 @@
     "DICESONICE.immediatelyDisplayChatMessagesHint": "Si activé, ne pas attendre la fin de l'animation 3D pour afficher le résultat dans le chat",
     "DICESONICE.throwingForce" : "Force du lancé",
     "DICESONICE.useHighDPI" : "Activer la gestion des écrans 'Retina/Haute Densité'",
+    "DICESONICE.showOthersSFX" : "Jouer les effets spéciaux des autres joueurs",
     "DICESONICE.animateRollTable" : "Activer les dés 3D pour les 'Tables aléatoires'",
     "DICESONICE.animateRollTableHint" : "Quand possible, afficher une animation 3D lors d'un lancé sur une table aléatoire. Pensez à désactiver 'Animation des tables aléatoires' dans la configuration générale.",
     "DICESONICE.hideNpcRolls" : "Désactiver la 3D pour les jets de PNJ",
     "DICESONICE.hideNpcRollsHint" : "Ne pas afficher les dés 3D lorsqu'un PNJ lance des dés.",
     "DICESONICE.animateInlineRoll" : "Activer la 3D pour les jets 'Inline'",
     "DICESONICE.animateInlineRollHint" : "Quand possible, afficher les dés 3D dans un jet 'Inline' est détecté dans le chat.",
+    "DICESONICE.allowInteractivity" : "Autoriser la manipulation des dés sur le plateau",
+    "DICESONICE.allowInteractivityHint" : "Laisser les joueurs attraper les dés 3D une fois qu'ils sont sur le plateau (n'a pas d'effet sur les résultats).",
     
+    "DICESONICE.Add" : "Ajouter",
+    "DICESONICE.Delete" : "Supprimer",
+    "DICESONICE.diceType" : "Dé",
+    "DICESONICE.onResult" : "Résultat",
+    "DICESONICE.specialEffect" : "Effet spécial",
+
+    "DICESONICE.PlaySoundEpicFail" : "Son: Echec épique",
+    "DICESONICE.PlaySoundEpicWin" : "Son: Victoire épique",
+    "DICESONICE.PlayAnimationDark" : "Unique: Obscurité",
+    "DICESONICE.PlayAnimationBright" : "Unique: Lueur blanche",
+    "DICESONICE.PlayAnimationImpact" : "Animation: Impact de verre",
+    "DICESONICE.PlayConfettiStrength1" : "Animation: Confetti triste",
+    "DICESONICE.PlayConfettiStrength2" : "Animation: Confetti",
+    "DICESONICE.PlayConfettiStrength3" : "Animation: CONFETTI!",
+    "DICESONICE.PlayAnimationParticleSpiral" : "Particules: Double spirale",
+    "DICESONICE.PlayAnimationParticleSparkles" : "Particules: Brasier",
+    "DICESONICE.PlayAnimationParticleVortex" : "Particules: Vortex magique",
+    "DICESONICE.PlayAnimationThormund" : "Animation: Thormund et ses amis",
+
     "DICESONICE.TextureClouds" : "Nuages",
     "DICESONICE.TextureCloudsTransparent" : "Nuages ​​(Transparent)",
     "DICESONICE.TextureFire" : "Feu",
@@ -142,6 +165,7 @@
     "DICESONICE.FontAuto": "Auto (Thème)",
 
     "DICESONICE.System.Standard" : "Standard",
+    "DICESONICE.System.FoundryVTT" : "Foundry VTT",
     "DICESONICE.System.Dot" : "Points (Blanc)",
     "DICESONICE.System.DotBlack" : "Points (Noir)",
 
@@ -155,5 +179,10 @@
 
     "DICESONICE.ThrowingForceWeak": "Doux",
     "DICESONICE.ThrowingForceMedium" : "Moyen",
-    "DICESONICE.ThrowingForceStrong" : "Fort"
+    "DICESONICE.ThrowingForceStrong" : "Fort",
+
+    "DICESONICE.WelcomeMessage1" : "Il semble que vous utilisez les dés 3D pour la première fois dans ce Monde.",
+    "DICESONICE.WelcomeMessage2" : "Vous pouvez modifier (ou désactiver) vos dés 3D en cliquant sur ce bouton:",
+    "DICESONICE.WelcomeMessage3" : "Vous pourrez par la suite le retrouver dans le menu 'Configurer les options > Modules > Dice So Nice!'",
+    "DICESONICE.WelcomeMessage4" : "Vous ne recevrez pas ce message à nouveau. Bon jeu !"
 }

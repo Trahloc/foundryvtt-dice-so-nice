@@ -2,6 +2,7 @@ import { DiceFactory } from './DiceFactory.js';
 import { DiceBox } from './DiceBox.js';
 import { DiceColors, TEXTURELIST, COLORSETS } from './DiceColors.js';
 import { DiceNotation } from './DiceNotation.js';
+import { DiceSFXManager } from './DiceSFXManager.js';
 
 /**
  * Registers the exposed settings for the various 3D dice options.
@@ -138,7 +139,17 @@ Hooks.once('init', () => {
         config: true
     });
 
-    
+    game.settings.register("dice-so-nice", "allowInteractivity", {
+        name: "DICESONICE.allowInteractivity",
+        hint: "DICESONICE.allowInteractivityHint",
+        scope: "world",
+        type: Boolean,
+        default: true,
+        config: true,
+        onChange: () => {
+            location.reload();
+        }
+    });
 
 });
 
@@ -312,9 +323,6 @@ class Utils {
             sets = COLORSETS;
         let groupedSetsList = Object.values(sets);
         groupedSetsList.sort((set1, set2) => {
-            //if(game.i18n.localize(set1.category) < game.i18n.localize(set2.category)) return -1;
-            //if(game.i18n.localize(set1.category) > game.i18n.localize(set2.category)) return 1;
-
             if (game.i18n.localize(set1.description) < game.i18n.localize(set2.description)) return -1;
             if (game.i18n.localize(set1.description) > game.i18n.localize(set2.description)) return 1;
         });
@@ -362,7 +370,8 @@ export class Dice3D {
             soundsVolume: 0.5,
             canvasZIndex:'over',
             throwingForce:'medium',
-            useHighDPI:true
+            useHighDPI:true,
+            showOthersSFX:true
         };
     }
 
@@ -393,8 +402,22 @@ export class Dice3D {
         return mergeObject(appearance, { "-=dimensions": null });
     }
 
+    static SFX(user = game.user){
+        if(Dice3D.CONFIG.showOthersSFX || user.id == game.user.id)
+            return user.getFlag("dice-so-nice", "sfxList");
+        else
+            return {};
+    }
+
+    static ALL_CUSTOMIZATION(user = game.user) {
+        let specialEffects = Dice3D.SFX(user);
+        return mergeObject(Dice3D.APPEARANCE(user), {specialEffects: specialEffects});
+    }
+
     static ALL_CONFIG(user = game.user) {
-        return mergeObject(Dice3D.CONFIG, Dice3D.APPEARANCE(user));
+        let ret = mergeObject(Dice3D.CONFIG, Dice3D.APPEARANCE(user));
+        ret.specialEffects = Dice3D.SFX(user);
+        return ret;
     }
 
     /**
@@ -501,8 +524,14 @@ export class Dice3D {
             Hooks.call("diceSoNiceReady", this);
             await this.DiceFactory._loadFonts();
         });
+        DiceSFXManager.init();
         this._startQueueHandler();
         this._nextAnimationHandler();
+        this._welcomeMessage();
+    }
+
+    get canInteract(){
+        return !this.box.running;
     }
 
     /**
@@ -565,18 +594,72 @@ export class Dice3D {
             }
         });
 
-        $('body,html').click(() => {
+        $(document).on("click",".dice-so-nice-btn-settings",(ev)=>{
+            ev.preventDefault();
+            const menu = game.settings.menus.get(ev.currentTarget.dataset.key);
+            const app = new menu.type();
+            return app.render(true);
+        });
+
+        game.socket.on('module.dice-so-nice', (request) => {
+            switch(request.type){
+                case "show":
+                    if (!request.users || request.users.includes(game.user.id))
+                        this.show(request.data, game.users.get(request.user));
+                    break;
+                case "update":
+                    if(request.user == game.user.id || Dice3D.CONFIG.showOthersSFX)
+                        DiceSFXManager.init();
+                    break;
+            }
+        });
+
+        if(game.settings.get("dice-so-nice", "allowInteractivity")){
+            $(document).on("mousemove.dicesonice", "#board", this._onMouseMove.bind(this));
+
+            $(document).on("mousedown.dicesonice", "#board", this._onMouseDown.bind(this));
+
+            $(document).on("mouseup.dicesonice", "#board", this._onMouseUp.bind(this));
+        }
+    }
+
+    _mouseNDC(event){
+        let rect = this.canvas[0].getBoundingClientRect();
+        let x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        if(x > 1)
+            x = 1;
+        let y = - ((event.clientY - rect.top) / rect.height) * 2 + 1;
+        return {x:x,y:y};
+    }
+
+    _onMouseMove(event){
+        if(!this.canInteract)
+            return;
+        this.box.onMouseMove(event,this._mouseNDC(event));
+    }
+
+    _onMouseDown(event){
+        if(!this.canInteract)
+            return;
+        let hit = this.box.onMouseDown(event,this._mouseNDC(event));
+        if(hit)
+            this._beforeShow();
+        else{
             const config = Dice3D.CONFIG;
             if (!config.hideAfterRoll && this.canvas.is(":visible") && !this.box.rolling) {
                 this.canvas.hide();
                 this.box.clearAll();
             }
-        });
-        game.socket.on('module.dice-so-nice', (request) => {
-            if (!request.users || request.users.includes(game.user.id)) {
-                this.show(request.data, game.users.get(request.user));
-            }
-        });
+        }
+
+    }
+
+    _onMouseUp(event){
+        if(!this.canInteract)
+            return;
+        let hit = this.box.onMouseUp(event);
+        if(hit)
+            this._afterShow();
     }
 
     _resizeEnd() {
@@ -611,6 +694,25 @@ export class Dice3D {
                 animate();
             }
         }, 100);
+    }
+
+    /**
+     * Show a private message to new players
+     */
+    _welcomeMessage(){
+        if(!game.user.getFlag("dice-so-nice","welcomeMessageShown")){
+            if(!game.user.getFlag("dice-so-nice","appearance")){
+                renderTemplate("modules/dice-so-nice/templates/welcomeMessage.html", {}).then((html)=>{
+                    let options = {
+                        whisper:[game.user.id],
+                        content: html
+                    };
+                    ChatMessage.create(options);
+                });
+            }
+            game.user.setFlag("dice-so-nice","welcomeMessageShown",true);
+        }
+        
     }
 
     /**
@@ -674,11 +776,11 @@ export class Dice3D {
 
                 if (synchronize) {
                     users = users && users.length > 0 ? (users[0].id ? users.map(user => user.id) : users) : users;
-                    game.socket.emit("module.dice-so-nice", { data: data, user: user.id, users: users });
+                    game.socket.emit("module.dice-so-nice.show", { type:"show", data: data, user: user.id, users: users });
                 }
 
                 if (!blind) {
-                    this._showAnimation(data, Dice3D.APPEARANCE(user)).then(displayed => {
+                    this._showAnimation(data, Dice3D.ALL_CUSTOMIZATION(user)).then(displayed => {
                         resolve(displayed);
                     });
                 } else {
@@ -753,25 +855,30 @@ export class Dice3D {
      */
     _afterShow() {
         if (Dice3D.CONFIG.hideAfterRoll) {
-            this.timeoutHandle = setTimeout(() => {
-                if (!this.box.rolling) {
-                    if (Dice3D.CONFIG.hideFX === 'none') {
-                        this.canvas.hide();
-                        this.box.clearAll();
+            if(DiceSFXManager.renderQueue.length){
+                clearTimeout(this.timeoutHandle);
+                return;
+            } else {
+                this.timeoutHandle = setTimeout(() => {
+                    if (!this.box.rolling) {
+                        if (Dice3D.CONFIG.hideFX === 'none') {
+                            this.canvas.hide();
+                            this.box.clearAll();
+                        }
+                        if (Dice3D.CONFIG.hideFX === 'fadeOut') {
+                        this.canvas.fadeOut({
+                                duration: 1000,
+                                complete: () => {
+                                    this.box.clearAll();
+                                },
+                                fail: () => {
+                                    this.canvas.fadeIn(0);
+                                }
+                            });
+                        }
                     }
-                    if (Dice3D.CONFIG.hideFX === 'fadeOut') {
-                       this.canvas.fadeOut({
-                            duration: 1000,
-                            complete: () => {
-                                this.box.clearAll();
-                            },
-                            fail: () => {
-                                this.canvas.fadeIn(0);
-                            }
-                        });
-                    }
-                }
-            }, Dice3D.CONFIG.timeBeforeHide);
+                }, Dice3D.CONFIG.timeBeforeHide);
+            }
         }
     }
 
@@ -831,13 +938,14 @@ class DiceConfig extends FormApplication {
             id: "dice-config",
             template: "modules/dice-so-nice/templates/dice-config.html",
             width: 500,
-            height: 700,
-            closeOnSubmit: true
+            height: "auto",
+            closeOnSubmit: true,
+            tabs: [{navSelector: ".tabs", contentSelector: "form", initial: "general"}]
         })
     }
 
     getData(options) {
-        return mergeObject({
+        let data = mergeObject({
             fxList: Utils.localize({
                 "none": "DICESONICE.None",
                 "fadeOut": "DICESONICE.FadeOut"
@@ -878,10 +986,14 @@ class DiceConfig extends FormApplication {
                 "weak": "DICESONICE.ThrowingForceWeak",
                 "medium": "DICESONICE.ThrowingForceMedium",
                 "strong": "DICESONICE.ThrowingForceStrong"
-            })
+            }),
+            specialEffectsMode:DiceSFXManager.SFX_MODE_LIST,
+            specialEffects:Dice3D.SFX()
         },
             this.reset ? Dice3D.ALL_DEFAULT_OPTIONS() : Dice3D.ALL_CONFIG()
         );
+        delete data.sfxLine;
+        return data;
     }
 
     activateListeners(html) {
@@ -909,6 +1021,27 @@ class DiceConfig extends FormApplication {
             html.find('button[name="reset"]').click(this.onReset.bind(this));
 
             this.reset = false;
+        });
+
+        $(".sfx-create").click((ev)=>{
+            renderTemplate("modules/dice-so-nice/templates/partial-sfx.html", {
+                id: $(".sfx-line").length,
+                specialEffectsMode: DiceSFXManager.SFX_MODE_LIST
+            }).then((html)=>{
+                $("#sfxs-list").append(html);
+                this.setPosition();
+            });
+        });
+
+        $(document).on("click", ".sfx-delete", (ev)=>{
+            $(ev.target).parents(".sfx-line").remove();
+            $(".sfx-line").each(function(index){
+                $(this).find("input, select").each(function(){
+                    let name = $(this).attr("name");
+                    $(this).attr("name", name.replace(/(\w+\[)(\d+)(\]\[\w+\])/, "$1"+index+"$3"));
+                });
+            });
+            this.setPosition();
         });
     }
 
@@ -977,20 +1110,66 @@ class DiceConfig extends FormApplication {
         this.render();
     }
 
+    parseInputs(data) {
+        var ret = {};
+        retloop:
+        for (var input in data) {
+            var val = data[input];
+    
+            var parts = input.split('[');       
+            var last = ret;
+    
+            for (var i in parts) {
+                var part = parts[i];
+                if (part.substr(-1) == ']') {
+                    part = part.substr(0, part.length - 1);
+                }
+    
+                if (i == parts.length - 1) {
+                    last[part] = val;
+                    continue retloop;
+                } else if (!last.hasOwnProperty(part)) {
+                    last[part] = {};
+                }
+                last = last[part];
+            }
+        }
+        return ret;
+    }
+
     async _updateObject(event, formData) {
         //Remove custom settings if custom isn't selected to prevent losing them in the user save
+        formData = this.parseInputs(formData);
+        let sfxLine = formData.sfxLine;
+        if(sfxLine){
+            for (let [key, value] of Object.entries(sfxLine)) {
+                if(value.diceType == "" || value.onResult == "")
+                delete sfxLine[key];
+            }
+            delete formData.sfxLine;
+        }
+
         if(formData.colorset != "custom"){
                 delete formData.labelColor;
                 delete formData.diceColor;
                 delete formData.outlineColor;
                 delete formData.edgeColor;
         }
+
         let settings = mergeObject(Dice3D.CONFIG, formData, { insertKeys: false, insertValues: false });
         let appearance = mergeObject(Dice3D.APPEARANCE(), formData, { insertKeys: false, insertValues: false });
+
         await game.settings.set('dice-so-nice', 'settings', settings);
         await game.user.setFlag("dice-so-nice", "appearance", appearance);
+        //required
+        await game.user.unsetFlag("dice-so-nice", "sfxList");
+        
+        await game.user.setFlag("dice-so-nice", "sfxList", sfxLine);
+        game.socket.emit("module.dice-so-nice", { type: "update", user: game.user.id});
+        DiceSFXManager.init();
         ui.notifications.info(game.i18n.localize("DICESONICE.saveMessage"));
     }
+
     close(options){
         super.close(options);
         this.box.clearScene();
