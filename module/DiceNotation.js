@@ -66,6 +66,7 @@ export class DiceNotation {
 				if(dieValue==10)
 					dieValue=0;
 			}
+			dsnDie.d100Result = fvttDie.results[index].result;
 		} else
 			dsnDie.resultLabel = fvttDie.constructor.getResultLabel(dieValue).toString();
 		dsnDie.result = dieValue;
@@ -102,7 +103,11 @@ export class DiceNotation {
 					continue;
 				//dice
 				for(let k=0;k<mergedRollCommands[i][j].dice.length;k++){
-					let specialEffects = Object.values(sfxList).filter(sfx => sfx.diceType == mergedRollCommands[i][j].dice[k].type && sfx.onResult == mergedRollCommands[i][j].dice[k].result);
+					let specialEffects = Object.values(sfxList).filter(sfx => {
+						return ((sfx.diceType == mergedRollCommands[i][j].dice[k].type && sfx.onResult == mergedRollCommands[i][j].dice[k].result.toString())
+							|| 
+						(sfx.diceType == "d100" && mergedRollCommands[i][j].dice[k].d100Result && mergedRollCommands[i][j].dice[k].d100Result.toString() == sfx.onResult))
+					});
 					if(specialEffects.length)
 						mergedRollCommands[i][j].dice[k].specialEffects = specialEffects;
 				}

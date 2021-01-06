@@ -87,6 +87,14 @@
 .dice-so-nice .sfxs-list .sfx-controls {
     -webkit-box-flex: 0;
     -ms-flex: 0 0 40px;
-    flex: 0 0 40px;
+    flex: 0 0 16px;
     text-align: right;
+}
+
+.dice-so-nice .sfx-double {
+    flex:2;
+}
+
+.dice-so-nice .sfx-data select{
+    width:100%;
 }

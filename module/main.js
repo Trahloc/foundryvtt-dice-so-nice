@@ -527,6 +527,7 @@ export class Dice3D {
         DiceSFXManager.init();
         this._startQueueHandler();
         this._nextAnimationHandler();
+        this._welcomeMessage();
     }
 
     get canInteract(){
@@ -591,6 +592,13 @@ export class Dice3D {
                 this._timeout = true;
                 setTimeout(this._resizeEnd.bind(this), 1000);
             }
+        });
+
+        $(document).on("click",".dice-so-nice-btn-settings",(ev)=>{
+            ev.preventDefault();
+            const menu = game.settings.menus.get(ev.currentTarget.dataset.key);
+            const app = new menu.type();
+            return app.render(true);
         });
 
         game.socket.on('module.dice-so-nice', (request) => {
@@ -686,6 +694,25 @@ export class Dice3D {
                 animate();
             }
         }, 100);
+    }
+
+    /**
+     * Show a private message to new players
+     */
+    _welcomeMessage(){
+        if(!game.user.getFlag("dice-so-nice","welcomeMessageShown")){
+            if(!game.user.getFlag("dice-so-nice","appearance")){
+                renderTemplate("modules/dice-so-nice/templates/welcomeMessage.html", {}).then((html)=>{
+                    let options = {
+                        whisper:[game.user.id],
+                        content: html
+                    };
+                    ChatMessage.create(options);
+                });
+            }
+            game.user.setFlag("dice-so-nice","welcomeMessageShown",true);
+        }
+        
     }
 
     /**

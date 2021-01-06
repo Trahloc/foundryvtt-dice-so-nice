@@ -66,10 +66,13 @@
     "DICESONICE.animateInlineRoll" : "Enable 3D dice on Inline Rolls",
     "DICESONICE.animateInlineRollHint" : "When possible, show a 3D dice when an inline roll is detected in the chat.",
     "DICESONICE.allowInteractivity" : "Allow interaction with rolled dice",
-    "DICESONICE.allowInteractivityHint" : "Let players grab and throw 3D dice after they've been rolled on the table",
+    "DICESONICE.allowInteractivityHint" : "Let players grab and throw 3D dice after they've been rolled on the table (this has no effect on the results)",
 
     "DICESONICE.Add" : "Add",
     "DICESONICE.Delete" : "Delete",
+    "DICESONICE.diceType" : "Dice type",
+    "DICESONICE.onResult" : "On result",
+    "DICESONICE.specialEffect" : "Special effect",
 
     "DICESONICE.PlaySoundEpicFail" : "Sound: Epic Fail",
     "DICESONICE.PlaySoundEpicWin" : "Sound: Epic Win",
@@ -80,7 +83,7 @@
     "DICESONICE.PlayConfettiStrength2" : "Animation: Confetti",
     "DICESONICE.PlayConfettiStrength3" : "Animation: CONFETTI!",
     "DICESONICE.PlayAnimationParticleSpiral" : "Particles: Double spiral",
-    "DICESONICE.PlayAnimationParticleSparkles" : "Particles: Red Sparkles",
+    "DICESONICE.PlayAnimationParticleSparkles" : "Particles: Blaze",
     "DICESONICE.PlayAnimationParticleVortex" : "Particles: Magic Vortex",
     "DICESONICE.PlayAnimationThormund" : "Animation: Thormund TTE",
 
@@ -176,5 +179,10 @@
 
     "DICESONICE.ThrowingForceWeak": "Weak",
     "DICESONICE.ThrowingForceMedium" : "Medium",
-    "DICESONICE.ThrowingForceStrong" : "Strong"
+    "DICESONICE.ThrowingForceStrong" : "Strong",
+
+    "DICESONICE.WelcomeMessage1" : "It seems like you're using 3D dice for the first time in this world.",
+    "DICESONICE.WelcomeMessage2" : "You can configure (or disable) your 3D dice by clicking this button:",
+    "DICESONICE.WelcomeMessage3" : "You can always change these settings later under 'Configure Settings > Module Settings > Dice So Nice!'",
+    "DICESONICE.WelcomeMessage4" : "You won't see this message again. Happy rolling!"
 }

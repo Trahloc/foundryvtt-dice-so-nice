@@ -210,11 +210,11 @@
                 </div>
                 <ol id="sfxs-list" class="sfxs-list">
                     <li class="sfx flexrow sfx-header">
-                        <div class="sfx-name">Dice type</div>
-                        <div class="sfx-name">On result</div>
-                        <div class="sfx-name">Special effect</div>
+                        <div class="sfx-name">{{localize "DICESONICE.diceType"}}</div>
+                        <div class="sfx-name">{{localize "DICESONICE.onResult"}}</div>
+                        <div class="sfx-name sfx-double">{{localize "DICESONICE.specialEffect"}}</div>
                         <div class="sfx-controls">
-                            <a class="sfx-control sfx-create"><i class="fas fa-plus"></i> {{localize "DICESONICE.Add"}}</a>
+                            <a class="sfx-control sfx-create" title='{{localize "DICESONICE.Add"}}'><i class="fas fa-plus"></i></a>
                         </div>
                     </li>
                     {{#each specialEffects as |sfx id|}}
@@ -225,7 +225,7 @@
                         <div class="sfx-data">
                             <input type="text" name="sfxLine[{{id}}][onResult]" value="{{sfx.onResult}}" />
                         </div>
-                        <div class="sfx-data">
+                        <div class="sfx-data sfx-double">
                             <select name="sfxLine[{{id}}][specialEffect]">
                                 {{selectOptions ../specialEffectsMode selected=sfx.specialEffect localize=true}}
                             </select>
