@@ -61,7 +61,6 @@ export const DiceSFXManager = {
             DiceSFXManager.SFX_CLASS[sfx.id] = sfx;
             sfx.initialized = true;
             sfx.init();
-            console.log("SFX INIT: "+sfx.name);
         }
     },
     playSFX : async function(id, box, dicemesh){

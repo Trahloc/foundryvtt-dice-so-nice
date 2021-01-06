@@ -38,7 +38,6 @@ export class PlayAnimationDark extends DiceSFX {
             val = Math.min(Math.max(val, 0), 1);
             this.dicemesh.material.color.copy(this.baseColor);
             this.dicemesh.material.color.lerp(PlayAnimationDark.darkColor, val);
-            //console.log(this.dicemesh.material.color);
         }
     }
 
