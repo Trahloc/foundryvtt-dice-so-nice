@@ -1,7 +1,9 @@
 import { DiceColors, COLORSETS } from './DiceColors.js';
 import { DICE_MODELS } from './DiceModels.js';
 import { RGBELoader } from './libs/three-modules/RGBELoader.js';
+import { DiceSFXManager } from './DiceSFXManager.js';
 //import {GLTFExporter} from './libs/three-modules/GLTFExporter.js';
+import { RendererStats } from './libs/three-modules/threex.rendererstats.js';
 import * as THREE from './libs/three.module.js';
 
 export class DiceBox {
@@ -191,13 +193,15 @@ export class DiceBox {
 				game.dice3dRenderers[this.config.boxType] = this.renderer;
 			}
 
-			/*this.rendererStats	= new THREEx.RendererStats()
+			if(false && this.config.boxType == "board"){
+				this.rendererStats	= new RendererStats()
 
-			this.rendererStats.domElement.style.position	= 'absolute';
-			this.rendererStats.domElement.style.left	= '44px';
-			this.rendererStats.domElement.style.bottom	= '178px';
-			this.rendererStats.domElement.style.transform	= 'scale(2)';
-			document.body.appendChild( this.rendererStats.domElement );*/
+				this.rendererStats.domElement.style.position	= 'absolute';
+				this.rendererStats.domElement.style.left	= '44px';
+				this.rendererStats.domElement.style.bottom	= '178px';
+				this.rendererStats.domElement.style.transform	= 'scale(2)';
+				document.body.appendChild( this.rendererStats.domElement );
+			}
 
 			this.container.appendChild(this.renderer.domElement);
 			this.renderer.shadowMap.enabled = this.shadows;
@@ -525,7 +529,7 @@ export class DiceBox {
 		let eulerAngle = new THREE.Euler(THREE.MathUtils.degToRad(rotationDegrees[0]), THREE.MathUtils.degToRad(rotationDegrees[1]), THREE.MathUtils.degToRad(rotationDegrees[2]));
 		let quaternion = new THREE.Quaternion().setFromEuler(eulerAngle);
 		if (value > result)
-			quaternion.inverse();
+			quaternion.invert();
 
 		dicemesh.applyQuaternion(quaternion);
 
@@ -566,6 +570,7 @@ export class DiceBox {
 		dicemesh.startAtIteration = dicedata.startAtIteration;
 		dicemesh.stopped = 0;
 		dicemesh.castShadow = this.shadows;
+		dicemesh.specialEffects = dicedata.specialEffects;
 
 		dicemesh.body_sim = new CANNON.Body({ allowSleep: true, sleepSpeedLimit: 75, sleepTimeLimit: 0.9, mass: mass, shape: dicemesh.geometry.cannon_shape, material: this.dice_body_material });
 		dicemesh.body_sim.type = CANNON.Body.DYNAMIC;
@@ -850,9 +855,12 @@ export class DiceBox {
 			}
 		}
 
-		if (this.isVisible && (this.allowInteractivity || this.animatedDiceDetected || neededSteps))
+		if (this.isVisible && (this.allowInteractivity || this.animatedDiceDetected || neededSteps || DiceSFXManager.renderQueue.length)){
+			DiceSFXManager.renderSFX();
 			this.renderer.render(this.scene, this.camera);
-		//this.rendererStats.update(this.renderer);
+		}
+		if(this.rendererStats)
+			this.rendererStats.update(this.renderer);
 		this.last_time = this.last_time + neededSteps * this.framerate * 1000;
 
 		// roll finished
@@ -862,7 +870,10 @@ export class DiceBox {
 			this.running = false;
 			this.rolling = false;
 
-			if (this.callback) this.callback(this.throws);
+			if (this.callback){
+				this.handleSpecialEffectsInit();
+				this.callback(this.throws);
+			} 
 			this.callback = null;
 			this.throws = null;
 			if (!this.animatedDiceDetected && !this.allowInteractivity)
@@ -946,10 +957,11 @@ export class DiceBox {
 		}
 
 		if (this.pane) this.scene.remove(this.pane);
+		
+		if(this.config.boxType == "board")
+			DiceSFXManager.clearQueue();
 		this.renderer.render(this.scene, this.camera);
 		this.isVisible = false;
-
-		//setTimeout(() => { this.renderer.render(this.scene, this.camera); }, 100);
 	}
 
 	clearScene() {
@@ -1270,7 +1282,6 @@ export class DiceBox {
 	onMouseDown(event,ndc){
 		this.mouse.pos.x = ndc.x;
 		this.mouse.pos.y = ndc.y;
-		console.log(ndc);
 		this.hoveredDie = null;
 		this.findHoveredDie();
 
@@ -1314,5 +1325,15 @@ export class DiceBox {
 			return true;
 		}
 		return false;
+	}
+
+	handleSpecialEffectsInit(){
+		this.diceList.forEach(dice =>{
+			if(dice.specialEffects){
+				dice.specialEffects.forEach(sfx => {
+					DiceSFXManager.playSFX(sfx.specialEffect, this, dice);
+				});
+			}
+		});
 	}
 }

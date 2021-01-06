@@ -56,7 +56,7 @@ A complete API and documentation for developers and artists alike is available i
 
 # Compatibility
 
-Tested on Foundry VTT 0.7.5  
+Tested on Foundry VTT 0.7.9  
 If you need to use an older Foundry version, please [download a compatible older version](https://foundryvtt.com/packages/dice-so-nice/)
 
 # Acknowledgment
@@ -68,13 +68,16 @@ Credits go to Anton Natarov, who published it under public domain.
 
 v2 of "Dice So Nice" based on Teal's fork from the awesome MajorVictory, with his direct consent. You can find his online roller here: http://dnd.majorsplace.com/dice/
 
-v10 Geometry created by Greewi who did all the maths for this custom "Pentagonal Trapezohedron". You can find his homebrewed (french) TTRPG Feerie/Solaires here: https://feerie.net
+d10 Geometry created by Greewi who did all the maths for our custom "Pentagonal Trapezohedron". You can find his homebrewed (french) TTRPG Feerie/Solaires here: https://feerie.net
+
+Built on [ThreeJS](https://threejs.org/), [CannonJS](https://schteppe.github.io/cannon.js/) and [Proton](https://github.com/drawcall/three.proton)
 
 ## Theme and model credits:
 - **Spencer Thayer:** `Thylean Bronze` theme
 - **Foundry VTT:** For the FVTT Logo in the `Foundry VTT` preset.
 - **MajorVictory:** For all the other theme in this module!
 - **[Joost Vanhoutte](https://joost3d.com/hdris/):** For the "Foyer" HDRI map
+- Additional sound effects from https://www.zapsplat.com
 
 Many thanks to the people who continue to support us on Discord, to the amazing system and module developers who integrate our module and to the artists who have let us integrate their textures in Dice So Nice!
 
