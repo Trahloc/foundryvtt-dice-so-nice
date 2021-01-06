@@ -856,6 +856,7 @@ export class Dice3D {
     _afterShow() {
         if (Dice3D.CONFIG.hideAfterRoll) {
             if(DiceSFXManager.renderQueue.length){
+                clearTimeout(this.timeoutHandle);
                 return;
             } else {
                 this.timeoutHandle = setTimeout(() => {

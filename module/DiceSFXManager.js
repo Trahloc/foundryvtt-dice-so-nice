@@ -34,6 +34,8 @@ export const DiceSFXManager = {
         if(!DiceSFXManager.SFX_MODE_LIST){
             DiceSFXManager.SFX_MODE_LIST = {};
             Object.values(DiceSFXManager.SFX_MODE_CLASS).forEach((sfx)=>{
+                if(sfx.id.startsWith("PlayConfettiStrength") && (!game.modules.get("confetti") || !game.modules.get("confetti").active))
+                    return;
                 DiceSFXManager.SFX_MODE_LIST[sfx.id] = sfx.name;
             });
         }

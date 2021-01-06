@@ -20,6 +20,8 @@ export class PlayAnimationBright extends DiceSFX {
 
     /**@override play */
     async play() {
+        if(!this.dicemesh.material.bumpMap)
+            return;
         this.clock = new THREE.Clock();
         this.baseColor = this.dicemesh.material.emissive.clone();
         this.baseMaterial = this.dicemesh.material;
