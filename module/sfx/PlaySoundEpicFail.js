@@ -18,7 +18,8 @@ export class PlaySoundEpicFail extends DiceSFX {
     /**@override play */
     async play(){
         AudioHelper.play({
-			src: PlaySoundEpicFail.path,
+            src: PlaySoundEpicFail.path,
+            volume: this.box.volume
 		}, false);
     }
 }

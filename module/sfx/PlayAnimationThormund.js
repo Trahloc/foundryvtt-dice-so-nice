@@ -68,7 +68,8 @@ export class PlayAnimationThormund extends DiceSFX {
         this.axis = new THREE.Vector3();
         this.box.scene.add(this.thormund);
         AudioHelper.play({
-			src: PlayAnimationThormund.sound,
+            src: PlayAnimationThormund.sound,
+            volume: this.box.volume
 		}, false);
     }
 
