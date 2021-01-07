@@ -876,7 +876,7 @@ export class DiceBox {
 			} 
 			this.callback = null;
 			this.throws = null;
-			if (!this.animatedDiceDetected && !this.allowInteractivity)
+			if (!this.animatedDiceDetected && !this.allowInteractivity && !DiceSFXManager.renderQueue.length)
 				canvas.app.ticker.remove(this.animateThrow, this);;
 		}
 	}

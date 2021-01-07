@@ -76,7 +76,8 @@ export class PlayAnimationParticleVortex extends DiceSFX {
         this.proton.addRender(new Proton.MeshRender(this.box.scene));
 
         AudioHelper.play({
-			src: PlayAnimationParticleVortex.sound,
+            src: PlayAnimationParticleVortex.sound,
+            volume: this.box.volume
 		}, false);
     }
 

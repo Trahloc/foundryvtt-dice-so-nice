@@ -56,7 +56,8 @@ export class PlayAnimationParticleSparkles extends DiceSFX {
         this.proton.addRender(new Proton.SpriteRender(this.box.scene));
 
         AudioHelper.play({
-			src: PlayAnimationParticleSparkles.sound,
+            src: PlayAnimationParticleSparkles.sound,
+            volume: this.box.volume
 		}, false);
     }
 

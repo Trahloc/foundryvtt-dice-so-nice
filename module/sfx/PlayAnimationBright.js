@@ -20,30 +20,33 @@ export class PlayAnimationBright extends DiceSFX {
 
     /**@override play */
     async play() {
-        if(!this.dicemesh.material.bumpMap)
+        if(!this.dicemesh.material.emissiveMap && !this.dicemesh.material.bumpMap)
             return;
         this.clock = new THREE.Clock();
         this.baseColor = this.dicemesh.material.emissive.clone();
         this.baseMaterial = this.dicemesh.material;
         this.dicemesh.material = this.baseMaterial.clone();
-        //Change the emissive map shader to highlight black instead of white
-        this.dicemesh.material.onBeforeCompile = (shader) => {
-            shader.fragmentShader = shader.fragmentShader.replace(
-                '#include <emissivemap_fragment>',
-                [
-                    '#ifdef USE_EMISSIVEMAP',
-                    'vec4 emissiveColorOg = texture2D( emissiveMap, vUv );',
-                    'vec4 emissiveColor = vec4(1.0 - emissiveColorOg.r,1.0 -emissiveColorOg.g,1.0 -emissiveColorOg.b,1);',
-                    'emissiveColor.rgb = emissiveMapTexelToLinear( emissiveColor ).rgb;',
-                    'totalEmissiveRadiance *= emissiveColor.rgb;',
-                    '#endif'
-                ].join('\n')
-            );
-        };
-        this.dicemesh.material.emissiveMap = this.dicemesh.material.bumpMap;
-        this.dicemesh.material.emissiveIntensity = 1.5;
+        if(!this.dicemesh.material.emissiveMap){
+            //Change the emissive map shader to highlight black instead of white
+            this.dicemesh.material.onBeforeCompile = (shader) => {
+                shader.fragmentShader = shader.fragmentShader.replace(
+                    '#include <emissivemap_fragment>',
+                    [
+                        '#ifdef USE_EMISSIVEMAP',
+                        'vec4 emissiveColorOg = texture2D( emissiveMap, vUv );',
+                        'vec4 emissiveColor = vec4(1.0 - emissiveColorOg.r,1.0 -emissiveColorOg.g,1.0 -emissiveColorOg.b,1);',
+                        'emissiveColor.rgb = emissiveMapTexelToLinear( emissiveColor ).rgb;',
+                        'totalEmissiveRadiance *= emissiveColor.rgb;',
+                        '#endif'
+                    ].join('\n')
+                );
+            };
+            this.dicemesh.material.emissiveMap = this.dicemesh.material.bumpMap;
+            this.dicemesh.material.emissiveIntensity = 1.5;
+        }
         AudioHelper.play({
-			src: PlayAnimationBright.sound,
+            src: PlayAnimationBright.sound,
+            volume: this.box.volume
 		}, false);
     }
 
