@@ -1,0 +1,23 @@
+{
+    "DICESONICE.config": "3D 骰子設置",
+    "DICESONICE.configTitle": "3D 骰子設置",
+    "DICESONICE.configHint": "設置3D骰子的顏色以及呎吋。",
+
+    "DICESONICE.enable": "啟用3D骰子",
+    "DICESONICE.labelColor": "數字顏色",
+    "DICESONICE.diceColor": "骰子顏色",
+    "DICESONICE.hideAfterRoll": "自動消退",
+    "DICESONICE.timeBeforeHide": "消退時間(毫秒)",
+    "DICESONICE.hideFX": "消退效果",
+    "DICESONICE.autoSize": "自動調整大小",
+    "DICESONICE.size": "手動調整大小",
+    "DICESONICE.None": "無",
+    "DICESONICE.FadeOut": "淡出",
+    "DICESONICE.speed": "動畫速度",
+    "DICESONICE.NormalSpeed": "普通",
+    "DICESONICE.2xSpeed": "2x",
+    "DICESONICE.3xSpeed": "3x",
+    "DICESONICE.Save": "保存",
+    "DICESONICE.Apply": "應用"
+
+}
