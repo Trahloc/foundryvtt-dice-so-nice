@@ -219,7 +219,8 @@ export const COLORSETS = {
 		foreground: '#f6c928',
 		background: '#f6c928',
 		outline: 'none',
-		texture: 'metal'
+		texture: 'metal',
+		visibility: 'hidden'
 	},
 	'radiant': {
 		name: 'radiant',
@@ -227,7 +228,7 @@ export const COLORSETS = {
 		category: 'DICESONICE.DamageTypes',
 		foreground: '#F9B333',
 		background: '#FFFFFF',
-		outline: 'none',
+		outline: 'gray',
 		texture: 'paper'
 	},
 	'fire': {
@@ -662,6 +663,8 @@ export class DiceColors {
 				COLORSETS[name].fontScale = DICE_SCALE;
 			else
 				COLORSETS[name].fontScale = mergeObject(DICE_SCALE,COLORSETS[name].fontScale,{inplace:false});
+			if(!COLORSETS[name].visibility)
+				COLORSETS[name].visibility = "visible";
 		}
 		
 		// generate the colors and textures for the random set
