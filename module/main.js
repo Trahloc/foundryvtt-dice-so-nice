@@ -398,7 +398,10 @@ export class Dice3D {
     }
 
     static APPEARANCE(user = game.user) {
-        let appearance = mergeObject(Dice3D.DEFAULT_APPEARANCE(user), user.getFlag("dice-so-nice", "appearance"));
+        let userAppearance = user.getFlag("dice-so-nice", "appearance");
+        let appearance = mergeObject(Dice3D.DEFAULT_APPEARANCE(user), userAppearance);
+        if(!userAppearance && game.dice3d && game.dice3d.DiceFactory.systemActivated != "standard")
+            appearance.system = game.dice3d.DiceFactory.systemActivated;
         return mergeObject(appearance, { "-=dimensions": null });
     }
 
@@ -994,9 +997,11 @@ class DiceConfig extends FormApplication {
         );
         delete data.sfxLine;
         //fix corupted save from #139
-        for (let [key, value] of Object.entries(data.specialEffects)) {
-            if(Array.isArray(value.diceType) || Array.isArray(value.onResult) || Array.isArray(value.specialEffect))
-            delete data.specialEffects[key];
+        if(data.specialEffects){
+            for (let [key, value] of Object.entries(data.specialEffects)) {
+                if(Array.isArray(value.diceType) || Array.isArray(value.onResult) || Array.isArray(value.specialEffect))
+                delete data.specialEffects[key];
+            }
         }
         return data;
     }
