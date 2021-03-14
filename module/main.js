@@ -993,6 +993,11 @@ class DiceConfig extends FormApplication {
             this.reset ? Dice3D.ALL_DEFAULT_OPTIONS() : Dice3D.ALL_CONFIG()
         );
         delete data.sfxLine;
+        //fix corupted save from #139
+        for (let [key, value] of Object.entries(data.specialEffects)) {
+            if(Array.isArray(value.diceType) || Array.isArray(value.onResult) || Array.isArray(value.specialEffect))
+            delete data.specialEffects[key];
+        }
         return data;
     }
 

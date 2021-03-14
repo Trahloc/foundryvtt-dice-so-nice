@@ -44,7 +44,10 @@ export const DiceSFXManager = {
             let sfxList = user.getFlag("dice-so-nice", "sfxList");
             if(sfxList){
                 Object.values(sfxList).forEach((line) => {
-                    sfxUniqueList.push(line.specialEffect);
+                    //fix corrupted save from bug #139
+                    if(!Array.isArray(line.specialEffect)){
+                        sfxUniqueList.push(line.specialEffect);
+                    } 
                 });
             }
         });
