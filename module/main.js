@@ -177,7 +177,7 @@ Hooks.on('createChatMessage', (chatMessage) => {
     }
     let roll = chatMessage.roll;
     if(hasInlineRoll){
-        let JqInlineRolls = $($.parseHTML(chatMessage.data.content)).filter(".inline-roll");
+        let JqInlineRolls = $($.parseHTML(chatMessage.data.content)).filter(".inline-roll.inline-result");
         if(JqInlineRolls.length == 0 && !chatMessage.isRoll) //it was a false positive
             return;
         let inlineRollList = [];
@@ -328,10 +328,11 @@ class Utils {
         });
         let preparedList = {};
         for (let i = 0; i < groupedSetsList.length; i++) {
+            if(groupedSetsList[i].visibility == 'hidden')
+                continue;
             let locCategory = game.i18n.localize(groupedSetsList[i].category);
             if (!preparedList.hasOwnProperty(locCategory))
                 preparedList[locCategory] = {};
-
             preparedList[locCategory][groupedSetsList[i].name] = game.i18n.localize(groupedSetsList[i].description);
         }
 
@@ -473,9 +474,9 @@ export class Dice3D {
     /**
      * Add a colorset (theme)
      * @param {Object} colorset 
-     * @param {Object} apply = "no", "default", "force"
+     * @param {Object} apply = "none", "default", "force"
      */
-    async addColorset(colorset, apply = "no") {
+    async addColorset(colorset, apply = "none") {
         let defaultValues = {
             foreground:"custom",
             background:"custom",
@@ -484,7 +485,8 @@ export class Dice3D {
             texture:"custom",
             material:"custom",
             font:"custom",
-            fontScale:{}
+            fontScale:{},
+            visibility:"visible"
         }
         colorset = mergeObject(defaultValues, colorset);
         COLORSETS[colorset.name] = colorset;
