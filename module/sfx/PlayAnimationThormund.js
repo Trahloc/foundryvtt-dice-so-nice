@@ -71,9 +71,12 @@ export class PlayAnimationThormund extends DiceSFX {
             src: PlayAnimationThormund.sound,
             volume: this.box.volume
 		}, false);
+        this.renderReady = true;
     }
 
     render() {
+        if(!this.renderReady)
+            return;
         let duration = this.step == 1? PlayAnimationThormund.duration1:PlayAnimationThormund.duration2;
         let x = 1-((duration - this.clock.getElapsedTime())/duration);
         if(x>1){
