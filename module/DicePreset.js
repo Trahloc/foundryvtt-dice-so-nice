@@ -26,7 +26,7 @@ export class DicePreset {
 
 	setValues(min = 1, max = 20, step = 1) {
 		this.values = this.range(min, max, step);
-		if(min != 1)
+		if(min < 1)
 			this.setValueMap(min, max, step);
 	}
 

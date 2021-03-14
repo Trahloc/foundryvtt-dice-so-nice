@@ -104,7 +104,7 @@ export class DiceNotation {
 				//dice
 				for(let k=0;k<mergedRollCommands[i][j].dice.length;k++){
 					let specialEffects = Object.values(sfxList).filter(sfx => {
-						return ((sfx.diceType == mergedRollCommands[i][j].dice[k].type && sfx.onResult == mergedRollCommands[i][j].dice[k].result.toString())
+						return ((sfx.diceType != "d100" && sfx.diceType == mergedRollCommands[i][j].dice[k].type && sfx.onResult == mergedRollCommands[i][j].dice[k].result.toString())
 							|| 
 						(sfx.diceType == "d100" && mergedRollCommands[i][j].dice[k].d100Result && mergedRollCommands[i][j].dice[k].d100Result.toString() == sfx.onResult))
 					});
