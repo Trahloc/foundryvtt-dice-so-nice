@@ -1142,10 +1142,20 @@ class DiceConfig extends FormApplication {
         formData = this.parseInputs(formData);
         let sfxLine = formData.sfxLine;
         if(sfxLine){
-            for (let [key, value] of Object.entries(sfxLine)) {
-                if(value.diceType == "" || value.onResult == "")
-                delete sfxLine[key];
+            sfxLine = Object.values(sfxLine);
+            //Remove empty lines
+            for (let i= sfxLine.length -1; i>=0; i--) {
+                if(sfxLine[i].diceType == "" || sfxLine[i].onResult == "")
+                    sfxLine.splice(i,1);
             }
+            //Remove duplicate lines
+            let dataArr = sfxLine.map(item=>{
+                return [JSON.stringify(item),item]
+            });
+            let mapArr = new Map(dataArr);
+            
+            sfxLine = [...mapArr.values()];
+
             delete formData.sfxLine;
         }
 
