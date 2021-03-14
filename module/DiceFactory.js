@@ -72,7 +72,6 @@ export class DiceFactory {
 			'modules/dice-so-nice/textures/coin/heads_bump.webp'
 		]);
 		diceobj.setValues(0,1);
-		diceobj.setValueMap({"0":1,"1":2});
 		diceobj.inertia = 8;
 		diceobj.scale = 0.9;
 		diceobj.colorset = "coin_default"
@@ -104,7 +103,6 @@ export class DiceFactory {
 		diceobj.name = 'Fate Dice';
 		diceobj.setLabels(['−', ' ', '+']);
 		diceobj.setValues(-1,1);
-		diceobj.setValueMap({"-1":1,"0":2,"1":3});
 		diceobj.scale = 0.9;
 		this.register(diceobj);
 
@@ -390,8 +388,18 @@ export class DiceFactory {
 		preset.name = dice.type;
 		preset.setLabels(dice.labels);
 		preset.setModel(dice.modelFile);
-		preset.values = model.values;
-		preset.valueMap = model.valueMap;
+		if(dice.values){
+			if(dice.values.min == undefined)
+				dice.values.min = 1;
+			if(dice.values.max == undefined)
+				dice.values.max = model.values.length;
+			if(dice.values.step == undefined)
+				dice.values.step = 1;
+			preset.setValues(dice.values.min,dice.values.max,dice.values.step);
+		} else {
+			preset.values = model.values;
+			preset.valueMap = model.valueMap;
+		}
 		preset.mass = model.mass;
 		preset.scale = model.scale;
 		preset.inertia = model.inertia;
