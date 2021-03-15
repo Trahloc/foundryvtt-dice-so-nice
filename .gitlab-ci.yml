@@ -14,6 +14,7 @@ build:
   artifacts:
     name: dice-so-nice
     when: on_success
+    expire_in: never
     paths:
       - dice-so-nice.zip
   when: on_success
