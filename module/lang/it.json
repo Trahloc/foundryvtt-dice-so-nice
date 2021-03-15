@@ -11,7 +11,7 @@
     "DICESONICE.labelColor": "Colore Etichetta",
     "DICESONICE.diceColor": "Colore Dado",
     "DICESONICE.hideAfterRoll": "Nascondi Automaticamente",
-    "DICESONICE.timeBeforeHide": "Millisecondi Prima ",
+    "DICESONICE.timeBeforeHide": "Millisec. Prima Della Dissolvenza",
     "DICESONICE.hideFX": "Effetto Applicato",
     "DICESONICE.autoSize": "Dimensioni Automatiche?",
     "DICESONICE.size": "Dimensioni Manuali",
