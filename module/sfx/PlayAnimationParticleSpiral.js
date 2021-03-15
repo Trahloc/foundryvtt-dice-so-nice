@@ -45,6 +45,7 @@ export class PlayAnimationParticleSpiral extends DiceSFX {
             src: PlayAnimationParticleSpiral.sound,
             volume: this.box.volume
 		}, false);
+        this.renderReady = true;
         //Proton.Debug.drawZone(proton,scene,zone2);
         //Proton.Debug.drawEmitter(this.proton,this.box.scene,this.emitter);
     }
@@ -82,6 +83,8 @@ export class PlayAnimationParticleSpiral extends DiceSFX {
     }
 
     render() {
+        if(!this.renderReady)
+            return;
         this.animateEmitter();
         this.proton.update();
         if(this.proton.emitters.length == 0){

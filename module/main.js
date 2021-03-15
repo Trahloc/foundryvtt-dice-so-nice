@@ -177,7 +177,7 @@ Hooks.on('createChatMessage', (chatMessage) => {
     }
     let roll = chatMessage.roll;
     if(hasInlineRoll){
-        let JqInlineRolls = $($.parseHTML(chatMessage.data.content)).filter(".inline-roll");
+        let JqInlineRolls = $($.parseHTML(chatMessage.data.content)).filter(".inline-roll.inline-result");
         if(JqInlineRolls.length == 0 && !chatMessage.isRoll) //it was a false positive
             return;
         let inlineRollList = [];
@@ -328,10 +328,11 @@ class Utils {
         });
         let preparedList = {};
         for (let i = 0; i < groupedSetsList.length; i++) {
+            if(groupedSetsList[i].visibility == 'hidden')
+                continue;
             let locCategory = game.i18n.localize(groupedSetsList[i].category);
             if (!preparedList.hasOwnProperty(locCategory))
                 preparedList[locCategory] = {};
-
             preparedList[locCategory][groupedSetsList[i].name] = game.i18n.localize(groupedSetsList[i].description);
         }
 
@@ -398,7 +399,10 @@ export class Dice3D {
     }
 
     static APPEARANCE(user = game.user) {
-        let appearance = mergeObject(Dice3D.DEFAULT_APPEARANCE(user), user.getFlag("dice-so-nice", "appearance"));
+        let userAppearance = user.getFlag("dice-so-nice", "appearance");
+        let appearance = mergeObject(Dice3D.DEFAULT_APPEARANCE(user), userAppearance);
+        if(!userAppearance && game.dice3d && game.dice3d.DiceFactory.systemActivated != "standard")
+            appearance.system = game.dice3d.DiceFactory.systemActivated;
         return mergeObject(appearance, { "-=dimensions": null });
     }
 
@@ -470,9 +474,9 @@ export class Dice3D {
     /**
      * Add a colorset (theme)
      * @param {Object} colorset 
-     * @param {Object} apply = "no", "default", "force"
+     * @param {Object} apply = "none", "default", "force"
      */
-    async addColorset(colorset, apply = "no") {
+    async addColorset(colorset, apply = "none") {
         let defaultValues = {
             foreground:"custom",
             background:"custom",
@@ -481,7 +485,8 @@ export class Dice3D {
             texture:"custom",
             material:"custom",
             font:"custom",
-            fontScale:{}
+            fontScale:{},
+            visibility:"visible"
         }
         colorset = mergeObject(defaultValues, colorset);
         COLORSETS[colorset.name] = colorset;
@@ -993,6 +998,13 @@ class DiceConfig extends FormApplication {
             this.reset ? Dice3D.ALL_DEFAULT_OPTIONS() : Dice3D.ALL_CONFIG()
         );
         delete data.sfxLine;
+        //fix corupted save from #139
+        if(data.specialEffects){
+            for (let [key, value] of Object.entries(data.specialEffects)) {
+                if(Array.isArray(value.diceType) || Array.isArray(value.onResult) || Array.isArray(value.specialEffect))
+                delete data.specialEffects[key];
+            }
+        }
         return data;
     }
 
@@ -1142,10 +1154,20 @@ class DiceConfig extends FormApplication {
         formData = this.parseInputs(formData);
         let sfxLine = formData.sfxLine;
         if(sfxLine){
-            for (let [key, value] of Object.entries(sfxLine)) {
-                if(value.diceType == "" || value.onResult == "")
-                delete sfxLine[key];
+            sfxLine = Object.values(sfxLine);
+            //Remove empty lines
+            for (let i= sfxLine.length -1; i>=0; i--) {
+                if(sfxLine[i].diceType == "" || sfxLine[i].onResult == "")
+                    sfxLine.splice(i,1);
             }
+            //Remove duplicate lines
+            let dataArr = sfxLine.map(item=>{
+                return [JSON.stringify(item),item]
+            });
+            let mapArr = new Map(dataArr);
+            
+            sfxLine = [...mapArr.values()];
+
             delete formData.sfxLine;
         }
 

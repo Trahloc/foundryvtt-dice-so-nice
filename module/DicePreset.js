@@ -26,9 +26,17 @@ export class DicePreset {
 
 	setValues(min = 1, max = 20, step = 1) {
 		this.values = this.range(min, max, step);
+		if(min < 1)
+			this.setValueMap(min, max, step);
 	}
 
-	setValueMap(map) {
+	setValueMap(min, max, step) {
+		let map = {};
+		let count=1;
+		for(let i = min; i<= max; i+=step){
+			map[i] = count;
+			count++;
+		}
 		this.valueMap = map;
 	}
 

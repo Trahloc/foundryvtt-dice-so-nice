@@ -7,6 +7,7 @@ export class DiceSFX {
         this.box = box;
         this.destroyed = false;
         this.enableGC = false;
+        this.renderReady = false;
     }
     static async init(){
         return true;

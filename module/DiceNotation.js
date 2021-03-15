@@ -70,6 +70,8 @@ export class DiceNotation {
 		} else
 			dsnDie.resultLabel = fvttDie.constructor.getResultLabel(dieValue).toString();
 		dsnDie.result = dieValue;
+		if(fvttDie.results[index].discarded)
+			dsnDie.discarded = true;
 
 		//If it is not a standard die ("d"), we need to prepend "d" to the denominator. If it is, we append the number of face
 		dsnDie.type = fvttDie.constructor.DENOMINATION;
@@ -104,9 +106,10 @@ export class DiceNotation {
 				//dice
 				for(let k=0;k<mergedRollCommands[i][j].dice.length;k++){
 					let specialEffects = Object.values(sfxList).filter(sfx => {
-						return ((sfx.diceType == mergedRollCommands[i][j].dice[k].type && sfx.onResult == mergedRollCommands[i][j].dice[k].result.toString())
+						return !mergedRollCommands[i][j].dice[k].discarded &&
+						(((sfx.diceType != "d100" && sfx.diceType == mergedRollCommands[i][j].dice[k].type && sfx.onResult == mergedRollCommands[i][j].dice[k].result.toString())
 							|| 
-						(sfx.diceType == "d100" && mergedRollCommands[i][j].dice[k].d100Result && mergedRollCommands[i][j].dice[k].d100Result.toString() == sfx.onResult))
+						(sfx.diceType == "d100" && mergedRollCommands[i][j].dice[k].d100Result && mergedRollCommands[i][j].dice[k].d100Result.toString() == sfx.onResult)))
 					});
 					if(specialEffects.length)
 						mergedRollCommands[i][j].dice[k].specialEffects = specialEffects;

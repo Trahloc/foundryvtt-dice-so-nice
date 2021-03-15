@@ -28,9 +28,12 @@ export class PlayAnimationDark extends DiceSFX {
 			src: PlayAnimationDark.sound,
             volume: this.box.volume
 		}, false);
+        this.renderReady = true;
     }
 
     render() {
+        if(!this.renderReady)
+            return;
         let x = 1-((PlayAnimationDark.duration - this.clock.getElapsedTime())/PlayAnimationDark.duration);
         if(x>1){
             this.destroy();

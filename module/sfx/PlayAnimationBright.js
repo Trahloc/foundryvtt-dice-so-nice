@@ -48,9 +48,12 @@ export class PlayAnimationBright extends DiceSFX {
             src: PlayAnimationBright.sound,
             volume: this.box.volume
 		}, false);
+        this.renderReady = true;
     }
 
     render() {
+        if(!this.renderReady)
+            return;
         let x = 1-((PlayAnimationBright.duration - this.clock.getElapsedTime())/PlayAnimationBright.duration);
         if(x>1){
             this.destroy();

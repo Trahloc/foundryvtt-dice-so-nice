@@ -59,9 +59,12 @@ export class PlayAnimationParticleSparkles extends DiceSFX {
             src: PlayAnimationParticleSparkles.sound,
             volume: this.box.volume
 		}, false);
+        this.renderReady = true;
     }
 
     render() {
+        if(!this.renderReady)
+            return;
         this.proton.update();
         if(this.proton.emitters.length == 0){
             this.destroy();
