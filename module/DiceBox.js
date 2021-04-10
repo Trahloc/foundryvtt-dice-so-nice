@@ -185,7 +185,7 @@ export class DiceBox {
 				if (this.dicefactory.bumpMapping) {
 					this.renderer.physicallyCorrectLights = true;
 					this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-					this.renderer.toneMappingExposure = 0.9;
+					this.renderer.toneMappingExposure = 1;
 					this.renderer.outputEncoding = THREE.sRGBEncoding;
 				}
 				await this.loadContextScopedTextures(this.config.boxType);
@@ -588,10 +588,10 @@ export class DiceBox {
 		dicemesh.body_sim.diceType = diceobj.type;
 		dicemesh.body_sim.diceMaterial = this.dicefactory.material_rand;
 
-		//dicemesh.meshCannon = this.body2mesh(dicemesh.body_sim,true);
+		/*dicemesh.meshCannon = this.body2mesh(dicemesh.body_sim,true);
 
-		/*var gltfExporter = new GLTFExporter();
-		gltfExporter.parse(dicemesh, function ( result ) {
+		var gltfExporter = new GLTFExporter();
+		gltfExporter.parse(dicemesh.meshCannon, function ( result ) {
 			if ( result instanceof ArrayBuffer ) {
 				saveArrayBuffer( result, 'scene.glb' );
 			} else {

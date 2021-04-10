@@ -21,12 +21,12 @@ export class PlayAnimationBright extends DiceSFX {
     /**@override play */
     async play() {
         if(!this.dicemesh.material.emissiveMap && !this.dicemesh.material.bumpMap)
-            return;
+            return false;
         this.clock = new THREE.Clock();
         this.baseColor = this.dicemesh.material.emissive.clone();
         this.baseMaterial = this.dicemesh.material;
         this.dicemesh.material = this.baseMaterial.clone();
-        if(!this.dicemesh.material.emissiveMap){
+        if(!this.dicemesh.material.emissiveMap || !this.dicemesh.material.bumpMap){
             //Change the emissive map shader to highlight black instead of white
             this.dicemesh.material.onBeforeCompile = (shader) => {
                 shader.fragmentShader = shader.fragmentShader.replace(
@@ -41,7 +41,8 @@ export class PlayAnimationBright extends DiceSFX {
                     ].join('\n')
                 );
             };
-            this.dicemesh.material.emissiveMap = this.dicemesh.material.bumpMap;
+            if(this.dicemesh.material.bumpMap)
+                this.dicemesh.material.emissiveMap = this.dicemesh.material.bumpMap;
             this.dicemesh.material.emissiveIntensity = 1.5;
         }
         AudioHelper.play({

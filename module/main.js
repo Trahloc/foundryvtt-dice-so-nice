@@ -190,7 +190,6 @@ Hooks.on('createChatMessage', (chatMessage) => {
             let mergingPool = new DicePool({rolls:inlineRollList}).evaluate();
             roll = Roll.create(mergingPool.formula).evaluate();
             roll.terms = [mergingPool]
-            //roll._dice = mergingPool.dice;
             roll.results = [mergingPool.total];
             roll._total = mergingPool.total;
             roll._rolled = true;
@@ -442,7 +441,7 @@ export class Dice3D {
 
     /**
      * Register a new dice preset
-     * Type should be a known dice type (d4,d6,d8,d10,d12,d20,d100)
+     * Type should be a known dice type (d4,d6,d8,d10,d12,d14,d16,d20,d24,d30,d100)
      * Labels contains either strings (unicode) or a path to a texture (png, gif, jpg, webp)
      * The texture file size should be 256*256
      * The system should be a system id already registered
