@@ -98,3 +98,21 @@
 .dice-so-nice .sfx-data select{
     width:100%;
 }
+
+.dice-so-nice .dice-more-theme {
+    border: 1px solid #585858;
+    background: #e6e6e6b8;
+    border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px 5px 5px 5px;
+    -moz-border-radius: 5px 5px 5px 5px;
+    text-align: center;
+    padding: 9px 0px;
+    font-size: 15px;
+    display:block;
+}
+
+.dice-so-nice .dice-more-theme:hover{
+    text-shadow: none;
+    color:#000;
+    background: #e8e8e8;
+}
