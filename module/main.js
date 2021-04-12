@@ -1111,8 +1111,9 @@ class DiceConfig extends FormApplication {
                 useHighDPI:$('input[name="useHighDPI"]').is(':checked')
             };
 		    this.box.dicefactory.disposeCachedMaterials("showcase");
-            this.box.update(config);
-            this.box.showcase(config);
+            this.box.update(config).then(()=>{
+                this.box.showcase(config);
+            });
         }, 100);
     }
 

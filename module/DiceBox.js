@@ -378,7 +378,7 @@ export class DiceBox {
 		this.renderer.render(this.scene, this.camera);
 	}
 
-	update(config) {
+	async update(config) {
 		if (config.autoscale) {
 			this.display.scale = Math.sqrt(this.display.containerWidth * this.display.containerWidth + this.display.containerHeight * this.display.containerHeight) / 13;
 		} else {
@@ -401,7 +401,7 @@ export class DiceBox {
 		this.volume = config.soundsVolume;
 		this.soundsSurface = config.soundsSurface;
 		if (config.system)
-			this.dicefactory.setSystem(config.system);
+			await this.dicefactory.setSystem(config.system);
 		this.applyColorsForRoll(config);
 		this.throwingForce = config.throwingForce;
 		this.scene.traverse(object => {

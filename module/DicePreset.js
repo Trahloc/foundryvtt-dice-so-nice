@@ -1,4 +1,4 @@
-import { GLTFLoader } from './libs/three-modules/GLTFLoader.js';
+
 export class DicePreset {
 
 	constructor(type, shape = '') {
@@ -114,18 +114,20 @@ export class DicePreset {
 		this.modelLoaded = false;
 	}
 
-	loadModel() {
-		var loader = new GLTFLoader();
+	loadModel(loader) {
 		this.modelLoading = true;
 		// Load a glTF resource
-		loader.load(this.modelFile, gltf => {
-			gltf.scene.traverse(function (node) {
-				if (node.isMesh) {
-					node.castShadow = true; 
-				}
+		return new Promise((resolve,reject)=> {
+			loader.load(this.modelFile, gltf => {
+				gltf.scene.traverse(function (node) {
+					if (node.isMesh) {
+						node.castShadow = true; 
+					}
+				});
+				this.model = gltf;
+				this.modelLoaded = true;
+				resolve(gltf);
 			});
-			this.model = gltf;
-			this.modelLoaded = true;
 		});
 	}
 }
