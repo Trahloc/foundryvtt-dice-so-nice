@@ -876,14 +876,13 @@ export class DiceBox {
 			} 
 			this.callback = null;
 			this.throws = null;
-			if (!this.animatedDiceDetected && !this.allowInteractivity && !DiceSFXManager.renderQueue.length)
+			if (!this.animatedDiceDetected && !(this.allowInteractivity && (this.deadDiceList.length + this.diceList.length)>0) && !DiceSFXManager.renderQueue.length)
 				canvas.app.ticker.remove(this.animateThrow, this);;
 		}
 	}
 
 	start_throw(throws, callback) {
 		if (this.rolling) return;
-		this.isVisible = true;
 		let countNewDice = 0;
 		throws.forEach(notation => {
 			let vector = { x: (Math.random() * 2 - 0.5) * this.display.currentWidth, y: -(Math.random() * 2 - 0.5) * this.display.currentHeight };
@@ -907,7 +906,7 @@ export class DiceBox {
 		if (this.deadDiceList.length + this.diceList.length + countNewDice > maxDiceNumber) {
 			this.clearAll();
 		}
-
+		this.isVisible = true;
 		this.rollDice(throws, callback);
 	}
 
