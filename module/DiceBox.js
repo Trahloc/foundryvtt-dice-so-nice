@@ -339,7 +339,7 @@ export class DiceBox {
 
 		let intensity;
 		if (this.dicefactory.bumpMapping) { //advanced lighting
-			intensity = 0.6;
+			intensity = 1.5;
 		} else {
 			intensity = 0.7;
 			this.light_amb = new THREE.HemisphereLight(this.colors.ambient, this.colors.ground, 1);

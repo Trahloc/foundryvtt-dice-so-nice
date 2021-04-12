@@ -26,7 +26,7 @@ export class PlayAnimationBright extends DiceSFX {
         this.baseColor = this.dicemesh.material.emissive.clone();
         this.baseMaterial = this.dicemesh.material;
         this.dicemesh.material = this.baseMaterial.clone();
-        if(!this.dicemesh.material.emissiveMap || !this.dicemesh.material.bumpMap){
+        if(!this.dicemesh.material.emissiveMap && this.dicemesh.material.bumpMap){
             //Change the emissive map shader to highlight black instead of white
             this.dicemesh.material.onBeforeCompile = (shader) => {
                 shader.fragmentShader = shader.fragmentShader.replace(
