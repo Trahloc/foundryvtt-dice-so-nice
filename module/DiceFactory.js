@@ -948,7 +948,7 @@ export class DiceFactory {
 				context.rotate(Math.PI * 2 / 3);
 				context.translate(-hw-x, -hh-y);
 
-				contextBump.translate(hw+x, hh+x);
+				contextBump.translate(hw+x, hh+y);
 				contextBump.rotate(Math.PI * 2 / 3);
 				contextBump.translate(-hw-x, -hh-y);
 			}
