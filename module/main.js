@@ -238,6 +238,24 @@ Hooks.on("renderChatMessage", (message, html, data) => {
     }
 });
 
+document.addEventListener("visibilitychange", function() {
+    //if there was roll while the tab was hidden
+    if(!document.hidden && game.dice3d && game.dice3d.hiddenAnimationQueue && game.dice3d.hiddenAnimationQueue.length){
+        let now = (new Date()).getTime();
+        for(let i=0;i<game.dice3d.hiddenAnimationQueue.length;i++){
+            let anim = game.dice3d.hiddenAnimationQueue[i];
+            if(now - anim.timestamp > 10000){
+                anim.resolve(false);
+            } else {
+                game.dice3d._showAnimation(anim.data, anim.config).then(displayed => {
+                    anim.resolve(displayed);
+                });
+            }
+        }
+        game.dice3d.hiddenAnimationQueue = [];
+    }
+});
+
 /**
  * Generic utilities class...
  */
@@ -519,7 +537,8 @@ export class Dice3D {
         game.dice3dRenderers = {
             "board":null,
             "showcase":null
-        }
+        };
+        this.hiddenAnimationQueue = [];
         this._buildCanvas();
         this._initListeners();
         this._buildDiceBox();
@@ -784,9 +803,18 @@ export class Dice3D {
                 }
 
                 if (!blind) {
-                    this._showAnimation(data, Dice3D.ALL_CUSTOMIZATION(user)).then(displayed => {
-                        resolve(displayed);
-                    });
+                    if(document.hidden){
+                        this.hiddenAnimationQueue.push({
+                            data:data,
+                            config:Dice3D.ALL_CUSTOMIZATION(user),
+                            timestamp:(new Date()).getTime(),
+                            resolve:resolve
+                        });
+                    } else {
+                        this._showAnimation(data, Dice3D.ALL_CUSTOMIZATION(user)).then(displayed => {
+                            resolve(displayed);
+                        });
+                    }
                 } else {
                     resolve(false);
                 }
