@@ -633,6 +633,9 @@ export class Dice3D {
                 case "update":
                     if(request.user == game.user.id || Dice3D.CONFIG.showOthersSFX)
                         DiceSFXManager.init();
+                    if(request.user != game.user.id){
+                        this.DiceFactory.preloadModels(request.user);
+                    }
                     break;
             }
         });
@@ -1211,9 +1214,10 @@ class DiceConfig extends FormApplication {
 
         await game.settings.set('dice-so-nice', 'settings', settings);
         await game.user.setFlag("dice-so-nice", "appearance", appearance);
+
         //required
         await game.user.unsetFlag("dice-so-nice", "sfxList");
-        
+
         await game.user.setFlag("dice-so-nice", "sfxList", sfxLine);
         game.socket.emit("module.dice-so-nice", { type: "update", user: game.user.id});
         DiceSFXManager.init();

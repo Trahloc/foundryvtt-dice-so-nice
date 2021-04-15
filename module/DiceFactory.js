@@ -363,8 +363,31 @@ export class DiceFactory {
 		if(diceobj.system == "standard")
 			this.dice[diceobj.type] = diceobj;
 		this.systems[diceobj.system].dice.push(diceobj);
-		if(diceobj.system == this.systemActivated && diceobj.modelFile && !diceobj.modelLoading)
+
+		let activatedSystems = [];
+        game.users.forEach((user) => {
+			let userSystem = null;
+			if(user.getFlag("dice-so-nice", "appearance"))
+            	userSystem = user.getFlag("dice-so-nice", "appearance").system;
+            if(userSystem)
+				activatedSystems.push(userSystem);
+        });
+        //remove duplicate
+        activatedSystems = activatedSystems.filter((v, i, a) => a.indexOf(v) === i);
+
+		if((diceobj.system == this.systemActivated || activatedSystems.includes(diceobj.system)) && diceobj.modelFile && !diceobj.modelLoading){
 			diceobj.loadModel(this.loaderGLTF);
+		}
+		
+	}
+
+	preloadModels(userID){
+		let systemId = game.users.get(userID).getFlag("dice-so-nice","appearance").system;
+		let dices = this.systems[systemId].dice;
+		for(let i=0;i<dices.length;i++){
+			if(dices[i].modelFile && !dices[i].modelLoading)
+				dices[i].loadModel(this.loaderGLTF);
+		}
 	}
 
 	//{id: 'standard', name: game.i18n.localize("DICESONICE.System.Standard")}
