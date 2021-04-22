@@ -42,9 +42,11 @@ export class DiceNotation {
 				for(let i =0; i< die.results.length; i++){
 					if(++diceNumber >= maxDiceNumber)
 						return true;
-					this.addDie(die, i);
-					if(die.faces == 100){
-						this.addDie(die, i, true);
+					if(!die.results[i].hidden){
+						this.addDie(die, i);
+						if(die.faces == 100){
+							this.addDie(die, i, true);
+						}
 					}
 				}
 			}
