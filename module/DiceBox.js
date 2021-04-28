@@ -326,8 +326,8 @@ export class DiceBox {
 			case 'selector':
 				this.camera.position.z = this.selector.dice.length > 9 ? this.cameraHeight.far : (this.selector.dice.length < 6 ? this.cameraHeight.close : this.cameraHeight.medium);
 				break;
-			case 'throw': case 'afterthrow': default: this.camera.position.z = this.cameraHeight.far;
-
+			default:
+				this.camera.position.z = this.cameraHeight.far;
 		}
 		this.camera.near = 10;
 		this.camera.lookAt(new THREE.Vector3(0, 0, 0));
@@ -339,7 +339,7 @@ export class DiceBox {
 
 		let intensity;
 		if (this.dicefactory.bumpMapping) { //advanced lighting
-			intensity = 1.5;
+			intensity = 1.2;
 		} else {
 			intensity = 0.7;
 			this.light_amb = new THREE.HemisphereLight(this.colors.ambient, this.colors.ground, 1);
