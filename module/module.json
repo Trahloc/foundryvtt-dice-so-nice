@@ -75,6 +75,10 @@
 		"lang": "de",
 		"name": "Deutsch",
 		"path": "./lang/de.json"
+	}, {
+		"lang": "cs",
+		"name": "Česky",
+		"path": "./lang/cs.json"
 	}],
 	"media":[
 		{
