@@ -184,5 +184,7 @@
     "DICESONICE.WelcomeMessage1" : "Sembra che tu stia usando i dadi 3D per la prima volta in questo mondo.",
     "DICESONICE.WelcomeMessage2" : "Puoi configurare (o disabilitare) i tuoi dadi 3D facendo clic su questo pulsante:",
     "DICESONICE.WelcomeMessage3" : "Puoi sempre modificare queste impostazioni in un secondo momento in 'Impostazioni > Impostazioni modulo > Dice So Nice!'",
-    "DICESONICE.WelcomeMessage4" : "Non vedrai più questo messaggio. Buon divertimento!"
+    "DICESONICE.WelcomeMessage4" : "Non vedrai più questo messaggio. Buon divertimento!",
+
+    "DICESONICE.FindMoreTheme" : "Scopri altri temi e modelli 3D"
 }
