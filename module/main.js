@@ -190,7 +190,6 @@ Hooks.on('createChatMessage', (chatMessage) => {
             let mergingPool = new DicePool({rolls:inlineRollList}).evaluate();
             roll = Roll.create(mergingPool.formula).evaluate();
             roll.terms = [mergingPool]
-            //roll._dice = mergingPool.dice;
             roll.results = [mergingPool.total];
             roll._total = mergingPool.total;
             roll._rolled = true;
@@ -236,6 +235,24 @@ Hooks.on("renderChatMessage", (message, html, data) => {
     }
     if (message._dice3danimating) {
         html.hide();
+    }
+});
+
+document.addEventListener("visibilitychange", function() {
+    //if there was roll while the tab was hidden
+    if(!document.hidden && game.dice3d && game.dice3d.hiddenAnimationQueue && game.dice3d.hiddenAnimationQueue.length){
+        let now = (new Date()).getTime();
+        for(let i=0;i<game.dice3d.hiddenAnimationQueue.length;i++){
+            let anim = game.dice3d.hiddenAnimationQueue[i];
+            if(now - anim.timestamp > 10000){
+                anim.resolve(false);
+            } else {
+                game.dice3d._showAnimation(anim.data, anim.config).then(displayed => {
+                    anim.resolve(displayed);
+                });
+            }
+        }
+        game.dice3d.hiddenAnimationQueue = [];
     }
 });
 
@@ -442,7 +459,7 @@ export class Dice3D {
 
     /**
      * Register a new dice preset
-     * Type should be a known dice type (d4,d6,d8,d10,d12,d20,d100)
+     * Type should be a known dice type (d4,d6,d8,d10,d12,d14,d16,d20,d24,d30,d100)
      * Labels contains either strings (unicode) or a path to a texture (png, gif, jpg, webp)
      * The texture file size should be 256*256
      * The system should be a system id already registered
@@ -520,7 +537,8 @@ export class Dice3D {
         game.dice3dRenderers = {
             "board":null,
             "showcase":null
-        }
+        };
+        this.hiddenAnimationQueue = [];
         this._buildCanvas();
         this._initListeners();
         this._buildDiceBox();
@@ -615,6 +633,9 @@ export class Dice3D {
                 case "update":
                     if(request.user == game.user.id || Dice3D.CONFIG.showOthersSFX)
                         DiceSFXManager.init();
+                    if(request.user != game.user.id){
+                        this.DiceFactory.preloadModels(request.user);
+                    }
                     break;
             }
         });
@@ -785,9 +806,18 @@ export class Dice3D {
                 }
 
                 if (!blind) {
-                    this._showAnimation(data, Dice3D.ALL_CUSTOMIZATION(user)).then(displayed => {
-                        resolve(displayed);
-                    });
+                    if(document.hidden){
+                        this.hiddenAnimationQueue.push({
+                            data:data,
+                            config:Dice3D.ALL_CUSTOMIZATION(user),
+                            timestamp:(new Date()).getTime(),
+                            resolve:resolve
+                        });
+                    } else {
+                        this._showAnimation(data, Dice3D.ALL_CUSTOMIZATION(user)).then(displayed => {
+                            resolve(displayed);
+                        });
+                    }
                 } else {
                     resolve(false);
                 }
@@ -1112,8 +1142,9 @@ class DiceConfig extends FormApplication {
                 useHighDPI:$('input[name="useHighDPI"]').is(':checked')
             };
 		    this.box.dicefactory.disposeCachedMaterials("showcase");
-            this.box.update(config);
-            this.box.showcase(config);
+            this.box.update(config).then(()=>{
+                this.box.showcase(config);
+            });
         }, 100);
     }
 
@@ -1183,9 +1214,10 @@ class DiceConfig extends FormApplication {
 
         await game.settings.set('dice-so-nice', 'settings', settings);
         await game.user.setFlag("dice-so-nice", "appearance", appearance);
+
         //required
         await game.user.unsetFlag("dice-so-nice", "sfxList");
-        
+
         await game.user.setFlag("dice-so-nice", "sfxList", sfxLine);
         game.socket.emit("module.dice-so-nice", { type: "update", user: game.user.id});
         DiceSFXManager.init();

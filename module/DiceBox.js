@@ -185,7 +185,7 @@ export class DiceBox {
 				if (this.dicefactory.bumpMapping) {
 					this.renderer.physicallyCorrectLights = true;
 					this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-					this.renderer.toneMappingExposure = 0.9;
+					this.renderer.toneMappingExposure = 1;
 					this.renderer.outputEncoding = THREE.sRGBEncoding;
 				}
 				await this.loadContextScopedTextures(this.config.boxType);
@@ -326,8 +326,8 @@ export class DiceBox {
 			case 'selector':
 				this.camera.position.z = this.selector.dice.length > 9 ? this.cameraHeight.far : (this.selector.dice.length < 6 ? this.cameraHeight.close : this.cameraHeight.medium);
 				break;
-			case 'throw': case 'afterthrow': default: this.camera.position.z = this.cameraHeight.far;
-
+			default:
+				this.camera.position.z = this.cameraHeight.far;
 		}
 		this.camera.near = 10;
 		this.camera.lookAt(new THREE.Vector3(0, 0, 0));
@@ -339,7 +339,7 @@ export class DiceBox {
 
 		let intensity;
 		if (this.dicefactory.bumpMapping) { //advanced lighting
-			intensity = 0.6;
+			intensity = 1.2;
 		} else {
 			intensity = 0.7;
 			this.light_amb = new THREE.HemisphereLight(this.colors.ambient, this.colors.ground, 1);
@@ -378,7 +378,7 @@ export class DiceBox {
 		this.renderer.render(this.scene, this.camera);
 	}
 
-	update(config) {
+	async update(config) {
 		if (config.autoscale) {
 			this.display.scale = Math.sqrt(this.display.containerWidth * this.display.containerWidth + this.display.containerHeight * this.display.containerHeight) / 13;
 		} else {
@@ -401,7 +401,7 @@ export class DiceBox {
 		this.volume = config.soundsVolume;
 		this.soundsSurface = config.soundsSurface;
 		if (config.system)
-			this.dicefactory.setSystem(config.system);
+			await this.dicefactory.setSystem(config.system);
 		this.applyColorsForRoll(config);
 		this.throwingForce = config.throwingForce;
 		this.scene.traverse(object => {
@@ -588,10 +588,10 @@ export class DiceBox {
 		dicemesh.body_sim.diceType = diceobj.type;
 		dicemesh.body_sim.diceMaterial = this.dicefactory.material_rand;
 
-		//dicemesh.meshCannon = this.body2mesh(dicemesh.body_sim,true);
+		/*dicemesh.meshCannon = this.body2mesh(dicemesh.body_sim,true);
 
-		/*var gltfExporter = new GLTFExporter();
-		gltfExporter.parse(dicemesh, function ( result ) {
+		var gltfExporter = new GLTFExporter();
+		gltfExporter.parse(dicemesh.meshCannon, function ( result ) {
 			if ( result instanceof ArrayBuffer ) {
 				saveArrayBuffer( result, 'scene.glb' );
 			} else {
@@ -876,14 +876,13 @@ export class DiceBox {
 			} 
 			this.callback = null;
 			this.throws = null;
-			if (!this.animatedDiceDetected && !this.allowInteractivity && !DiceSFXManager.renderQueue.length)
+			if (!this.animatedDiceDetected && !(this.allowInteractivity && (this.deadDiceList.length + this.diceList.length)>0) && !DiceSFXManager.renderQueue.length)
 				canvas.app.ticker.remove(this.animateThrow, this);;
 		}
 	}
 
 	start_throw(throws, callback) {
 		if (this.rolling) return;
-		this.isVisible = true;
 		let countNewDice = 0;
 		throws.forEach(notation => {
 			let vector = { x: (Math.random() * 2 - 0.5) * this.display.currentWidth, y: -(Math.random() * 2 - 0.5) * this.display.currentHeight };
@@ -907,7 +906,7 @@ export class DiceBox {
 		if (this.deadDiceList.length + this.diceList.length + countNewDice > maxDiceNumber) {
 			this.clearAll();
 		}
-
+		this.isVisible = true;
 		this.rollDice(throws, callback);
 	}
 
