@@ -153,8 +153,10 @@ export class DiceBox {
 		return new Promise(async resolve => {
 			game.audio.pending.push(this.preloadSounds.bind(this));
 
-			if (this.config.system != "standard")
+			if (this.config.system != "standard"){
 				this.dicefactory.setSystem(this.config.system);
+				await this.dicefactory.preloadModels(this.config.system);
+			}
 
 			this.sounds = this.config.sounds == '1';
 			this.volume = this.config.soundsVolume;
@@ -400,8 +402,10 @@ export class DiceBox {
 		this.sounds = config.sounds;
 		this.volume = config.soundsVolume;
 		this.soundsSurface = config.soundsSurface;
-		if (config.system)
-			await this.dicefactory.setSystem(config.system);
+		if (config.system){
+			this.dicefactory.setSystem(config.system);
+			await this.dicefactory.preloadModels(config.system);
+		}
 		this.applyColorsForRoll(config);
 		this.throwingForce = config.throwingForce;
 		this.scene.traverse(object => {

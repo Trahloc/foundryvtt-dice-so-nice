@@ -634,7 +634,7 @@ export class Dice3D {
                     if(request.user == game.user.id || Dice3D.CONFIG.showOthersSFX)
                         DiceSFXManager.init();
                     if(request.user != game.user.id){
-                        this.DiceFactory.preloadModels(request.user);
+                        this.DiceFactory.preloadUserModels(request.user);
                     }
                     break;
             }
