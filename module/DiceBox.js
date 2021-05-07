@@ -870,18 +870,17 @@ export class DiceBox {
 		// roll finished
 		if (this.throwFinished("render")) {
 			//if animated dice still on the table, keep animating
-
-			this.running = false;
 			this.rolling = false;
-
-			if (this.callback){
-				this.handleSpecialEffectsInit();
-				this.callback(this.throws);
-			} 
-			this.callback = null;
-			this.throws = null;
-			if (!this.animatedDiceDetected && !(this.allowInteractivity && (this.deadDiceList.length + this.diceList.length)>0) && !DiceSFXManager.renderQueue.length)
-				canvas.app.ticker.remove(this.animateThrow, this);
+			if(this.running){
+				this.handleSpecialEffectsInit().then(()=>{
+					this.callback(this.throws);
+					this.callback = null;
+					this.throws = null;
+					if (!this.animatedDiceDetected && !(this.allowInteractivity && (this.deadDiceList.length + this.diceList.length)>0) && !DiceSFXManager.renderQueue.length)
+						canvas.app.ticker.remove(this.animateThrow, this);
+				});
+			}
+			this.running = false;
 		}
 	}
 
@@ -1331,13 +1330,15 @@ export class DiceBox {
 		return false;
 	}
 
-	handleSpecialEffectsInit(){
+	async handleSpecialEffectsInit(){
+		let promisesSFX = [];
 		this.diceList.forEach(dice =>{
 			if(dice.specialEffects){
 				dice.specialEffects.forEach(sfx => {
-					DiceSFXManager.playSFX(sfx.specialEffect, this, dice);
+					promisesSFX.push(DiceSFXManager.playSFX(sfx.specialEffect, this, dice));
 				});
 			}
 		});
+		return Promise.all(promisesSFX);
 	}
 }
