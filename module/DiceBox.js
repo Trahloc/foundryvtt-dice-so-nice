@@ -881,7 +881,7 @@ export class DiceBox {
 			this.callback = null;
 			this.throws = null;
 			if (!this.animatedDiceDetected && !(this.allowInteractivity && (this.deadDiceList.length + this.diceList.length)>0) && !DiceSFXManager.renderQueue.length)
-				canvas.app.ticker.remove(this.animateThrow, this);;
+				canvas.app.ticker.remove(this.animateThrow, this);
 		}
 	}
 
@@ -961,8 +961,9 @@ export class DiceBox {
 
 		if (this.pane) this.scene.remove(this.pane);
 		
-		if(this.config.boxType == "board")
+		if(this.config.boxType == "board"){
 			DiceSFXManager.clearQueue();
+		}
 		this.renderer.render(this.scene, this.camera);
 		this.isVisible = false;
 	}

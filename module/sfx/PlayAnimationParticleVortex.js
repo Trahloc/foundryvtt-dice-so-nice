@@ -92,11 +92,11 @@ export class PlayAnimationParticleVortex extends DiceSFX {
     }
 
     destroy(){
-        if(this.emitter && !this.emitter.dead){
+        if(this.emitter){
+            this.emitter.stopEmit();
             this.emitter.removeAllParticles();
-            this.proton.update();
-            this.emitter.destroy();
         }
+        this.proton.update();
         this.proton.destroy();
         this.destroyed = true;
     }
