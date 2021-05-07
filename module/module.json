@@ -115,5 +115,6 @@
 	"manifest": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/raw/master/module/module.json",
 	"download": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/jobs/artifacts/3.3.4/raw/dice-so-nice.zip?job=build",
 	"bugs": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/issues",
+	"allowBugReporter": true,
 	"readme": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/blob/master/README.md"
 }
