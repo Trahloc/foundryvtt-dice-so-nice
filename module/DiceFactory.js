@@ -381,7 +381,7 @@ export class DiceFactory {
 		
 	}
 
-	preloadModels(userID){
+	preloadUserModels(userID){
 		let systemId = game.users.get(userID).getFlag("dice-so-nice","appearance").system;
 		let dices = this.systems[systemId].dice;
 		for(let i=0;i<dices.length;i++){
@@ -471,7 +471,7 @@ export class DiceFactory {
 		this.register(preset);
 	}
 
-	async setSystem(systemId, force=false){
+	setSystem(systemId, force=false){
 		if(this.systemForced && systemId != this.systemActivated)
 			return;
 		//first we reset to standard
@@ -481,20 +481,29 @@ export class DiceFactory {
 		//Then we apply override
 		if(systemId!= "standard" && this.systems.hasOwnProperty(systemId))
 		{
-			let modelsPromise = [];
 			dices = this.systems[systemId].dice;
 			for(let i=0;i<dices.length;i++){
 				this.dice[dices[i].type] = dices[i];
-				if(this.dice[dices[i].type].modelFile && !this.dice[dices[i].type].modelLoading)
-					modelsPromise.push(this.dice[dices[i].type].loadModel(this.loaderGLTF));
 			}
-			await Promise.all(modelsPromise);
 		}
 		if(force)
 			this.systemForced = true;
 		this.systemActivated = systemId;
 		if(systemId != this.systemActivated)
 			this.disposeCachedMaterials();
+	}
+
+	async preloadModels(systemId){
+		if(systemId!= "standard" && this.systems.hasOwnProperty(systemId))
+		{
+			let modelsPromise = [];
+			let dices = this.systems[systemId].dice;
+			for(let i=0;i<dices.length;i++){
+				if(this.dice[dices[i].type].modelFile && !this.dice[dices[i].type].modelLoading)
+					modelsPromise.push(this.dice[dices[i].type].loadModel(this.loaderGLTF));
+			}
+			await Promise.all(modelsPromise);
+		}
 	}
 
 	disposeCachedMaterials(type = null){

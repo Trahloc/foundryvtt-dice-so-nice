@@ -93,18 +93,16 @@ export class PlayAnimationParticleSpiral extends DiceSFX {
     }
 
     destroy(){
-        if(this.emitter1 && !this.emitter1.dead)    
+        if(this.emitter1){
+            this.emitter1.stopEmit();
             this.emitter1.removeAllParticles();
-        if(this.emitter2 && !this.emitter2.dead)   
+        } 
+            
+        if(this.emitter2){
+            this.emitter2.stopEmit();
             this.emitter2.removeAllParticles();
-
+        }
         this.proton.update();
-
-        if(this.emitter1 && !this.emitter1.dead)  
-            this.emitter1.destroy();
-        if(this.emitter2 && !this.emitter2.dead)  
-            this.emitter2.destroy();
-
         this.proton.destroy();
         this.destroyed = true;
     }

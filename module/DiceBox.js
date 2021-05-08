@@ -153,8 +153,10 @@ export class DiceBox {
 		return new Promise(async resolve => {
 			game.audio.pending.push(this.preloadSounds.bind(this));
 
-			if (this.config.system != "standard")
+			if (this.config.system != "standard"){
 				this.dicefactory.setSystem(this.config.system);
+				await this.dicefactory.preloadModels(this.config.system);
+			}
 
 			this.sounds = this.config.sounds == '1';
 			this.volume = this.config.soundsVolume;
@@ -400,8 +402,10 @@ export class DiceBox {
 		this.sounds = config.sounds;
 		this.volume = config.soundsVolume;
 		this.soundsSurface = config.soundsSurface;
-		if (config.system)
-			await this.dicefactory.setSystem(config.system);
+		if (config.system){
+			this.dicefactory.setSystem(config.system);
+			await this.dicefactory.preloadModels(config.system);
+		}
 		this.applyColorsForRoll(config);
 		this.throwingForce = config.throwingForce;
 		this.scene.traverse(object => {
@@ -866,18 +870,17 @@ export class DiceBox {
 		// roll finished
 		if (this.throwFinished("render")) {
 			//if animated dice still on the table, keep animating
-
-			this.running = false;
 			this.rolling = false;
-
-			if (this.callback){
-				this.handleSpecialEffectsInit();
-				this.callback(this.throws);
-			} 
-			this.callback = null;
-			this.throws = null;
-			if (!this.animatedDiceDetected && !(this.allowInteractivity && (this.deadDiceList.length + this.diceList.length)>0) && !DiceSFXManager.renderQueue.length)
-				canvas.app.ticker.remove(this.animateThrow, this);;
+			if(this.running){
+				this.handleSpecialEffectsInit().then(()=>{
+					this.callback(this.throws);
+					this.callback = null;
+					this.throws = null;
+					if (!this.animatedDiceDetected && !(this.allowInteractivity && (this.deadDiceList.length + this.diceList.length)>0) && !DiceSFXManager.renderQueue.length)
+						canvas.app.ticker.remove(this.animateThrow, this);
+				});
+			}
+			this.running = false;
 		}
 	}
 
@@ -957,8 +960,9 @@ export class DiceBox {
 
 		if (this.pane) this.scene.remove(this.pane);
 		
-		if(this.config.boxType == "board")
+		if(this.config.boxType == "board"){
 			DiceSFXManager.clearQueue();
+		}
 		this.renderer.render(this.scene, this.camera);
 		this.isVisible = false;
 	}
@@ -1326,13 +1330,15 @@ export class DiceBox {
 		return false;
 	}
 
-	handleSpecialEffectsInit(){
+	async handleSpecialEffectsInit(){
+		let promisesSFX = [];
 		this.diceList.forEach(dice =>{
 			if(dice.specialEffects){
 				dice.specialEffects.forEach(sfx => {
-					DiceSFXManager.playSFX(sfx.specialEffect, this, dice);
+					promisesSFX.push(DiceSFXManager.playSFX(sfx.specialEffect, this, dice));
 				});
 			}
 		});
+		return Promise.all(promisesSFX);
 	}
 }
