@@ -184,5 +184,7 @@
     "DICESONICE.WelcomeMessage1" : "このワールドで3Dダイスが初めて有効になりました！",
     "DICESONICE.WelcomeMessage2" : "下のボタンをクリックして、どんなダイスにするかを設定しましょう（あるいは無効にもできます）。",
     "DICESONICE.WelcomeMessage3" : "あとでダイスを設定したいときは「設定→モジュール設定→Dice So Nice!」から変更できます。",
-    "DICESONICE.WelcomeMessage4" : "以後、このメッセージが表示されることはありません。それでは良いロールを！"
+    "DICESONICE.WelcomeMessage4" : "以後、このメッセージが表示されることはありません。それでは良いロールを！",
+
+    "DICESONICE.FindMoreTheme" : "より多くのテーマや3Dモデルをお探しですか？"
 }
