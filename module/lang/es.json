@@ -187,5 +187,7 @@
     "DICESONICE.WelcomeMessage1" : "Parece que es la primera vez que usas dados 3D en este mundo.",
     "DICESONICE.WelcomeMessage2" : "Puedes personalizar (o deshabilitar) los dados 3D haciendo clic en el siguiente botón:",
     "DICESONICE.WelcomeMessage3" : "Siempre puedes cambiar estos ajustes más tarde en 'Configurar Ajustes > Ajustes de Módulos > Dice So Nice!'",
-    "DICESONICE.WelcomeMessage4" : "No volverás a ver este mensaje. ¡Que rueden los dados!"
+    "DICESONICE.WelcomeMessage4" : "No volverás a ver este mensaje. ¡Que rueden los dados!",
+
+    "DICESONICE.FindMoreTheme" : "Aquí podrá encontrar temas nuevos y modelos 3D"
 }
