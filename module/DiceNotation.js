@@ -59,18 +59,20 @@ export class DiceNotation {
 			//For d100, we create two d10 dice
 			if(isd10of100) {
 				dieValue = dieValue%10;
-				dsnDie.resultLabel = fvttDie.constructor.getResultLabel(dieValue).toString();
+				
+				dsnDie.resultLabel = fvttDie.getResultLabel({result:dieValue});
 			}
 			else {
 				dieValue = parseInt(dieValue/10);
-				dsnDie.resultLabel = fvttDie.constructor.getResultLabel(dieValue*10).toString();
+				dsnDie.resultLabel = fvttDie.getResultLabel({result:dieValue*10});
 				//On a d100, 0 is 10, because.
 				if(dieValue==10)
 					dieValue=0;
 			}
 			dsnDie.d100Result = fvttDie.results[index].result;
 		} else
-			dsnDie.resultLabel = fvttDie.constructor.getResultLabel(dieValue).toString();
+			
+			dsnDie.resultLabel = fvttDie.getResultLabel({result:dieValue});
 		dsnDie.result = dieValue;
 		if(fvttDie.results[index].discarded)
 			dsnDie.discarded = true;

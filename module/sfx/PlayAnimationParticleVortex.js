@@ -21,10 +21,7 @@ export class PlayAnimationParticleVortex extends DiceSFX {
         PlayAnimationParticleVortex.sprite = new THREE.Mesh(geometry,material);
         
         game.audio.pending.push(function(){
-            AudioHelper.play({
-                src: PlayAnimationParticleVortex.sound,
-                autoplay: false
-            }, false);
+            AudioHelper.play(PlayAnimationParticleVortex.sound);
         }.bind(this));
     }
 

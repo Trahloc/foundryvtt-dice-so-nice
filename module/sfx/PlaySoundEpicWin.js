@@ -7,10 +7,7 @@ export class PlaySoundEpicWin extends DiceSFX {
     /**@override init */
     static async init(){
         game.audio.pending.push(function(){
-            AudioHelper.play({
-                src: PlaySoundEpicWin.path,
-                autoplay: false
-            }, false);
+            AudioHelper.preloadSound(PlaySoundEpicWin.path);
         }.bind(this));
         return true;
     }

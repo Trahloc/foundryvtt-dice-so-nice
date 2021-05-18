@@ -113,10 +113,7 @@ export class DiceBox {
 			this.sounds_table[surface] = [];
 			for (let s = 1; s <= numsounds; ++s) {
 				let path = `modules/dice-so-nice/sounds/${surface}/surface_${surface}${s}.wav`;
-				AudioHelper.play({
-					src: path,
-					autoplay: false
-				}, false);
+				AudioHelper.preloadSound(path);
 				this.sounds_table[surface].push(path);
 			}
 		}
@@ -131,20 +128,14 @@ export class DiceBox {
 			this.sounds_dice[material] = [];
 			for (let s = 1; s <= numsounds; ++s) {
 				let path = `modules/dice-so-nice/sounds/dicehit/dicehit${s}_${material}.wav`;
-				AudioHelper.play({
-					src: path,
-					autoplay: false
-				}, false);
+				AudioHelper.preloadSound(path);
 				this.sounds_dice[material].push(path);
 			}
 		}
 
 		for (let i = 1; i <= 6; ++i) {
 			let path = `modules/dice-so-nice/sounds/dicehit/coinhit${i}.wav`;
-			AudioHelper.play({
-				src: path,
-				autoplay: false
-			}, false);
+			AudioHelper.preloadSound(path);
 			this.sounds_coins.push(path);
 		}
 	}

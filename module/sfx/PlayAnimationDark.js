@@ -11,10 +11,7 @@ export class PlayAnimationDark extends DiceSFX {
     static async init() {
         PlayAnimationDark.darkColor = new THREE.Color(0.1,0.1,0.1);
         game.audio.pending.push(function(){
-            AudioHelper.play({
-                src: PlayAnimationDark.sound,
-                autoplay: false
-            }, false);
+            AudioHelper.preloadSound(PlayAnimationDark.sound);
         }.bind(this));
     }
 

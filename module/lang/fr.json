@@ -168,6 +168,7 @@
     "DICESONICE.System.FoundryVTT" : "Foundry VTT",
     "DICESONICE.System.Dot" : "Points (Blanc)",
     "DICESONICE.System.DotBlack" : "Points (Noir)",
+    "DICESONICE.System.SpectrumDice" : "Spectral",
 
     "DICESONICE.SurfaceFelt" : "Feutre",
     "DICESONICE.SurfaceWoodTable" : "Table en bois",

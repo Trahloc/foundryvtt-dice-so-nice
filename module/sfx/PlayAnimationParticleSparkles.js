@@ -19,10 +19,7 @@ export class PlayAnimationParticleSparkles extends DiceSFX {
         });
         PlayAnimationParticleSparkles.sprite = new THREE.Sprite(material);
         game.audio.pending.push(function(){
-            AudioHelper.play({
-                src: PlayAnimationParticleSparkles.sound,
-                autoplay: false
-            }, false);
+            AudioHelper.preloadSound(PlayAnimationParticleSparkles.sound);
         }.bind(this));
     }
 
