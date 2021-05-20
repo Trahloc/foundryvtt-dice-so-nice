@@ -11,10 +11,7 @@ export class PlayAnimationBright extends DiceSFX {
     static async init() {
         PlayAnimationBright.brightColor = new THREE.Color(0.4,0.4,0.4);
         game.audio.pending.push(function(){
-            AudioHelper.play({
-                src: PlayAnimationBright.sound,
-                autoplay: false
-            }, false);
+            AudioHelper.preloadSound(PlayAnimationBright.sound);
         }.bind(this));
     }
 
