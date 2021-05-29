@@ -116,3 +116,19 @@
     color:#000;
     background: #e8e8e8;
 }
+
+.dice-so-nice .dsn-appearance-tabs span {
+    border-left: 1px;
+    border-top: 1px;
+    border-right: 1px;
+    border-style: solid;
+    border-bottom: 0px;
+    display: inline-block;
+    padding: 3px;
+    margin: 5px 2px;
+    font-weight: bold;
+}
+
+.dice-so-nice .dsn-appearance-tabs {
+    height: 30px;
+}

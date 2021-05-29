@@ -9,7 +9,6 @@ export class DicePreset {
 		this.name = '';
 		this.shape = shape || type;
 		this.scale = 1;
-		this.color = '';
 		this.labels = [];
 		this.valueMap = null;
 		this.values = [];
@@ -18,10 +17,20 @@ export class DicePreset {
 		this.inertia = 13;
 		this.geometry = null;
 		this.model = null;
-		this.display = 'values';
 		this.system = 'standard';
 		this.modelLoaded = false;
 		this.modelFile = null;
+		this.appearanceGlobal = true;
+		this.appearance = {
+			labelColor: "#FFFFFF",
+			diceColor: "#000000",
+			outlineColor: "#000000",
+			edgeColor: "#000000",
+			texture: "none",
+			material: "auto",
+			font: "auto",
+			colorset: "custom"
+		};
 	}
 
 	setValues(min = 1, max = 20, step = 1) {

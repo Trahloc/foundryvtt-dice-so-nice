@@ -1,12 +1,12 @@
 <form autocomplete="off" class="dice-so-nice flexcol">
-    <nav class="sheet-tabs tabs">
+    <nav class="sheet-tabs tabs" data-group="dsn-main">
         <a class="item active" data-tab="general"><i class="fas fa-dice-d20"></i> {{localize "DICESONICE.settingsAppearance"}}</a>
         <a class="item" data-tab="preferences"><i class="fas fa-cogs"></i> {{localize "DICESONICE.settingsPreferences"}}</a>
         <a class="item" data-tab="sfx"><i class="fas fa-meteor"></i> {{localize "DICESONICE.settingsSpecialEffects"}}</a>
         <a class="item" data-tab="performance"><i class="fas fa-tachometer-alt"></i> {{localize "DICESONICE.settingsPerformance"}}</a>
     </nav>
     <section id="config-tabs" class="content">
-        <div class="tab active" data-tab="general">
+        <div class="tab active" data-tab="general" data-group="dsn-main">
             <div class="settings-list">
                 <div id="dice-configuration-canvas"></div>
                 <div class="dsn-settings-container">
@@ -17,101 +17,17 @@
                     <a class="dice-more-theme" href="https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/wikis/Links" target="_blank">
                         <i class="fas fa-store"></i> {{localize "DICESONICE.FindMoreTheme"}}
                     </a>
-                    <div class="form-group">
-                        <label>{{localize "DICESONICE.system"}}</label>
-                        <select name="system">
-                            {{#select system}}
-                            {{#each systemList as |name key|}}
-                            <option value="{{key}}">{{name}}</option>
-                            {{/each}}
-                            {{/select}}
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>{{localize "DICESONICE.colorset"}}</label>
-                        <select name="colorset">
-                            {{#select colorset}}
-                            {{#each colorsetList as |group key|}}
-                            <optgroup label="{{key}}">
-                                {{#each group as |name id|}}
-                                <option value="{{id}}">{{name}}</option>
-                                {{/each}}
-                            </optgroup>
-                            {{/each}}
-                            {{/select}}
-                        </select>
-                        <p class="notes">{{localize "DICESONICE.colorsetDesc"}}</p>
-                    </div>
-
-                    <div class="form-group">
-                        <label>{{localize "DICESONICE.texture"}}</label>
-                        <select name="texture">
-                            {{#select texture}}
-                            {{#each textureList as |name key|}}
-                            <option value="{{key}}">{{name}}</option>
-                            {{/each}}
-                            {{/select}}
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>{{localize "DICESONICE.material"}}</label>
-                        <select name="material">
-                            {{#select material}}
-                            {{#each materialList as |name key|}}
-                            <option value="{{key}}">{{name}}</option>
-                            {{/each}}
-                            {{/select}}
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>{{localize "DICESONICE.font"}}</label>
-                        <select name="font">
-                            {{#select font}}
-                            {{#each fontList as |name key|}}
-                            <option value="{{key}}">{{name}}</option>
-                            {{/each}}
-                            {{/select}}
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>{{localize "DICESONICE.labelColor"}}</label>
-                        <div class="form-fields">
-                            <input type="text" name="labelColor" value="{{labelColor}}" data-dtype="String" />
-                            <input type="color" name="labelColorSelector" value="{{labelColor}}" data-edit="labelColor" />
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>{{localize "DICESONICE.diceColor"}}</label>
-                        <div class="form-fields">
-                            <input type="text" name="diceColor" value="{{diceColor}}" data-dtype="String" />
-                            <input type="color" name="diceColorSelector" value="{{diceColor}}" data-edit="diceColor" />
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>{{localize "DICESONICE.outlineColor"}}</label>
-                        <div class="form-fields">
-                            <input type="text" name="outlineColor" value="{{outlineColor}}" data-dtype="String" />
-                            <input type="color" name="outlineColorSelector" value="{{outlineColor}}" data-edit="outlineColor" />
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>{{localize "DICESONICE.edgeColor"}}</label>
-                        <div class="form-fields">
-                            <input type="text" name="edgeColor" value="{{edgeColor}}" data-dtype="String" />
-                            <input type="color" name="edgeColorSelector" value="{{edgeColor}}" data-edit="edgeColor" />
-                        </div>
-                    </div>
+                    <nav class="dsn-appearance-tabs" data-group="dsn-dice">
+                        <span class="item" data-tab="global">Global</span>
+                        <span class="item" data-tab="tab2">D20 <i class="fas fa-times"></i></span>
+                    </nav>
+                    <section id="dsn-appearance-content">
+                        {{{tabsAppearance}}}
+                    </section>
                 </div>
             </div>
         </div>
-        <div class="tab" data-tab="preferences">
+        <div class="tab" data-tab="preferences" data-group="dsn-main">
             <div class="settings-list">
                 <div class="form-group">
                     <label>{{localize "DICESONICE.hideAfterRoll"}}</label>
@@ -205,7 +121,7 @@
                 </div>
             </div>
         </div>
-        <div class="tab" data-tab="sfx">
+        <div class="tab" data-tab="sfx" data-group="dsn-main">
             <div class="settings-list">
                 <div class="form-group">
                     <label>{{localize "DICESONICE.showOthersSFX"}}</label>
@@ -241,7 +157,7 @@
                 </ol>
             </div>
         </div>
-        <div class="tab" data-tab="performance">
+        <div class="tab" data-tab="performance" data-group="dsn-main">
             <div class="settings-list">
                 <div class="form-group">
                     <label>{{localize "DICESONICE.shadowQuality"}}</label>

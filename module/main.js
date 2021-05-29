@@ -157,8 +157,6 @@ Hooks.once('init', () => {
  * Foundry is ready, let's create a new Dice3D!
  */
 Hooks.once('ready', () => {
-
-    Utils.migrateOldSettings();
     if(!game.settings.get("core", "noCanvas"))
         game.dice3d = new Dice3D();
     else
@@ -262,20 +260,6 @@ document.addEventListener("visibilitychange", function() {
  * Generic utilities class...
  */
 class Utils {
-
-    /**
-     * Migrate old 1.0 setting to new 2.0 format.
-     */
-    static async migrateOldSettings() {
-        let settings = game.settings.get("dice-so-nice", "settings");
-        if (settings.diceColor || settings.labelColor) {
-            let newSettings = mergeObject(Dice3D.DEFAULT_OPTIONS, settings, { insertKeys: false, insertValues: false });
-            let appearance = mergeObject(Dice3D.DEFAULT_APPEARANCE(), settings, { insertKeys: false, insertValues: false });
-            await game.settings.set('dice-so-nice', 'settings', mergeObject(newSettings, { "-=dimensions": null, "-=fxList": null }));
-            await game.user.setFlag("dice-so-nice", "appearance", appearance);
-            ui.notifications.info(game.i18n.localize("DICESONICE.migrateMessage"));
-        }
-    }
 
     /**
      *
@@ -397,20 +381,22 @@ export class Dice3D {
 
     static DEFAULT_APPEARANCE(user = game.user) {
         return {
-            labelColor: Utils.contrastOf(user.color),
-            diceColor: user.color,
-            outlineColor: user.color,
-            edgeColor: user.color,
-            texture: "none",
-            material: "auto",
-            font:"auto",
-            colorset: "custom",
-            system: "standard"
+            global:{
+                labelColor: Utils.contrastOf(user.color),
+                diceColor: user.color,
+                outlineColor: user.color,
+                edgeColor: user.color,
+                texture: "none",
+                material: "auto",
+                font:"auto",
+                colorset: "custom",
+                system: "standard"
+            }
         };
     }
 
     static ALL_DEFAULT_OPTIONS(user = game.user) {
-        return mergeObject(Dice3D.DEFAULT_OPTIONS, Dice3D.DEFAULT_APPEARANCE(user));
+        return mergeObject(Dice3D.DEFAULT_OPTIONS, {appearance:Dice3D.DEFAULT_APPEARANCE(user)});
     }
 
     static get CONFIG() {
@@ -421,7 +407,7 @@ export class Dice3D {
         let userAppearance = user.getFlag("dice-so-nice", "appearance");
         let appearance = mergeObject(Dice3D.DEFAULT_APPEARANCE(user), userAppearance);
         if(!userAppearance && game.dice3d && game.dice3d.DiceFactory.systemActivated != "standard")
-            appearance.system = game.dice3d.DiceFactory.systemActivated;
+            appearance.global.system = game.dice3d.DiceFactory.systemActivated;
         return mergeObject(appearance, { "-=dimensions": null });
     }
 
@@ -434,11 +420,11 @@ export class Dice3D {
 
     static ALL_CUSTOMIZATION(user = game.user) {
         let specialEffects = Dice3D.SFX(user);
-        return mergeObject(Dice3D.APPEARANCE(user), {specialEffects: specialEffects});
+        return mergeObject({appearance:Dice3D.APPEARANCE(user)}, {specialEffects: specialEffects});
     }
 
     static ALL_CONFIG(user = game.user) {
-        let ret = mergeObject(Dice3D.CONFIG, Dice3D.APPEARANCE(user));
+        let ret = mergeObject(Dice3D.CONFIG, {appearance:Dice3D.APPEARANCE(user)});
         ret.specialEffects = Dice3D.SFX(user);
         return ret;
     }
@@ -977,11 +963,14 @@ class DiceConfig extends FormApplication {
             width: 500,
             height: "auto",
             closeOnSubmit: true,
-            tabs: [{navSelector: ".tabs", contentSelector: "form", initial: "general"}]
+            tabs: [
+                {navSelector: ".tabs", contentSelector: "#config-tabs", initial: "general"},
+                {navSelector: ".dsn-appearance-tabs", contentSelector: "#dsn-appearance-content", initial: "global"},
+            ]
         })
     }
 
-    getData(options) {
+    async getData(options) {
         let data = mergeObject({
             fxList: Utils.localize({
                 "none": "DICESONICE.None",
@@ -1037,6 +1026,30 @@ class DiceConfig extends FormApplication {
                 delete data.specialEffects[key];
             }
         }
+        let tabsList = [];
+        for (var scope in data.appearance) {
+            if (data.appearance.hasOwnProperty(scope)) {
+                tabsList.push(scope);
+            }
+        }
+        
+        let tabsAppearance = [];
+        let tabsPromises = [];
+        tabsList.forEach((tabName)=>{
+            tabsPromises.push(renderTemplate("modules/dice-so-nice/templates/partial-appearance.html", {
+                tabName: tabName,
+                appearance: data.appearance[tabName],
+                systemList: data.systemList,
+                colorsetList: data.colorsetList,
+                textureList: data.textureList,
+                materialList: data.materialList,
+                fontList: data.fontList
+            }).then((html)=>{
+                tabsAppearance.push(html);
+            }));
+        });
+        await Promise.all(tabsPromises);
+        data.tabsAppearance = tabsAppearance.join("");
         return data;
     }
 

@@ -543,11 +543,13 @@ export class DiceBox {
 			colorset = dicedata.options.flavor;
 		}
 
-		let dicemesh = this.dicefactory.create(this.renderer.scopedTextureCache, diceobj.type, colorset);
+		//TODO: Override dicedata.appearance with flavor
+
+		let dicemesh = this.dicefactory.create(this.renderer.scopedTextureCache, diceobj.type, dicedata.appearance);
 		if (!dicemesh) return;
 
 		let mass = diceobj.mass;
-		switch (this.dicefactory.material_rand) {
+		switch (dicedata.appearance.material) {
 			case "metal":
 				mass *= 7;
 				break;
@@ -558,7 +560,7 @@ export class DiceBox {
 				mass *= 2;
 				break;
 		}
-
+		//continuer à faire passer "appearance" au create et le faire remonter dans DiceNotation aussi!
 		dicemesh.notation = vectordata;
 		dicemesh.result = [];
 		dicemesh.forcedResult = dicedata.result;

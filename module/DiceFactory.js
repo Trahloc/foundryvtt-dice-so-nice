@@ -6,6 +6,7 @@ import { GLTFLoader } from './libs/three-modules/GLTFLoader.js';
 export class DiceFactory {
 
 	constructor() {
+		//Contains the dice set
 		this.dice = {};
 		this.geometries = {};
 
@@ -682,7 +683,7 @@ export class DiceFactory {
 	}
 
 	// returns a dicemesh (THREE.Mesh) object
-	create(scopedTextureCache, type, colorset = null) {
+	create(scopedTextureCache, type, appearance) {
 		let diceobj = this.dice[type];
 		let scopedScale = scopedTextureCache.type == "board" ? this.baseScale : 60;
 		if (!diceobj) return null;
