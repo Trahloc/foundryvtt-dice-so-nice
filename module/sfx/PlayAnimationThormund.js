@@ -25,10 +25,7 @@ export class PlayAnimationThormund extends DiceSFX {
             PlayAnimationThormund.model = gltf.scene.children[0];
         });
         game.audio.pending.push(function(){
-            AudioHelper.play({
-                src: PlayAnimationThormund.sound,
-                autoplay: false
-            }, false);
+            AudioHelper.preloadSound(PlayAnimationThormund.sound);
         }.bind(this));
     }
     /**@override play */

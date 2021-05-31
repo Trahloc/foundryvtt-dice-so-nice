@@ -23,10 +23,7 @@ export class PlayAnimationParticleSpiral extends DiceSFX {
         });
         PlayAnimationParticleSpiral.sprite = new THREE.Sprite(material);
         game.audio.pending.push(function(){
-            AudioHelper.play({
-                src: PlayAnimationParticleSpiral.sound,
-                autoplay: false
-            }, false);
+            AudioHelper.preloadSound(PlayAnimationParticleSpiral.sound);
         }.bind(this));
     }
 

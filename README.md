@@ -75,7 +75,7 @@ A complete API and documentation for developers and artists alike is available i
 
 # Compatibility
 
-Tested on Foundry VTT 0.7.9  
+Tested on Foundry VTT 0.8.5  
 If you need to use an older Foundry version, please [download a compatible older version](https://foundryvtt.com/packages/dice-so-nice/)
 
 # Acknowledgment
@@ -94,6 +94,7 @@ Built on [ThreeJS](https://threejs.org/), [CannonJS](https://schteppe.github.io/
 ## Theme and model credits:
 - **Spencer Thayer:** `Thylean Bronze` theme
 - **Foundry VTT:** For the FVTT Logo in the `Foundry VTT` preset.
+- **LyncsCwtsh:** For the `Spectrum` system (Discord: LyncsCwtsh#7116).
 - **MajorVictory:** For all the other theme in this module!
 - **[Joost Vanhoutte](https://joost3d.com/hdris/):** For the "Foyer" HDRI map
 - Additional sound effects from https://www.zapsplat.com
