@@ -708,18 +708,9 @@ export class DiceFactory {
 				dicemesh.mixer.clipAction(diceobj.model.animations[0]).play();
 			}
 		}else{
-			//We use either (by order of priority): a flavor/targeted colorset, the colorset of the diceobj, the colorset configured by the player
-			let cacheString = "";
-			if(colorset){
-				cacheString = this.setMaterialInfo(diceobj, colorset);
-			}
-			else if (diceobj.colorset) {
-				cacheString = this.setMaterialInfo(diceobj, diceobj.colorset);
-			} else {
-				cacheString = this.setMaterialInfo(diceobj);
-			}
+			let materialData = this.generateMaterialData(diceobj, appearance);
 
-			let baseTextureCacheString = scopedTextureCache.type+this.systemActivated+type+cacheString;
+			let baseTextureCacheString = scopedTextureCache.type+type+materialData.cacheString;
 			let materials;
 			if(this.baseTextureCache[baseTextureCacheString])
 				materials = this.baseTextureCache[baseTextureCacheString];
@@ -1138,7 +1129,7 @@ export class DiceFactory {
 		}
 	}
 
-	applyColorSet(colordata) {
+	/*applyColorSet(colordata) {
 		this.colordata = colordata;
 		this.label_color = colordata.foreground;
 		this.dice_color = colordata.background;
@@ -1147,7 +1138,7 @@ export class DiceFactory {
 		this.material = colordata.material;
 		this.font = colordata.font;
 		this.edge_color = colordata.hasOwnProperty("edge") && colordata.edge != '' ? colordata.edge:colordata.background;
-	}
+	}*/
 
 	applyTexture(texture) {
 		this.dice_texture = texture;
@@ -1161,122 +1152,82 @@ export class DiceFactory {
 		this.font = font;
 	}
 
-	setMaterialInfo(diceobj, colorset = '') {
-
-		let prevcolordata = this.colordata;
-		let prevtexture = this.dice_texture;
-		let prevmaterial = this.material;
-		let prevfont = this.font;
-
-		if (colorset) {
-			let colordata = DiceColors.getColorSet(colorset);
-
-			if(colordata.background == "custom")
-				colordata.background = prevcolordata.background;
-			if(colordata.foreground == "custom")
-				colordata.foreground = prevcolordata.foreground;
-			if(colordata.edge == "custom")
-				colordata.edge = prevcolordata.edge;
-			if(colordata.outline == "custom")
-				colordata.outline = prevcolordata.outline;
-			if(colordata.material == "custom")
-				colordata.material = prevmaterial;
-			if(colordata.texture == "custom")
-				colordata.texture = prevtexture;
-			if(colordata.font == "custom")
-				colordata.font = prevfont;
-
-			if (this.colordata.id != colordata.id) {
-				this.applyColorSet(colordata);
-			}
-		}
-
-		//reset random choices
-		this.dice_color_rand = '';
-		this.label_color_rand = '';
-		this.label_outline_rand = '';
-		this.dice_texture_rand = '';
-		this.edge_color_rand = '';
-		this.material_rand = '';
-		this.font_rand = '';
-		this.font_scale_rand = {};
-		
-
+	generateMaterialData(diceobj, appearance) {
+		let materialData = {};
+		let colorindex;
 		// set base color first
-		if (Array.isArray(this.dice_color)) {
+		if (Array.isArray(appearance.background)) {
 
-			var colorindex = Math.floor(Math.random() * this.dice_color.length);
+			colorindex = Math.floor(Math.random() * appearance.background.length);
 
 			// if color list and label list are same length, treat them as a parallel list
-			if (Array.isArray(this.label_color) && this.label_color.length == this.dice_color.length) {
-				this.label_color_rand = this.label_color[colorindex];
+			if (Array.isArray(appearance.foreground) && appearance.foreground.length == appearance.background.length) {
+				materialData.foreground = appearance.foreground[colorindex];
 
 				// if label list and outline list are same length, treat them as a parallel list
-				if (Array.isArray(this.label_outline) && this.label_outline.length == this.label_color.length) {
-					this.label_outline_rand = this.label_outline[colorindex];
+				if (Array.isArray(appearance.outline) && appearance.outline.length == appearance.foreground.length) {
+					materialData.outline = appearance.outline[colorindex];
 				}
 			}
 			// if texture list is same length do the same
-			if (Array.isArray(this.dice_texture) && this.dice_texture.length == this.dice_color.length) {
-				this.dice_texture_rand = this.dice_texture[colorindex];
+			if (Array.isArray(appearance.texture) && appearance.texture.length == appearance.background.length) {
+				materialData.texture = appearance.texture[colorindex];
 			}
 
 			//if edge list and color list are same length, treat them as a parallel list
-			if (Array.isArray(this.edge_color) && this.edge_color.length == this.dice_color.length) {
-				this.edge_color_rand = this.edge_color[colorindex];
+			if (Array.isArray(appearance.edge) && appearance.edge.length == appearance.background.length) {
+				materialData.edge = appearance.edge[colorindex];
 			}
 
-			this.dice_color_rand = this.dice_color[colorindex];
-		} else {
-			this.dice_color_rand = this.dice_color;
+			materialData.background = appearance.background[colorindex];
 		}
-
-		// set edge color if not set
-		if(this.edge_color_rand == ''){
-			if (Array.isArray(this.edge_color)) {
-
-				var colorindex = Math.floor(Math.random() * this.edge_color.length);
-
-				this.edge_color_rand = this.edge_color[colorindex];
-			} else {
-				this.edge_color_rand = this.edge_color;
+		if(!materialData.edge){
+			if (Array.isArray(appearance.edge)) {
+				colorindex = Math.floor(Math.random() * appearance.edge.length);
+				materialData.edge = appearance.edge[colorindex];
 			}
+			else
+				materialData.edge = appearance.edge;
 		}
 
 		// if selected label color is still not set, pick one
-		if (this.label_color_rand == '' && Array.isArray(this.label_color)) {
-			var colorindex = this.label_color[Math.floor(Math.random() * this.label_color.length)];
+		if(!materialData.foreground){
+			if(Array.isArray(appearance.foreground)){
+				colorindex = appearance.foreground[Math.floor(Math.random() * appearance.foreground.length)];
 
-			// if label list and outline list are same length, treat them as a parallel list
-			if (Array.isArray(this.label_outline) && this.label_outline.length == this.label_color.length) {
-				this.label_outline_rand = this.label_outline[colorindex];
+				// if label list and outline list are same length, treat them as a parallel list
+				if (Array.isArray(appearance.outline) && appearance.outline.length == appearance.foreground.length) {
+					materialData.outline = appearance.outline[colorindex];
+				}
+
+				materialData.foreground = appearance.foreground[colorindex];
 			}
-
-			this.label_color_rand = this.label_color[colorindex];
-
-		} else if (this.label_color_rand == '') {
-			this.label_color_rand = this.label_color;
+			else
+				materialData.foreground = appearance.foreground;
 		}
 
 		// if selected label outline is still not set, pick one
-		if (this.label_outline_rand == '' && Array.isArray(this.label_outline)) {
-			var colorindex = this.label_outline[Math.floor(Math.random() * this.label_outline.length)];
+		if (!materialData.outline){
+			if(Array.isArray(appearance.outline)) {
+				colorindex = appearance.outline[Math.floor(Math.random() * appearance.outline.length)];
 
-			this.label_outline_rand = this.label_outline[colorindex];
-			
-		} else if (this.label_outline_rand == '') {
-			this.label_outline_rand = this.label_outline;
+				materialData.outline = appearance.outline[colorindex];
+			} else {
+				materialData.outline = appearance.outline;
+			}
 		}
 
 		// same for textures list
-		if (this.dice_texture_rand == '' && Array.isArray(this.dice_texture)) {
-			this.dice_texture_rand = this.dice_texture[Math.floor(Math.random() * this.dice_texture.length)];
-		} else if (this.dice_texture_rand == '') {
-			this.dice_texture_rand = this.dice_texture;
+		if(!materialData.texture){
+			if (Array.isArray(appearance.texture)) {
+				materialData.texture = appearance.texture[Math.floor(Math.random() * appearance.texture.length)];
+			} else {
+				materialData.texture = appearance.texture;
+			}
 		}
 
 		//Same for material
-		let baseTexture = Array.isArray(this.dice_texture_rand) ? this.dice_texture_rand[0]:this.dice_texture_rand;
+		let baseTexture = Array.isArray(materialData.texture) ? materialData.texture[0]:materialData.texture;
 		if(this.material){
 			this.material_rand = this.material;
 		}
