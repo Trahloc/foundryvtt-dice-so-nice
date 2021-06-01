@@ -19,11 +19,6 @@ export class DiceFactory {
 		this.cache_hits = 0;
 		this.cache_misses = 0;
 
-		this.label_color = '';
-		this.dice_color = '';
-		this.label_outline = '';
-		this.dice_texture = '';
-		this.edge_color = '';
 		this.bumpMapping = true;
 
 		this.loaderGLTF = new GLTFLoader();
@@ -786,6 +781,7 @@ export class DiceFactory {
 		return this.dice[type];
 	}
 	createMaterials(scopedTextureCache, baseTextureCacheString, diceobj , margin, d4specialindex = null) {
+		//TODO : createMaterials
 		if(this.baseTextureCache[baseTextureCacheString])
 			return this.baseTextureCache[baseTextureCacheString];
 
@@ -1138,7 +1134,7 @@ export class DiceFactory {
 		this.material = colordata.material;
 		this.font = colordata.font;
 		this.edge_color = colordata.hasOwnProperty("edge") && colordata.edge != '' ? colordata.edge:colordata.background;
-	}*/
+	}
 
 	applyTexture(texture) {
 		this.dice_texture = texture;
@@ -1150,11 +1146,14 @@ export class DiceFactory {
 
 	applyFont(font) {
 		this.font = font;
-	}
+	}*/
 
 	generateMaterialData(diceobj, appearance) {
 		let materialData = {};
 		let colorindex;
+
+		let colorsetData = DiceColors.getColorSet(appearance.colorset);
+
 		// set base color first
 		if (Array.isArray(appearance.background)) {
 
@@ -1221,6 +1220,9 @@ export class DiceFactory {
 		if(!materialData.texture){
 			if (Array.isArray(appearance.texture)) {
 				materialData.texture = appearance.texture[Math.floor(Math.random() * appearance.texture.length)];
+			} else if(appearance.texture == "none"){
+				//set to none/theme
+				materialData.texture = colorsetData.texture;
 			} else {
 				materialData.texture = appearance.texture;
 			}
@@ -1228,38 +1230,33 @@ export class DiceFactory {
 
 		//Same for material
 		let baseTexture = Array.isArray(materialData.texture) ? materialData.texture[0]:materialData.texture;
-		if(this.material){
-			this.material_rand = this.material;
+
+		if(appearance.material == "auto"){
+			materialData.material = baseTexture.material;
+		} else {
+			materialData.material = appearance.material;
 		}
-		else if(this.colordata.material)
-			this.material_rand = this.colordata.material;
-		else if(baseTexture && baseTexture.material)
-			this.material_rand = baseTexture.material;
 
 		//for font, we priorize the dicepreset font, then custom, then coloret
-		if(this.font){
-			this.font_rand = this.font;
+		if(appearance.font == "auto"){
+			if(diceobj.font){
+				materialData.font = diceobj.font;
+			} else {
+				materialData.font = colorsetData.font;
+			}
+			if(diceobj.fontScale){
+				materialData.fontScale = diceobj.fontScale;
+			} else {
+				materialData.fontScale = colorsetData.fontScale;
+			}
+		} else {
+			materialData.font = appearance.font;
+			if(appearance.fontScale)
+				materialData.fontScale = appearance.fontScale;
 		}
-		else if(this.colordata.font){
-			this.material_rand = this.colordata.font;
-		}
-
-		if(this.colordata.fontScale && Object.entries(this.colordata.fontScale).length)
-			this.font_scale_rand = this.colordata.fontScale;
 		
-		
-		if (this.colordata.id != prevcolordata.id) {
-			this.applyColorSet(prevcolordata);
-			this.applyTexture(prevtexture);
-			this.applyMaterial(prevmaterial);
-			this.applyFont(prevfont);
-		}
-		let cacheString = this.dice_color_rand+this.label_color_rand+this.label_outline_rand+this.dice_texture_rand.name+this.edge_color_rand+this.material_rand;
-		if(diceobj.font)
-			cacheString += diceobj.font;
-		else
-			cacheString += this.font_rand;
-		return cacheString;
+		materialData.cacheString = materialData.background+materialData.foreground+materialData.outline+materialData.texture.name+materialData.edge+materialData.material+materialData.font;
+		return materialData;
 	}
 
 	calc_texture_size(approx, ceil = false) {

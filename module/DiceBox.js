@@ -940,6 +940,7 @@ export class DiceBox {
 
 		//To keep compatibility with both older integrations and user settings, we use the DiceColor naming convention from there
 		let appearance = {
+			colorset: settings.colorset,
 			foreground: settings.labelColor,
 			background: settings.diceColor,
 			outline: settings.outlineColor,
