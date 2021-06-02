@@ -175,7 +175,7 @@ Hooks.on('createChatMessage', (chatMessage) => {
         (chatMessage.getFlag("core", "RollTable") && !game.settings.get("dice-so-nice", "animateRollTable"))) {
         return;
     }
-    let roll = chatMessage.roll;
+    let roll = chatMessage.isRoll ? chatMessage.roll:null;
     if(hasInlineRoll){
         let JqInlineRolls = $($.parseHTML(chatMessage.data.content)).filter(".inline-roll.inline-result");
         if(JqInlineRolls.length == 0 && !chatMessage.isRoll) //it was a false positive
