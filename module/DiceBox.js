@@ -532,7 +532,7 @@ export class DiceBox {
 	}
 
 	//spawns one dicemesh object from a single vectordata object
-	spawnDice(dicedata) {
+	spawnDice(dicedata, appearance) {
 		let vectordata = dicedata.vectors;
 		const diceobj = this.dicefactory.get(vectordata.type);
 		if (!diceobj) return;
@@ -540,11 +540,11 @@ export class DiceBox {
 
 		//TODO: Override dicedata.appearance with flavor
 
-		let dicemesh = this.dicefactory.create(this.renderer.scopedTextureCache, diceobj.type, dicedata.appearance);
+		let dicemesh = this.dicefactory.create(this.renderer.scopedTextureCache, diceobj.type, appearance);
 		if (!dicemesh) return;
 
 		let mass = diceobj.mass;
-		switch (dicedata.appearance.material) {
+		switch (appearance.material) {
 			case "metal":
 				mass *= 7;
 				break;
@@ -578,7 +578,7 @@ export class DiceBox {
 
 		//We add some informations about the dice to the CANNON body to be used in the collide event
 		dicemesh.body_sim.diceType = diceobj.type;
-		dicemesh.body_sim.diceMaterial = dicedata.appearance.material;
+		dicemesh.body_sim.diceMaterial = appearance.material;
 
 		/*dicemesh.meshCannon = this.body2mesh(dicemesh.body_sim,true);
 
@@ -901,36 +901,6 @@ export class DiceBox {
 		this.rollDice(throws, callback);
 	}
 
-	/*applyColorsForRoll(dsnConfig) {
-		let texture = null;
-		let material = null;
-		let font = null;
-		if (dsnConfig.colorset == "custom")
-			DiceColors.setColorCustom(dsnConfig.labelColor, dsnConfig.diceColor, dsnConfig.outlineColor, dsnConfig.edgeColor);
-
-		if (dsnConfig.texture != "none")
-			texture = dsnConfig.texture;
-		else if (dsnConfig.colorset != "custom") {
-			let set = DiceColors.getColorSet(dsnConfig.colorset);
-			texture = set.texture.id;
-		}
-
-		if (dsnConfig.material != "auto")
-			material = dsnConfig.material;
-		else if (dsnConfig.colorset != "custom") {
-			let set = DiceColors.getColorSet(dsnConfig.colorset);
-			material = set.material;
-		}
-
-		if (dsnConfig.font != "auto")
-			font = dsnConfig.font;
-		else if (dsnConfig.colorset != "custom") {
-			let set = DiceColors.getColorSet(dsnConfig.colorset);
-			font = set.font;
-		}
-
-		DiceColors.applyColorSet(this.dicefactory, dsnConfig.colorset, texture, material, font);
-	}*/
 	getAppearanceForDice(appearances, dicetype, dicenotation = null){
 		let settings;
 		if(appearances[dicetype])
@@ -954,9 +924,9 @@ export class DiceBox {
 		if(dicenotation){
 			let colorset = null;
 			if (dicenotation.options.colorset)
-				colorset = dicedata.options.colorset;
-			else if (dicedata.options.flavor && COLORSETS[dicedata.options.flavor]) {
-				colorset = dicedata.options.flavor;
+				colorset = dicenotation.options.colorset;
+			else if (dicenotation.options.flavor && COLORSETS[dicenotation.options.flavor]) {
+				colorset = dicenotation.options.flavor;
 			}
 			if(colorset){
 				let colorsetData = DiceColors.getColorSet(colorset);
@@ -1011,11 +981,12 @@ export class DiceBox {
 
 		for (let j = 0; j < throws.length; j++) {
 			let notationVectors = throws[j];
-			this.applyColorsForRoll(notationVectors.dsnConfig);
+			
 			this.dicefactory.setSystem(notationVectors.dsnConfig.system);
 			for (let i = 0, len = notationVectors.dice.length; i < len; ++i) {
 				notationVectors.dice[i].startAtIteration = j * this.nbIterationsBetweenRolls;
-				this.spawnDice(notationVectors.dice[i]);
+				let appearance = this.getAppearanceForDice(notationVectors.dsnConfig.appearance,notationVectors.dice[i].type, notationVectors.dice[i]);
+				this.spawnDice(notationVectors.dice[i], appearance);
 			}
 		}
 		this.iteration = 0;

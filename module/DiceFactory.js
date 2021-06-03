@@ -710,7 +710,7 @@ export class DiceFactory {
 			if(this.baseTextureCache[baseTextureCacheString])
 				materials = this.baseTextureCache[baseTextureCacheString];
 			else
-				materials = this.createMaterials(scopedTextureCache, baseTextureCacheString, diceobj, 1.0);
+				materials = this.createMaterials(scopedTextureCache, baseTextureCacheString, diceobj, materialData);
 			
 			dicemesh = new THREE.Mesh(geom, materials);
 
@@ -780,7 +780,7 @@ export class DiceFactory {
 	get(type) {
 		return this.dice[type];
 	}
-	createMaterials(scopedTextureCache, baseTextureCacheString, diceobj , margin, d4specialindex = null) {
+	createMaterials(scopedTextureCache, baseTextureCacheString, diceobj, materialData) {
 		//TODO : createMaterials
 		if(this.baseTextureCache[baseTextureCacheString])
 			return this.baseTextureCache[baseTextureCacheString];
@@ -790,10 +790,10 @@ export class DiceFactory {
 			labels = diceobj.labels[0];
 		}
 		//If the texture is an array of texture (for random face texture), we look at the first element to determine the faces material and the edge texture
-		let dice_texture = Array.isArray(this.dice_texture_rand) ? this.dice_texture_rand[0] : this.dice_texture_rand;
+		let dice_texture = Array.isArray(materialData.texture) ? materialData.texture[0] : materialData.texture;
 
 		var mat;
-		let materialSelected = this.material_options[this.material_rand] ? this.material_options[this.material_rand] : this.material_options["plastic"];
+		let materialSelected = this.material_options[materialData.material] ? this.material_options[materialData.material] : this.material_options["plastic"];
 		if(!this.bumpMapping){
 			delete materialSelected.roughnessMap;
 		}
@@ -819,11 +819,11 @@ export class DiceFactory {
 		};
 		
 		if(!font.type){
-			font.type = this.font_rand;
+			font.type = materialData.font;
 		}
 		if(!font.scale){
-			if(this.font_scale_rand[diceobj.type])
-				font.scale = this.font_scale_rand[diceobj.type];
+			if(materialData.fontScale[diceobj.type])
+				font.scale = materialData.fontScale[diceobj.type];
 			else{
 				font.scale = DICE_SCALE[diceobj.shape];
 			}	
@@ -857,11 +857,11 @@ export class DiceFactory {
 				let texture = {name:"none"};
 				if(dice_texture.composite != "source-over")
 					texture = dice_texture;
-				this.createTextMaterial(context, contextBump, x, y, sizeTexture, diceobj, labels, font, i, margin, texture, this.label_color_rand, this.label_outline_rand, this.edge_color_rand);
+				this.createTextMaterial(context, contextBump, x, y, sizeTexture, diceobj, labels, font, i, texture, materialData);
 			}
 			else
 			{
-				this.createTextMaterial(context, contextBump, x, y, sizeTexture, diceobj, labels, font, i, margin, this.dice_texture_rand, this.label_color_rand, this.label_outline_rand, this.dice_color_rand);
+				this.createTextMaterial(context, contextBump, x, y, sizeTexture, diceobj, labels, font, i, materialData.texture, materialData);
 			}
 			texturesOnThisLine++;
 			x += sizeTexture;
@@ -873,7 +873,7 @@ export class DiceFactory {
 					x = 0;
 					texturesOnThisLine = 0;
 				}
-				this.createTextMaterial(context, contextBump, x, y, sizeTexture, diceobj, labels, font, i, margin, this.dice_texture_rand, this.label_color_rand, this.label_outline_rand, this.dice_color_rand, 2);
+				this.createTextMaterial(context, contextBump, x, y, sizeTexture, diceobj, labels, font, i, materialData.texture, materialData);
 				texturesOnThisLine++;
 				x += sizeTexture;
 			}
@@ -897,7 +897,7 @@ export class DiceFactory {
 
 		//mat.displacementMap = mat.bumpMap;
 
-		switch(this.material_rand){
+		switch(materialData.material){
 			case "chrome":
 				if(this.bumpMapping)
 					mat.metalnessMap = mat.bumpMap;
@@ -911,20 +911,20 @@ export class DiceFactory {
 		this.baseTextureCache[baseTextureCacheString] = mat;
 		return mat;
 	}
-	createTextMaterial(context, contextBump, x, y, ts, diceobj, labels, font, index, margin, texture, forecolor, outlinecolor, backcolor, repeat = 1) {
+	createTextMaterial(context, contextBump, x, y, ts, diceobj, labels, font, index, texture, materialData) {
 		if (labels[index] === undefined) return null;
 
-		texture = texture || this.dice_texture_rand;
+		let forecolor = materialData.foreground;
+		let outlinecolor = materialData.outline;
+		let backcolor = index > 0 ? materialData.background : materialData.edge;
+
 		if(Array.isArray(texture))
 			texture = texture[Math.floor(Math.random() * texture.length)];
-        forecolor = forecolor || this.label_color_rand;
-		outlinecolor = outlinecolor || this.label_outline_rand;
-
-		backcolor = backcolor || this.dice_color_rand;
 		
 		let text = labels[index];
 		let normal = diceobj.normals[index];
 		let isTexture = false;
+		let margin = 1.0;
 
 		// create color
 		context.fillStyle = backcolor;
@@ -1125,34 +1125,12 @@ export class DiceFactory {
 		}
 	}
 
-	/*applyColorSet(colordata) {
-		this.colordata = colordata;
-		this.label_color = colordata.foreground;
-		this.dice_color = colordata.background;
-		this.label_outline = colordata.outline ? colordata.outline:"none";
-		this.dice_texture = colordata.texture;
-		this.material = colordata.material;
-		this.font = colordata.font;
-		this.edge_color = colordata.hasOwnProperty("edge") && colordata.edge != '' ? colordata.edge:colordata.background;
-	}
-
-	applyTexture(texture) {
-		this.dice_texture = texture;
-	}
-
-	applyMaterial(material) {
-		this.material = material;
-	}
-
-	applyFont(font) {
-		this.font = font;
-	}*/
-
 	generateMaterialData(diceobj, appearance) {
 		let materialData = {};
 		let colorindex;
 
 		let colorsetData = DiceColors.getColorSet(appearance.colorset);
+		appearance.texture = DiceColors.getTexture(appearance.texture);
 
 		// set base color first
 		if (Array.isArray(appearance.background)) {
@@ -1179,7 +1157,10 @@ export class DiceFactory {
 			}
 
 			materialData.background = appearance.background[colorindex];
+		} else {
+			materialData.background = appearance.background;
 		}
+
 		if(!materialData.edge){
 			if (Array.isArray(appearance.edge)) {
 				colorindex = Math.floor(Math.random() * appearance.edge.length);
@@ -1220,7 +1201,7 @@ export class DiceFactory {
 		if(!materialData.texture){
 			if (Array.isArray(appearance.texture)) {
 				materialData.texture = appearance.texture[Math.floor(Math.random() * appearance.texture.length)];
-			} else if(appearance.texture == "none"){
+			} else if(appearance.texture.name == "none"){
 				//set to none/theme
 				materialData.texture = colorsetData.texture;
 			} else {
