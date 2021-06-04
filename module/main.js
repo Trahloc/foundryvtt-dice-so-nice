@@ -189,12 +189,8 @@ Hooks.on('createChatMessage', (chatMessage) => {
         if(inlineRollList.length){
             if(chatMessage.isRoll)
                 inlineRollList.push(chatMessage.roll);
-            let mergingPool = new DicePool({rolls:inlineRollList}).evaluate();
-            roll = Roll.create(mergingPool.formula).evaluate();
-            roll.terms = [mergingPool]
-            roll.results = [mergingPool.total];
-            roll._total = mergingPool.total;
-            roll._rolled = true;
+            let pool = PoolTerm.fromRolls(inlineRollList);
+            roll = Roll.fromTerms([pool]);
         }
         else if(!chatMessage.isRoll)
             return;
