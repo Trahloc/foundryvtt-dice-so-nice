@@ -586,7 +586,8 @@ export class Dice3D {
      */
     _resizeCanvas() {
         const sidebarWidth = $('#sidebar').width();
-        this.canvas.width(window.innerWidth - sidebarWidth + 'px');
+        const sidebarOffset = sidebarWidth > window.innerWidth / 2 ? 0 : sidebarWidth;
+        this.canvas.width(window.innerWidth - sidebarOffset + 'px');
         this.canvas.height(window.innerHeight - 1 + 'px');
     }
 
