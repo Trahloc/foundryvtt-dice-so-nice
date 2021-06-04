@@ -21,6 +21,7 @@ export class DicePreset {
 		this.display = 'values';
 		this.system = 'standard';
 		this.modelLoaded = false;
+		this.modelLoading = false;
 		this.modelFile = null;
 	}
 
@@ -115,19 +116,21 @@ export class DicePreset {
 	}
 
 	loadModel(loader) {
-		this.modelLoading = true;
 		// Load a glTF resource
-		return new Promise((resolve,reject)=> {
-			loader.load(this.modelFile, gltf => {
-				gltf.scene.traverse(function (node) {
-					if (node.isMesh) {
-						node.castShadow = true; 
-					}
+		if(this.modelLoading === false){
+			this.modelLoading = new Promise((resolve,reject)=> {
+				loader.load(this.modelFile, gltf => {
+					gltf.scene.traverse(function (node) {
+						if (node.isMesh) {
+							node.castShadow = true; 
+						}
+					});
+					this.model = gltf;
+					this.modelLoaded = true;
+					resolve(gltf);
 				});
-				this.model = gltf;
-				this.modelLoaded = true;
-				resolve(gltf);
 			});
-		});
+		}
+		return this.modelLoading;
 	}
 }
