@@ -645,7 +645,7 @@ export class DiceFactory {
 			let modelsPromise = [];
 			let dices = this.systems[systemId].dice;
 			for(let i=0;i<dices.length;i++){
-				if(this.dice[dices[i].type].modelFile && !this.dice[dices[i].type].modelLoading)
+				if(this.dice[dices[i].type].modelFile)
 					modelsPromise.push(this.dice[dices[i].type].loadModel(this.loaderGLTF));
 			}
 			await Promise.all(modelsPromise);

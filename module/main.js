@@ -187,12 +187,8 @@ Hooks.on('createChatMessage', (chatMessage) => {
         if(inlineRollList.length){
             if(chatMessage.isRoll)
                 inlineRollList.push(chatMessage.roll);
-            let mergingPool = new DicePool({rolls:inlineRollList}).evaluate();
-            roll = Roll.create(mergingPool.formula).evaluate();
-            roll.terms = [mergingPool]
-            roll.results = [mergingPool.total];
-            roll._total = mergingPool.total;
-            roll._rolled = true;
+            let pool = PoolTerm.fromRolls(inlineRollList);
+            roll = Roll.fromTerms([pool]);
         }
         else if(!chatMessage.isRoll)
             return;
@@ -572,7 +568,8 @@ export class Dice3D {
      */
     _resizeCanvas() {
         const sidebarWidth = $('#sidebar').width();
-        this.canvas.width(window.innerWidth - sidebarWidth + 'px');
+        const sidebarOffset = sidebarWidth > window.innerWidth / 2 ? 0 : sidebarWidth;
+        this.canvas.width(window.innerWidth - sidebarOffset + 'px');
         this.canvas.height(window.innerHeight - 1 + 'px');
     }
 
