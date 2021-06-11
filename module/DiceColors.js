@@ -56,7 +56,7 @@ export const TEXTURELIST = {
 		composite: 'multiply',
 		source: 'modules/dice-so-nice/textures/ice.webp',
 		bump: 'modules/dice-so-nice/textures/ice.webp',
-		material: 'metal'
+		material: 'glass'
 	},
 	'paper': {
 		name: 'DICESONICE.TexturePaper',
@@ -219,6 +219,7 @@ export const COLORSETS = {
 		foreground: '#f6c928',
 		background: '#f6c928',
 		outline: 'none',
+		edge: '#f6c928',
 		texture: 'metal',
 		visibility: 'hidden'
 	},

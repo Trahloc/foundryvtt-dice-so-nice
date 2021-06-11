@@ -397,7 +397,6 @@ export class DiceBox {
 			this.dicefactory.setSystem(config.system);
 			await this.dicefactory.preloadModels(config.system);
 		}
-		this.applyColorsForRoll(config);
 		this.throwingForce = config.throwingForce;
 		this.scene.traverse(object => {
 			if (object.type === 'Mesh') object.material.needsUpdate = true;
@@ -901,44 +900,6 @@ export class DiceBox {
 		this.rollDice(throws, callback);
 	}
 
-	getAppearanceForDice(appearances, dicetype, dicenotation = null){
-		let settings;
-		if(appearances[dicetype])
-			settings = appearances[dicetype];
-		else
-			settings = appearances.global;
-
-		//To keep compatibility with both older integrations and user settings, we use the DiceColor naming convention from there
-		let appearance = {
-			colorset: settings.colorset,
-			foreground: settings.labelColor,
-			background: settings.diceColor,
-			outline: settings.outlineColor,
-			edge: settings.edgeColor,
-			texture: settings.texture,
-			material: settings.material,
-			font: settings.font,
-			system: settings.system
-		};
-		
-		if(dicenotation){
-			let colorset = null;
-			if (dicenotation.options.colorset)
-				colorset = dicenotation.options.colorset;
-			else if (dicenotation.options.flavor && COLORSETS[dicenotation.options.flavor]) {
-				colorset = dicenotation.options.flavor;
-			}
-			if(colorset){
-				let colorsetData = DiceColors.getColorSet(colorset);
-				mergeObject(appearance, colorsetData);
-			}
-			if(dicenotation.options.appearance){
-				mergeObject(appearance, dicenotation.options.appearance);
-			}
-		}
-		return appearance;
-	}
-
 	clearDice() {
 		this.running = false;
 		this.deadDiceList = this.deadDiceList.concat(this.diceList);
@@ -985,7 +946,7 @@ export class DiceBox {
 			this.dicefactory.setSystem(notationVectors.dsnConfig.system);
 			for (let i = 0, len = notationVectors.dice.length; i < len; ++i) {
 				notationVectors.dice[i].startAtIteration = j * this.nbIterationsBetweenRolls;
-				let appearance = this.getAppearanceForDice(notationVectors.dsnConfig.appearance,notationVectors.dice[i].type, notationVectors.dice[i]);
+				let appearance = this.dicefactory.getAppearanceForDice(notationVectors.dsnConfig.appearance,notationVectors.dice[i].type, notationVectors.dice[i]);
 				this.spawnDice(notationVectors.dice[i], appearance);
 			}
 		}
@@ -1055,7 +1016,7 @@ export class DiceBox {
 				posx = posxstart;
 				posy--;
 			}
-			let appearance = this.getAppearanceForDice(config.appearance,selectordice[i]);
+			let appearance = this.dicefactory.getAppearanceForDice(config.appearance,selectordice[i]);
 			let dicemesh = this.dicefactory.create(this.renderer.scopedTextureCache, selectordice[i], appearance);
 			dicemesh.position.set(posx * step, posy * step, step * 0.5);
 			dicemesh.castShadow = this.shadows;

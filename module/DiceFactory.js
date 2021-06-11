@@ -916,7 +916,7 @@ export class DiceFactory {
 
 		let forecolor = materialData.foreground;
 		let outlinecolor = materialData.outline;
-		let backcolor = index > 0 ? materialData.background : materialData.edge;
+		let backcolor = index > 0 ? materialData.background : materialData.edge != "" ? materialData.edge:materialData.background;
 
 		if(Array.isArray(texture))
 			texture = texture[Math.floor(Math.random() * texture.length)];
@@ -1125,12 +1125,73 @@ export class DiceFactory {
 		}
 	}
 
+	getAppearanceForDice(appearances, dicetype, dicenotation = null){
+		/*
+			We use either (by order of priority): 
+			1) A notation appearance
+			2) A flavor/notation colorset
+			3) The colorset of the diceobj
+			4) The colorset configured by the player for this dice type
+			5) The global colorset of the player
+		*/
+		let diceobj = this.dice[dicetype];
+		let settings;
+		if(appearances[dicetype])
+			settings = appearances[dicetype];
+		else
+			settings = appearances.global;
+
+		//To keep compatibility with both older integrations and user settings, we use the DiceColor naming convention from there
+		let appearance = {
+			colorset: settings.colorset,
+			foreground: settings.labelColor,
+			background: settings.diceColor,
+			outline: settings.outlineColor,
+			edge: settings.edgeColor,
+			texture: settings.texture,
+			material: settings.material,
+			font: settings.font,
+			system: settings.system
+		};
+
+		if(settings.colorset != "custom"){
+			let colorsetData = DiceColors.getColorSet(settings.colorset);
+			appearance.foreground = colorsetData.foreground;
+			appearance.background = colorsetData.background;
+			appearance.outline = colorsetData.outline;
+			appearance.edge = colorsetData.edge ? colorsetData.edge : "";
+		}
+
+		if(diceobj.colorset){
+			let colorsetData = DiceColors.getColorSet(diceobj.colorset);
+			mergeObject(appearance, colorsetData);
+		}
+		
+		if(dicenotation){
+			let colorset = null;
+			if (dicenotation.options.colorset)
+				colorset = dicenotation.options.colorset;
+			else if (dicenotation.options.flavor && COLORSETS[dicenotation.options.flavor]) {
+				colorset = dicenotation.options.flavor;
+			}
+			if(colorset){
+				let colorsetData = DiceColors.getColorSet(colorset);
+				mergeObject(appearance, colorsetData);
+			}
+			if(dicenotation.options.appearance){
+				mergeObject(appearance, dicenotation.options.appearance);
+			}
+		}
+		return appearance;
+	}
+
 	generateMaterialData(diceobj, appearance) {
 		let materialData = {};
 		let colorindex;
 
 		let colorsetData = DiceColors.getColorSet(appearance.colorset);
-		appearance.texture = DiceColors.getTexture(appearance.texture);
+		if(appearance.texture && !appearance.texture.id)
+			appearance.texture = DiceColors.getTexture(appearance.texture);
 
 		// set base color first
 		if (Array.isArray(appearance.background)) {
@@ -1212,8 +1273,11 @@ export class DiceFactory {
 		//Same for material
 		let baseTexture = Array.isArray(materialData.texture) ? materialData.texture[0]:materialData.texture;
 
-		if(appearance.material == "auto"){
-			materialData.material = baseTexture.material;
+		if(appearance.material == "auto" || appearance.material == ""){
+			if(colorsetData.material)
+				materialData.material = colorsetData.material;
+			else
+				materialData.material = baseTexture.material;
 		} else {
 			materialData.material = appearance.material;
 		}
@@ -1225,15 +1289,16 @@ export class DiceFactory {
 			} else {
 				materialData.font = colorsetData.font;
 			}
-			if(diceobj.fontScale){
-				materialData.fontScale = diceobj.fontScale;
-			} else {
-				materialData.fontScale = colorsetData.fontScale;
-			}
 		} else {
 			materialData.font = appearance.font;
-			if(appearance.fontScale)
-				materialData.fontScale = appearance.fontScale;
+		}
+
+		if(appearance.fontScale)
+			materialData.fontScale = appearance.fontScale;
+		else if(diceobj.fontScale){
+			materialData.fontScale = diceobj.fontScale;
+		} else {
+			materialData.fontScale = colorsetData.fontScale;
 		}
 		
 		materialData.cacheString = materialData.background+materialData.foreground+materialData.outline+materialData.texture.name+materialData.edge+materialData.material+materialData.font;
