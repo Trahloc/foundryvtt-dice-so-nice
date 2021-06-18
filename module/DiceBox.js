@@ -391,7 +391,7 @@ export class DiceBox {
 		this.volume = config.soundsVolume;
 		this.soundsSurface = config.soundsSurface;
 
-		await this.dicefactory.preloadPresets();
+		await this.dicefactory.preloadPresets(true, null, config.appearance);
 
 		this.throwingForce = config.throwingForce;
 		this.scene.traverse(object => {
@@ -997,7 +997,7 @@ export class DiceBox {
 			this.scene.add(this.pane);
 		}
 
-		let selectordice = Object.keys(this.dicefactory.dice);
+		let selectordice = this.dicefactory.systems.standard.dice.map(dice => dice.type);
 		//remove the useless d3 and d5
 		selectordice = selectordice.filter((die) => die !== "d3" && die !== "d5");
 		this.camera.position.z = selectordice.length > 10 ? this.cameraHeight.far / 1.3 : this.cameraHeight.medium;

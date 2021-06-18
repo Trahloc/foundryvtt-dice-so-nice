@@ -7,8 +7,6 @@ import { GLTFLoader } from './libs/three-modules/GLTFLoader.js';
 export class DiceFactory {
 
 	constructor() {
-		//Contains the dice set
-		this.dice = {};
 		this.geometries = {};
 
 		this.baseScale = 50;
@@ -206,34 +204,33 @@ export class DiceFactory {
 		this.systems[diceobj.system].dice.push(diceobj);		
 	}
 
-	preloadUserModels(userID){
-		let systemId = game.users.get(userID).getFlag("dice-so-nice","appearance").system;
-		let dices = this.systems[systemId].dice;
-		for(let i=0;i<dices.length;i++){
-			if(dices[i].modelFile && !dices[i].modelLoading)
-				dices[i].loadModel(this.loaderGLTF);
-		}
-	}
-
-	async preloadPresets(waitForLoad = false){
+	async preloadPresets(waitForLoad = true, userID = null, config = {}){
 		let activePresets = [];
-        game.users.forEach((user) => {
+		const preloadPresetsByUser = (user) => {
 			let appearance = user.getFlag("dice-so-nice", "appearance");
-			if(appearance){
+			if(!appearance)
+				appearance = {};
+			mergeObject(appearance, config);
+			if(!isObjectEmpty(appearance)){
 				for (let scope in appearance) {
 					if (appearance.hasOwnProperty(scope)) {
 						if(scope != "global")
 							activePresets.push(this.getPresetBySystem(scope, appearance[scope].system));
-						else if(appearance[scope].system != "standard"){
-							this.systems[scope].dice.forEach((obj) =>{
+						else if(this.systems.hasOwnProperty(appearance[scope].system)){
+							this.systems[appearance[scope].system].dice.forEach((obj) =>{
 								activePresets.push(obj);
 							});
 						}
 					}
 				}
-				activePresets.push(userSystem);
-			}	
-        });
+			}
+		};
+		if(userID)
+			preloadPresetsByUser(game.users.get(userID));
+		else
+        	game.users.forEach((user) =>{
+				preloadPresetsByUser(user);
+			});
         //remove duplicate
         activePresets = activePresets.filter((v, i, a) => a.indexOf(v) === i);
 		let promiseArray = [];
@@ -257,14 +254,6 @@ export class DiceFactory {
 		system.dice = [];
 		system.mode = mode;
 		this.systems[system.id] = system;
-		if(mode == "exclusive"){
-			this.systemsHaveExclusive = true;
-			if(this.systems[this.systemActivated] && this.systems[this.systemActivated].mode != "exclusive")
-				this.setSystem(system.id, false);
-		}
-		else if(mode=="force")
-			this.setSystem(system.id, true);
-		
 	}
 	//{type:"",labels:[],system:""}
 	//Should have been called "addDicePresetFromModel" but ¯\_(ツ)_/¯
@@ -302,8 +291,6 @@ export class DiceFactory {
 		if(dice.bumpMaps && dice.bumpMaps.length)
 			preset.setBumpMaps(dice.bumpMaps);
 		this.register(preset);
-		if(this.systemActivated == dice.system)
-			this.setSystem(dice.system);
 
 		if(dice.font && !this.fontFamilies.includes(dice.font)){
 			this.fontFamilies.push(dice.font);
@@ -331,28 +318,6 @@ export class DiceFactory {
 		preset.inertia = model.inertia;
 		preset.scale = model.scale;
 		this.register(preset);
-	}
-
-	setSystem(systemId, force=false){
-		if(this.systemForced && systemId != this.systemActivated)
-			return;
-		//first we reset to standard
-		let dices = this.systems["standard"].dice;
-		for(let i=0;i<dices.length;i++)
-			this.dice[dices[i].type] = dices[i];
-		//Then we apply override
-		if(systemId!= "standard" && this.systems.hasOwnProperty(systemId))
-		{
-			dices = this.systems[systemId].dice;
-			for(let i=0;i<dices.length;i++){
-				this.dice[dices[i].type] = dices[i];
-			}
-		}
-		if(force)
-			this.systemForced = true;
-		this.systemActivated = systemId;
-		if(systemId != this.systemActivated)
-			this.disposeCachedMaterials();
 	}
 
 	disposeCachedMaterials(type = null){
@@ -387,7 +352,8 @@ export class DiceFactory {
 	getPresetBySystem(type, system = "standard"){
 		let diceobj = null;
 		if(system != "standard"){
-			diceobj = this.systems[system].dice.find(obj => obj.type == type);
+			if(this.systems.hasOwnProperty(system))
+				diceobj = this.systems[system].dice.find(obj => obj.type == type);
 		}
 		//If not, or if it's the base system, load it
 		if(!diceobj){
@@ -463,7 +429,7 @@ export class DiceFactory {
 					closest_face = i;
 				}
 			}
-			const diceobj = factory.dice[this.notation.type];
+			const diceobj = factory.get(this.notation.type);
 			let dieValue = DICE_MODELS[this.shape].faceValues[closest_face];
 
 			if (this.shape == 'd4') {
@@ -595,7 +561,7 @@ export class DiceFactory {
 			}
 		}
 
-		//var img    = canvasBump.toDataURL("image/png");
+		//var img    = canvas.toDataURL("image/png");
 		//document.write('<img src="'+img+'"/>');
 		//generate basetexture for caching
 		if(!this.baseTextureCache[baseTextureCacheString]){
@@ -850,7 +816,7 @@ export class DiceFactory {
 			4) The colorset configured by the player for this dice type
 			5) The global colorset of the player
 		*/
-		let diceobj = this.dice[dicetype];
+		
 		let settings;
 		if(appearances[dicetype])
 			settings = appearances[dicetype];
@@ -877,7 +843,7 @@ export class DiceFactory {
 			appearance.outline = colorsetData.outline;
 			appearance.edge = colorsetData.edge ? colorsetData.edge : "";
 		}
-
+		let diceobj = this.getPresetBySystem(dicetype,appearance.system);
 		if(diceobj.colorset){
 			let colorsetData = DiceColors.getColorSet(diceobj.colorset);
 			mergeObject(appearance, colorsetData);

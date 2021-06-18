@@ -387,13 +387,17 @@ class Utils {
 
     static prepareSystemList() {
         let systems = game.dice3d.box.dicefactory.systems;
-        let hasExclusive = game.dice3d.box.dicefactory.systemsHaveExclusive;
         return Object.keys(systems).reduce((i18nCfg, key) => {
-            if ((!game.dice3d.box.dicefactory.systemForced || game.dice3d.box.dicefactory.systemActivated == key)&&(!hasExclusive || systems[key].mode=="exclusive"))
-                i18nCfg[key] = game.i18n.localize(systems[key].name);
+            i18nCfg[key] = game.i18n.localize(systems[key].name);
             return i18nCfg;
         }, {});
     };
+
+    static filterObject(obj, predicate){
+        return Object.keys(obj)
+          .filter( key => predicate(obj[key]) )
+          .reduce( (res, key) => (res[key] = obj[key], res), {} );
+    }
 }
 
 /**
@@ -451,8 +455,6 @@ export class Dice3D {
     static APPEARANCE(user = game.user) {
         let userAppearance = user.getFlag("dice-so-nice", "appearance");
         let appearance = mergeObject(Dice3D.DEFAULT_APPEARANCE(user), userAppearance);
-        if(!userAppearance && game.dice3d && game.dice3d.DiceFactory.systemActivated != "standard")
-            appearance.global.system = game.dice3d.DiceFactory.systemActivated;
         return mergeObject(appearance, { "-=dimensions": null });
     }
 
@@ -579,6 +581,7 @@ export class Dice3D {
             DiceColors.initColorSets();
             Hooks.call("diceSoNiceReady", this);
             await this.DiceFactory._loadFonts();
+            await this.DiceFactory.preloadPresets();
         });
         DiceSFXManager.init();
         this._startQueueHandler();
@@ -668,7 +671,7 @@ export class Dice3D {
                     if(request.user == game.user.id || Dice3D.CONFIG.showOthersSFX)
                         DiceSFXManager.init();
                     if(request.user != game.user.id){
-                        this.DiceFactory.preloadUserModels(request.user);
+                        this.DiceFactory.preloadPresets(false, request.user);
                     }
                     break;
             }
@@ -1128,6 +1131,8 @@ class DiceConfig extends FormApplication {
             this.toggleHideAfterRoll();
             this.toggleAutoScale();
             this.toggleCustomColors();
+            this.toggleCustomization();
+            this.filterSystems();
 
             this.navOrder = {};
             let i=0;
@@ -1154,6 +1159,10 @@ class DiceConfig extends FormApplication {
 
         $(this.element).on("change", ".dice-so-nice [data-colorset]", (ev) =>{
             this.toggleCustomColors($(ev.target).data("dicetype"));
+        });
+
+        $(this.element).on("change", ".dice-so-nice [data-system]", (ev) =>{
+            this.toggleCustomization($(ev.target).data("dicetype"));
         });
 
         $(this.element).on("change", ".dice-so-nice input,.dice-so-nice select", (ev) =>{
@@ -1234,6 +1243,8 @@ class DiceConfig extends FormApplication {
                         }
                         this.activateAppearanceTab(diceType);
                         this.toggleCustomColors(diceType);
+                        this.toggleCustomization(diceType);
+                        this.filterSystems(diceType);
                     });
                 }
             }
@@ -1323,6 +1334,47 @@ class DiceConfig extends FormApplication {
             $(element).find('[data-outlineColorSelector]').prop("disabled", colorset);
             $(element).find('[data-edgeColorSelector]').prop("disabled", colorset);
         }); 
+    }
+
+    toggleCustomization(diceType = null){
+        let container;
+        if(diceType){
+            container = $(`.dice-so-nice .tabAppearance[data-tab="${diceType}"]`);
+        } else {
+            container = $(`.dice-so-nice .tabAppearance`);
+        }
+         
+        container.each((index, element)=>{
+            let diceType = $(element).data("tab");
+            if(diceType != "global"){
+                let system = $(element).find('[data-system]').val();
+                let customizationElements = $(element).find('[data-colorset],[data-texture],[data-material],[data-font]');
+                if(system != "standard"){
+                    let diceobj = this.box.dicefactory.systems[system].dice.find(obj => obj.type == diceType);
+                    customizationElements.prop("disabled", (diceobj && (diceobj.modelFile || diceobj.colorset)));
+                } else {
+                    customizationElements.prop("disabled", false);
+                }
+            }
+        });
+    }
+
+    filterSystems(diceType = null){
+        let container;
+        if(diceType){
+            container = $(`.dice-so-nice .tabAppearance[data-tab="${diceType}"] [data-system]`);
+        } else {
+            container = $(`.dice-so-nice .tabAppearance [data-system]`);
+        }
+        container.each((index, element)=>{
+            let diceType = $(element).data("dicetype");
+            if(diceType != "global"){
+                $(element).find("option").each((indexOpt, elementOpt)=>{
+                    if(!this.box.dicefactory.systems[$(elementOpt).val()].dice.find(obj => obj.type == diceType))
+                        $(elementOpt).attr("disabled","disabled");
+                });
+            }
+        });
     }
 
     onApply(event = null) {

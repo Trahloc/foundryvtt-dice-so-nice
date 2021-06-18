@@ -52,11 +52,8 @@ export class DicePreset {
 	}
 
 	registerFaces(faces, type = "labels") {
-		let tab;
-		if (type == "labels")
-			tab = this.labels;
-		else
-			tab = this.normals;
+		let tab = [];
+		
 		tab.push('');
 		if (!["d2", "d10"].includes(this.shape)) tab.push('');
 
@@ -67,7 +64,7 @@ export class DicePreset {
 			let c = faces[2];
 			let d = faces[3];
 
-			this.labels = [
+			tab = [
 				[[], [0, 0, 0], [b, d, c], [a, c, d], [b, a, d], [a, b, c]],
 				[[], [0, 0, 0], [b, c, d], [c, a, d], [b, d, a], [c, b, a]],
 				[[], [0, 0, 0], [d, c, b], [c, d, a], [d, b, a], [c, a, b]],
@@ -76,6 +73,10 @@ export class DicePreset {
 		} else {
 			Array.prototype.push.apply(tab, faces)
 		}
+		if (type == "labels")
+			this.labels = tab;
+		else
+			this.normals = tab;
 	}
 
 	setLabels(labels) {
@@ -113,21 +114,21 @@ export class DicePreset {
 						}
 						hasTextures = true;
 						imgElements[i] = new Image();
-						imgElements[i].onload = function () {
-
+						imgElements[i].textureType = type;
+						imgElements[i].onload = function(){
 							if (++loadedImages >= numImages) {
-								this.registerFaces(imgElements, type);
-								if(textureTypeLoaded < 2)
+								this.registerFaces(imgElements, imgElements[0].textureType);
+								if(textureTypeLoaded < 1)
 									textureTypeLoaded++;
 								else
 									resolve();
 							}
-						};
+						}.bind(this);
 						imgElements[i].src = textures[i];
 					}
 					if (!hasTextures){
 						this.registerFaces(imgElements, type);
-						if(textureTypeLoaded < 2)
+						if(textureTypeLoaded < 1)
 							textureTypeLoaded++;
 						else
 							resolve();
