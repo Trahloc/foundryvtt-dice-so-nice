@@ -1,4 +1,5 @@
 import {DicePreset} from './DicePreset.js';
+import {BASE_PRESETS_LIST, EXTRA_PRESETS_LIST} from './DiceDefaultPresets.js';
 import {DiceColors, DICE_SCALE} from './DiceColors.js';
 import {DICE_MODELS} from './DiceModels.js';
 import * as THREE from './libs/three.module.js';
@@ -12,6 +13,7 @@ export class DiceFactory {
 
 		this.baseScale = 50;
 
+		//TODO
 		this.systemForced = false;
 		this.systemActivated = "standard";
 		this.systemsHaveExclusive = false;
@@ -51,318 +53,13 @@ export class DiceFactory {
 			'dot': {id: 'dot', name: game.i18n.localize("DICESONICE.System.Dot"), dice:[], mode:"default"},
 			'dot_b': {id: 'dot_b', name: game.i18n.localize("DICESONICE.System.DotBlack"), dice:[], mode:"default"}
 		};
-		let diceobj;
-		diceobj = new DicePreset('d2');
-		diceobj.name = 'd2';
-		diceobj.setLabels(['1','2']);
-		diceobj.setValues(1,2);
-		diceobj.inertia = 8;
-		diceobj.mass = 400;
-		diceobj.scale = 0.9;
-		this.register(diceobj);
 		
-		diceobj = new DicePreset('dc','d2');
-		diceobj.name = 'Coin';
-		diceobj.setLabels([
-			'modules/dice-so-nice/textures/coin/tail.webp',
-			'modules/dice-so-nice/textures/coin/heads.webp'
-		]);
-		diceobj.setBumpMaps([
-			'modules/dice-so-nice/textures/coin/tail_bump.webp',
-			'modules/dice-so-nice/textures/coin/heads_bump.webp'
-		]);
-		diceobj.setValues(0,1);
-		diceobj.inertia = 8;
-		diceobj.scale = 0.9;
-		diceobj.colorset = "coin_default"
-		this.register(diceobj);
-
-		diceobj = new DicePreset('d4');
-		diceobj.name = 'd4';
-		diceobj.setLabels(['1','2','3','4']);
-		diceobj.setValues(1,4);
-		diceobj.inertia = 5;
-		diceobj.scale = 1.2;
-		this.register(diceobj);
-
-		diceobj = new DicePreset('d6');
-		diceobj.name = 'd6';
-		diceobj.setLabels(['1', '2', '3', '4', '5', '6']);
-		diceobj.setValues(1,6);
-		diceobj.scale = 0.9;
-		this.register(diceobj);
-
-		diceobj = new DicePreset('d3', 'd6');
-		diceobj.name = 'd3';
-		diceobj.setLabels(['1', '2', '3', '1', '2', '3']);
-		diceobj.setValues(1,3);
-		diceobj.scale = 0.9;
-		this.register(diceobj);
-
-		diceobj = new DicePreset('df', 'd6');
-		diceobj.name = 'Fate Dice';
-		diceobj.setLabels(['−', ' ', '+']);
-		diceobj.setValues(-1,1);
-		diceobj.scale = 0.9;
-		this.register(diceobj);
-
-		diceobj = new DicePreset('d8');
-		diceobj.name = 'd8';
-		diceobj.setLabels(['1','2','3','4','5','6','7','8']);
-		diceobj.setValues(1,8);
-		this.register(diceobj);
-
-		diceobj = new DicePreset('d10');
-		diceobj.name = 'd10';
-		diceobj.setLabels(['1','2','3','4','5','6','7','8','9','0']);
-		diceobj.setValues(1,10);
-		diceobj.mass = 450;
-		diceobj.inertia = 9;
-		diceobj.scale = 0.9;
-		this.register(diceobj);
-
-		diceobj = new DicePreset('d5','d10');
-		diceobj.name = 'd5';
-		diceobj.setLabels(['1','2','3','4','5','1','2','3','4','5']);
-		diceobj.setValues(1,5);
-		diceobj.mass = 450;
-		diceobj.inertia = 9;
-		diceobj.scale = 0.9;
-		this.register(diceobj);
-
-		diceobj = new DicePreset('d100', 'd10');
-		diceobj.name = 'd100';
-		diceobj.setLabels(['10', '20', '30', '40', '50', '60', '70', '80', '90', '00']);
-		diceobj.setValues(10, 100, 10);
-		diceobj.mass = 450;
-		diceobj.inertia = 9;
-		diceobj.scale = 0.9;
-		this.register(diceobj);
-
-		diceobj = new DicePreset('d12');
-		diceobj.name = 'd12';
-		diceobj.setLabels(['1','2','3','4','5','6','7','8','9','10','11','12']);
-		diceobj.setValues(1,12);
-		diceobj.mass = 450;
-		diceobj.inertia = 8;
-		diceobj.scale = 0.9;
-		this.register(diceobj);
-
-		diceobj = new DicePreset('d20');
-		diceobj.name = 'd20';
-		diceobj.setLabels(['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20']);
-		diceobj.setValues(1,20);
-		diceobj.mass = 500;
-		diceobj.scale = 1;
-		diceobj.inertia = 6;
-		this.register(diceobj);
-
-		diceobj = new DicePreset('d6');
-		diceobj.name = 'd6';
-		diceobj.setLabels([
-			'modules/dice-so-nice/textures/dot/d6-1.webp',
-			'modules/dice-so-nice/textures/dot/d6-2.webp',
-			'modules/dice-so-nice/textures/dot/d6-3.webp',
-			'modules/dice-so-nice/textures/dot/d6-4.webp',
-			'modules/dice-so-nice/textures/dot/d6-5.webp',
-			'modules/dice-so-nice/textures/dot/d6-6.webp',
-		]);
-		diceobj.setBumpMaps([
-			'modules/dice-so-nice/textures/dot/d6-1-b.webp',
-			'modules/dice-so-nice/textures/dot/d6-2-b.webp',
-			'modules/dice-so-nice/textures/dot/d6-3-b.webp',
-			'modules/dice-so-nice/textures/dot/d6-4-b.webp',
-			'modules/dice-so-nice/textures/dot/d6-5-b.webp',
-			'modules/dice-so-nice/textures/dot/d6-6-b.webp',
-		]);
-		diceobj.setValues(1,6);
-		diceobj.scale = 0.9;
-		diceobj.system = "dot";
-		this.register(diceobj);
-
-		diceobj = new DicePreset('d6');
-		diceobj.name = 'd6';
-		diceobj.setLabels([
-			'modules/dice-so-nice/textures/dot/d6-1-black.webp',
-			'modules/dice-so-nice/textures/dot/d6-2-black.webp',
-			'modules/dice-so-nice/textures/dot/d6-3-black.webp',
-			'modules/dice-so-nice/textures/dot/d6-4-black.webp',
-			'modules/dice-so-nice/textures/dot/d6-5-black.webp',
-			'modules/dice-so-nice/textures/dot/d6-6-black.webp',
-		]);
-		diceobj.setBumpMaps([
-			'modules/dice-so-nice/textures/dot/d6-1-b.webp',
-			'modules/dice-so-nice/textures/dot/d6-2-b.webp',
-			'modules/dice-so-nice/textures/dot/d6-3-b.webp',
-			'modules/dice-so-nice/textures/dot/d6-4-b.webp',
-			'modules/dice-so-nice/textures/dot/d6-5-b.webp',
-			'modules/dice-so-nice/textures/dot/d6-6-b.webp',
-		]);
-		diceobj.setValues(1,6);
-		diceobj.scale = 0.9;
-		diceobj.system = "dot_b";
-		this.register(diceobj);
-
-		diceobj = new DicePreset('d20');
-		diceobj.name = 'd20';
-		diceobj.setLabels(['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','modules/dice-so-nice/textures/foundry_vtt/foundrynat20.webp']);
-		diceobj.setBumpMaps([,,,,,,,,,,,,,,,,,,,'modules/dice-so-nice/textures/foundry_vtt/foundrynat20_bump.webp']);
-		diceobj.setValues(1,20);
-		diceobj.mass = 500;
-		diceobj.scale = 1;
-		diceobj.font = "Arial Black";
-		diceobj.fontScale = 0.8;
-		diceobj.inertia = 6;
-		diceobj.system = "foundry_vtt";
-		this.register(diceobj);
-
-		//Spectrum Dice
-
-		this.addDicePreset({
-			type:"df",
-			labels:[
-				'modules/dice-so-nice/textures/spectrumdice/df-m.webp',
-				'modules/dice-so-nice/textures/spectrumdice/df-0.webp',
-				'modules/dice-so-nice/textures/spectrumdice/df-p.webp'
-			],
-			system:"spectrum"
+		BASE_PRESETS_LIST.forEach((preset) => {
+			this.register(preset);
 		});
-
-		this.addDicePreset({
-			type:"d2",
-			labels:[
-				'modules/dice-so-nice/textures/spectrumdice/d2-1.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d2-2.webp'
-			],
-			system:"spectrum"
-		});
-
-		this.addDicePreset({
-			type:"dc",
-			labels:[
-				'modules/dice-so-nice/textures/spectrumdice/dc-h.webp',
-				'modules/dice-so-nice/textures/spectrumdice/dc-t.webp'
-			],
-			system:"spectrum"
-		});
-
-		this.addDicePreset({
-			type:"d4",
-			labels:[
-				'modules/dice-so-nice/textures/spectrumdice/d4-1.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d4-2.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d4-3.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d4-4.webp'
-			],
-			system:"spectrum"
-		});
-
-		this.addDicePreset({
-			type:"d6",
-			labels:[
-				'modules/dice-so-nice/textures/spectrumdice/d6-1.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d6-2.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d6-3.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d6-4.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d6-5.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d6-6.webp'
-			],
-			system:"spectrum"
-		});
-
-		this.addDicePreset({
-			type:"d8",
-			labels:[
-				'modules/dice-so-nice/textures/spectrumdice/d8-1.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d8-2.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d8-3.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d8-4.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d8-5.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d8-6.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d8-7.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d8-8.webp'
-			],
-			system:"spectrum"
-		});
-
-		this.addDicePreset({
-			type:"d10",
-			labels:[
-				'modules/dice-so-nice/textures/spectrumdice/d10-1.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d10-2.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d10-3.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d10-4.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d10-5.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d10-6.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d10-7.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d10-8.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d10-9.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d10-0.webp'
-			],
-			system:"spectrum"
-		});
-
-		this.addDicePreset({
-			type:"d12",
-			labels:[
-				'modules/dice-so-nice/textures/spectrumdice/d12-1.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d12-2.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d12-3.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d12-4.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d12-5.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d12-6.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d12-7.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d12-8.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d12-9.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d12-10.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d12-11.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d12-12.webp'
-			],
-			system:"spectrum"
-		});
-
-		this.addDicePreset({
-			type:"d100",
-			labels:[
-				'modules/dice-so-nice/textures/spectrumdice/d100-10.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d100-20.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d100-30.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d100-40.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d100-50.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d100-60.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d100-70.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d100-80.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d100-90.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d100-00.webp'
-			],
-			system:"spectrum"
-		});
-
-		this.addDicePreset({
-			type:"d20",
-			labels:[
-				'modules/dice-so-nice/textures/spectrumdice/d20-1.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-2.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-3.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-4.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-5.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-6.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-7.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-8.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-9.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-10.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-11.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-12.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-13.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-14.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-15.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-16.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-17.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-18.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-19.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-20.webp'
-			],
-			system:"spectrum"
+		
+		EXTRA_PRESETS_LIST.forEach((data) => {
+			this.addDicePreset(data);
 		});
 
 		for(let i in CONFIG.Dice.terms){
@@ -506,25 +203,7 @@ export class DiceFactory {
 	}
 
 	register(diceobj) {
-		if(diceobj.system == "standard")
-			this.dice[diceobj.type] = diceobj;
-		this.systems[diceobj.system].dice.push(diceobj);
-
-		let activatedSystems = [];
-        game.users.forEach((user) => {
-			let userSystem = null;
-			if(user.getFlag("dice-so-nice", "appearance"))
-            	userSystem = user.getFlag("dice-so-nice", "appearance").system;
-            if(userSystem)
-				activatedSystems.push(userSystem);
-        });
-        //remove duplicate
-        activatedSystems = activatedSystems.filter((v, i, a) => a.indexOf(v) === i);
-
-		if((diceobj.system == this.systemActivated || activatedSystems.includes(diceobj.system)) && diceobj.modelFile && !diceobj.modelLoading){
-			diceobj.loadModel(this.loaderGLTF);
-		}
-		
+		this.systems[diceobj.system].dice.push(diceobj);		
 	}
 
 	preloadUserModels(userID){
@@ -534,6 +213,43 @@ export class DiceFactory {
 			if(dices[i].modelFile && !dices[i].modelLoading)
 				dices[i].loadModel(this.loaderGLTF);
 		}
+	}
+
+	async preloadPresets(waitForLoad = false){
+		let activePresets = [];
+        game.users.forEach((user) => {
+			let appearance = user.getFlag("dice-so-nice", "appearance");
+			if(appearance){
+				for (let scope in appearance) {
+					if (appearance.hasOwnProperty(scope)) {
+						if(scope != "global")
+							activePresets.push(this.getPresetBySystem(scope, appearance[scope].system));
+						else if(appearance[scope].system != "standard"){
+							this.systems[scope].dice.forEach((obj) =>{
+								activePresets.push(obj);
+							});
+						}
+					}
+				}
+				activePresets.push(userSystem);
+			}	
+        });
+        //remove duplicate
+        activePresets = activePresets.filter((v, i, a) => a.indexOf(v) === i);
+		let promiseArray = [];
+		activePresets.forEach((preset)=>{
+			
+			if(preset.modelFile){
+				//Custom 3D model
+				promiseArray.push(preset.loadModel(this.loaderGLTF));
+			} else {
+				//Classic 3D model
+				promiseArray.push(preset.loadTextures());
+			}
+		});
+
+		if(waitForLoad)
+			await Promise.all(promiseArray);
 	}
 
 	//{id: 'standard', name: game.i18n.localize("DICESONICE.System.Standard")}
@@ -639,19 +355,6 @@ export class DiceFactory {
 			this.disposeCachedMaterials();
 	}
 
-	async preloadModels(systemId){
-		if(systemId!= "standard" && this.systems.hasOwnProperty(systemId))
-		{
-			let modelsPromise = [];
-			let dices = this.systems[systemId].dice;
-			for(let i=0;i<dices.length;i++){
-				if(this.dice[dices[i].type].modelFile)
-					modelsPromise.push(this.dice[dices[i].type].loadModel(this.loaderGLTF));
-			}
-			await Promise.all(modelsPromise);
-		}
-	}
-
 	disposeCachedMaterials(type = null){
 		for (const material in this.baseTextureCache) {
 			if(type == null || material.substr(0,type.length) == type){
@@ -677,9 +380,25 @@ export class DiceFactory {
 		return Promise.race([document.fonts.ready, timeout]);
 	}
 
+	get(type) {
+		return this.getPresetBySystem(type);
+	}
+
+	getPresetBySystem(type, system = "standard"){
+		let diceobj = null;
+		if(system != "standard"){
+			diceobj = this.systems[system].dice.find(obj => obj.type == type);
+		}
+		//If not, or if it's the base system, load it
+		if(!diceobj){
+			diceobj = this.systems.standard.dice.find(obj => obj.type == type);
+		}
+		return diceobj;
+	}
+
 	// returns a dicemesh (THREE.Mesh) object
 	create(scopedTextureCache, type, appearance) {
-		let diceobj = this.dice[type];
+		let diceobj = this.getPresetBySystem(type, appearance.system);
 		let scopedScale = scopedTextureCache.type == "board" ? this.baseScale : 60;
 		if (!diceobj) return null;
 		let dicemesh;
@@ -777,9 +496,6 @@ export class DiceFactory {
 		return dicemesh;
 	}
 
-	get(type) {
-		return this.dice[type];
-	}
 	createMaterials(scopedTextureCache, baseTextureCacheString, diceobj, materialData) {
 		//TODO : createMaterials
 		if(this.baseTextureCache[baseTextureCacheString])

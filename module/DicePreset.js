@@ -21,7 +21,8 @@ export class DicePreset {
 		this.modelLoaded = false;
 		this.modelLoading = false;
 		this.modelFile = null;
-		this.appearanceGlobal = true;
+
+		//todo : check if this is useful
 		this.appearance = {
 			labelColor: "#FFFFFF",
 			diceColor: "#000000",
@@ -78,37 +79,63 @@ export class DicePreset {
 	}
 
 	setLabels(labels) {
-		this.loadTextures(labels, this.registerFaces.bind(this), "labels");
+		this.labels = labels;
 	}
 
 	setBumpMaps(normals) {
-		this.loadTextures(normals, this.registerFaces.bind(this), "bump");
+		this.normals = normals;
 	}
 
-	loadTextures(textures, callback, type) {
-		let loadedImages = 0;
-		let numImages = textures.length;
-		let regexTexture = /\.(PNG|JPG|GIF|WEBP)$/i;
-		let imgElements = Array(textures.length);
-		let hasTextures = false;
-		for (let i = 0; i < numImages; i++) {
-			if (textures[i] == null || textures[i] == '' || !textures[i].match(regexTexture)) {
-				imgElements[i] = textures[i];
-				++loadedImages
-				continue;
-			}
-			hasTextures = true;
-			imgElements[i] = new Image();
-			imgElements[i].onload = function () {
+	loadTextures() {
+		if(!this.modelLoaded && this.modelLoading === false){
+			this.modelLoading = new Promise((resolve,reject)=> {
+				let textures;
+				let type;
+				let textureTypeLoaded = 0;
+				for(let i = 0; i < 2;i++){
+					if(i == 0){
+						textures = this.labels;
+						type = "labels";
+					} else {
+						textures = this.normals;
+						type = "bump";
+					}
+					let loadedImages = 0;
+					let numImages = textures.length;
+					let regexTexture = /\.(PNG|JPG|GIF|WEBP)$/i;
+					let imgElements = Array(textures.length);
+					let hasTextures = false;
+					for (let i = 0; i < numImages; i++) {
+						if (textures[i] == null || textures[i] == '' || !textures[i].match(regexTexture)) {
+							imgElements[i] = textures[i];
+							++loadedImages
+							continue;
+						}
+						hasTextures = true;
+						imgElements[i] = new Image();
+						imgElements[i].onload = function () {
 
-				if (++loadedImages >= numImages) {
-					callback(imgElements, type);
+							if (++loadedImages >= numImages) {
+								this.registerFaces(imgElements, type);
+								if(textureTypeLoaded < 2)
+									textureTypeLoaded++;
+								else
+									resolve();
+							}
+						};
+						imgElements[i].src = textures[i];
+					}
+					if (!hasTextures){
+						this.registerFaces(imgElements, type);
+						if(textureTypeLoaded < 2)
+							textureTypeLoaded++;
+						else
+							resolve();
+					}
 				}
-			};
-			imgElements[i].src = textures[i];
+			});
 		}
-		if (!hasTextures)
-			callback(imgElements, type);
+		return this.modelLoading;
 	}
 
 	range(start, stop, step = 1) {
@@ -124,9 +151,9 @@ export class DicePreset {
 		this.modelLoaded = false;
 	}
 
-	loadModel(loader) {
+	loadModel(loader = null) {
 		// Load a glTF resource
-		if(this.modelLoading === false){
+		if(!this.modelLoaded && this.modelLoading === false){
 			this.modelLoading = new Promise((resolve,reject)=> {
 				loader.load(this.modelFile, gltf => {
 					gltf.scene.traverse(function (node) {

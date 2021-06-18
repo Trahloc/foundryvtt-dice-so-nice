@@ -112,7 +112,7 @@ export class DiceBox {
 		for (const [surface, numsounds] of surfaces) {
 			this.sounds_table[surface] = [];
 			for (let s = 1; s <= numsounds; ++s) {
-				let path = `modules/dice-so-nice/sounds/${surface}/surface_${surface}${s}.wav`;
+				let path = `modules/dice-so-nice/sounds/${surface}/surface_${surface}${s}.mp3`;
 				AudioHelper.preloadSound(path);
 				this.sounds_table[surface].push(path);
 			}
@@ -127,14 +127,14 @@ export class DiceBox {
 		for (const [material, numsounds] of materials) {
 			this.sounds_dice[material] = [];
 			for (let s = 1; s <= numsounds; ++s) {
-				let path = `modules/dice-so-nice/sounds/dicehit/dicehit${s}_${material}.wav`;
+				let path = `modules/dice-so-nice/sounds/dicehit/dicehit${s}_${material}.mp3`;
 				AudioHelper.preloadSound(path);
 				this.sounds_dice[material].push(path);
 			}
 		}
 
 		for (let i = 1; i <= 6; ++i) {
-			let path = `modules/dice-so-nice/sounds/dicehit/coinhit${i}.wav`;
+			let path = `modules/dice-so-nice/sounds/dicehit/coinhit${i}.mp3`;
 			AudioHelper.preloadSound(path);
 			this.sounds_coins.push(path);
 		}
@@ -144,10 +144,7 @@ export class DiceBox {
 		return new Promise(async resolve => {
 			game.audio.pending.push(this.preloadSounds.bind(this));
 
-			if (this.config.system != "standard"){
-				this.dicefactory.setSystem(this.config.system);
-				await this.dicefactory.preloadModels(this.config.system);
-			}
+			await this.dicefactory.preloadPresets();
 
 			this.sounds = this.config.sounds == '1';
 			this.volume = this.config.soundsVolume;
@@ -393,10 +390,9 @@ export class DiceBox {
 		this.sounds = config.sounds;
 		this.volume = config.soundsVolume;
 		this.soundsSurface = config.soundsSurface;
-		if (config.system){
-			this.dicefactory.setSystem(config.system);
-			await this.dicefactory.preloadModels(config.system);
-		}
+
+		await this.dicefactory.preloadPresets();
+
 		this.throwingForce = config.throwingForce;
 		this.scene.traverse(object => {
 			if (object.type === 'Mesh') object.material.needsUpdate = true;
@@ -943,7 +939,6 @@ export class DiceBox {
 		for (let j = 0; j < throws.length; j++) {
 			let notationVectors = throws[j];
 			
-			this.dicefactory.setSystem(notationVectors.dsnConfig.system);
 			for (let i = 0, len = notationVectors.dice.length; i < len; ++i) {
 				notationVectors.dice[i].startAtIteration = j * this.nbIterationsBetweenRolls;
 				let appearance = this.dicefactory.getAppearanceForDice(notationVectors.dsnConfig.appearance,notationVectors.dice[i].type, notationVectors.dice[i]);
@@ -1210,6 +1205,16 @@ export class DiceBox {
 		}
 
 		return obj;
+	}
+
+	findShowcaseDie(pos){
+		this.raycaster.setFromCamera(pos, this.camera);
+		const intersects = this.raycaster.intersectObjects(this.diceList);
+		if(intersects.length){
+			return intersects[0];
+		}
+		else
+			return null;
 	}
 
 	findHoveredDie(){

@@ -19,8 +19,9 @@
                     </a>
                     <nav class="dsn-appearance-tabs" data-group="dsn-dice">
                         <span class="item" data-tab="global">Global</span>
+                        <span class="dsn-appearance-hint" {{{displayHint}}}>{{localize "DICESONICE.navAppearanceHint"}}</span>
                         {{#each navAppearance as |name key|}}
-                        <span class="item" data-tab="{{key}}">{{name}} <i class="fas fa-times"></i></span>
+                        <span class="item" data-tab="{{key}}">{{name}} <i class="fas fa-times" data-close-tab></i></span>
                         {{/each}}
                     </nav>
                     <section id="dsn-appearance-content">

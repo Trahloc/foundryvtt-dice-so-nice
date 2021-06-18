@@ -68,6 +68,7 @@
     "DICESONICE.animateInlineRollHint" : "When possible, show a 3D dice when an inline roll is detected in the chat.",
     "DICESONICE.allowInteractivity" : "Allow interaction with rolled dice",
     "DICESONICE.allowInteractivityHint" : "Let players grab and throw 3D dice after they've been rolled on the table (this has no effect on the results)",
+    "DICESONICE.navAppearanceHint" : "(Click on a die to customize it)",
 
     "DICESONICE.Add" : "Add",
     "DICESONICE.Delete" : "Delete",

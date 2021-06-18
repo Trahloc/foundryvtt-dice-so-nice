@@ -47,6 +47,7 @@
 #dice-configuration-canvas {
     width: 477px;
     height: 234px;
+    cursor:pointer;
 }
 
 .dice-so-nice .sfxs-list {
@@ -127,8 +128,59 @@
     padding: 3px;
     margin: 5px 2px;
     font-weight: bold;
+    cursor: pointer;
+    opacity: 0.6;
+}
+
+.dice-so-nice .dsn-appearance-tabs span::before {
+    display: inline-block;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    padding:0px 3px;
+}
+
+.dice-so-nice .dsn-appearance-tabs span.active::before{
+    font-family: "Font Awesome 5 Free"; 
+    font-weight: 900; 
+    content: "\f140";
 }
 
 .dice-so-nice .dsn-appearance-tabs {
     height: 30px;
+}
+
+.dice-so-nice .dsn-appearance-tabs span.item.active {
+    opacity: 1;
+}
+
+.dice-so-nice .dsn-appearance-tabs i.fas.fa-times {
+    font-size: 11px;
+    vertical-align: top;
+    padding: 0px 2px;
+    transition: all .2s ease-in-out;
+    display:none;
+}
+
+.dice-so-nice .dsn-appearance-tabs i.fas.fa-times:hover {
+    transform: scale(1.2);
+}
+
+.dice-so-nice .dsn-appearance-tabs .active i.fas.fa-times{
+    display:inline-block;
+}
+
+.dice-so-nice .dsn-appearance-tabs span.item:hover {
+    opacity: 0.8;
+}
+
+.dice-so-nice .dsn-appearance-tabs span.item.active:hover {
+    opacity: 1;
+}
+
+.dice-so-nice span.dsn-appearance-hint {
+    border: none;
+    font-weight: normal;
+    cursor: auto;
 }

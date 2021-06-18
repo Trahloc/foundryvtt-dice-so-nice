@@ -8,7 +8,7 @@ import { DiceSFXManager } from './DiceSFXManager.js';
  * Registers the exposed settings for the various 3D dice options.
  */
 Hooks.once('init', () => {
-
+    const debouncedReload = foundry.utils.debounce(window.location.reload, 100);
     game.settings.registerMenu("dice-so-nice", "dice-so-nice", {
         name: "DICESONICE.config",
         label: "DICESONICE.configTitle",
@@ -27,7 +27,7 @@ Hooks.once('init', () => {
         onChange: settings => {
             if (game.dice3d) {
                 if((game.dice3d.currentCanvasPosition != settings.canvasZIndex)||(game.dice3d.currentBumpMapping != settings.bumpMapping)||(game.dice3d.currentUseHighDPI != settings.useHighDPI))
-                    location.reload();
+                    debouncedReload();
                 else
                     game.dice3d.update(settings);
             }
@@ -61,9 +61,7 @@ Hooks.once('init', () => {
         }),
         default: "0",
         config: true,
-        onChange: () => {
-            location.reload();
-        }
+        onChange: debouncedReload
     });
 
     game.settings.register("dice-so-nice", "enabledSimultaneousRolls", {
@@ -73,9 +71,7 @@ Hooks.once('init', () => {
         type: Boolean,
         default: true,
         config: true,
-        onChange: () => {
-            location.reload();
-        }
+        onChange: debouncedReload
     });
 
     game.settings.register("dice-so-nice", "diceCanBeFlipped", {
@@ -153,9 +149,7 @@ Hooks.once('init', () => {
         type: Boolean,
         default: true,
         config: true,
-        onChange: () => {
-            location.reload();
-        }
+        onChange: debouncedReload
     });
 
 });
@@ -295,7 +289,7 @@ class Utils {
         //v2 to v4
         await Promise.all(game.users.map(async (user)=>{
             let appearance = user.getFlag("dice-so-nice", "appearance");
-            if(appearance && appearance.labelColor){
+            if(appearance && appearance.hasOwnProperty("labelColor")){
                 let data = {
                     global:appearance
                 };
@@ -449,7 +443,9 @@ export class Dice3D {
     }
 
     static get CONFIG() {
-        return mergeObject(Dice3D.DEFAULT_OPTIONS, game.settings.get("dice-so-nice", "settings"));
+        let config = mergeObject(Dice3D.DEFAULT_OPTIONS, game.settings.get("dice-so-nice", "settings"));
+        mergeObject(config,{ "-=appearance": null, "-=sfxLine":null });
+        return config;
     }
 
     static APPEARANCE(user = game.user) {
@@ -1015,7 +1011,7 @@ class DiceConfig extends FormApplication {
             closeOnSubmit: true,
             tabs: [
                 {navSelector: ".tabs", contentSelector: "#config-tabs", initial: "general"},
-                {navSelector: ".dsn-appearance-tabs", contentSelector: "#dsn-appearance-content", initial: "global"},
+                {navSelector: ".dsn-appearance-tabs", contentSelector: "#dsn-appearance-content", initial: "global"}
             ]
         })
     }
@@ -1077,7 +1073,7 @@ class DiceConfig extends FormApplication {
             }
         }
         let tabsList = [];
-        for (var scope in data.appearance) {
+        for (let scope in data.appearance) {
             if (data.appearance.hasOwnProperty(scope)) {
                 tabsList.push(scope);
             }
@@ -1102,7 +1098,17 @@ class DiceConfig extends FormApplication {
                 data.navAppearance[diceType] = diceType.toUpperCase();
         });
         await Promise.all(tabsPromises);
+
+        if(tabsAppearance.length>1)
+            data.displayHint = "style='display:none;'";
+        else
+            data.displayHint = '';
+
         data.tabsAppearance = tabsAppearance.join("");
+        this.lastActiveAppearanceTab = "global";
+
+        this.initializationData = data;
+        this.currentGlobalAppearance = data.appearance.global;
         return data;
     }
 
@@ -1123,19 +1129,47 @@ class DiceConfig extends FormApplication {
             this.toggleAutoScale();
             this.toggleCustomColors();
 
-            html.find('[data-hideAfterRoll]').change(this.toggleHideAfterRoll.bind(this));
-            html.find('[data-sounds]').change(this.toggleSounds.bind(this));
-            html.find('[data-autoscale]').change(this.toggleAutoScale.bind(this));
-            html.find('[data-colorset]').change((ev) => {
-                this.toggleCustomColors($(ev.target).data("dicetype"));
+            this.navOrder = {};
+            let i=0;
+            this.box.diceList.forEach((el)=>{
+                this.navOrder[el.userData] = i++;
             });
-            html.find('input,select').change(this.onApply.bind(this));
-            html.find('[data-reset]').click(this.onReset.bind(this));
+
+
 
             this.reset = false;
         });
 
-        html.find(".sfx-create").click((ev)=>{
+        $(this.element).on("change", ".dice-so-nice [data-hideAfterRoll]", (ev) =>{
+            this.toggleHideAfterRoll(ev);
+        });
+
+        $(this.element).on("change", ".dice-so-nice [data-sounds]", (ev) =>{
+            this.toggleSounds(ev);
+        });
+
+        $(this.element).on("change", ".dice-so-nice [data-autoscale]", (ev) =>{
+            this.toggleAutoScale(ev);
+        });
+
+        $(this.element).on("change", ".dice-so-nice [data-colorset]", (ev) =>{
+            this.toggleCustomColors($(ev.target).data("dicetype"));
+        });
+
+        $(this.element).on("change", ".dice-so-nice input,.dice-so-nice select", (ev) =>{
+            this.onApply(ev);
+        });
+
+        $(this.element).on("change", ".dice-so-nice [data-reset]", (ev) =>{
+            this.onReset(ev);
+        });
+
+        $(this.element).on("click", ".dice-so-nice [data-close-tab]", (ev) =>{
+            let diceType = $(ev.target).parent().data("tab");
+            this.closeAppearanceTab(diceType);
+        });
+
+        $(this.element).on("click", ".dice-so-nice .sfx-list", (ev) =>{
             renderTemplate("modules/dice-so-nice/templates/partial-sfx.html", {
                 id: $(".sfx-line").length,
                 specialEffectsMode: DiceSFXManager.SFX_MODE_LIST
@@ -1145,7 +1179,7 @@ class DiceConfig extends FormApplication {
             });
         });
 
-        $(document).on("click", ".dice-so-nice .sfx-delete", (ev)=>{
+        $(this.element).on("click", ".dice-so-nice .sfx-delete", (ev)=>{
             $(ev.target).parents(".sfx-line").remove();
             $(".dice-so-nice .sfx-line").each(function(index){
                 $(this).find("input, select").each(function(){
@@ -1155,6 +1189,103 @@ class DiceConfig extends FormApplication {
             });
             this.setPosition();
         });
+
+        $(this.element).on("click", ".dice-so-nice #dice-configuration-canvas", (event)=>{
+            let rect = event.target.getBoundingClientRect();
+            let x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            if(x > 1)
+                x = 1;
+            let y = - ((event.clientY - rect.top) / rect.height) * 2 + 1;
+            let pos = {x:x,y:y};
+            let dice = this.box.findShowcaseDie(pos);
+            if(dice){
+                let diceType = dice.object.userData;
+
+                if($(`.dice-so-nice .dsn-appearance-tabs [data-tab="${diceType}"]`).length){
+                    this.activateAppearanceTab(diceType);
+                } else {
+                    $(".dice-so-nice .dsn-appearance-hint").hide();
+                    renderTemplate("modules/dice-so-nice/templates/partial-appearance.html", {
+                        dicetype: diceType,
+                        appearance: this.currentGlobalAppearance,
+                        systemList: this.initializationData.systemList,
+                        colorsetList: this.initializationData.colorsetList,
+                        textureList: this.initializationData.textureList,
+                        materialList: this.initializationData.materialList,
+                        fontList: this.initializationData.fontList
+                    }).then((html)=>{
+                        let tabName = diceType.toUpperCase();
+                        
+                        let insertBefore = null;
+                        //let's find where to insert the tab so it keeps the same order as the dice list
+                        $(".dice-so-nice .dsn-appearance-tabs .item").each((index, el)=>{
+                            if(this.navOrder[$(el).data("tab")] >= this.navOrder[diceType]){
+                                insertBefore = $(el).data("tab");
+                                return false;
+                            }
+                        });
+                        let htmlNavString = `<span class="item" data-tab="${diceType}">${tabName} <i class="fas fa-times" data-close-tab></i></span>`;
+                        if(insertBefore){
+                            $(html).insertBefore(`.dice-so-nice .tabAppearance[data-tab="${insertBefore}"]`);
+                            $(htmlNavString).insertBefore(`.dice-so-nice .dsn-appearance-tabs .item[data-tab="${insertBefore}"]`);
+                        } else {
+                            $(".dice-so-nice  #dsn-appearance-content").append(html);
+                            $(".dice-so-nice .dsn-appearance-tabs").append(htmlNavString);
+                        }
+                        this.activateAppearanceTab(diceType);
+                        this.toggleCustomColors(diceType);
+                    });
+                }
+            }
+        });
+    }
+
+    activateAppearanceTab(diceType) {
+        let tabs = this._tabs[1];
+        tabs.activate(diceType,{triggerCallback:true});
+    }
+
+    closeAppearanceTab(diceType){
+        if(diceType=="global")
+            return;
+        let tabs = this._tabs[1];
+        if(this._tabs[1].active == diceType)
+            tabs.activate("global",{triggerCallback:true});
+
+        $(`.dice-so-nice .tabAppearance[data-tab="${diceType}"]`).remove();
+        $(`.dice-so-nice .dsn-appearance-tabs [data-tab="${diceType}"]`).remove();
+
+        this.onApply();
+    }
+
+    _onChangeTab(event, tabs, active){
+        super._onChangeTab(event, tabs, active);
+        if(tabs._contentSelector == "#dsn-appearance-content"){
+            if(this.lastActiveAppearanceTab != "global"){
+                let appearanceArray = [];
+                $(`.dice-so-nice .tabAppearance[data-tab="global"], .dice-so-nice .tabAppearance[data-tab="${this.lastActiveAppearanceTab}"]`).each((index, element) => {
+                    let obj = {
+                        labelColor: $(element).find('[data-labelColor]').val(),
+                        diceColor: $(element).find('[data-diceColor]').val(),
+                        outlineColor: $(element).find('[data-outlineColor]').val(),
+                        edgeColor: $(element).find('[data-edgeColor]').val(),
+                        colorset: $(element).find('[data-colorset]').val(),
+                        texture: $(element).find('[data-texture]').val(),
+                        material: $(element).find('[data-material]').val(),
+                        font: $(element).find('[data-font]').val(),
+                        system: $(element).find('[data-system]').val(),
+                    };
+                    appearanceArray.push(obj);
+                });
+                if(appearanceArray.length>1){
+                    let diff = diffObject(appearanceArray[0],appearanceArray[1]);
+                    if(isObjectEmpty(diff)){
+                        this.closeAppearanceTab(this.lastActiveAppearanceTab)
+                    }
+                }
+            }
+            this.lastActiveAppearanceTab = active;
+        }
     }
 
     toggleHideAfterRoll() {
@@ -1194,22 +1325,11 @@ class DiceConfig extends FormApplication {
         }); 
     }
 
-    onApply(event) {
-        event.preventDefault();
+    onApply(event = null) {
+        if(event)
+            event.preventDefault();
 
         setTimeout(() => {
-
-            /*
-            labelColor: $('input[name="labelColor"]').val(),
-            diceColor: $('input[name="diceColor"]').val(),
-            outlineColor: $('input[name="outlineColor"]').val(),
-            edgeColor: $('input[name="edgeColor"]').val(),
-            colorset: $('select[name="colorset"]').val(),
-            texture: $('select[name="texture"]').val(),
-            material: $('select[name="material"]').val(),
-            font: $('select[name="font"]').val(),
-            system: $('select[name="system"]').val(),
-            */
             let config = {
                 autoscale: false,
                 scale: 60,
@@ -1233,6 +1353,7 @@ class DiceConfig extends FormApplication {
                     system: $(element).find('[data-system]').val(),
                 };
             });
+            this.currentGlobalAppearance = config.appearance.global;
             this.box.dicefactory.disposeCachedMaterials("showcase");
             this.box.update(config).then(()=>{
                 this.box.showcase(config);
@@ -1294,23 +1415,30 @@ class DiceConfig extends FormApplication {
             delete formData.sfxLine;
         }
 
-        if(formData.colorset != "custom"){
-                delete formData.labelColor;
-                delete formData.diceColor;
-                delete formData.outlineColor;
-                delete formData.edgeColor;
+        for (let scope in formData.appearance) {
+            if (formData.appearance.hasOwnProperty(scope)) {
+                if(formData.appearance[scope].colorset != "custom"){
+                    delete formData.appearance[scope].labelColor;
+                    delete formData.appearance[scope].diceColor;
+                    delete formData.appearance[scope].outlineColor;
+                    delete formData.appearance[scope].edgeColor;
+                }
+            }
         }
-
-        let settings = mergeObject(Dice3D.CONFIG, formData, { insertKeys: false, insertValues: false });
-        let appearance = mergeObject(Dice3D.APPEARANCE(), formData, { insertKeys: false, insertValues: false });
-
-        await game.settings.set('dice-so-nice', 'settings', settings);
-        await game.user.setFlag("dice-so-nice", "appearance", appearance);
 
         //required
         await game.user.unsetFlag("dice-so-nice", "sfxList");
+        await game.user.unsetFlag("dice-so-nice", "appearance");
 
+        
+        let appearance = mergeObject(Dice3D.APPEARANCE(), formData.appearance, { insertKeys: false, insertValues: false });
+        delete formData.appearance;
+        let settings = mergeObject(Dice3D.CONFIG, formData, { insertKeys: false, insertValues: false });
+
+        await game.settings.set('dice-so-nice', 'settings', settings);
+        await game.user.setFlag("dice-so-nice", "appearance", appearance);
         await game.user.setFlag("dice-so-nice", "sfxList", sfxLine);
+
         game.socket.emit("module.dice-so-nice", { type: "update", user: game.user.id});
         DiceSFXManager.init();
         ui.notifications.info(game.i18n.localize("DICESONICE.saveMessage"));
