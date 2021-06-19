@@ -288,7 +288,7 @@ class Utils {
 
         //v2 to v4
         await Promise.all(game.users.map(async (user)=>{
-            let appearance = duplicate(user.getFlag("dice-so-nice", "appearance"));
+            let appearance = user.getFlag("dice-so-nice", "appearance") ? duplicate(user.getFlag("dice-so-nice", "appearance")) : null;
             if(appearance && appearance.hasOwnProperty("labelColor")){
                 let data = {
                     global:appearance
@@ -453,14 +453,14 @@ export class Dice3D {
     }
 
     static APPEARANCE(user = game.user) {
-        let userAppearance = duplicate(user.getFlag("dice-so-nice", "appearance"));
+        let userAppearance = user.getFlag("dice-so-nice", "appearance") ? duplicate(user.getFlag("dice-so-nice", "appearance")) : null;
         let appearance = mergeObject(Dice3D.DEFAULT_APPEARANCE(user), userAppearance);
         return mergeObject(appearance, { "-=dimensions": null });
     }
 
     static SFX(user = game.user){
         if(Dice3D.CONFIG.showOthersSFX || user.id == game.user.id)
-            return duplicate(user.getFlag("dice-so-nice", "sfxList"));
+            return user.getFlag("dice-so-nice", "sfxList") ? duplicate(user.getFlag("dice-so-nice", "sfxList")) : null;
         else
             return {};
     }
@@ -555,7 +555,7 @@ export class Dice3D {
             //note: there's no break here on purpose 
             case "default":
                 //If there's no apperance already selected by the player, save this custom colorset as his own
-                let savedAppearance = duplicate(game.user.getFlag("dice-so-nice", "appearance"));
+                let savedAppearance = game.user.getFlag("dice-so-nice", "appearance") ? duplicate(game.user.getFlag("dice-so-nice", "appearance")) : null;
                 if (!savedAppearance) {
                     let appearance = Dice3D.DEFAULT_APPEARANCE();
                     appearance.colorset = colorset.name;
@@ -1079,6 +1079,16 @@ class DiceConfig extends FormApplication {
         for (let scope in data.appearance) {
             if (data.appearance.hasOwnProperty(scope)) {
                 tabsList.push(scope);
+                if(scope != "global"){
+                    if(!data.appearance[scope].labelColor)
+                        data.appearance[scope].labelColor = data.appearance.global.labelColor;
+                    if(!data.appearance[scope].diceColor)
+                        data.appearance[scope].diceColor = data.appearance.global.diceColor;
+                    if(!data.appearance[scope].outlineColor)
+                        data.appearance[scope].outlineColor = data.appearance.global.outlineColor;
+                    if(!data.appearance[scope].edgeColor)
+                        data.appearance[scope].edgeColor = data.appearance.global.edgeColor;
+                }
             }
         }
         
