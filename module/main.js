@@ -288,7 +288,7 @@ class Utils {
 
         //v2 to v4
         await Promise.all(game.users.map(async (user)=>{
-            let appearance = user.getFlag("dice-so-nice", "appearance");
+            let appearance = duplicate(user.getFlag("dice-so-nice", "appearance"));
             if(appearance && appearance.hasOwnProperty("labelColor")){
                 let data = {
                     global:appearance
@@ -453,14 +453,14 @@ export class Dice3D {
     }
 
     static APPEARANCE(user = game.user) {
-        let userAppearance = user.getFlag("dice-so-nice", "appearance");
+        let userAppearance = duplicate(user.getFlag("dice-so-nice", "appearance"));
         let appearance = mergeObject(Dice3D.DEFAULT_APPEARANCE(user), userAppearance);
         return mergeObject(appearance, { "-=dimensions": null });
     }
 
     static SFX(user = game.user){
         if(Dice3D.CONFIG.showOthersSFX || user.id == game.user.id)
-            return user.getFlag("dice-so-nice", "sfxList");
+            return duplicate(user.getFlag("dice-so-nice", "sfxList"));
         else
             return {};
     }
@@ -555,7 +555,7 @@ export class Dice3D {
             //note: there's no break here on purpose 
             case "default":
                 //If there's no apperance already selected by the player, save this custom colorset as his own
-                let savedAppearance = game.user.getFlag("dice-so-nice", "appearance");
+                let savedAppearance = duplicate(game.user.getFlag("dice-so-nice", "appearance"));
                 if (!savedAppearance) {
                     let appearance = Dice3D.DEFAULT_APPEARANCE();
                     appearance.colorset = colorset.name;

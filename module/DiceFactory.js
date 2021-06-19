@@ -207,7 +207,7 @@ export class DiceFactory {
 	async preloadPresets(waitForLoad = true, userID = null, config = {}){
 		let activePresets = [];
 		const preloadPresetsByUser = (user) => {
-			let appearance = user.getFlag("dice-so-nice", "appearance");
+			let appearance = duplicate(user.getFlag("dice-so-nice", "appearance"));
 			if(!appearance)
 				appearance = {};
 			mergeObject(appearance, config);
