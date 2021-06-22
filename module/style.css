@@ -45,8 +45,8 @@
 }
 
 #dice-configuration-canvas {
-    width: 477px;
-    height: 234px;
+    width: 634px;
+    height: 245px;
     cursor:pointer;
 }
 
@@ -183,4 +183,16 @@
     border: none;
     font-weight: normal;
     cursor: auto;
+}
+
+.dice-so-nice button[data-overwrite] {
+    flex: 0 0 100px;
+}
+
+.dice-so-nice button[data-delete] {
+    flex: 0 0 50px;
+}
+
+.dice-so-nice button[data-add-new] {
+    flex: 0 0 150px;
 }

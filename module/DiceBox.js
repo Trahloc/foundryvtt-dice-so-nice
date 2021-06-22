@@ -337,7 +337,10 @@ export class DiceBox {
 		}
 
 		this.light = new THREE.DirectionalLight(this.colors.spotlight, intensity);
-		this.light.position.set(-this.display.containerWidth / 10, this.display.containerHeight / 10, maxwidth / 2);
+		if(this.config.boxType == "board")
+			this.light.position.set(-this.display.containerWidth / 10, this.display.containerHeight / 10, maxwidth / 2);
+		else
+			this.light.position.set(0, this.display.containerHeight / 10, maxwidth / 2);
 		this.light.target.position.set(0, 0, 0);
 		this.light.distance = 0;
 		this.light.castShadow = this.shadows;
@@ -983,42 +986,53 @@ export class DiceBox {
 
 	showcase(config) {
 		this.clearAll();
-		let step = this.display.containerWidth / 5 * 1.15;
-
-		if (this.pane) this.scene.remove(this.pane);
-		if (this.desk) this.scene.remove(this.desk);
-		if (this.shadows) {
-			let shadowplane = new THREE.ShadowMaterial();
-			shadowplane.opacity = 0.5;
-
-			this.pane = new THREE.Mesh(new THREE.PlaneGeometry(this.display.containerWidth * 6, this.display.containerHeight * 6, 1, 1), shadowplane);
-			this.pane.receiveShadow = this.shadows;
-			this.pane.position.set(0, 0, 1);
-			this.scene.add(this.pane);
-		}
 
 		let selectordice = this.dicefactory.systems.standard.dice.map(dice => dice.type);
 		//remove the useless d3 and d5
 		selectordice = selectordice.filter((die) => die !== "d3" && die !== "d5");
-		this.camera.position.z = selectordice.length > 10 ? this.cameraHeight.far / 1.3 : this.cameraHeight.medium;
-		let posxstart = selectordice.length > 10 ? -2.5 : -2.0;
-		let posystart = selectordice.length > 10 ? 1 : 0.5;
-		let poswrap = selectordice.length > 10 ? 3 : 2;
+		
+		let proportion = this.display.containerWidth / this.display.containerHeight;
+		let columns = Math.min(selectordice.length, Math.round(Math.sqrt(proportion * selectordice.length)));
+		let rows = Math.floor((selectordice.length + columns - 1) / columns);
 
-		for (let i = 0, posx = posxstart, posy = posystart; i < selectordice.length; ++i, ++posx) {
+		this.camera.position.z = this.cameraHeight.medium;
+		this.camera.position.x = this.display.containerWidth/2 - (this.display.containerWidth/columns/2);
+		this.camera.position.y = -this.display.containerHeight/2 + (this.display.containerHeight/rows/2);
+		this.camera.fov = 2 * Math.atan(this.display.containerHeight / (2*this.camera.position.z)) * (180 / Math.PI);
+		this.camera.updateProjectionMatrix();
 
-			if (posx > poswrap) {
-				posx = posxstart;
-				posy--;
+		if (this.pane) this.scene.remove(this.pane);
+		if (this.desk) this.scene.remove(this.desk);
+		if (this.shadows) {
+			
+			let shadowplane = new THREE.ShadowMaterial();
+			shadowplane.opacity = 0.5;
+
+			this.pane = new THREE.Mesh(new THREE.PlaneGeometry(this.display.containerWidth*2, this.display.containerHeight*2, 1, 1), shadowplane);
+			this.pane.receiveShadow = this.shadows;
+			this.pane.position.set(0, 0, -70);
+			this.scene.add(this.pane);
+		}
+
+		let z = 0;
+		let count = 0;
+		for(let y = 0;y < rows;y++){
+			for(let x = 0; x < columns;x++){
+				if(count>=selectordice.length)
+					break;
+				let appearance = this.dicefactory.getAppearanceForDice(config.appearance,selectordice[count]);
+				let dicemesh = this.dicefactory.create(this.renderer.scopedTextureCache, selectordice[count], appearance);
+				dicemesh.scale.set(dicemesh.scale.x * 5 /  columns, dicemesh.scale.y * 5 /  columns, dicemesh.scale.z * 5 /  columns);
+
+				dicemesh.position.set(x * this.display.containerWidth / columns, -(y * this.display.containerHeight / rows), z);
+				
+				dicemesh.castShadow = this.shadows;
+				dicemesh.userData = selectordice[count];
+
+				this.diceList.push(dicemesh);
+				this.scene.add(dicemesh);
+				count++;
 			}
-			let appearance = this.dicefactory.getAppearanceForDice(config.appearance,selectordice[i]);
-			let dicemesh = this.dicefactory.create(this.renderer.scopedTextureCache, selectordice[i], appearance);
-			dicemesh.position.set(posx * step, posy * step, step * 0.5);
-			dicemesh.castShadow = this.shadows;
-			dicemesh.userData = selectordice[i];
-
-			this.diceList.push(dicemesh);
-			this.scene.add(dicemesh);
 		}
 
 		this.last_time = 0;

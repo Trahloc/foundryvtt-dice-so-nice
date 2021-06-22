@@ -1,12 +1,12 @@
 <li class="sfx flexrow sfx-line">
     <div class="sfx-data">
-        <input type="text" name="sfxLine[{{id}}][diceType]" value="" placeholder="d20, d6, df..." />
+        <input type="text" data-sfx-dicetype name="sfxLine[{{id}}][diceType]" value="" placeholder="d20, d6, df..." />
     </div>
     <div class="sfx-data">
-        <input type="text" name="sfxLine[{{id}}][onResult]" value="" placeholder="1, 20, 6..." />
+        <input type="text" data-sfx-result name="sfxLine[{{id}}][onResult]" value="" placeholder="1, 20, 6..." />
     </div>
     <div class="sfx-data sfx-double">
-        <select name="sfxLine[{{id}}][specialEffect]">
+        <select data-sfx-specialeffect name="sfxLine[{{id}}][specialEffect]">
             {{selectOptions specialEffectsMode localize=true}}
         </select>
     </div>

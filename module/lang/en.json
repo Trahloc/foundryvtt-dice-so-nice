@@ -7,6 +7,7 @@
     "DICESONICE.settingsPreferences": "Preferences",
     "DICESONICE.settingsPerformance": "Performance",
     "DICESONICE.settingsSpecialEffects": "Special Effects",
+    "DICESONICE.settingsBackup": "Backup & Restore",
     "DICESONICE.enable": "Enable 3D Dice",
     "DICESONICE.labelColor": "Label Color",
     "DICESONICE.diceColor": "Dice Color",
@@ -25,7 +26,12 @@
     "DICESONICE.fps": "Max FPS",
     "DICESONICE.Save": "Save",
     "DICESONICE.Reset": "Reset to Default",
+    "DICESONICE.Cancel": "Cancel",
     "DICESONICE.Apply": "Apply",
+    "DICESONICE.SaveAs": "Save as...",
+    "DICESONICE.Load": "Load...",
+    "DICESONICE.Import": "Import...",
+    "DICESONICE.Export": "Export...",
     "DICESONICE.outlineColor": "Outline Color",
     "DICESONICE.edgeColor": "Edge Color",
     "DICESONICE.texture": "Texture",
@@ -189,5 +195,15 @@
     "DICESONICE.WelcomeMessage3" : "You can always change these settings later under 'Configure Settings > Module Settings > Dice So Nice!'",
     "DICESONICE.WelcomeMessage4" : "You won't see this message again. Happy rolling!",
 
-    "DICESONICE.FindMoreTheme" : "Find more themes and 3D models"
+    "DICESONICE.FindMoreTheme" : "Find more themes and 3D models",
+
+    "DICESONICE.BackupHint" : "You can save or load multiple dice settings. They'll be saved in your user settings in this world only. If you wish to use them in a different world, please use the Import/Export buttons instead.",
+    "DICESONICE.SaveAsHint" : "Save all your current settings (appearances, special effects, etc.). You can either overwrite an existing save or create a new one.",
+    "DICESONICE.Overwrite":  "Overwrite",
+    "DICESONICE.AddNew" : "Add new",
+    "DICESONICE.SaveAsErrorName" : "Please enter a name for your save file",
+    "DICESONICE.SaveAsErrorAlreadyExist" : "A save file with this name already exist. Choose another name or use the Overwrite button to update your save.",
+    "DICESONICE.ImportHint" : "You can import a previously exported JSON file. This will overwrite your current settings but not your save files. This operation can't be undone.",
+    "DICESONICE.ImportNoFile" : "No file found. Please select a file to import.",
+    "DICESONICE.TestRoll" : "Test Roll"
 }

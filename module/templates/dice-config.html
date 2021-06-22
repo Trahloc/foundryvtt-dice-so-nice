@@ -4,6 +4,7 @@
         <a class="item" data-tab="preferences"><i class="fas fa-cogs"></i> {{localize "DICESONICE.settingsPreferences"}}</a>
         <a class="item" data-tab="sfx"><i class="fas fa-meteor"></i> {{localize "DICESONICE.settingsSpecialEffects"}}</a>
         <a class="item" data-tab="performance"><i class="fas fa-tachometer-alt"></i> {{localize "DICESONICE.settingsPerformance"}}</a>
+        <a class="item" data-tab="backup"><i class="fas fa-upload"></i> {{localize "DICESONICE.settingsBackup"}}</a>
     </nav>
     <section id="config-tabs" class="content">
         <div class="tab active" data-tab="general" data-group="dsn-main">
@@ -18,10 +19,10 @@
                         <i class="fas fa-store"></i> {{localize "DICESONICE.FindMoreTheme"}}
                     </a>
                     <nav class="dsn-appearance-tabs" data-group="dsn-dice">
-                        <span class="item" data-tab="global">Global</span>
+                        <span class="item" data-group="dsn-dice" data-tab="global">Global</span>
                         <span class="dsn-appearance-hint" {{{displayHint}}}>{{localize "DICESONICE.navAppearanceHint"}}</span>
                         {{#each navAppearance as |name key|}}
-                        <span class="item" data-tab="{{key}}">{{name}} <i class="fas fa-times" data-close-tab></i></span>
+                        <span class="item" data-group="dsn-dice" data-tab="{{key}}">{{name}} <i class="fas fa-times" data-close-tab></i></span>
                         {{/each}}
                     </nav>
                     <section id="dsn-appearance-content">
@@ -142,13 +143,13 @@
                     {{#each specialEffects as |sfx id|}}
                     <li class="sfx flexrow sfx-line">
                         <div class="sfx-data">
-                            <input type="text" name="sfxLine[{{id}}][diceType]" value="{{sfx.diceType}}" placeholder="d20, d6, df..." />
+                            <input type="text" data-sfx-dicetype name="sfxLine[{{id}}][diceType]" value="{{sfx.diceType}}" placeholder="d20, d6, df..." />
                         </div>
                         <div class="sfx-data">
-                            <input type="text" name="sfxLine[{{id}}][onResult]" value="{{sfx.onResult}}" />
+                            <input type="text" data-sfx-result name="sfxLine[{{id}}][onResult]" value="{{sfx.onResult}}" />
                         </div>
                         <div class="sfx-data sfx-double">
-                            <select name="sfxLine[{{id}}][specialEffect]">
+                            <select data-sfx-specialeffect name="sfxLine[{{id}}][specialEffect]">
                                 {{selectOptions ../specialEffectsMode selected=sfx.specialEffect localize=true}}
                             </select>
                         </div>
@@ -184,13 +185,48 @@
                 </div>
             </div>
         </div>
+        <div class="tab" data-tab="backup" data-group="dsn-main">
+            <div class="settings-list">
+                <p class="notes">{{localize "DICESONICE.BackupHint"}}</p>
+                <div class="form-group">
+                    <button type="button" data-saveas name="saveas">
+                        <i class="fas fa-archive"></i> {{localize "DICESONICE.SaveAs"}}
+                    </button>
+                </div>
+                <div class="form-group">
+                    <button type="button" data-load name="load">
+                        <i class="fas fa-box-open"></i> {{localize "DICESONICE.Load"}}
+                    </button>
+                </div>
+                <hr />
+                <div class="form-group">
+                    <button type="button" data-import name="import">
+                        <i class="fas fa-file-import"></i> {{localize "DICESONICE.Import"}}
+                    </button>
+                </div>
+                <div class="form-group">
+                    <button type="button" data-export name="export">
+                        <i class="fas fa-file-export"></i> {{localize "DICESONICE.Export"}}
+                    </button>
+                </div>
+                <hr />
+                <div class="form-group">
+                    <button type="button" data-reset name="reset">
+                        <i class="fas fa-undo"></i> {{localize "DICESONICE.Reset"}}
+                    </button>
+                </div>
+            </div>
+        </div>
     </section>
     <footer class="sheet-footer flexrow">
-        <button type="button" data-reset name="reset">
-            <i class="fas fa-refresh"></i> {{localize "DICESONICE.Reset"}}
-        </button>
         <button type="submit" name="submit">
-            <i class="fas fa-save"></i> {{localize "DICESONICE.Save"}}
+            <i class="far fa-save"></i> {{localize "DICESONICE.Save"}}
+        </button>
+        <button type="button" data-test name="test">
+            <i class="fas fa-dice"></i> {{localize "DICESONICE.TestRoll"}}
+        </button>
+        <button type="button" data-cancel name="cancel">
+            <i class="fas fa-ban"></i> {{localize "DICESONICE.Cancel"}}
         </button>
     </footer>
 </form>

@@ -12,9 +12,7 @@ export class DiceFactory {
 		this.baseScale = 50;
 
 		//TODO
-		this.systemForced = false;
-		this.systemActivated = "standard";
-		this.systemsHaveExclusive = false;
+		this.preferedSystem = "standard";
 
 		this.cache_hits = 0;
 		this.cache_misses = 0;
@@ -208,8 +206,15 @@ export class DiceFactory {
 		let activePresets = [];
 		const preloadPresetsByUser = (user) => {
 			let appearance = user.getFlag("dice-so-nice", "appearance") ? duplicate(user.getFlag("dice-so-nice", "appearance")) : null;
-			if(!appearance)
+			if(!appearance){
 				appearance = {};
+				if(this.preferedSystem != "standard")
+					appearance.global = {system:this.preferedSystem};
+				//load basic model
+				this.systems["standard"].dice.forEach((obj) =>{
+					activePresets.push(obj);
+				});
+			}
 			mergeObject(appearance, config);
 			if(!isObjectEmpty(appearance)){
 				for (let scope in appearance) {
@@ -253,6 +258,8 @@ export class DiceFactory {
 	addSystem(system, mode="default"){
 		system.dice = [];
 		system.mode = mode;
+		if(mode != "default" && this.preferedSystem == "standard")
+			this.preferedSystem = system.id;
 		this.systems[system.id] = system;
 	}
 	//{type:"",labels:[],system:""}
@@ -615,6 +622,9 @@ export class DiceFactory {
 		contextBump.fillStyle = "#FFFFFF";
 		contextBump.fillRect(x, y, ts, ts);
 
+		context.rect(x, y, ts, ts);
+		context.stroke();
+
 		//create underlying texture
 		if (texture.name != '' && texture.name != 'none') {
 			context.save();
@@ -767,11 +777,13 @@ export class DiceFactory {
 					case 2:
 						wShift = 0.87;
 				}
+				let destX = hw*wShift+x;
+				let destY = (hh - ts * 0.3)*hShift+y;
 				//custom texture face
 				if(text[i] instanceof HTMLImageElement){
 					isTexture = true;
-					let scaleTexture = text[i].width / ts;
-					context.drawImage(text[i], 0,0,text[i].width,text[i].height,100/scaleTexture+x,25/scaleTexture+y,60/scaleTexture,60/scaleTexture);
+					let textureSize = 60 / (text[i].width / ts);
+					context.drawImage(text[i],0,0,text[i].width,text[i].height,destX-(textureSize/2),destY-(textureSize/2),textureSize,textureSize);
 				}
 				else{
 					// attempt to outline the text with a meaningful color
@@ -779,18 +791,18 @@ export class DiceFactory {
 						context.strokeStyle = outlinecolor;
 						
 						context.lineWidth = 5;
-						context.strokeText(text[i], hw*wShift+x, (hh - ts * 0.3)*hShift+y);
+						context.strokeText(text[i], destX, destY);
 
 						contextBump.strokeStyle = "#555555";
 						contextBump.lineWidth = 5;
-						contextBump.strokeText(text[i], hw*wShift+x, (hh - ts * 0.3)*hShift+y);
+						contextBump.strokeText(text[i], destX, destY);
 					}
 
 					//draw label in top middle section
 					context.fillStyle = forecolor;
-					context.fillText(text[i], hw*wShift+x, (hh - ts * 0.3)*hShift+y);
+					context.fillText(text[i], destX, destY);
 					contextBump.fillStyle = "#555555";
-					contextBump.fillText(text[i], hw*wShift+x, (hh - ts * 0.3)*hShift+y);
+					contextBump.fillText(text[i], destX, destY);
 					//var img    = canvas.toDataURL("image/png");
 					//document.write('<img src="'+img+'"/>');
 				}
@@ -814,7 +826,8 @@ export class DiceFactory {
 			2) A flavor/notation colorset
 			3) The colorset of the diceobj
 			4) The colorset configured by the player for this dice type
-			5) The global colorset of the player
+			5) A prefered system set by a module/system (done in main.js)
+			6) The global colorset of the player
 		*/
 		
 		let settings;

@@ -114,10 +114,10 @@ export class DicePreset {
 						}
 						hasTextures = true;
 						imgElements[i] = new Image();
-						imgElements[i].textureType = type;
+						imgElements.textureType = type;
 						imgElements[i].onload = function(){
 							if (++loadedImages >= numImages) {
-								this.registerFaces(imgElements, imgElements[0].textureType);
+								this.registerFaces(imgElements, imgElements.textureType);
 								if(textureTypeLoaded < 1)
 									textureTypeLoaded++;
 								else
