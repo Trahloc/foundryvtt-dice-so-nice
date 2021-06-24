@@ -9,7 +9,7 @@
     <section id="config-tabs" class="content">
         <div class="tab active" data-tab="general" data-group="dsn-main">
             <div class="settings-list">
-                <div id="dice-configuration-canvas"></div>
+                <div id="dice-configuration-canvas-container"></div>
                 <div class="dsn-settings-container">
                     <div class="form-group">
                         <label>{{localize "DICESONICE.enable"}}</label>
@@ -133,31 +133,14 @@
                 </div>
                 <ol id="sfxs-list" class="sfxs-list">
                     <li class="sfx flexrow sfx-header">
-                        <div class="sfx-name">{{localize "DICESONICE.diceType"}}</div>
-                        <div class="sfx-name">{{localize "DICESONICE.onResult"}}</div>
-                        <div class="sfx-name sfx-double">{{localize "DICESONICE.specialEffect"}}</div>
+                        <div class="sfx-name sfx-flex-2">{{localize "DICESONICE.diceType"}}</div>
+                        <div class="sfx-name sfx-flex-5">{{localize "DICESONICE.onResult"}}</div>
+                        <div class="sfx-name sfx-flex-3">{{localize "DICESONICE.specialEffect"}}</div>
                         <div class="sfx-controls">
                             <a class="sfx-control sfx-create" title='{{localize "DICESONICE.Add"}}'><i class="fas fa-plus"></i></a>
                         </div>
                     </li>
-                    {{#each specialEffects as |sfx id|}}
-                    <li class="sfx flexrow sfx-line">
-                        <div class="sfx-data">
-                            <input type="text" data-sfx-dicetype name="sfxLine[{{id}}][diceType]" value="{{sfx.diceType}}" placeholder="d20, d6, df..." />
-                        </div>
-                        <div class="sfx-data">
-                            <input type="text" data-sfx-result name="sfxLine[{{id}}][onResult]" value="{{sfx.onResult}}" />
-                        </div>
-                        <div class="sfx-data sfx-double">
-                            <select data-sfx-specialeffect name="sfxLine[{{id}}][specialEffect]">
-                                {{selectOptions ../specialEffectsMode selected=sfx.specialEffect localize=true}}
-                            </select>
-                        </div>
-                        <div class="sfx-controls">
-                            <a class="sfx-control sfx-delete" title='{{localize "DICESONICE.Delete"}}'><i class="fas fa-trash"></i></a>
-                        </div>
-                    </li>
-                    {{/each}}
+                    {{{specialEffectsList}}}
                 </ol>
             </div>
         </div>

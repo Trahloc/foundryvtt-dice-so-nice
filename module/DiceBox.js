@@ -286,9 +286,15 @@ export class DiceBox {
 	setDimensions(dimensions) {
 		this.display.currentWidth = this.container.clientWidth / 2;
 		this.display.currentHeight = this.container.clientHeight / 2;
+
 		if (dimensions) {
 			this.display.containerWidth = dimensions.w;
 			this.display.containerHeight = dimensions.h;
+
+			if(!this.display.currentWidth || !this.display.currentHeight){
+				this.display.currentWidth = dimensions.w / 2;
+				this.display.currentHeight = dimensions.h / 2;
+			}
 		} else {
 			this.display.containerWidth = this.display.currentWidth;
 			this.display.containerHeight = this.display.currentHeight;

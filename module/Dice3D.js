@@ -409,18 +409,27 @@ import { Utils } from './Utils.js';
      *
      * @param roll an instance of Roll class to show 3D dice animation.
      * @param user the user who made the roll (game.user by default).
-     * @param synchronize if the animation needs to be synchronized for each players (true/false).
+     * @param synchronize if the animation needs to be sent and played for each players (true/false).
      * @param users list of users or userId who can see the roll, leave it empty if everyone can see.
      * @param blind if the roll is blind for the current user
+     * @param messageID ChatMessage related to this roll (default: null)
+     * @param speaker Object based on the ChatSpeakerData data schema related to this roll. Useful to fully support DsN settings like "hide npc rolls". (Default: null)
      * @returns {Promise<boolean>} when resolved true if the animation was displayed, false if not.
      */
-    showForRoll(roll, user = game.user, synchronize, users = null, blind, messageID = null) {
+    showForRoll(roll, user = game.user, synchronize, users = null, blind, messageID = null, speaker = null) {
         let context = {
             roll: roll,
             user: user,
             users: users,
             blind: blind
         };
+        if(speaker){
+            let actor = game.actors.get(speaker.actor);
+            const isNpc = actor ? actor.data.type === 'npc' : false;
+            if (isNpc && game.settings.get("dice-so-nice", "hideNpcRolls")) {
+                return false;
+            }
+        }
         Hooks.callAll("diceSoNiceRollStart", messageID, context);
 
         let notation = new DiceNotation(context.roll);

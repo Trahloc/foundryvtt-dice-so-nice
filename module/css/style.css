@@ -33,7 +33,7 @@
     flex: 0;
 }
 
-.dice-so-nice nav.sheet-tabs{
+.dice-so-nice nav.sheet-tabs {
     border-bottom: 1px solid #000;
     line-height: 25px;
 }
@@ -47,7 +47,7 @@
 #dice-configuration-canvas {
     width: 634px;
     height: 245px;
-    cursor:pointer;
+    cursor: pointer;
 }
 
 .dice-so-nice .sfxs-list {
@@ -62,7 +62,7 @@
 }
 
 .dice-so-nice .sfxs-list .sfx {
-    height: 30px;
+    min-height: 30px;
     line-height: 24px;
     padding: 3px 0;
     border-bottom: 1px solid #BBB;
@@ -92,12 +92,20 @@
     text-align: right;
 }
 
-.dice-so-nice .sfx-double {
-    flex:2;
+.dice-so-nice .sfx-flex-2 {
+    flex: 2;
 }
 
-.dice-so-nice .sfx-data select{
-    width:100%;
+.dice-so-nice .sfx-flex-5 {
+    flex: 5;
+}
+
+.dice-so-nice .sfx-flex-3 {
+    flex: 3;
+}
+
+.dice-so-nice .sfx-data select {
+    width: 100%;
 }
 
 .dice-so-nice .dice-more-theme {
@@ -109,12 +117,12 @@
     text-align: center;
     padding: 9px 0px;
     font-size: 15px;
-    display:block;
+    display: block;
 }
 
-.dice-so-nice .dice-more-theme:hover{
+.dice-so-nice .dice-more-theme:hover {
     text-shadow: none;
-    color:#000;
+    color: #000;
     background: #e8e8e8;
 }
 
@@ -138,12 +146,12 @@
     font-variant: normal;
     text-rendering: auto;
     -webkit-font-smoothing: antialiased;
-    padding:0px 3px;
+    padding: 0px 3px;
 }
 
-.dice-so-nice .dsn-appearance-tabs span.active::before{
-    font-family: "Font Awesome 5 Free"; 
-    font-weight: 900; 
+.dice-so-nice .dsn-appearance-tabs span.active::before {
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
     content: "\f140";
 }
 
@@ -160,15 +168,15 @@
     vertical-align: top;
     padding: 0px 2px;
     transition: all .2s ease-in-out;
-    display:none;
+    display: none;
 }
 
 .dice-so-nice .dsn-appearance-tabs i.fas.fa-times:hover {
     transform: scale(1.2);
 }
 
-.dice-so-nice .dsn-appearance-tabs .active i.fas.fa-times{
-    display:inline-block;
+.dice-so-nice .dsn-appearance-tabs .active i.fas.fa-times {
+    display: inline-block;
 }
 
 .dice-so-nice .dsn-appearance-tabs span.item:hover {

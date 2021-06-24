@@ -20,6 +20,7 @@ import { DiceColors, TEXTURELIST, COLORSETS } from './DiceColors.js';
         } else if (formatversion == "4") {
             return true;
         }
+        let migrated = false;
         //v1 to v2
         let settings = game.settings.get("dice-so-nice", "settings");
         if (settings.diceColor || settings.labelColor) {
@@ -27,6 +28,7 @@ import { DiceColors, TEXTURELIST, COLORSETS } from './DiceColors.js';
             let appearance = mergeObject(Dice3D.DEFAULT_APPEARANCE(), settings, { insertKeys: false, insertValues: false });
             await game.settings.set("dice-so-nice", "settings", mergeObject(newSettings, { "-=dimensions": null, "-=fxList": null }));
             await game.user.setFlag("dice-so-nice", "appearance", appearance);
+            migrated = true;
         }
 
         //v2 to v4
@@ -38,11 +40,22 @@ import { DiceColors, TEXTURELIST, COLORSETS } from './DiceColors.js';
                 };
                 await user.unsetFlag("dice-so-nice", "appearance");
                 await user.setFlag("dice-so-nice", "appearance", data);
+                migrated = true;
             }
+
+            let sfxList = user.getFlag("dice-so-nice", "sfxList") ? duplicate(user.getFlag("dice-so-nice", "sfxList")) : null;
+            if(sfxList){
+                sfxList.forEach((sfx)=>{
+                    sfx.onResult = [sfx.onResult];
+                });
+            }
+            await user.unsetFlag("dice-so-nice", "sfxList");
+            await user.setFlag("dice-so-nice", "sfxList", sfxList);
+            migrated = true;
         }));
         game.settings.set("dice-so-nice", "formatVersion", "4");
-
-        ui.notifications.info(game.i18n.localize("DICESONICE.migrateMessage"));
+        if(migrated)
+            ui.notifications.info(game.i18n.localize("DICESONICE.migrateMessage"));
         return true;
     }
 

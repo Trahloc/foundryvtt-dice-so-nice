@@ -199,6 +199,22 @@ export class DiceFactory {
 	}
 
 	register(diceobj) {
+		if(diceobj.system != "standard"){
+			let index = this.systems.standard.dice.findIndex(el => el.type == diceobj.type);
+			if(index<0){
+				//If for some reasons, we try to register a dice type that doesnt exist on the standard system, we add it there first.
+				//This should not happen because of internalAddDicePreset but I'm only 95% sure.
+				this.systems.standard.dice.push(diceobj);
+				if(diceobj.modelFile){
+					diceobj.loadModel(this.loaderGLTF);
+				} else {
+					diceobj.loadTextures();
+				}
+			} else if(this.systems.standard.dice[index].internalAdd && diceobj.system == this.preferedSystem) {
+				//if it exists in the standard system but has been added by the internal call, we update it with its custom preset
+				this.systems.standard.dice[index] = diceobj;
+			}
+		}
 		this.systems[diceobj.system].dice.push(diceobj);		
 	}
 
@@ -210,11 +226,11 @@ export class DiceFactory {
 				appearance = {};
 				if(this.preferedSystem != "standard")
 					appearance.global = {system:this.preferedSystem};
-				//load basic model
-				this.systems["standard"].dice.forEach((obj) =>{
-					activePresets.push(obj);
-				});
 			}
+			//load basic model
+			this.systems["standard"].dice.forEach((obj) =>{
+				activePresets.push(obj);
+			});
 			mergeObject(appearance, config);
 			if(!isObjectEmpty(appearance)){
 				for (let scope in appearance) {
@@ -269,7 +285,10 @@ export class DiceFactory {
 			shape = dice.type;
 		let model = this.systems["standard"].dice.find(el => el.type == shape);
 		let preset = new DicePreset(dice.type, model.shape);
-		preset.name = dice.type;
+
+		let roll = new Roll(dice.type).evaluate({async:false});
+		preset.term = roll.terms[0].constructor.name;
+		
 		preset.setLabels(dice.labels);
 		preset.setModel(dice.modelFile);
 		if(dice.values){
@@ -314,7 +333,7 @@ export class DiceFactory {
 		let type = "d" + diceobj.constructor.DENOMINATION;
 		let model = this.systems["standard"].dice.find(el => el.type == shape);
 		let preset = new DicePreset(type, model.shape);
-		preset.name = diceobj.name;
+		preset.term = diceobj.constructor.name;
 		let labels = [];
 		for(let i = 1;i<= diceobj.faces;i++){
 			labels.push(diceobj.getResultLabel({result:i}));
@@ -324,6 +343,7 @@ export class DiceFactory {
 		preset.mass = model.mass;
 		preset.inertia = model.inertia;
 		preset.scale = model.scale;
+		preset.internalAdd = true;
 		this.register(preset);
 	}
 

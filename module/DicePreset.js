@@ -6,7 +6,7 @@ export class DicePreset {
 		shape = shape || type;
 
 		this.type = type;
-		this.name = '';
+		this.term = 'Die';
 		this.shape = shape || type;
 		this.scale = 1;
 		this.labels = [];
@@ -21,6 +21,7 @@ export class DicePreset {
 		this.modelLoaded = false;
 		this.modelLoading = false;
 		this.modelFile = null;
+		this.internalAdd = false;
 
 		//todo : check if this is useful
 		this.appearance = {
@@ -120,8 +121,10 @@ export class DicePreset {
 								this.registerFaces(imgElements, imgElements.textureType);
 								if(textureTypeLoaded < 1)
 									textureTypeLoaded++;
-								else
+								else{
 									resolve();
+									this.modelLoaded = true;
+								}
 							}
 						}.bind(this);
 						imgElements[i].src = textures[i];
@@ -130,8 +133,10 @@ export class DicePreset {
 						this.registerFaces(imgElements, type);
 						if(textureTypeLoaded < 1)
 							textureTypeLoaded++;
-						else
+						else{
 							resolve();
+							this.modelLoaded = true;
+						}
 					}
 				}
 			});

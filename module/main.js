@@ -104,6 +104,15 @@ Hooks.once('init', () => {
         config: true
     });
 
+    game.settings.register("dice-so-nice", "disabledForInitiative", {
+        name: "DICESONICE.disabledForInitiative",
+        hint: "DICESONICE.disabledForInitiativeHint",
+        scope: "world",
+        type: Boolean,
+        default: false,
+        config: true
+    });
+
     game.settings.register("dice-so-nice", "immediatelyDisplayChatMessages", {
         name: "DICESONICE.immediatelyDisplayChatMessages",
         hint: "DICESONICE.immediatelyDisplayChatMessagesHint",
@@ -197,11 +206,9 @@ Hooks.on('createChatMessage', (chatMessage) => {
             return;
     }
 
-    let actor = game.actors.get(chatMessage.data.speaker.actor);
-    const isNpc = actor ? actor.data.type === 'npc' : false;
-    if (isNpc && game.settings.get("dice-so-nice", "hideNpcRolls")) {
+    const isInitiativeRoll = chatMessage.getFlag("core","initiativeRoll");
+    if(isInitiativeRoll && game.settings.get("dice-so-nice", "disabledForInitiative"))
         return;
-    }
 
     //Remove the chatmessage sound if it is the core dice sound.
     if (Dice3D.CONFIG.sounds && chatMessage.data.sound == "sounds/dice.wav") {
@@ -216,7 +223,7 @@ Hooks.on('createChatMessage', (chatMessage) => {
             ui.chat.scrollBottom();
         }, 2500, chatMessage);
     } else {
-        game.dice3d.showForRoll(roll, chatMessage.user, false, null, false, chatMessage.id).then(displayed => {
+        game.dice3d.showForRoll(roll, chatMessage.user, false, null, false, chatMessage.id, chatMessage.data.speaker).then(displayed => {
             delete chatMessage._dice3danimating;
             $(`#chat-log .message[data-message-id="${chatMessage.id}"]`).show();
             Hooks.callAll("diceSoNiceRollComplete", chatMessage.id);

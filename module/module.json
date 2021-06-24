@@ -22,11 +22,13 @@
 		"./main.js"
 	],
 	"scripts": [
-		"./libs/cannon.min.js"
+		"./libs/cannon.min.js",
+		"./libs/select2.min.js"
 	],
 	"socket": true,
 	"styles": [
-		"./style.css"
+		"./css/style.css",
+		"./css/select2.css"
 	],
 	"languages": [{
 		"lang": "en",

@@ -28,6 +28,8 @@ export const DiceSFXManager = {
     },
     SFX_MODE_LIST : null,
     SFX_CLASS : {},
+    EXTRA_TRIGGER_TYPE : [],
+    EXTRA_TRIGGER_RESULTS : {},
     renderQueue : [],
     garbageCollector : [],
     init : function(){

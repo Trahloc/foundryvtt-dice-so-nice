@@ -65,9 +65,7 @@ import { DiceNotation } from './DiceNotation.js';
                 "weak": "DICESONICE.ThrowingForceWeak",
                 "medium": "DICESONICE.ThrowingForceMedium",
                 "strong": "DICESONICE.ThrowingForceStrong"
-            }),
-            specialEffectsMode: DiceSFXManager.SFX_MODE_LIST,
-            specialEffects: Dice3D.SFX()
+            })
         },
             this.reset ? Dice3D.ALL_DEFAULT_OPTIONS() : Dice3D.ALL_CONFIG()
         );
@@ -79,6 +77,63 @@ import { DiceNotation } from './DiceNotation.js';
                     delete data.specialEffects[key];
             }
         }
+
+        this.canvas = $('<div id="dice-configuration-canvas"></div>')[0];
+        let config = mergeObject(
+            this.reset ? Dice3D.ALL_DEFAULT_OPTIONS() : Dice3D.ALL_CONFIG(),
+            { dimensions: { w: 634, h: 245 }, autoscale: false, scale: 60, boxType: "showcase" }
+        );
+
+        this.box = new DiceBox(this.canvas, game.dice3d.box.dicefactory, config);
+        await this.box.initialize();
+        if (this.box.dicefactory.preferedSystem != "standard" && !game.user.getFlag("dice-so-nice", "appearance")) {
+            config.appearance.global.system = this.box.dicefactory.preferedSystem;
+        }
+        this.box.showcase(config);
+
+        this.navOrder = {};
+        let triggerTypeList = [{id:"",name:""}];
+        this.possibleResultList = {};
+        let i = 0;
+        this.box.diceList.forEach((el) => {
+            this.navOrder[el.userData] = i++;
+            triggerTypeList.push({id:el.userData,name:el.userData});
+            this.possibleResultList[el.userData] = [];
+            let preset = this.box.dicefactory.systems.standard.dice.find(dice => dice.type == el.userData);
+            let termClass = Object.values(CONFIG.Dice.terms).find(term => term.name == preset.term) || Die;
+            let term = new termClass({});
+                
+            preset.values.forEach((value) => {
+                let label = term.getResultLabel({result:value});
+                let option = {id:value+"",name:label};
+                this.possibleResultList[el.userData].push(option);
+            });
+        });
+
+        let specialEffectsList = [];
+        let specialEffectsPromises = [];
+        const specialEffects =  Dice3D.SFX();
+        this.triggerTypeList = [...triggerTypeList,...DiceSFXManager.EXTRA_TRIGGER_TYPE];
+        mergeObject(this.possibleResultList, DiceSFXManager.EXTRA_TRIGGER_RESULTS);
+
+        if(specialEffects){
+            specialEffects.forEach((sfx, index) => {
+                specialEffectsPromises.push(renderTemplate("modules/dice-so-nice/templates/partial-sfx.html", {
+                    id: index,
+                    diceType: sfx.diceType,
+                    onResult: sfx.onResult,
+                    specialEffect: sfx.specialEffect,
+                    specialEffectsMode: DiceSFXManager.SFX_MODE_LIST,
+                    triggerTypeList:this.triggerTypeList,
+                    possibleResultList:this.possibleResultList[sfx.diceType]
+                }).then((html) => {
+                    specialEffectsList.push(html);
+                }));
+            });
+            await Promise.all(specialEffectsPromises);
+        }
+        data.specialEffectsList = specialEffectsList.join("");
+
         let tabsList = [];
         for (let scope in data.appearance) {
             if (data.appearance.hasOwnProperty(scope)) {
@@ -126,43 +181,47 @@ import { DiceNotation } from './DiceNotation.js';
 
         this.initializationData = data;
         this.currentGlobalAppearance = data.appearance.global;
+
+        const templateSelect2 = (result) => {
+            
+            if(result.element){
+                let label = this.possibleResultList[result.element.parentElement.dataset.sfxResultDicetype].find(el => el.id == result.text).name;
+                if(label != result.text)
+                    return `${label} (${result.text})`;
+                else
+                    return result.text;
+            } else {
+                return result.text;
+            }
+        };
+
+        this.select2Options = {
+            dropdownCssClass:"dice-so-nice",
+            escapeMarkup: function(text){return text;},
+            dropdownParent:"form.dice-so-nice",
+            templateResult:templateSelect2,
+            templateSelection: templateSelect2,
+            width:"306px"
+        }
+
         return data;
     }
 
     activateListeners(html) {
         super.activateListeners(html);
 
-        let canvas = document.getElementById('dice-configuration-canvas');
-        let config = mergeObject(
-            this.reset ? Dice3D.ALL_DEFAULT_OPTIONS() : Dice3D.ALL_CONFIG(),
-            { dimensions: { w: 634, h: 245 }, autoscale: false, scale: 60, boxType: "showcase" }
-        );
+        $(html).find("#dice-configuration-canvas-container").append(this.canvas);
+        
 
+        this.toggleHideAfterRoll();
+        this.toggleAutoScale();
+        this.toggleCustomization();
+        this.filterSystems();
+        this.setPreferedSystem();
 
+        this.reset = false;
 
-        this.box = new DiceBox(canvas, game.dice3d.box.dicefactory, config);
-        this.box.initialize().then(() => {
-            if (this.box.dicefactory.preferedSystem != "standard" && !game.user.getFlag("dice-so-nice", "appearance")) {
-                config.appearance.global.system = this.box.dicefactory.preferedSystem;
-            }
-            this.box.showcase(config);
-
-            this.toggleHideAfterRoll();
-            this.toggleAutoScale();
-            this.toggleCustomization();
-            this.filterSystems();
-            this.setPreferedSystem();
-
-            this.navOrder = {};
-            let i = 0;
-            this.box.diceList.forEach((el) => {
-                this.navOrder[el.userData] = i++;
-            });
-
-
-
-            this.reset = false;
-        });
+        $(this.element).find("[data-sfx-result]").select2(this.select2Options);
 
         $(this.element).on("change", "[data-hideAfterRoll]", (ev) => {
             this.toggleHideAfterRoll(ev);
@@ -221,9 +280,15 @@ import { DiceNotation } from './DiceNotation.js';
         $(this.element).on("click", ".sfx-create", (ev) => {
             renderTemplate("modules/dice-so-nice/templates/partial-sfx.html", {
                 id: $(".sfx-line").length,
-                specialEffectsMode: DiceSFXManager.SFX_MODE_LIST
+                diceType: "",
+                onResult: [],
+                specialEffect: "",
+                specialEffectsMode: DiceSFXManager.SFX_MODE_LIST,
+                triggerTypeList:this.triggerTypeList,
+                possibleResultList:[]
             }).then((html) => {
                 $("#sfxs-list").append(html);
+                $("[data-sfx-result]").select2(this.select2Options);
                 this.setPosition();
             });
         });
@@ -237,6 +302,22 @@ import { DiceNotation } from './DiceNotation.js';
                 });
             });
             this.setPosition();
+        });
+
+        $(this.element).on("change","[data-sfx-dicetype]",(ev)=>{
+            let dicetype = $(ev.target).val();
+            let optionHTML = $([]);
+            if(dicetype!=""){
+                this.possibleResultList[dicetype].forEach(opt => {
+                    let frag = $("<option></option>");
+                    frag.html(opt.id);
+                    frag.attr("value",opt.id);
+                    optionHTML = optionHTML.add(frag);
+                });
+                $(ev.target).parents(".sfx-line").find("[data-sfx-result]").html(optionHTML).trigger("change");
+            } else {
+                $(ev.target).parents(".sfx-line").find("[data-sfx-result]").empty().trigger("change");
+            }
         });
 
         /**
