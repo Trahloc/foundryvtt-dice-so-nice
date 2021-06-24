@@ -221,6 +221,9 @@ Hooks.on('createChatMessage', (chatMessage) => {
             $(`#chat-log .message[data-message-id="${chatMessage.id}"]`).show();
             Hooks.callAll("diceSoNiceRollComplete", chatMessage.id);
             ui.chat.scrollBottom();
+            let popout = Object.values(ui.windows).find(win => win instanceof ChatLog);
+            if(popout)
+                popout.scrollBottom();
         }, 2500, chatMessage);
     } else {
         game.dice3d.showForRoll(roll, chatMessage.user, false, null, false, chatMessage.id, chatMessage.data.speaker).then(displayed => {
@@ -228,6 +231,9 @@ Hooks.on('createChatMessage', (chatMessage) => {
             $(`#chat-log .message[data-message-id="${chatMessage.id}"]`).show();
             Hooks.callAll("diceSoNiceRollComplete", chatMessage.id);
             ui.chat.scrollBottom();
+            let popout = Object.values(ui.windows).find(win => win instanceof ChatLog);
+            if(popout)
+                popout.scrollBottom();
         });
     }
 });
