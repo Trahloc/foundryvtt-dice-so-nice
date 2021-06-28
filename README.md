@@ -38,7 +38,9 @@ There's two type of settings:
 - **Label Color**: Allows to change the color of the dice label. 
 - **Dice Color**: Allows to change the color of the dice.
 - **Outline Color**: Allows to change the color of the dice label outline.
-- **Edge Color**: Allows to change the color of the edges of the dice.
+- **Edge Color**: Allows to change the color of the edges of the dice.  
+
+**Note:** You can click on any dice to customize it instead of using a global settings for all the dice.
 
 ## Preferences
 ![Preview](./settings-preferences.jpg?raw=true)
@@ -57,6 +59,7 @@ There's two type of settings:
 ## Special Effects
 ![Preview](./settings-sfx.jpg?raw=true)
 - **Show other players special effects**: When enabled, it will play the special effects from other players settings. Disable to only show your own.
+- **Settings**: Some special effects require further options to work properly. Click on the Gear icon to access these options. 
 - **Add**: You can add special effects. A special effect is a short animation and/or sound played when a die roll on a specified result. Ex: Rolling a native 20 on a d20.  
 
 💥[You can find a gallery of all special effects here](https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/wikis/Special-Effects)💥
@@ -66,6 +69,16 @@ There's two type of settings:
 - **Shadows Quality**: Allows to select the shadows quality. Can help with performances on some PCs.
 - **Advanced lighting**: When enabled, use realistic lighting (HDRI). Disable for better performances.
 - **Enable 'high density' screen support**: When enabled, it will upscale the 3D view to benefit from the extra pixels. Only have an effect on HDPI screens (like Retina display, 4k, etc). High-end GPU needed.
+
+## Backup & Restore
+![Preview](./settings-backuprestore.jpg?raw=true)
+- **Save As**: Manage your save files. You can have an unlimited number of save files to rapidly switch between multiple settings.
+- **Load**: Load a previously created save file.
+- **Import**: Import a Dice So Nice setting file from a local file.
+- **Export all**: Export all settings (appearances, preferences, sfx, performance settings) to a JSON file.
+- **Export Special effects**: Export only the Special effects list to a JSON file.
+- **Reset to Default**: Reset all settings to their default value.
+
 # Documentation and API
 A complete API and documentation for developers and artists alike is available in the [Wiki](https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/wikis/home)
 
@@ -75,7 +88,7 @@ A complete API and documentation for developers and artists alike is available i
 
 # Compatibility
 
-Tested on Foundry VTT 0.8.5  
+Tested on Foundry VTT 0.8.8  
 If you need to use an older Foundry version, please [download a compatible older version](https://foundryvtt.com/packages/dice-so-nice/)
 
 # Acknowledgment
@@ -105,7 +118,7 @@ Many thanks to the people who continue to support us on Discord, to the amazing 
 
 Every suggestions/feedback are appreciated, if so, please contact (Simone#6710) or JDW (JDW#6422) on discord 
 
-To report a bug, please open a new issue [in our tracker](https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/issues)
+To report a bug, please open a new issue [in our tracker](https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/issues) or use the [Bug Reporter module](https://www.foundryvtt-hub.com/package/bug-reporter/)
 
 # License
 

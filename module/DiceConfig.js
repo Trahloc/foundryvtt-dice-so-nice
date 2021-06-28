@@ -793,13 +793,13 @@ export class DiceConfig extends FormApplication {
                         }
                         customizationElements.each((index, el) =>{
                             let colorsetForce = false;
-                            if($(el).is("[data-colorset]"))
+                            if($(el).is("[data-colorset]") && !isObjectEmpty(colorsetData))
                                 colorsetForce = true;
-                            else if($(el).is("[data-texture]") && colorsetData.texture != "custom")
+                            else if($(el).is("[data-texture]") && !isObjectEmpty(colorsetData) && colorsetData.texture != "custom")
                                 colorsetForce = true;
-                            else if($(el).is("[data-material]") && colorsetData.material != "custom")
+                            else if($(el).is("[data-material]") && !isObjectEmpty(colorsetData) && colorsetData.material != "custom")
                                 colorsetForce = true;
-                            else if($(el).is("[data-font]") && (colorsetData.font != "custom" || diceobj.font))
+                            else if($(el).is("[data-font]") && ((!isObjectEmpty(colorsetData) && colorsetData.font != "custom") || diceobj.font))
                                 colorsetForce = true;
                             $(el).prop("disabled", diceobj.modelFile || colorsetForce);
                         });
