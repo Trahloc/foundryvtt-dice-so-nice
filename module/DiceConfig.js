@@ -114,6 +114,8 @@ export class DiceConfig extends FormApplication {
         let specialEffectsList = [];
         let specialEffectsPromises = [];
         let specialEffects = Dice3D.SFX();
+        if(this.reset)
+            specialEffects = [];
         this.triggerTypeList = [...triggerTypeList, ...DiceSFXManager.EXTRA_TRIGGER_TYPE];
         mergeObject(this.possibleResultList, DiceSFXManager.EXTRA_TRIGGER_RESULTS);
 
@@ -232,356 +234,358 @@ export class DiceConfig extends FormApplication {
         this.filterSystems();
         this.setPreferedSystem();
 
-        this.reset = false;
         select2dsn.call($(this.element).find("[data-sfx-result]"), this.select2Options);
 
-        $(this.element).on("change", "[data-hideAfterRoll]", (ev) => {
-            this.toggleHideAfterRoll(ev);
-        });
+        if(!this.reset){
 
-        $(this.element).on("change", "[data-sounds]", (ev) => {
-            this.toggleSounds(ev);
-        });
-
-        $(this.element).on("change", "[data-autoscale]", (ev) => {
-            this.toggleAutoScale(ev);
-        });
-
-        $(this.element).on("change", "[data-colorset]", (ev) => {
-            this.toggleCustomColors($(ev.target).data("dicetype"));
-        });
-
-        $(this.element).on("change", "[data-system]", (ev) => {
-            this.toggleCustomization($(ev.target).data("dicetype"));
-        });
-
-        $(this.element).on("change", "input,select", (ev) => {
-            this.onApply(ev);
-        });
-
-        $(this.element).on("change", "[data-reset]", (ev) => {
-            this.onReset(ev);
-        });
-
-        $(this.element).on("click", "[data-cancel]", (ev) => {
-            this.close();
-        });
-
-        $(this.element).on("click", "[data-close-tab]", (ev) => {
-            let diceType = $(ev.target).parent().data("tab");
-            this.closeAppearanceTab(diceType);
-        });
-
-        $(this.element).on("click", "[data-test]", (ev) => {
-            let config = this.getShowcaseAppearance();
-            let denominationList = [];
-            this.box.diceList.forEach((el) => {
-                //the d100 will roll the d10 so we remove the d10 from the list
-                if (el.userData != "d10")
-                    denominationList.push(el.userData);
+            $(this.element).on("change", "[data-hideAfterRoll]", (ev) => {
+                this.toggleHideAfterRoll(ev);
             });
-            let roll = new Roll(denominationList.join("+")).roll();
-            let data = new DiceNotation(roll);
 
-            let specialEffects = [];
-            let customization = mergeObject({ appearance: config.appearance }, { specialEffects: specialEffects });
+            $(this.element).on("change", "[data-sounds]", (ev) => {
+                this.toggleSounds(ev);
+            });
 
-            game.dice3d._showAnimation(data, customization);
-        });
+            $(this.element).on("change", "[data-autoscale]", (ev) => {
+                this.toggleAutoScale(ev);
+            });
 
-        $(this.element).on("click", "[data-sfx-create]", (ev) => {
-            let ID = $(".sfx-line").length;
-            let firstSFX = Object.keys(DiceSFXManager.SFX_MODE_LIST)[0];
-            let sfxClass = DiceSFXManager.SFX_MODE_CLASS[firstSFX];
-            let dialogContent = sfxClass.getDialogContent({},ID);
-            let hdbsTemplate = Handlebars.compile(dialogContent.content);
-            renderTemplate("modules/dice-so-nice/templates/partial-sfx.html", {
-                id: ID,
-                diceType: "",
-                onResult: [],
-                specialEffect: "",
-                specialEffectsMode: DiceSFXManager.SFX_MODE_LIST,
-                triggerTypeList: this.triggerTypeList,
-                possibleResultList: [],
-                options:hdbsTemplate(dialogContent.data)
-            }).then((html) => {
-                $("#sfxs-list").append(html);
-                select2dsn.call($("[data-sfx-result]"), this.select2Options);
+            $(this.element).on("change", "[data-colorset]", (ev) => {
+                this.toggleCustomColors($(ev.target).data("dicetype"));
+            });
+
+            $(this.element).on("change", "[data-system]", (ev) => {
+                this.toggleCustomization($(ev.target).data("dicetype"));
+            });
+
+            $(this.element).on("change", "input,select", (ev) => {
+                this.onApply(ev);
+            });
+
+            $(this.element).on("click", "[data-reset]", (ev) => {
+                this.onReset(ev);
+            });
+
+            $(this.element).on("click", "[data-cancel]", (ev) => {
+                this.close();
+            });
+
+            $(this.element).on("click", "[data-close-tab]", (ev) => {
+                let diceType = $(ev.target).parent().data("tab");
+                this.closeAppearanceTab(diceType);
+            });
+
+            $(this.element).on("click", "[data-test]", (ev) => {
+                let config = this.getShowcaseAppearance();
+                let denominationList = [];
+                this.box.diceList.forEach((el) => {
+                    //the d100 will roll the d10 so we remove the d10 from the list
+                    if (el.userData != "d10")
+                        denominationList.push(el.userData);
+                });
+                let roll = new Roll(denominationList.join("+")).roll();
+                let data = new DiceNotation(roll);
+
+                let specialEffects = [];
+                let customization = mergeObject({ appearance: config.appearance }, { specialEffects: specialEffects });
+
+                game.dice3d._showAnimation(data, customization);
+            });
+
+            $(this.element).on("click", "[data-sfx-create]", (ev) => {
+                let ID = $(".sfx-line").length;
+                let firstSFX = Object.keys(DiceSFXManager.SFX_MODE_LIST)[0];
+                let sfxClass = DiceSFXManager.SFX_MODE_CLASS[firstSFX];
+                let dialogContent = sfxClass.getDialogContent({},ID);
+                let hdbsTemplate = Handlebars.compile(dialogContent.content);
+                renderTemplate("modules/dice-so-nice/templates/partial-sfx.html", {
+                    id: ID,
+                    diceType: "",
+                    onResult: [],
+                    specialEffect: "",
+                    specialEffectsMode: DiceSFXManager.SFX_MODE_LIST,
+                    triggerTypeList: this.triggerTypeList,
+                    possibleResultList: [],
+                    options:hdbsTemplate(dialogContent.data)
+                }).then((html) => {
+                    $("#sfxs-list").append(html);
+                    select2dsn.call($("[data-sfx-result]"), this.select2Options);
+                    this.setPosition();
+                });
+            });
+
+            $(this.element).on("click", "[data-sfx-delete]", (ev) => {
+                $(ev.target).parents(".sfx-line").remove();
+                $(this.element).find(".sfx-line").each(function (index) {
+                    $(this).find("input, select").each(function () {
+                        let name = $(this).attr("name");
+                        $(this).attr("name", name.replace(/(\w+\[)(\d+)(\]\[\w+\])/, "$1" + index + "$3"));
+                    });
+                });
                 this.setPosition();
             });
-        });
 
-        $(this.element).on("click", "[data-sfx-delete]", (ev) => {
-            $(ev.target).parents(".sfx-line").remove();
-            $(this.element).find(".sfx-line").each(function (index) {
-                $(this).find("input, select").each(function () {
-                    let name = $(this).attr("name");
-                    $(this).attr("name", name.replace(/(\w+\[)(\d+)(\]\[\w+\])/, "$1" + index + "$3"));
-                });
-            });
-            this.setPosition();
-        });
+            $(this.element).on("click", "[data-sfx-options]", (ev) => {
+                let sfxLineOptions = $(ev.target).parents(".sfx-line").find("[data-sfx-hidden-options]");
 
-        $(this.element).on("click", "[data-sfx-options]", (ev) => {
-            let sfxLineOptions = $(ev.target).parents(".sfx-line").find("[data-sfx-hidden-options]");
+                if(sfxLineOptions.length<1)
+                    return;
 
-            if(sfxLineOptions.length<1)
-                return;
-
-            let d = new Dialog({
-                title: game.i18n.localize("DICESONICE.Options"),
-                content: `<form autocomplete="off" onsubmit="event.preventDefault();"></form>`,
-                buttons: {
-                    ok: {
-                        icon: '<i class="fas fa-check-circle"></i>',
-                        label: 'OK'
+                let d = new Dialog({
+                    title: game.i18n.localize("DICESONICE.Options"),
+                    content: `<form autocomplete="off" onsubmit="event.preventDefault();"></form>`,
+                    buttons: {
+                        ok: {
+                            icon: '<i class="fas fa-check-circle"></i>',
+                            label: 'OK'
+                        }
+                    },
+                    default: "ok",
+                    render: (html) => {
+                        sfxLineOptions.detach().appendTo($(html).find("form"));
+                    },
+                    close: (html) => {
+                        $(html).find("[data-sfx-hidden-options]").detach().appendTo($(ev.target).parents(".sfx-line").find(".sfx-hidden"));
+                        this.sfxDialogList = this.sfxDialogList.filter(dialog => dialog.appId != d.appId);
                     }
-                },
-                default: "ok",
-                render: (html) => {
-                    sfxLineOptions.detach().appendTo($(html).find("form"));
-                },
-                close: (html) => {
-                    $(html).find("[data-sfx-hidden-options]").detach().appendTo($(ev.target).parents(".sfx-line").find(".sfx-hidden"));
-                    this.sfxDialogList = this.sfxDialogList.filter(dialog => dialog.appId != d.appId);
+                });
+                d.render(true);
+                this.sfxDialogList.push(d);
+            });
+
+            $(this.element).on("change", "[data-sfx-dicetype]", (ev) => {
+                let dicetype = $(ev.target).val();
+                let optionHTML = $([]);
+                if (dicetype != "") {
+                    this.possibleResultList[dicetype].forEach(opt => {
+                        let frag = $("<option></option>");
+                        frag.html(opt.id);
+                        frag.attr("value", opt.id);
+                        optionHTML = optionHTML.add(frag);
+                    });
+                    $(ev.target).parents(".sfx-line").find("[data-sfx-result]").html(optionHTML).attr("data-sfx-result-dicetype", dicetype).trigger("change");
+                } else {
+                    $(ev.target).parents(".sfx-line").find("[data-sfx-result]").empty().trigger("change");
                 }
             });
-            d.render(true);
-            this.sfxDialogList.push(d);
-        });
 
-        $(this.element).on("change", "[data-sfx-dicetype]", (ev) => {
-            let dicetype = $(ev.target).val();
-            let optionHTML = $([]);
-            if (dicetype != "") {
-                this.possibleResultList[dicetype].forEach(opt => {
-                    let frag = $("<option></option>");
-                    frag.html(opt.id);
-                    frag.attr("value", opt.id);
-                    optionHTML = optionHTML.add(frag);
+            $(this.element).on("change", "[data-sfx-specialeffect]", (ev) => {
+                this.sfxDialogList.forEach((dialog) => {
+                    dialog.close();
                 });
-                $(ev.target).parents(".sfx-line").find("[data-sfx-result]").html(optionHTML).attr("data-sfx-result-dicetype", dicetype).trigger("change");
-            } else {
-                $(ev.target).parents(".sfx-line").find("[data-sfx-result]").empty().trigger("change");
-            }
-        });
+                this.sfxDialogList = [];
+                let sfxLine = $(ev.target).parents(".sfx-line");
 
-        $(this.element).on("change", "[data-sfx-specialeffect]", (ev) => {
-            this.sfxDialogList.forEach((dialog) => {
-                dialog.close();
+                let ID = sfxLine.prevAll(".sfx-line").length;
+                let sfxClass = DiceSFXManager.SFX_MODE_CLASS[$(ev.target).val()];
+                let dialogContent = sfxClass.getDialogContent({},ID);
+                let hdbsTemplate = Handlebars.compile(dialogContent.content);
+                
+                sfxLine.find(".sfx-hidden [data-sfx-hidden-options]").html(hdbsTemplate(dialogContent.data));
+                for ( let fp of sfxLine.find(".sfx-hidden [data-sfx-hidden-options] button.file-picker") ) {
+                    fp.onclick = this._activateFilePicker.bind(this);
+                }
             });
-            this.sfxDialogList = [];
-            let sfxLine = $(ev.target).parents(".sfx-line");
 
-            let ID = sfxLine.prevAll(".sfx-line").length;
-            let sfxClass = DiceSFXManager.SFX_MODE_CLASS[$(ev.target).val()];
-            let dialogContent = sfxClass.getDialogContent({},ID);
-            let hdbsTemplate = Handlebars.compile(dialogContent.content);
-            
-            sfxLine.find(".sfx-hidden [data-sfx-hidden-options]").html(hdbsTemplate(dialogContent.data));
-            for ( let fp of sfxLine.find(".sfx-hidden [data-sfx-hidden-options] button.file-picker") ) {
-                fp.onclick = this._activateFilePicker.bind(this);
-            }
-        });
+            /**
+             * Save As
+             */
+            $(this.element).on("click", "[data-saveas]", async (ev) => {
+                let saves = game.user.getFlag("dice-so-nice", "saves");
+                let saveList = [];
+                if (saves)
+                    saveList = new Map(Object.entries(saves));
 
-        /**
-         * Save As
-         */
-        $(this.element).on("click", "[data-saveas]", async (ev) => {
-            let saves = game.user.getFlag("dice-so-nice", "saves");
-            let saveList = [];
-            if (saves)
-                saveList = new Map(Object.entries(saves));
-
-            let dialogSaveAs = new Dialog({
-                title: game.i18n.localize("DICESONICE.SaveAs"),
-                width: 550,
-                content: await renderTemplate("modules/dice-so-nice/templates/dialog-saveas.html",
-                    {
-                        saveList: saveList.keys()
-                    }),
-                buttons: {},
-                render: html => {
-                    if (saveList.size) {
-                        $(html).on("click", "[data-overwrite]", (ev) => {
-                            let name = $(html).find("[data-save-list]").val();
-                            this.actionSaveAs(name);
-                            dialogSaveAs.close();
-                        });
-
-                        $(html).on("click", "[data-delete]", async (ev) => {
-                            let name = $(html).find("[data-save-list]").val();
-                            await this.actionDeleteSave(name);
-                            saveList.delete(name);
-                            $(html).find("[data-save-list] option:selected").remove();
-                            if (!saveList.size) {
-                                $(html).find("[data-overwrite]").prop("disabled", true);
-                                $(html).find("[data-delete]").prop("disabled", true);
-                            }
-                        });
-
-                    } else {
-                        $(html).find("[data-overwrite]").prop("disabled", true);
-                        $(html).find("[data-delete]").prop("disabled", true);
-                    }
-
-                    $(html).on("click", "[data-add-new]", (ev) => {
-                        let name = $(html).find("[data-save-name]").val();
-                        if (name) {
-                            if (saveList.has(name)) {
-                                ui.notifications.error(game.i18n.localize("DICESONICE.SaveAsErrorAlreadyExist"));
-                            } else {
+                let dialogSaveAs = new Dialog({
+                    title: game.i18n.localize("DICESONICE.SaveAs"),
+                    width: 550,
+                    content: await renderTemplate("modules/dice-so-nice/templates/dialog-saveas.html",
+                        {
+                            saveList: saveList.keys()
+                        }),
+                    buttons: {},
+                    render: html => {
+                        if (saveList.size) {
+                            $(html).on("click", "[data-overwrite]", (ev) => {
+                                let name = $(html).find("[data-save-list]").val();
                                 this.actionSaveAs(name);
                                 dialogSaveAs.close();
-                            }
-                        }
-                        else
-                            ui.notifications.error(game.i18n.localize("DICESONICE.SaveAsErrorName"));
-                    });
-                }
-            }, {
-                width: 450,
-                classes: ["dice-so-nice"]
-            }).render(true);
-        });
-
-        /**
-         * Load
-         */
-        $(this.element).on("click", "[data-load]", async (ev) => {
-            let saves = game.user.getFlag("dice-so-nice", "saves");
-            let saveList = [];
-            if (saves)
-                saveList = new Map(Object.entries(saves));
-
-            new Dialog({
-                title: game.i18n.localize("DICESONICE.Load"),
-                content: await renderTemplate("modules/dice-so-nice/templates/dialog-load.html",
-                    {
-                        saveList: saveList.keys()
-                    }),
-                buttons: {
-                    load: {
-                        icon: '<i class="fas fa-box-open"></i>',
-                        label: game.i18n.localize("DICESONICE.Load"),
-                        callback: async html => {
-                            let name = $(html).find("[data-save-list]").val();
-                            await this.actionLoadSave(name);
-                            //Close Dice Settings
-                            this.close();
-                        }
-                    },
-                    no: {
-                        icon: '<i class="fas fa-ban"></i>',
-                        label: game.i18n.localize("DICESONICE.Cancel")
-                    }
-                },
-                render: html => {
-                    if (!saveList.size)
-                        $(html).find('[data-button="load"]').prop("disabled", true);
-                },
-                default: "no"
-            }, {
-                width: 550
-            }).render(true);
-        });
-
-
-        /**
-         * Import
-         */
-        $(this.element).on("click", "[data-import]", async (ev) => {
-            new Dialog({
-                title: game.i18n.localize("DICESONICE.Import"),
-                content: await renderTemplate("modules/dice-so-nice/templates/dialog-import.html"),
-                buttons: {
-                    import: {
-                        icon: '<i class="fas fa-file-import"></i>',
-                        label: game.i18n.localize("DICESONICE.Import"),
-                        callback: html => {
-                            const form = html.find("form")[0];
-                            if (!form.data.files.length) return ui.notifications.error(game.i18n.localize("DICESONICE.ImportNoFile"));
-                            readTextFromFile(form.data.files[0]).then(async json => {
-                                await this.actionImportFromJSON(json);
-                                this.close();
                             });
+
+                            $(html).on("click", "[data-delete]", async (ev) => {
+                                let name = $(html).find("[data-save-list]").val();
+                                await this.actionDeleteSave(name);
+                                saveList.delete(name);
+                                $(html).find("[data-save-list] option:selected").remove();
+                                if (!saveList.size) {
+                                    $(html).find("[data-overwrite]").prop("disabled", true);
+                                    $(html).find("[data-delete]").prop("disabled", true);
+                                }
+                            });
+
+                        } else {
+                            $(html).find("[data-overwrite]").prop("disabled", true);
+                            $(html).find("[data-delete]").prop("disabled", true);
+                        }
+
+                        $(html).on("click", "[data-add-new]", (ev) => {
+                            let name = $(html).find("[data-save-name]").val();
+                            if (name) {
+                                if (saveList.has(name)) {
+                                    ui.notifications.error(game.i18n.localize("DICESONICE.SaveAsErrorAlreadyExist"));
+                                } else {
+                                    this.actionSaveAs(name);
+                                    dialogSaveAs.close();
+                                }
+                            }
+                            else
+                                ui.notifications.error(game.i18n.localize("DICESONICE.SaveAsErrorName"));
+                        });
+                    }
+                }, {
+                    width: 450,
+                    classes: ["dice-so-nice"]
+                }).render(true);
+            });
+
+            /**
+             * Load
+             */
+            $(this.element).on("click", "[data-load]", async (ev) => {
+                let saves = game.user.getFlag("dice-so-nice", "saves");
+                let saveList = [];
+                if (saves)
+                    saveList = new Map(Object.entries(saves));
+
+                new Dialog({
+                    title: game.i18n.localize("DICESONICE.Load"),
+                    content: await renderTemplate("modules/dice-so-nice/templates/dialog-load.html",
+                        {
+                            saveList: saveList.keys()
+                        }),
+                    buttons: {
+                        load: {
+                            icon: '<i class="fas fa-box-open"></i>',
+                            label: game.i18n.localize("DICESONICE.Load"),
+                            callback: async html => {
+                                let name = $(html).find("[data-save-list]").val();
+                                await this.actionLoadSave(name);
+                                //Close Dice Settings
+                                this.close();
+                            }
+                        },
+                        no: {
+                            icon: '<i class="fas fa-ban"></i>',
+                            label: game.i18n.localize("DICESONICE.Cancel")
                         }
                     },
-                    no: {
-                        icon: '<i class="fas fa-ban"></i>',
-                        label: "Cancel"
-                    }
-                },
-                default: "import"
-            }, {
-                width: 400
-            }).render(true);
-        });
-
-        $(this.element).on("click", "[data-export]", async (ev) => {
-            const filename = `fvtt-dicesonice-${Date.now()}.json`;
-            this.actionExportToJSON().then((json) => {
-                saveDataToFile(json, "text/json", filename);
+                    render: html => {
+                        if (!saveList.size)
+                            $(html).find('[data-button="load"]').prop("disabled", true);
+                    },
+                    default: "no"
+                }, {
+                    width: 550
+                }).render(true);
             });
-        });
 
-        $(this.element).on("click", "[data-exportSFX]", async (ev) => {
-            const filename = `fvtt-dicesonice-SFX-${Date.now()}.json`;
-            this.actionExportSFXToJSON().then((json) => {
-                saveDataToFile(json, "text/json", filename);
-            });
-        });
 
-        $(this.element).on("click", "#dice-configuration-canvas", (event) => {
-            let rect = event.target.getBoundingClientRect();
-            let x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-            if (x > 1)
-                x = 1;
-            let y = - ((event.clientY - rect.top) / rect.height) * 2 + 1;
-            let pos = { x: x, y: y };
-            let dice = this.box.findShowcaseDie(pos);
-            if (dice) {
-                let diceType = dice.object.userData;
-                if (this.box.dicefactory.preferedSystem != "standard" && !game.user.getFlag("dice-so-nice", "appearance"))
-                    this.getShowcaseAppearance();
-                if ($(this.element).find(`.dsn-appearance-tabs [data-tab="${diceType}"]`).length) {
-                    this.activateAppearanceTab(diceType);
-                } else {
-                    $(this.element).find(".dsn-appearance-hint").hide();
-                    renderTemplate("modules/dice-so-nice/templates/partial-appearance.html", {
-                        dicetype: diceType,
-                        appearance: this.currentGlobalAppearance,
-                        systemList: this.initializationData.systemList,
-                        colorsetList: this.initializationData.colorsetList,
-                        textureList: this.initializationData.textureList,
-                        materialList: this.initializationData.materialList,
-                        fontList: this.initializationData.fontList
-                    }).then((html) => {
-                        let tabName = diceType.toUpperCase();
-
-                        let insertBefore = null;
-                        //let's find where to insert the tab so it keeps the same order as the dice list
-                        $(this.element).find(".dsn-appearance-tabs .item").each((index, el) => {
-                            if (this.navOrder[$(el).data("tab")] >= this.navOrder[diceType]) {
-                                insertBefore = $(el).data("tab");
-                                return false;
+            /**
+             * Import
+             */
+            $(this.element).on("click", "[data-import]", async (ev) => {
+                new Dialog({
+                    title: game.i18n.localize("DICESONICE.Import"),
+                    content: await renderTemplate("modules/dice-so-nice/templates/dialog-import.html"),
+                    buttons: {
+                        import: {
+                            icon: '<i class="fas fa-file-import"></i>',
+                            label: game.i18n.localize("DICESONICE.Import"),
+                            callback: html => {
+                                const form = html.find("form")[0];
+                                if (!form.data.files.length) return ui.notifications.error(game.i18n.localize("DICESONICE.ImportNoFile"));
+                                readTextFromFile(form.data.files[0]).then(async json => {
+                                    await this.actionImportFromJSON(json);
+                                    this.close();
+                                });
                             }
-                        });
-                        let htmlNavString = `<span class="item" data-group="dsn-dice" data-tab="${diceType}">${tabName} <i class="fas fa-times" data-close-tab></i></span>`;
-                        if (insertBefore) {
-                            $(html).insertBefore($(this.element).find(`.tabAppearance[data-tab="${insertBefore}"]`));
-                            $(htmlNavString).insertBefore($(this.element).find(`.dsn-appearance-tabs .item[data-tab="${insertBefore}"]`));
-                        } else {
-                            $(this.element).find("#dsn-appearance-content").append(html);
-                            $(this.element).find(".dsn-appearance-tabs").append(htmlNavString);
+                        },
+                        no: {
+                            icon: '<i class="fas fa-ban"></i>',
+                            label: "Cancel"
                         }
+                    },
+                    default: "import"
+                }, {
+                    width: 400
+                }).render(true);
+            });
+
+            $(this.element).on("click", "[data-export]", async (ev) => {
+                const filename = `fvtt-dicesonice-${Date.now()}.json`;
+                this.actionExportToJSON().then((json) => {
+                    saveDataToFile(json, "text/json", filename);
+                });
+            });
+
+            $(this.element).on("click", "[data-exportSFX]", async (ev) => {
+                const filename = `fvtt-dicesonice-SFX-${Date.now()}.json`;
+                this.actionExportSFXToJSON().then((json) => {
+                    saveDataToFile(json, "text/json", filename);
+                });
+            });
+
+            $(this.element).on("click", "#dice-configuration-canvas", (event) => {
+                let rect = event.target.getBoundingClientRect();
+                let x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                if (x > 1)
+                    x = 1;
+                let y = - ((event.clientY - rect.top) / rect.height) * 2 + 1;
+                let pos = { x: x, y: y };
+                let dice = this.box.findShowcaseDie(pos);
+                if (dice) {
+                    let diceType = dice.object.userData;
+                    if (this.box.dicefactory.preferedSystem != "standard" && !game.user.getFlag("dice-so-nice", "appearance"))
+                        this.getShowcaseAppearance();
+                    if ($(this.element).find(`.dsn-appearance-tabs [data-tab="${diceType}"]`).length) {
                         this.activateAppearanceTab(diceType);
-                        this.toggleCustomization(diceType);
-                        this.filterSystems(diceType);
-                    });
+                    } else {
+                        $(this.element).find(".dsn-appearance-hint").hide();
+                        renderTemplate("modules/dice-so-nice/templates/partial-appearance.html", {
+                            dicetype: diceType,
+                            appearance: this.currentGlobalAppearance,
+                            systemList: this.initializationData.systemList,
+                            colorsetList: this.initializationData.colorsetList,
+                            textureList: this.initializationData.textureList,
+                            materialList: this.initializationData.materialList,
+                            fontList: this.initializationData.fontList
+                        }).then((html) => {
+                            let tabName = diceType.toUpperCase();
+
+                            let insertBefore = null;
+                            //let's find where to insert the tab so it keeps the same order as the dice list
+                            $(this.element).find(".dsn-appearance-tabs .item").each((index, el) => {
+                                if (this.navOrder[$(el).data("tab")] >= this.navOrder[diceType]) {
+                                    insertBefore = $(el).data("tab");
+                                    return false;
+                                }
+                            });
+                            let htmlNavString = `<span class="item" data-group="dsn-dice" data-tab="${diceType}">${tabName} <i class="fas fa-times" data-close-tab></i></span>`;
+                            if (insertBefore) {
+                                $(html).insertBefore($(this.element).find(`.tabAppearance[data-tab="${insertBefore}"]`));
+                                $(htmlNavString).insertBefore($(this.element).find(`.dsn-appearance-tabs .item[data-tab="${insertBefore}"]`));
+                            } else {
+                                $(this.element).find("#dsn-appearance-content").append(html);
+                                $(this.element).find(".dsn-appearance-tabs").append(htmlNavString);
+                            }
+                            this.activateAppearanceTab(diceType);
+                            this.toggleCustomization(diceType);
+                            this.filterSystems(diceType);
+                        });
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     async actionSaveAs(name) {
@@ -892,6 +896,7 @@ export class DiceConfig extends FormApplication {
     onReset() {
         this.reset = true;
         this.render();
+        this._tabs[0].activate("general");
     }
 
     parseInputs(data) {

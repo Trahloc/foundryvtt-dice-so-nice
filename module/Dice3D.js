@@ -48,7 +48,9 @@ import { Utils } from './Utils.js';
     }
 
     static ALL_DEFAULT_OPTIONS(user = game.user) {
-        return mergeObject(Dice3D.DEFAULT_OPTIONS, { appearance: Dice3D.DEFAULT_APPEARANCE(user) });
+        let options = mergeObject(Dice3D.DEFAULT_OPTIONS, { appearance: Dice3D.DEFAULT_APPEARANCE(user) });
+        options.appearance.global.system = game.dice3d.DiceFactory.preferedSystem;
+        return options;
     }
 
     static get CONFIG() {
@@ -151,8 +153,8 @@ import { Utils } from './Utils.js';
         let defaultValues = {
             foreground: "custom",
             background: "custom",
-            outline: "custom",
-            edge: "custom",
+            outline: "",
+            edge: "",
             texture: "custom",
             material: "custom",
             font: "custom",
