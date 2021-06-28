@@ -878,7 +878,11 @@ export class DiceFactory {
 		}
 		let diceobj = this.getPresetBySystem(dicetype,appearance.system);
 		if(diceobj.colorset){
-			let colorsetData = DiceColors.getColorSet(diceobj.colorset);
+			let colorsetData = {...DiceColors.getColorSet(diceobj.colorset)};
+			Object.entries(colorsetData).forEach((opt) => {
+				if(opt[1] == "custom")
+					delete colorsetData[opt[0]];
+			});
 			mergeObject(appearance, colorsetData);
 		}
 		

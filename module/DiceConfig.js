@@ -3,6 +3,7 @@ import { DiceBox } from './DiceBox.js';
 import { DiceSFXManager } from './DiceSFXManager.js';
 import { Utils } from './Utils.js';
 import { DiceNotation } from './DiceNotation.js';
+import {DiceColors, DICE_SCALE} from './DiceColors.js';
 /**
  * Form application to configure settings of the 3D Dice.
  */
@@ -781,7 +782,24 @@ export class DiceConfig extends FormApplication {
                 let customizationElements = $(element).find('[data-colorset],[data-texture],[data-material],[data-font]');
                 if (system != "standard") {
                     let diceobj = this.box.dicefactory.systems[system].dice.find(obj => obj.type == diceType);
-                    customizationElements.prop("disabled", (diceobj && (diceobj.modelFile || diceobj.colorset)));
+                    if(diceobj){
+                        let colorsetData = {};
+                        if(diceobj.colorset){
+                            colorsetData = DiceColors.getColorSet(diceobj.colorset);
+                        }
+                        customizationElements.each((index, el) =>{
+                            let colorsetForce = false;
+                            if($(el).is("[data-colorset]"))
+                                colorsetForce = true;
+                            else if($(el).is("[data-texture]") && colorsetData.texture != "custom")
+                                colorsetForce = true;
+                            else if($(el).is("[data-material]") && colorsetData.material != "custom")
+                                colorsetForce = true;
+                            else if($(el).is("[data-font]") && (colorsetData.font != "custom" || diceobj.font))
+                                colorsetForce = true;
+                            $(el).prop("disabled", diceobj.modelFile || colorsetForce);
+                        });
+                    }
                 } else {
                     customizationElements.prop("disabled", false);
                 }

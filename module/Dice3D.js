@@ -156,7 +156,6 @@ import { Utils } from './Utils.js';
             texture: "custom",
             material: "custom",
             font: "custom",
-            fontScale: {},
             visibility: "visible"
         }
         colorset = mergeObject(defaultValues, colorset);
