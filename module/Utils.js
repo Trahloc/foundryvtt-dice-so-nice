@@ -44,6 +44,8 @@ import { DiceColors, TEXTURELIST, COLORSETS } from './DiceColors.js';
             }
 
             let sfxList = user.getFlag("dice-so-nice", "sfxList") ? duplicate(user.getFlag("dice-so-nice", "sfxList")) : null;
+            if(!Array.isArray(sfxList))
+                sfxList = Object.values(sfxList);
             if(sfxList){
                 sfxList.forEach((sfx)=>{
                     sfx.onResult = [sfx.onResult];

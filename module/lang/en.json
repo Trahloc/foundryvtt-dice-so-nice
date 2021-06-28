@@ -31,7 +31,8 @@
     "DICESONICE.SaveAs": "Save as...",
     "DICESONICE.Load": "Load...",
     "DICESONICE.Import": "Import...",
-    "DICESONICE.Export": "Export...",
+    "DICESONICE.Export": "Export all",
+    "DICESONICE.ExportSFX": "Export Special effects",
     "DICESONICE.outlineColor": "Outline Color",
     "DICESONICE.edgeColor": "Edge Color",
     "DICESONICE.texture": "Texture",
@@ -80,6 +81,7 @@
 
     "DICESONICE.Add" : "Add",
     "DICESONICE.Delete" : "Delete",
+    "DICESONICE.Options" : "Options",
     "DICESONICE.diceType" : "Dice type",
     "DICESONICE.onResult" : "On result",
     "DICESONICE.specialEffect" : "Special effect",
@@ -96,6 +98,7 @@
     "DICESONICE.PlayAnimationParticleSparkles" : "Particles: Blaze",
     "DICESONICE.PlayAnimationParticleVortex" : "Particles: Magic Vortex",
     "DICESONICE.PlayAnimationThormund" : "Animation: Thormund TTE",
+    "DICESONICE.PlaySoundCustom" : "Sound: Custom file",
 
     "DICESONICE.TextureClouds" : "Clouds",
     "DICESONICE.TextureCloudsTransparent" : "Clouds (Transparent)",
@@ -207,5 +210,8 @@
     "DICESONICE.SaveAsErrorAlreadyExist" : "A save file with this name already exist. Choose another name or use the Overwrite button to update your save.",
     "DICESONICE.ImportHint" : "You can import a previously exported JSON file. This will overwrite your current settings but not your save files. This operation can't be undone.",
     "DICESONICE.ImportNoFile" : "No file found. Please select a file to import.",
-    "DICESONICE.TestRoll" : "Test Roll"
+    "DICESONICE.TestRoll" : "Test Roll",
+
+    "DICESONICE.sfxOptionsIsGlobal" : "(GM Only) Enable this SFX for all players",
+    "DICESONICE.sfxOptionsCustomSound" : "Select a sound file"
 }

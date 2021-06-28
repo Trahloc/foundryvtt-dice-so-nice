@@ -215,26 +215,25 @@ Hooks.on('createChatMessage', (chatMessage) => {
         mergeObject(chatMessage.data, { "-=sound": null });
     }
     chatMessage._dice3danimating = true;
+
+    const showMessage = () => {
+            delete chatMessage._dice3danimating;
+            
+            window.ui.chat.element.find(`.message[data-message-id="${chatMessage.id}"]`).show();
+            if(window.ui.sidebar.popouts.chat)
+                window.ui.sidebar.popouts.chat.element.find(`.message[data-message-id="${chatMessage.id}"]`).show();
+
+            Hooks.callAll("diceSoNiceRollComplete", chatMessage.id);
+
+            window.ui.chat.scrollBottom();
+            if(window.ui.sidebar.popouts.chat)
+                window.ui.sidebar.popouts.chat.scrollBottom();
+    }
+
     if (game.view == "stream") {
-        setTimeout(function () {
-            delete chatMessage._dice3danimating;
-            $(`#chat-log .message[data-message-id="${chatMessage.id}"]`).show();
-            Hooks.callAll("diceSoNiceRollComplete", chatMessage.id);
-            ui.chat.scrollBottom();
-            let popout = Object.values(ui.windows).find(win => win instanceof ChatLog);
-            if(popout)
-                popout.scrollBottom();
-        }, 2500, chatMessage);
+        setTimeout(showMessage, 2500, chatMessage);
     } else {
-        game.dice3d.showForRoll(roll, chatMessage.user, false, null, false, chatMessage.id, chatMessage.data.speaker).then(displayed => {
-            delete chatMessage._dice3danimating;
-            $(`#chat-log .message[data-message-id="${chatMessage.id}"]`).show();
-            Hooks.callAll("diceSoNiceRollComplete", chatMessage.id);
-            ui.chat.scrollBottom();
-            let popout = Object.values(ui.windows).find(win => win instanceof ChatLog);
-            if(popout)
-                popout.scrollBottom();
-        });
+        game.dice3d.showForRoll(roll, chatMessage.user, false, null, false, chatMessage.id, chatMessage.data.speaker).then(showMessage);
     }
 });
 

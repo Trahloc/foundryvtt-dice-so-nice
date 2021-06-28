@@ -70,8 +70,18 @@ import { Utils } from './Utils.js';
             return {};
     }
 
+    /**
+     * Get the full customizations settings for the _showAnimation method 
+     */
     static ALL_CUSTOMIZATION(user = game.user, dicefactory = null) {
-        let specialEffects = Dice3D.SFX(user);
+        let specialEffects = Dice3D.SFX(user) || [];
+        game.users.forEach((other) => {
+            if(other.isGM && other.id != user.id){
+                let GMSFX = Dice3D.SFX(other);
+                GMSFX = GMSFX.filter(sfx => sfx.options && sfx.options.isGlobal);
+                mergeObject(specialEffects,GMSFX);
+            }
+        });
         let config = mergeObject({ appearance: Dice3D.APPEARANCE(user) }, { specialEffects: specialEffects });
         if (dicefactory && dicefactory.preferedSystem != "standard" && !game.user.getFlag("dice-so-nice", "appearance")) {
             config.appearance.global.system = dicefactory.preferedSystem;
@@ -171,6 +181,24 @@ import { Utils } from './Utils.js';
                     game.user.setFlag("dice-so-nice", "appearance", appearance);
                 }
         }
+    }
+
+    /**
+     * Add a new type if SFX trigger that can be customized by users.
+     * This trigger can then be pulled by a system, a module or a macro
+     * @param {String} id : Identifier of the trigger, ex: fate3df
+     * @param {String} name : Localized name of the trigger, ex: Fate Roll
+     * @param {Array(String)} results : Array of possible results for this trigger, ex: ["-3","3","0"]
+     * @returns 
+     */
+    addSFXTrigger(id, name, results){
+        if(DiceSFXManager.EXTRA_TRIGGER_RESULTS[id])
+            return;
+        DiceSFXManager.EXTRA_TRIGGER_TYPE.push({id:id, name:name});
+        DiceSFXManager.EXTRA_TRIGGER_RESULTS[id] = [];
+        results.forEach((res) => {
+            DiceSFXManager.EXTRA_TRIGGER_RESULTS[id].push({id:res,name:res});
+        });
     }
 
     /**
@@ -287,11 +315,11 @@ import { Utils } from './Utils.js';
         });
 
         if (game.settings.get("dice-so-nice", "allowInteractivity")) {
-            $(document).on("mousemove.dicesonice", "#board", this._onMouseMove.bind(this));
+            $(document).on("mousemove.dicesonice", "body", this._onMouseMove.bind(this));
 
-            $(document).on("mousedown.dicesonice", "#board", this._onMouseDown.bind(this));
+            $(document).on("mousedown.dicesonice", "body", this._onMouseDown.bind(this));
 
-            $(document).on("mouseup.dicesonice", "#board", this._onMouseUp.bind(this));
+            $(document).on("mouseup.dicesonice", "body", this._onMouseUp.bind(this));
         }
     }
 

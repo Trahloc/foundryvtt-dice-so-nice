@@ -1317,7 +1317,7 @@ export class DiceBox {
 		this.diceList.forEach(dice =>{
 			if(dice.specialEffects){
 				dice.specialEffects.forEach(sfx => {
-					promisesSFX.push(DiceSFXManager.playSFX(sfx.specialEffect, this, dice));
+					promisesSFX.push(DiceSFXManager.playSFX(sfx, this, dice));
 				});
 			}
 		});

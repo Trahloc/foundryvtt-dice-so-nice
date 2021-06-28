@@ -1,6 +1,7 @@
 import { DiceSFX } from '../DiceSFX.js';
 import * as THREE from '../libs/three.module.js';
 import { Proton } from '../libs/three-modules/three.proton.js';
+import { DiceSFXManager } from '../DiceSFXManager.js';
 
 export class PlayAnimationParticleVortex extends DiceSFX {
     static id = "PlayAnimationParticleVortex";
@@ -9,7 +10,7 @@ export class PlayAnimationParticleVortex extends DiceSFX {
     static sound = "modules/dice-so-nice/sfx/sounds/vortex.mp3";
     /**@override init */
     static async init() {
-        let map = new THREE.TextureLoader().load("modules/dice-so-nice/sfx/textures/magic01.webp");
+        let map = await this.loadAsset(DiceSFXManager.TextureLoader, "modules/dice-so-nice/sfx/textures/magic01.webp");
         let material = new THREE.MeshBasicMaterial({
             map: map,
             blending:THREE.NormalBlending,

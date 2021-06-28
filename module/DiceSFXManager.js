@@ -1,5 +1,9 @@
+import * as THREE from './libs/three.module.js';
+import { GLTFLoader } from './libs/three-modules/GLTFLoader.js';
+
 import { PlaySoundEpicFail } from './sfx/PlaySoundEpicFail.js';
 import { PlaySoundEpicWin } from './sfx/PlaySoundEpicWin.js';
+import { PlaySoundCustom } from './sfx/PlaySoundCustom.js';
 import { PlayConfettiStrength1 } from './sfx/PlayConfettiStrength1.js';
 import { PlayConfettiStrength2 } from './sfx/PlayConfettiStrength2.js';
 import { PlayConfettiStrength3 } from './sfx/PlayConfettiStrength3.js';
@@ -24,7 +28,8 @@ export const DiceSFXManager = {
         "PlayAnimationParticleSparkles": PlayAnimationParticleSparkles,
         "PlayAnimationParticleVortex": PlayAnimationParticleVortex,
         "PlaySoundEpicWin": PlaySoundEpicWin,
-        "PlaySoundEpicFail": PlaySoundEpicFail
+        "PlaySoundEpicFail": PlaySoundEpicFail,
+        "PlaySoundCustom": PlaySoundCustom
     },
     SFX_MODE_LIST : null,
     SFX_CLASS : {},
@@ -32,6 +37,8 @@ export const DiceSFXManager = {
     EXTRA_TRIGGER_RESULTS : {},
     renderQueue : [],
     garbageCollector : [],
+    GLTFLoader : null,
+    TextureLoader: null,
     init : function(){
         if(!DiceSFXManager.SFX_MODE_LIST){
             DiceSFXManager.SFX_MODE_LIST = {};
@@ -41,6 +48,10 @@ export const DiceSFXManager = {
                 DiceSFXManager.SFX_MODE_LIST[sfx.id] = sfx.name;
             });
         }
+
+        DiceSFXManager.GLTFLoader = new GLTFLoader();
+        DiceSFXManager.TextureLoader = new THREE.TextureLoader();
+
         let sfxUniqueList = [];
         game.users.forEach((user) => {
             let sfxList = user.getFlag("dice-so-nice", "sfxList");
@@ -63,20 +74,27 @@ export const DiceSFXManager = {
             DiceSFXManager.addSFXMode(DiceSFXManager.SFX_MODE_CLASS[sfxClassName]);
         });
     },
-    addSFXMode : function(sfx){
+    addSFXMode : async function(sfx){
         if(sfx.id && sfx.name && !sfx.initialized){
             DiceSFXManager.SFX_CLASS[sfx.id] = sfx;
             sfx.initialized = true;
-            sfx.init();
+            await sfx.init();
         }
     },
-    playSFX : async function(id, box, dicemesh){
-        return new Promise((resolve)=>{
-            if(!DiceSFXManager.SFX_CLASS[id])
-                return;
+    playSFX : async function(sfx, box, dicemesh){
+        let id = sfx.specialEffect;
+        return new Promise(async (resolve)=>{
+            if(!DiceSFXManager.SFX_CLASS[id]){
+                if(DiceSFXManager.SFX_MODE_CLASS[id]){
+                    await DiceSFXManager.addSFXMode(DiceSFXManager.SFX_MODE_CLASS[id]);
+                } else {
+                    return;
+                }
+            }
+                
             let sfxInstance = new DiceSFXManager.SFX_CLASS[id](box, dicemesh);
 
-            sfxInstance.play().then(result => {
+            sfxInstance.play(sfx.options).then(result => {
                 if(result !== false){
                     if(typeof sfxInstance.render === 'function')
                         DiceSFXManager.renderQueue.push(sfxInstance);
