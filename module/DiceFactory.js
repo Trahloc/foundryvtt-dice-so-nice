@@ -858,19 +858,19 @@ export class DiceFactory {
 
 		//To keep compatibility with both older integrations and user settings, we use the DiceColor naming convention from there
 		let appearance = {
-			colorset: settings.colorset,
-			foreground: settings.labelColor,
-			background: settings.diceColor,
-			outline: settings.outlineColor,
-			edge: settings.edgeColor,
-			texture: settings.texture,
-			material: settings.material,
-			font: settings.font,
-			system: settings.system
+			colorset: settings.colorset ? settings.colorset : appearances.global.colorset ? appearances.global.colorset : "custom",
+			foreground: settings.labelColor ? settings.labelColor:appearances.global.labelColor ? appearances.global.labelColor : "#FFFFFF",
+			background: settings.diceColor ? settings.diceColor:appearances.global.diceColor ? appearances.global.diceColor : "#000000",
+			outline: settings.outlineColor ? settings.outlineColor: appearances.global.outlineColor ? appearances.global.outlineColor : "",
+			edge: settings.edgeColor ? settings.edgeColor:appearances.global.edgeColor ? appearances.global.edgeColor:"",
+			texture: settings.texture ? settings.texture:appearances.global.texture ? appearances.global.texture : "none",
+			material: settings.material ? settings.material:appearances.global.material ? appearances.global.material : "auto",
+			font: settings.font ? settings.font:appearances.global.font ? appearances.global.font : "Arial",
+			system: settings.system ? settings.system:appearances.global.system ? appearances.global.system : "standard"
 		};
 
-		if(settings.colorset != "custom"){
-			let colorsetData = DiceColors.getColorSet(settings.colorset);
+		if(appearance.colorset && appearance.colorset != "custom"){
+			let colorsetData = DiceColors.getColorSet(appearance.colorset);
 			appearance.foreground = colorsetData.foreground;
 			appearance.background = colorsetData.background;
 			appearance.outline = colorsetData.outline;
