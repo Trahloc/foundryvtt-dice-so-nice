@@ -11,8 +11,8 @@ export class DiceFactory {
 
 		this.baseScale = 50;
 
-		//TODO
-		this.preferedSystem = "standard";
+		this.preferredSystem = "standard";
+		this.preferredColorset = "custom";
 
 		this.cache_hits = 0;
 		this.cache_misses = 0;
@@ -210,7 +210,7 @@ export class DiceFactory {
 				} else {
 					diceobj.loadTextures();
 				}
-			} else if(this.systems.standard.dice[index].internalAdd && diceobj.system == this.preferedSystem) {
+			} else if(this.systems.standard.dice[index].internalAdd && diceobj.system == this.preferredSystem) {
 				//if it exists in the standard system but has been added by the internal call, we update it with its custom preset
 				this.systems.standard.dice[index] = diceobj;
 			}
@@ -223,9 +223,11 @@ export class DiceFactory {
 		const preloadPresetsByUser = (user) => {
 			let appearance = user.getFlag("dice-so-nice", "appearance") ? duplicate(user.getFlag("dice-so-nice", "appearance")) : null;
 			if(!appearance){
-				appearance = {};
-				if(this.preferedSystem != "standard")
-					appearance.global = {system:this.preferedSystem};
+				appearance = {global:{}};
+				if(this.preferredSystem != "standard")
+					appearance.global.system = this.preferredSystem;
+				if(this.preferredColorset != "custom")
+					appearance.global.colorset = this.preferredColorset;
 			}
 			//load basic model
 			this.systems["standard"].dice.forEach((obj) =>{
@@ -274,8 +276,8 @@ export class DiceFactory {
 	addSystem(system, mode="default"){
 		system.dice = [];
 		system.mode = mode;
-		if(mode != "default" && this.preferedSystem == "standard")
-			this.preferedSystem = system.id;
+		if(mode != "default" && this.preferredSystem == "standard")
+			this.preferredSystem = system.id;
 		this.systems[system.id] = system;
 	}
 	//{type:"",labels:[],system:""}
@@ -846,7 +848,7 @@ export class DiceFactory {
 			2) A flavor/notation colorset
 			3) The colorset of the diceobj
 			4) The colorset configured by the player for this dice type
-			5) A prefered system set by a module/system (done in main.js)
+			5) A preferred system set by a module/system (done in main.js)
 			6) The global colorset of the player
 		*/
 		

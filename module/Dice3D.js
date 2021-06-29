@@ -49,7 +49,8 @@ import { Utils } from './Utils.js';
 
     static ALL_DEFAULT_OPTIONS(user = game.user) {
         let options = mergeObject(Dice3D.DEFAULT_OPTIONS, { appearance: Dice3D.DEFAULT_APPEARANCE(user) });
-        options.appearance.global.system = game.dice3d.DiceFactory.preferedSystem;
+        options.appearance.global.system = game.dice3d.DiceFactory.preferredSystem;
+        options.appearance.global.colorset = game.dice3d.DiceFactory.preferredColorset;
         return options;
     }
 
@@ -85,8 +86,11 @@ import { Utils } from './Utils.js';
             }
         });
         let config = mergeObject({ appearance: Dice3D.APPEARANCE(user) }, { specialEffects: specialEffects });
-        if (dicefactory && dicefactory.preferedSystem != "standard" && !game.user.getFlag("dice-so-nice", "appearance")) {
-            config.appearance.global.system = dicefactory.preferedSystem;
+        if (dicefactory && !game.user.getFlag("dice-so-nice", "appearance")) {
+            if(dicefactory.preferredSystem != "standard" )
+                config.appearance.global.system = dicefactory.preferredSystem;
+            if(dicefactory.preferredColorset != "custom")
+                config.appearance.global.colorset = dicefactory.preferredColorset;
         }
         return config;
     }
@@ -102,12 +106,12 @@ import { Utils } from './Utils.js';
      * The id is to be used with addDicePreset
      * The name can be a localized string
      * @param {Object} system {id, name}
-     * @param {Boolean} mode "force, exclusive, default". Force will prevent any other systems from being enabled. exclusive will list only "exclusive" systems in the dropdown . Default will add the system as a choice
+     * @param {Boolean} mode "default,preferred". Default will add the system as a choice. Preferred will be enabled for all users unless they change their settings.
      */
     addSystem(system, mode = "default") {
         //retrocompatibility with  API version < 3.1
         if (typeof mode == "boolean") {
-            mode = mode ? "force" : "default";
+            mode = mode ? "preferred" : "default";
         }
 
         this.DiceFactory.addSystem(system, mode);
@@ -147,9 +151,9 @@ import { Utils } from './Utils.js';
     /**
      * Add a colorset (theme)
      * @param {Object} colorset 
-     * @param {Object} apply = "none", "default", "force"
+     * @param {Object} mode = "default", "preferred"
      */
-    async addColorset(colorset, apply = "none") {
+    async addColorset(colorset, mode = "default") {
         let defaultValues = {
             foreground: "custom",
             background: "custom",
@@ -168,20 +172,8 @@ import { Utils } from './Utils.js';
             this.DiceFactory.fontFamilies.push(colorset.font);
             await this.DiceFactory._loadFonts();
         }
-
-        switch (apply) {
-            case "force":
-                DiceColors.colorsetForced = colorset.name;
-            //note: there's no break here on purpose 
-            case "default":
-                //If there's no apperance already selected by the player, save this custom colorset as his own
-                let savedAppearance = game.user.getFlag("dice-so-nice", "appearance") ? duplicate(game.user.getFlag("dice-so-nice", "appearance")) : null;
-                if (!savedAppearance) {
-                    let appearance = Dice3D.DEFAULT_APPEARANCE();
-                    appearance.colorset = colorset.name;
-                    game.user.setFlag("dice-so-nice", "appearance", appearance);
-                }
-        }
+        if(mode=="preferred")
+            this.DiceFactory.preferredColorset = colorset.name;
     }
 
     /**
@@ -217,6 +209,7 @@ import { Utils } from './Utils.js';
         this._buildDiceBox();
         DiceColors.loadTextures(TEXTURELIST, async (images) => {
             DiceColors.initColorSets();
+            
             Hooks.call("diceSoNiceReady", this);
             await this.DiceFactory._loadFonts();
             await this.DiceFactory.preloadPresets();

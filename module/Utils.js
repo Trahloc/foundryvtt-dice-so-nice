@@ -120,12 +120,7 @@ import { DiceColors, TEXTURELIST, COLORSETS } from './DiceColors.js';
     };
 
     static prepareColorsetList() {
-        let sets = {};
-        if (DiceColors.colorsetForced)
-            sets[DiceColors.colorsetForced] = COLORSETS[DiceColors.colorsetForced];
-        else
-            sets = COLORSETS;
-        let groupedSetsList = Object.values(sets);
+        let groupedSetsList = Object.values(COLORSETS);
         groupedSetsList.sort((set1, set2) => {
             if (game.i18n.localize(set1.description) < game.i18n.localize(set2.description)) return -1;
             if (game.i18n.localize(set1.description) > game.i18n.localize(set2.description)) return 1;

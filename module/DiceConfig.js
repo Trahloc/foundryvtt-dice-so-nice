@@ -87,8 +87,11 @@ export class DiceConfig extends FormApplication {
 
         this.box = new DiceBox(this.canvas, game.dice3d.box.dicefactory, config);
         await this.box.initialize();
-        if (this.box.dicefactory.preferedSystem != "standard" && !game.user.getFlag("dice-so-nice", "appearance")) {
-            config.appearance.global.system = this.box.dicefactory.preferedSystem;
+        if (!game.user.getFlag("dice-so-nice", "appearance")) {
+            if(this.box.dicefactory.preferredSystem != "standard")
+                config.appearance.global.system = this.box.dicefactory.preferredSystem;
+            if(this.box.dicefactory.preferredColorset != "standard")
+                config.appearance.global.colorset = this.box.dicefactory.preferredColorset;
         }
         this.box.showcase(config);
 
@@ -232,7 +235,7 @@ export class DiceConfig extends FormApplication {
         this.toggleAutoScale();
         this.toggleCustomization();
         this.filterSystems();
-        this.setPreferedSystem();
+        this.setPreferredOptions();
 
         select2dsn.call($(this.element).find("[data-sfx-result]"), this.select2Options);
 
@@ -545,7 +548,7 @@ export class DiceConfig extends FormApplication {
                 let dice = this.box.findShowcaseDie(pos);
                 if (dice) {
                     let diceType = dice.object.userData;
-                    if (this.box.dicefactory.preferedSystem != "standard" && !game.user.getFlag("dice-so-nice", "appearance"))
+                    if (!game.user.getFlag("dice-so-nice", "appearance") && (this.box.dicefactory.preferredSystem != "standard" || this.box.dicefactory.preferredColorset != "custom"))
                         this.getShowcaseAppearance();
                     if ($(this.element).find(`.dsn-appearance-tabs [data-tab="${diceType}"]`).length) {
                         this.activateAppearanceTab(diceType);
@@ -830,9 +833,12 @@ export class DiceConfig extends FormApplication {
         });
     }
 
-    setPreferedSystem() {
-        if (this.box.dicefactory.preferedSystem != "standard" && !game.user.getFlag("dice-so-nice", "appearance")) {
-            $(this.element).find('.tabAppearance[data-tab="global"] [data-system]').val(this.box.dicefactory.preferedSystem);
+    setPreferredOptions() {
+        if (!game.user.getFlag("dice-so-nice", "appearance")) {
+            if(this.box.dicefactory.preferredSystem != "standard")
+                $(this.element).find('.tabAppearance[data-tab="global"] [data-system]').val(this.box.dicefactory.preferredSystem);
+            if(this.box.dicefactory.preferredColorset != "custom")
+                $(this.element).find('.tabAppearance[data-tab="global"] [data-colorset]').val(this.box.dicefactory.preferredColorset);
         }
     }
 
