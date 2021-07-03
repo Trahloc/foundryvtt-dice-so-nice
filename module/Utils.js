@@ -44,16 +44,17 @@ import { DiceColors, TEXTURELIST, COLORSETS } from './DiceColors.js';
             }
 
             let sfxList = user.getFlag("dice-so-nice", "sfxList") ? duplicate(user.getFlag("dice-so-nice", "sfxList")) : null;
-            if(!Array.isArray(sfxList))
-                sfxList = Object.values(sfxList);
+           
             if(sfxList){
+                if(!Array.isArray(sfxList))
+                    sfxList = Object.values(sfxList);
                 sfxList.forEach((sfx)=>{
                     sfx.onResult = [sfx.onResult];
                 });
+                await user.unsetFlag("dice-so-nice", "sfxList");
+                await user.setFlag("dice-so-nice", "sfxList", sfxList);
+                migrated = true;
             }
-            await user.unsetFlag("dice-so-nice", "sfxList");
-            await user.setFlag("dice-so-nice", "sfxList", sfxList);
-            migrated = true;
         }));
         game.settings.set("dice-so-nice", "formatVersion", "4");
         if(migrated)
