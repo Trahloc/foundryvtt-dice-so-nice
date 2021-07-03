@@ -34,10 +34,10 @@ import { Utils } from './Utils.js';
     static DEFAULT_APPEARANCE(user = game.user) {
         return {
             global: {
-                labelColor: Utils.contrastOf(user.color),
-                diceColor: user.color,
-                outlineColor: user.color,
-                edgeColor: user.color,
+                labelColor: Utils.contrastOf(user.data.color),
+                diceColor: user.data.color,
+                outlineColor: user.data.color,
+                edgeColor: user.data.color,
                 texture: "none",
                 material: "auto",
                 font: "auto",
