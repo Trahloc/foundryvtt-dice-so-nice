@@ -1,6 +1,7 @@
 import { DiceSFX } from '../DiceSFX.js';
 import * as THREE from '../libs/three.module.js';
 import { Proton } from '../libs/three-modules/three.proton.js';
+import { DiceSFXManager } from '../DiceSFXManager.js';
 
 export class PlayAnimationParticleSparkles extends DiceSFX {
     static id = "PlayAnimationParticleSparkles";
@@ -9,7 +10,7 @@ export class PlayAnimationParticleSparkles extends DiceSFX {
     static sound = "modules/dice-so-nice/sfx/sounds/sparkles.mp3";
     /**@override init */
     static async init() {
-        let map = new THREE.TextureLoader().load("modules/dice-so-nice/sfx/textures/glow_point_red_gold.webp");
+        let map = await this.loadAsset(DiceSFXManager.TextureLoader, "modules/dice-so-nice/sfx/textures/glow_point_red_gold.webp");
         let material = new THREE.SpriteMaterial({
             map: map,
             fog: true,

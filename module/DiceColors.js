@@ -56,7 +56,7 @@ export const TEXTURELIST = {
 		composite: 'multiply',
 		source: 'modules/dice-so-nice/textures/ice.webp',
 		bump: 'modules/dice-so-nice/textures/ice.webp',
-		material: 'metal'
+		material: 'glass'
 	},
 	'paper': {
 		name: 'DICESONICE.TexturePaper',
@@ -219,6 +219,7 @@ export const COLORSETS = {
 		foreground: '#f6c928',
 		background: '#f6c928',
 		outline: 'none',
+		edge: '#f6c928',
 		texture: 'metal',
 		visibility: 'hidden'
 	},
@@ -699,32 +700,5 @@ export class DiceColors {
 		COLORSETS['custom'].background = background;
 		COLORSETS['custom'].outline = outline;
 		COLORSETS['custom'].edge = edge;
-	}
-
-	static applyColorSet(dicefactory, colorset, texture = null, material = null, font = null) {
-		var colordata = DiceColors.getColorSet(colorset);
-		
-		if (colorset && colorset.length > 0) {
-	
-			dicefactory.applyColorSet(colordata);
-		}
-	
-		if (texture || (colordata.texture && !Array.isArray(colordata.texture))) {
-	
-			var texturedata = this.getTexture((texture || colordata.texture.name));
-	
-			if (texturedata.name) {
-				dicefactory.applyTexture(texturedata);
-			}
-	
-		}
-
-		if (material || colordata.material) {
-			dicefactory.applyMaterial((material || colordata.material));
-		}
-
-		if (font || colordata.font) {
-			dicefactory.applyFont((font || colordata.font));
-		}
 	}
 }

@@ -1,6 +1,7 @@
 import { DiceSFX } from '../DiceSFX.js';
+import { DiceSFXManager } from '../DiceSFXManager.js';
 import * as THREE from '../libs/three.module.js';
-import { GLTFLoader } from '../libs/three-modules/GLTFLoader.js';
+
 
 export class PlayAnimationThormund extends DiceSFX {
     static id = "PlayAnimationThormund";
@@ -14,19 +15,17 @@ export class PlayAnimationThormund extends DiceSFX {
     static up = new THREE.Vector3(0,0,1);
     /**@override init */
     static async init() {
-        let loader = new GLTFLoader();
-
-		loader.load(PlayAnimationThormund.file, gltf => {
-			gltf.scene.traverse(function (node) {
-				if (node.isMesh) {
-					node.castShadow = true; 
-				}
-			});
-            PlayAnimationThormund.model = gltf.scene.children[0];
-        });
         game.audio.pending.push(function(){
             AudioHelper.preloadSound(PlayAnimationThormund.sound);
         }.bind(this));
+
+        let gltf = await this.loadAsset(DiceSFXManager.GLTFLoader, PlayAnimationThormund.file);
+        gltf.scene.traverse(function (node) {
+            if (node.isMesh) {
+                node.castShadow = true; 
+            }
+        });
+        PlayAnimationThormund.model = gltf.scene.children[0];
     }
     /**@override play */
     async play() {

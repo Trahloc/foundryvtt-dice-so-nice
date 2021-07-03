@@ -1,4 +1,5 @@
 import {DicePreset} from './DicePreset.js';
+import {BASE_PRESETS_LIST, EXTRA_PRESETS_LIST} from './DiceDefaultPresets.js';
 import {DiceColors, DICE_SCALE} from './DiceColors.js';
 import {DICE_MODELS} from './DiceModels.js';
 import * as THREE from './libs/three.module.js';
@@ -6,23 +7,16 @@ import { GLTFLoader } from './libs/three-modules/GLTFLoader.js';
 export class DiceFactory {
 
 	constructor() {
-		this.dice = {};
 		this.geometries = {};
 
 		this.baseScale = 50;
 
-		this.systemForced = false;
-		this.systemActivated = "standard";
-		this.systemsHaveExclusive = false;
+		this.preferredSystem = "standard";
+		this.preferredColorset = "custom";
 
 		this.cache_hits = 0;
 		this.cache_misses = 0;
 
-		this.label_color = '';
-		this.dice_color = '';
-		this.label_outline = '';
-		this.dice_texture = '';
-		this.edge_color = '';
 		this.bumpMapping = true;
 
 		this.loaderGLTF = new GLTFLoader();
@@ -55,318 +49,13 @@ export class DiceFactory {
 			'dot': {id: 'dot', name: game.i18n.localize("DICESONICE.System.Dot"), dice:[], mode:"default"},
 			'dot_b': {id: 'dot_b', name: game.i18n.localize("DICESONICE.System.DotBlack"), dice:[], mode:"default"}
 		};
-		let diceobj;
-		diceobj = new DicePreset('d2');
-		diceobj.name = 'd2';
-		diceobj.setLabels(['1','2']);
-		diceobj.setValues(1,2);
-		diceobj.inertia = 8;
-		diceobj.mass = 400;
-		diceobj.scale = 0.9;
-		this.register(diceobj);
 		
-		diceobj = new DicePreset('dc','d2');
-		diceobj.name = 'Coin';
-		diceobj.setLabels([
-			'modules/dice-so-nice/textures/coin/tail.webp',
-			'modules/dice-so-nice/textures/coin/heads.webp'
-		]);
-		diceobj.setBumpMaps([
-			'modules/dice-so-nice/textures/coin/tail_bump.webp',
-			'modules/dice-so-nice/textures/coin/heads_bump.webp'
-		]);
-		diceobj.setValues(0,1);
-		diceobj.inertia = 8;
-		diceobj.scale = 0.9;
-		diceobj.colorset = "coin_default"
-		this.register(diceobj);
-
-		diceobj = new DicePreset('d4');
-		diceobj.name = 'd4';
-		diceobj.setLabels(['1','2','3','4']);
-		diceobj.setValues(1,4);
-		diceobj.inertia = 5;
-		diceobj.scale = 1.2;
-		this.register(diceobj);
-
-		diceobj = new DicePreset('d6');
-		diceobj.name = 'd6';
-		diceobj.setLabels(['1', '2', '3', '4', '5', '6']);
-		diceobj.setValues(1,6);
-		diceobj.scale = 0.9;
-		this.register(diceobj);
-
-		diceobj = new DicePreset('d3', 'd6');
-		diceobj.name = 'd3';
-		diceobj.setLabels(['1', '2', '3', '1', '2', '3']);
-		diceobj.setValues(1,3);
-		diceobj.scale = 0.9;
-		this.register(diceobj);
-
-		diceobj = new DicePreset('df', 'd6');
-		diceobj.name = 'Fate Dice';
-		diceobj.setLabels(['−', ' ', '+']);
-		diceobj.setValues(-1,1);
-		diceobj.scale = 0.9;
-		this.register(diceobj);
-
-		diceobj = new DicePreset('d8');
-		diceobj.name = 'd8';
-		diceobj.setLabels(['1','2','3','4','5','6','7','8']);
-		diceobj.setValues(1,8);
-		this.register(diceobj);
-
-		diceobj = new DicePreset('d10');
-		diceobj.name = 'd10';
-		diceobj.setLabels(['1','2','3','4','5','6','7','8','9','0']);
-		diceobj.setValues(1,10);
-		diceobj.mass = 450;
-		diceobj.inertia = 9;
-		diceobj.scale = 0.9;
-		this.register(diceobj);
-
-		diceobj = new DicePreset('d5','d10');
-		diceobj.name = 'd5';
-		diceobj.setLabels(['1','2','3','4','5','1','2','3','4','5']);
-		diceobj.setValues(1,5);
-		diceobj.mass = 450;
-		diceobj.inertia = 9;
-		diceobj.scale = 0.9;
-		this.register(diceobj);
-
-		diceobj = new DicePreset('d100', 'd10');
-		diceobj.name = 'd100';
-		diceobj.setLabels(['10', '20', '30', '40', '50', '60', '70', '80', '90', '00']);
-		diceobj.setValues(10, 100, 10);
-		diceobj.mass = 450;
-		diceobj.inertia = 9;
-		diceobj.scale = 0.9;
-		this.register(diceobj);
-
-		diceobj = new DicePreset('d12');
-		diceobj.name = 'd12';
-		diceobj.setLabels(['1','2','3','4','5','6','7','8','9','10','11','12']);
-		diceobj.setValues(1,12);
-		diceobj.mass = 450;
-		diceobj.inertia = 8;
-		diceobj.scale = 0.9;
-		this.register(diceobj);
-
-		diceobj = new DicePreset('d20');
-		diceobj.name = 'd20';
-		diceobj.setLabels(['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20']);
-		diceobj.setValues(1,20);
-		diceobj.mass = 500;
-		diceobj.scale = 1;
-		diceobj.inertia = 6;
-		this.register(diceobj);
-
-		diceobj = new DicePreset('d6');
-		diceobj.name = 'd6';
-		diceobj.setLabels([
-			'modules/dice-so-nice/textures/dot/d6-1.webp',
-			'modules/dice-so-nice/textures/dot/d6-2.webp',
-			'modules/dice-so-nice/textures/dot/d6-3.webp',
-			'modules/dice-so-nice/textures/dot/d6-4.webp',
-			'modules/dice-so-nice/textures/dot/d6-5.webp',
-			'modules/dice-so-nice/textures/dot/d6-6.webp',
-		]);
-		diceobj.setBumpMaps([
-			'modules/dice-so-nice/textures/dot/d6-1-b.webp',
-			'modules/dice-so-nice/textures/dot/d6-2-b.webp',
-			'modules/dice-so-nice/textures/dot/d6-3-b.webp',
-			'modules/dice-so-nice/textures/dot/d6-4-b.webp',
-			'modules/dice-so-nice/textures/dot/d6-5-b.webp',
-			'modules/dice-so-nice/textures/dot/d6-6-b.webp',
-		]);
-		diceobj.setValues(1,6);
-		diceobj.scale = 0.9;
-		diceobj.system = "dot";
-		this.register(diceobj);
-
-		diceobj = new DicePreset('d6');
-		diceobj.name = 'd6';
-		diceobj.setLabels([
-			'modules/dice-so-nice/textures/dot/d6-1-black.webp',
-			'modules/dice-so-nice/textures/dot/d6-2-black.webp',
-			'modules/dice-so-nice/textures/dot/d6-3-black.webp',
-			'modules/dice-so-nice/textures/dot/d6-4-black.webp',
-			'modules/dice-so-nice/textures/dot/d6-5-black.webp',
-			'modules/dice-so-nice/textures/dot/d6-6-black.webp',
-		]);
-		diceobj.setBumpMaps([
-			'modules/dice-so-nice/textures/dot/d6-1-b.webp',
-			'modules/dice-so-nice/textures/dot/d6-2-b.webp',
-			'modules/dice-so-nice/textures/dot/d6-3-b.webp',
-			'modules/dice-so-nice/textures/dot/d6-4-b.webp',
-			'modules/dice-so-nice/textures/dot/d6-5-b.webp',
-			'modules/dice-so-nice/textures/dot/d6-6-b.webp',
-		]);
-		diceobj.setValues(1,6);
-		diceobj.scale = 0.9;
-		diceobj.system = "dot_b";
-		this.register(diceobj);
-
-		diceobj = new DicePreset('d20');
-		diceobj.name = 'd20';
-		diceobj.setLabels(['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','modules/dice-so-nice/textures/foundry_vtt/foundrynat20.webp']);
-		diceobj.setBumpMaps([,,,,,,,,,,,,,,,,,,,'modules/dice-so-nice/textures/foundry_vtt/foundrynat20_bump.webp']);
-		diceobj.setValues(1,20);
-		diceobj.mass = 500;
-		diceobj.scale = 1;
-		diceobj.font = "Arial Black";
-		diceobj.fontScale = 0.8;
-		diceobj.inertia = 6;
-		diceobj.system = "foundry_vtt";
-		this.register(diceobj);
-
-		//Spectrum Dice
-
-		this.addDicePreset({
-			type:"df",
-			labels:[
-				'modules/dice-so-nice/textures/spectrumdice/df-m.webp',
-				'modules/dice-so-nice/textures/spectrumdice/df-0.webp',
-				'modules/dice-so-nice/textures/spectrumdice/df-p.webp'
-			],
-			system:"spectrum"
+		BASE_PRESETS_LIST.forEach((preset) => {
+			this.register(preset);
 		});
-
-		this.addDicePreset({
-			type:"d2",
-			labels:[
-				'modules/dice-so-nice/textures/spectrumdice/d2-1.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d2-2.webp'
-			],
-			system:"spectrum"
-		});
-
-		this.addDicePreset({
-			type:"dc",
-			labels:[
-				'modules/dice-so-nice/textures/spectrumdice/dc-h.webp',
-				'modules/dice-so-nice/textures/spectrumdice/dc-t.webp'
-			],
-			system:"spectrum"
-		});
-
-		this.addDicePreset({
-			type:"d4",
-			labels:[
-				'modules/dice-so-nice/textures/spectrumdice/d4-1.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d4-2.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d4-3.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d4-4.webp'
-			],
-			system:"spectrum"
-		});
-
-		this.addDicePreset({
-			type:"d6",
-			labels:[
-				'modules/dice-so-nice/textures/spectrumdice/d6-1.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d6-2.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d6-3.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d6-4.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d6-5.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d6-6.webp'
-			],
-			system:"spectrum"
-		});
-
-		this.addDicePreset({
-			type:"d8",
-			labels:[
-				'modules/dice-so-nice/textures/spectrumdice/d8-1.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d8-2.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d8-3.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d8-4.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d8-5.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d8-6.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d8-7.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d8-8.webp'
-			],
-			system:"spectrum"
-		});
-
-		this.addDicePreset({
-			type:"d10",
-			labels:[
-				'modules/dice-so-nice/textures/spectrumdice/d10-1.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d10-2.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d10-3.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d10-4.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d10-5.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d10-6.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d10-7.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d10-8.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d10-9.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d10-0.webp'
-			],
-			system:"spectrum"
-		});
-
-		this.addDicePreset({
-			type:"d12",
-			labels:[
-				'modules/dice-so-nice/textures/spectrumdice/d12-1.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d12-2.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d12-3.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d12-4.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d12-5.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d12-6.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d12-7.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d12-8.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d12-9.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d12-10.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d12-11.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d12-12.webp'
-			],
-			system:"spectrum"
-		});
-
-		this.addDicePreset({
-			type:"d100",
-			labels:[
-				'modules/dice-so-nice/textures/spectrumdice/d100-10.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d100-20.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d100-30.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d100-40.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d100-50.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d100-60.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d100-70.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d100-80.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d100-90.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d100-00.webp'
-			],
-			system:"spectrum"
-		});
-
-		this.addDicePreset({
-			type:"d20",
-			labels:[
-				'modules/dice-so-nice/textures/spectrumdice/d20-1.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-2.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-3.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-4.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-5.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-6.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-7.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-8.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-9.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-10.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-11.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-12.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-13.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-14.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-15.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-16.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-17.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-18.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-19.webp',
-				'modules/dice-so-nice/textures/spectrumdice/d20-20.webp'
-			],
-			system:"spectrum"
+		
+		EXTRA_PRESETS_LIST.forEach((data) => {
+			this.addDicePreset(data);
 		});
 
 		for(let i in CONFIG.Dice.terms){
@@ -510,49 +199,86 @@ export class DiceFactory {
 	}
 
 	register(diceobj) {
-		if(diceobj.system == "standard")
-			this.dice[diceobj.type] = diceobj;
-		this.systems[diceobj.system].dice.push(diceobj);
-
-		let activatedSystems = [];
-        game.users.forEach((user) => {
-			let userSystem = null;
-			if(user.getFlag("dice-so-nice", "appearance"))
-            	userSystem = user.getFlag("dice-so-nice", "appearance").system;
-            if(userSystem)
-				activatedSystems.push(userSystem);
-        });
-        //remove duplicate
-        activatedSystems = activatedSystems.filter((v, i, a) => a.indexOf(v) === i);
-
-		if((diceobj.system == this.systemActivated || activatedSystems.includes(diceobj.system)) && diceobj.modelFile && !diceobj.modelLoading){
-			diceobj.loadModel(this.loaderGLTF);
+		if(diceobj.system != "standard"){
+			let index = this.systems.standard.dice.findIndex(el => el.type == diceobj.type);
+			if(index<0){
+				//If for some reasons, we try to register a dice type that doesnt exist on the standard system, we add it there first.
+				//This should not happen because of internalAddDicePreset but I'm only 95% sure.
+				this.systems.standard.dice.push(diceobj);
+				if(diceobj.modelFile){
+					diceobj.loadModel(this.loaderGLTF);
+				} else {
+					diceobj.loadTextures();
+				}
+			} else if(this.systems.standard.dice[index].internalAdd && diceobj.system == this.preferredSystem) {
+				//if it exists in the standard system but has been added by the internal call, we update it with its custom preset
+				this.systems.standard.dice[index] = diceobj;
+			}
 		}
-		
+		this.systems[diceobj.system].dice.push(diceobj);		
 	}
 
-	preloadUserModels(userID){
-		let systemId = game.users.get(userID).getFlag("dice-so-nice","appearance").system;
-		let dices = this.systems[systemId].dice;
-		for(let i=0;i<dices.length;i++){
-			if(dices[i].modelFile && !dices[i].modelLoading)
-				dices[i].loadModel(this.loaderGLTF);
-		}
+	async preloadPresets(waitForLoad = true, userID = null, config = {}){
+		let activePresets = [];
+		const preloadPresetsByUser = (user) => {
+			let appearance = user.getFlag("dice-so-nice", "appearance") ? duplicate(user.getFlag("dice-so-nice", "appearance")) : null;
+			if(!appearance){
+				appearance = {global:{}};
+				if(this.preferredSystem != "standard")
+					appearance.global.system = this.preferredSystem;
+				if(this.preferredColorset != "custom")
+					appearance.global.colorset = this.preferredColorset;
+			}
+			//load basic model
+			this.systems["standard"].dice.forEach((obj) =>{
+				activePresets.push(obj);
+			});
+			mergeObject(appearance, config);
+			if(!isObjectEmpty(appearance)){
+				for (let scope in appearance) {
+					if (appearance.hasOwnProperty(scope)) {
+						if(scope != "global")
+							activePresets.push(this.getPresetBySystem(scope, appearance[scope].system));
+						else if(this.systems.hasOwnProperty(appearance[scope].system)){
+							this.systems[appearance[scope].system].dice.forEach((obj) =>{
+								activePresets.push(obj);
+							});
+						}
+					}
+				}
+			}
+		};
+		if(userID)
+			preloadPresetsByUser(game.users.get(userID));
+		else
+        	game.users.forEach((user) =>{
+				preloadPresetsByUser(user);
+			});
+        //remove duplicate
+        activePresets = activePresets.filter((v, i, a) => a.indexOf(v) === i);
+		let promiseArray = [];
+		activePresets.forEach((preset)=>{
+			
+			if(preset.modelFile){
+				//Custom 3D model
+				promiseArray.push(preset.loadModel(this.loaderGLTF));
+			} else {
+				//Classic 3D model
+				promiseArray.push(preset.loadTextures());
+			}
+		});
+
+		if(waitForLoad)
+			await Promise.all(promiseArray);
 	}
 
 	//{id: 'standard', name: game.i18n.localize("DICESONICE.System.Standard")}
 	addSystem(system, mode="default"){
 		system.dice = [];
 		system.mode = mode;
+		if(mode != "default" && this.preferredSystem == "standard")
+			this.preferredSystem = system.id;
 		this.systems[system.id] = system;
-		if(mode == "exclusive"){
-			this.systemsHaveExclusive = true;
-			if(this.systems[this.systemActivated] && this.systems[this.systemActivated].mode != "exclusive")
-				this.setSystem(system.id, false);
-		}
-		else if(mode=="force")
-			this.setSystem(system.id, true);
-		
 	}
 	//{type:"",labels:[],system:""}
 	//Should have been called "addDicePresetFromModel" but ¯\_(ツ)_/¯
@@ -561,7 +287,10 @@ export class DiceFactory {
 			shape = dice.type;
 		let model = this.systems["standard"].dice.find(el => el.type == shape);
 		let preset = new DicePreset(dice.type, model.shape);
-		preset.name = dice.type;
+
+		let roll = new Roll(dice.type).evaluate({async:false});
+		preset.term = roll.terms[0].constructor.name;
+		
 		preset.setLabels(dice.labels);
 		preset.setModel(dice.modelFile);
 		if(dice.values){
@@ -590,8 +319,6 @@ export class DiceFactory {
 		if(dice.bumpMaps && dice.bumpMaps.length)
 			preset.setBumpMaps(dice.bumpMaps);
 		this.register(preset);
-		if(this.systemActivated == dice.system)
-			this.setSystem(dice.system);
 
 		if(dice.font && !this.fontFamilies.includes(dice.font)){
 			this.fontFamilies.push(dice.font);
@@ -608,7 +335,7 @@ export class DiceFactory {
 		let type = "d" + diceobj.constructor.DENOMINATION;
 		let model = this.systems["standard"].dice.find(el => el.type == shape);
 		let preset = new DicePreset(type, model.shape);
-		preset.name = diceobj.name;
+		preset.term = diceobj.constructor.name;
 		let labels = [];
 		for(let i = 1;i<= diceobj.faces;i++){
 			labels.push(diceobj.getResultLabel({result:i}));
@@ -618,42 +345,8 @@ export class DiceFactory {
 		preset.mass = model.mass;
 		preset.inertia = model.inertia;
 		preset.scale = model.scale;
+		preset.internalAdd = true;
 		this.register(preset);
-	}
-
-	setSystem(systemId, force=false){
-		if(this.systemForced && systemId != this.systemActivated)
-			return;
-		//first we reset to standard
-		let dices = this.systems["standard"].dice;
-		for(let i=0;i<dices.length;i++)
-			this.dice[dices[i].type] = dices[i];
-		//Then we apply override
-		if(systemId!= "standard" && this.systems.hasOwnProperty(systemId))
-		{
-			dices = this.systems[systemId].dice;
-			for(let i=0;i<dices.length;i++){
-				this.dice[dices[i].type] = dices[i];
-			}
-		}
-		if(force)
-			this.systemForced = true;
-		this.systemActivated = systemId;
-		if(systemId != this.systemActivated)
-			this.disposeCachedMaterials();
-	}
-
-	async preloadModels(systemId){
-		if(systemId!= "standard" && this.systems.hasOwnProperty(systemId))
-		{
-			let modelsPromise = [];
-			let dices = this.systems[systemId].dice;
-			for(let i=0;i<dices.length;i++){
-				if(this.dice[dices[i].type].modelFile)
-					modelsPromise.push(this.dice[dices[i].type].loadModel(this.loaderGLTF));
-			}
-			await Promise.all(modelsPromise);
-		}
 	}
 
 	disposeCachedMaterials(type = null){
@@ -681,9 +374,26 @@ export class DiceFactory {
 		return Promise.race([document.fonts.ready, timeout]);
 	}
 
+	get(type) {
+		return this.getPresetBySystem(type);
+	}
+
+	getPresetBySystem(type, system = "standard"){
+		let diceobj = null;
+		if(system != "standard"){
+			if(this.systems.hasOwnProperty(system))
+				diceobj = this.systems[system].dice.find(obj => obj.type == type);
+		}
+		//If not, or if it's the base system, load it
+		if(!diceobj){
+			diceobj = this.systems.standard.dice.find(obj => obj.type == type);
+		}
+		return diceobj;
+	}
+
 	// returns a dicemesh (THREE.Mesh) object
-	create(scopedTextureCache, type, colorset = null) {
-		let diceobj = this.dice[type];
+	create(scopedTextureCache, type, appearance) {
+		let diceobj = this.getPresetBySystem(type, appearance.system);
 		let scopedScale = scopedTextureCache.type == "board" ? this.baseScale : 60;
 		if (!diceobj) return null;
 		let dicemesh;
@@ -707,23 +417,14 @@ export class DiceFactory {
 				dicemesh.mixer.clipAction(diceobj.model.animations[0]).play();
 			}
 		}else{
-			//We use either (by order of priority): a flavor/targeted colorset, the colorset of the diceobj, the colorset configured by the player
-			let cacheString = "";
-			if(colorset){
-				cacheString = this.setMaterialInfo(diceobj, colorset);
-			}
-			else if (diceobj.colorset) {
-				cacheString = this.setMaterialInfo(diceobj, diceobj.colorset);
-			} else {
-				cacheString = this.setMaterialInfo(diceobj);
-			}
+			let materialData = this.generateMaterialData(diceobj, appearance);
 
-			let baseTextureCacheString = scopedTextureCache.type+this.systemActivated+type+cacheString;
+			let baseTextureCacheString = scopedTextureCache.type+type+materialData.cacheString;
 			let materials;
 			if(this.baseTextureCache[baseTextureCacheString])
 				materials = this.baseTextureCache[baseTextureCacheString];
 			else
-				materials = this.createMaterials(scopedTextureCache, baseTextureCacheString, diceobj, 1.0);
+				materials = this.createMaterials(scopedTextureCache, baseTextureCacheString, diceobj, materialData);
 			
 			dicemesh = new THREE.Mesh(geom, materials);
 
@@ -757,7 +458,7 @@ export class DiceFactory {
 					closest_face = i;
 				}
 			}
-			const diceobj = factory.dice[this.notation.type];
+			const diceobj = factory.get(this.notation.type);
 			let dieValue = DICE_MODELS[this.shape].faceValues[closest_face];
 
 			if (this.shape == 'd4') {
@@ -790,10 +491,8 @@ export class DiceFactory {
 		return dicemesh;
 	}
 
-	get(type) {
-		return this.dice[type];
-	}
-	createMaterials(scopedTextureCache, baseTextureCacheString, diceobj , margin, d4specialindex = null) {
+	createMaterials(scopedTextureCache, baseTextureCacheString, diceobj, materialData) {
+		//TODO : createMaterials
 		if(this.baseTextureCache[baseTextureCacheString])
 			return this.baseTextureCache[baseTextureCacheString];
 
@@ -802,10 +501,10 @@ export class DiceFactory {
 			labels = diceobj.labels[0];
 		}
 		//If the texture is an array of texture (for random face texture), we look at the first element to determine the faces material and the edge texture
-		let dice_texture = Array.isArray(this.dice_texture_rand) ? this.dice_texture_rand[0] : this.dice_texture_rand;
+		let dice_texture = Array.isArray(materialData.texture) ? materialData.texture[0] : materialData.texture;
 
 		var mat;
-		let materialSelected = this.material_options[this.material_rand] ? this.material_options[this.material_rand] : this.material_options["plastic"];
+		let materialSelected = this.material_options[materialData.material] ? this.material_options[materialData.material] : this.material_options["plastic"];
 		if(!this.bumpMapping){
 			delete materialSelected.roughnessMap;
 		}
@@ -831,11 +530,11 @@ export class DiceFactory {
 		};
 		
 		if(!font.type){
-			font.type = this.font_rand;
+			font.type = materialData.font;
 		}
 		if(!font.scale){
-			if(this.font_scale_rand[diceobj.type])
-				font.scale = this.font_scale_rand[diceobj.type];
+			if(materialData.fontScale[diceobj.type])
+				font.scale = materialData.fontScale[diceobj.type];
 			else{
 				font.scale = DICE_SCALE[diceobj.shape];
 			}	
@@ -869,11 +568,11 @@ export class DiceFactory {
 				let texture = {name:"none"};
 				if(dice_texture.composite != "source-over")
 					texture = dice_texture;
-				this.createTextMaterial(context, contextBump, x, y, sizeTexture, diceobj, labels, font, i, margin, texture, this.label_color_rand, this.label_outline_rand, this.edge_color_rand);
+				this.createTextMaterial(context, contextBump, x, y, sizeTexture, diceobj, labels, font, i, texture, materialData);
 			}
 			else
 			{
-				this.createTextMaterial(context, contextBump, x, y, sizeTexture, diceobj, labels, font, i, margin, this.dice_texture_rand, this.label_color_rand, this.label_outline_rand, this.dice_color_rand);
+				this.createTextMaterial(context, contextBump, x, y, sizeTexture, diceobj, labels, font, i, materialData.texture, materialData);
 			}
 			texturesOnThisLine++;
 			x += sizeTexture;
@@ -885,13 +584,13 @@ export class DiceFactory {
 					x = 0;
 					texturesOnThisLine = 0;
 				}
-				this.createTextMaterial(context, contextBump, x, y, sizeTexture, diceobj, labels, font, i, margin, this.dice_texture_rand, this.label_color_rand, this.label_outline_rand, this.dice_color_rand, 2);
+				this.createTextMaterial(context, contextBump, x, y, sizeTexture, diceobj, labels, font, i, materialData.texture, materialData);
 				texturesOnThisLine++;
 				x += sizeTexture;
 			}
 		}
 
-		//var img    = canvasBump.toDataURL("image/png");
+		//var img    = canvas.toDataURL("image/png");
 		//document.write('<img src="'+img+'"/>');
 		//generate basetexture for caching
 		if(!this.baseTextureCache[baseTextureCacheString]){
@@ -909,7 +608,7 @@ export class DiceFactory {
 
 		//mat.displacementMap = mat.bumpMap;
 
-		switch(this.material_rand){
+		switch(materialData.material){
 			case "chrome":
 				if(this.bumpMapping)
 					mat.metalnessMap = mat.bumpMap;
@@ -923,20 +622,20 @@ export class DiceFactory {
 		this.baseTextureCache[baseTextureCacheString] = mat;
 		return mat;
 	}
-	createTextMaterial(context, contextBump, x, y, ts, diceobj, labels, font, index, margin, texture, forecolor, outlinecolor, backcolor, repeat = 1) {
+	createTextMaterial(context, contextBump, x, y, ts, diceobj, labels, font, index, texture, materialData) {
 		if (labels[index] === undefined) return null;
 
-		texture = texture || this.dice_texture_rand;
+		let forecolor = materialData.foreground;
+		let outlinecolor = materialData.outline;
+		let backcolor = index > 0 ? materialData.background : materialData.edge != "" ? materialData.edge:materialData.background;
+
 		if(Array.isArray(texture))
 			texture = texture[Math.floor(Math.random() * texture.length)];
-        forecolor = forecolor || this.label_color_rand;
-		outlinecolor = outlinecolor || this.label_outline_rand;
-
-		backcolor = backcolor || this.dice_color_rand;
 		
 		let text = labels[index];
 		let normal = diceobj.normals[index];
 		let isTexture = false;
+		let margin = 1.0;
 
 		// create color
 		context.fillStyle = backcolor;
@@ -944,6 +643,9 @@ export class DiceFactory {
 
 		contextBump.fillStyle = "#FFFFFF";
 		contextBump.fillRect(x, y, ts, ts);
+
+		context.rect(x, y, ts, ts);
+		context.stroke();
 
 		//create underlying texture
 		if (texture.name != '' && texture.name != 'none') {
@@ -1097,11 +799,13 @@ export class DiceFactory {
 					case 2:
 						wShift = 0.87;
 				}
+				let destX = hw*wShift+x;
+				let destY = (hh - ts * 0.3)*hShift+y;
 				//custom texture face
 				if(text[i] instanceof HTMLImageElement){
 					isTexture = true;
-					let scaleTexture = text[i].width / ts;
-					context.drawImage(text[i], 0,0,text[i].width,text[i].height,100/scaleTexture+x,25/scaleTexture+y,60/scaleTexture,60/scaleTexture);
+					let textureSize = 60 / (text[i].width / ts);
+					context.drawImage(text[i],0,0,text[i].width,text[i].height,destX-(textureSize/2),destY-(textureSize/2),textureSize,textureSize);
 				}
 				else{
 					// attempt to outline the text with a meaningful color
@@ -1109,18 +813,18 @@ export class DiceFactory {
 						context.strokeStyle = outlinecolor;
 						
 						context.lineWidth = 5;
-						context.strokeText(text[i], hw*wShift+x, (hh - ts * 0.3)*hShift+y);
+						context.strokeText(text[i], destX, destY);
 
 						contextBump.strokeStyle = "#555555";
 						contextBump.lineWidth = 5;
-						contextBump.strokeText(text[i], hw*wShift+x, (hh - ts * 0.3)*hShift+y);
+						contextBump.strokeText(text[i], destX, destY);
 					}
 
 					//draw label in top middle section
 					context.fillStyle = forecolor;
-					context.fillText(text[i], hw*wShift+x, (hh - ts * 0.3)*hShift+y);
+					context.fillText(text[i], destX, destY);
 					contextBump.fillStyle = "#555555";
-					contextBump.fillText(text[i], hw*wShift+x, (hh - ts * 0.3)*hShift+y);
+					contextBump.fillText(text[i], destX, destY);
 					//var img    = canvas.toDataURL("image/png");
 					//document.write('<img src="'+img+'"/>');
 				}
@@ -1137,177 +841,189 @@ export class DiceFactory {
 		}
 	}
 
-	applyColorSet(colordata) {
-		this.colordata = colordata;
-		this.label_color = colordata.foreground;
-		this.dice_color = colordata.background;
-		this.label_outline = colordata.outline ? colordata.outline:"none";
-		this.dice_texture = colordata.texture;
-		this.material = colordata.material;
-		this.font = colordata.font;
-		this.edge_color = colordata.hasOwnProperty("edge") && colordata.edge != '' ? colordata.edge:colordata.background;
-	}
+	getAppearanceForDice(appearances, dicetype, dicenotation = null){
+		/*
+			We use either (by order of priority): 
+			1) A notation appearance
+			2) A flavor/notation colorset
+			3) The colorset of the diceobj
+			4) The colorset configured by the player for this dice type
+			5) A preferred system set by a module/system (done in main.js)
+			6) The global colorset of the player
+		*/
+		
+		let settings;
+		if(appearances[dicetype])
+			settings = appearances[dicetype];
+		else
+			settings = appearances.global;
 
-	applyTexture(texture) {
-		this.dice_texture = texture;
-	}
+		//To keep compatibility with both older integrations and user settings, we use the DiceColor naming convention from there
+		let appearance = {
+			colorset: settings.colorset ? settings.colorset : appearances.global.colorset ? appearances.global.colorset : "custom",
+			foreground: settings.labelColor ? settings.labelColor:appearances.global.labelColor ? appearances.global.labelColor : "#FFFFFF",
+			background: settings.diceColor ? settings.diceColor:appearances.global.diceColor ? appearances.global.diceColor : "#000000",
+			outline: settings.outlineColor ? settings.outlineColor: appearances.global.outlineColor ? appearances.global.outlineColor : "",
+			edge: settings.edgeColor ? settings.edgeColor:appearances.global.edgeColor ? appearances.global.edgeColor:"",
+			texture: settings.texture ? settings.texture:appearances.global.texture ? appearances.global.texture : "none",
+			material: settings.material ? settings.material:appearances.global.material ? appearances.global.material : "auto",
+			font: settings.font ? settings.font:appearances.global.font ? appearances.global.font : "Arial",
+			system: settings.system ? settings.system:appearances.global.system ? appearances.global.system : "standard"
+		};
 
-	applyMaterial(material) {
-		this.material = material;
-	}
-
-	applyFont(font) {
-		this.font = font;
-	}
-
-	setMaterialInfo(diceobj, colorset = '') {
-
-		let prevcolordata = this.colordata;
-		let prevtexture = this.dice_texture;
-		let prevmaterial = this.material;
-		let prevfont = this.font;
-
-		if (colorset) {
-			let colordata = DiceColors.getColorSet(colorset);
-
-			if(colordata.background == "custom")
-				colordata.background = prevcolordata.background;
-			if(colordata.foreground == "custom")
-				colordata.foreground = prevcolordata.foreground;
-			if(colordata.edge == "custom")
-				colordata.edge = prevcolordata.edge;
-			if(colordata.outline == "custom")
-				colordata.outline = prevcolordata.outline;
-			if(colordata.material == "custom")
-				colordata.material = prevmaterial;
-			if(colordata.texture == "custom")
-				colordata.texture = prevtexture;
-			if(colordata.font == "custom")
-				colordata.font = prevfont;
-
-			if (this.colordata.id != colordata.id) {
-				this.applyColorSet(colordata);
+		if(appearance.colorset && appearance.colorset != "custom"){
+			let colorsetData = DiceColors.getColorSet(appearance.colorset);
+			appearance.foreground = colorsetData.foreground;
+			appearance.background = colorsetData.background;
+			appearance.outline = colorsetData.outline;
+			appearance.edge = colorsetData.edge ? colorsetData.edge : "";
+		}
+		let diceobj = this.getPresetBySystem(dicetype,appearance.system);
+		if(diceobj.colorset){
+			let colorsetData = {...DiceColors.getColorSet(diceobj.colorset)};
+			Object.entries(colorsetData).forEach((opt) => {
+				if(opt[1] == "custom")
+					delete colorsetData[opt[0]];
+			});
+			mergeObject(appearance, colorsetData);
+		}
+		
+		if(dicenotation){
+			let colorset = null;
+			if (dicenotation.options.colorset)
+				colorset = dicenotation.options.colorset;
+			else if (dicenotation.options.flavor && COLORSETS[dicenotation.options.flavor]) {
+				colorset = dicenotation.options.flavor;
+			}
+			if(colorset){
+				let colorsetData = DiceColors.getColorSet(colorset);
+				mergeObject(appearance, colorsetData);
+			}
+			if(dicenotation.options.appearance){
+				mergeObject(appearance, dicenotation.options.appearance);
 			}
 		}
+		return appearance;
+	}
 
-		//reset random choices
-		this.dice_color_rand = '';
-		this.label_color_rand = '';
-		this.label_outline_rand = '';
-		this.dice_texture_rand = '';
-		this.edge_color_rand = '';
-		this.material_rand = '';
-		this.font_rand = '';
-		this.font_scale_rand = {};
-		
+	generateMaterialData(diceobj, appearance) {
+		let materialData = {};
+		let colorindex;
+
+		let colorsetData = DiceColors.getColorSet(appearance.colorset);
+		if(appearance.texture && !appearance.texture.id)
+			appearance.texture = DiceColors.getTexture(appearance.texture);
 
 		// set base color first
-		if (Array.isArray(this.dice_color)) {
+		if (Array.isArray(appearance.background)) {
 
-			var colorindex = Math.floor(Math.random() * this.dice_color.length);
+			colorindex = Math.floor(Math.random() * appearance.background.length);
 
 			// if color list and label list are same length, treat them as a parallel list
-			if (Array.isArray(this.label_color) && this.label_color.length == this.dice_color.length) {
-				this.label_color_rand = this.label_color[colorindex];
+			if (Array.isArray(appearance.foreground) && appearance.foreground.length == appearance.background.length) {
+				materialData.foreground = appearance.foreground[colorindex];
 
 				// if label list and outline list are same length, treat them as a parallel list
-				if (Array.isArray(this.label_outline) && this.label_outline.length == this.label_color.length) {
-					this.label_outline_rand = this.label_outline[colorindex];
+				if (Array.isArray(appearance.outline) && appearance.outline.length == appearance.foreground.length) {
+					materialData.outline = appearance.outline[colorindex];
 				}
 			}
 			// if texture list is same length do the same
-			if (Array.isArray(this.dice_texture) && this.dice_texture.length == this.dice_color.length) {
-				this.dice_texture_rand = this.dice_texture[colorindex];
+			if (Array.isArray(appearance.texture) && appearance.texture.length == appearance.background.length) {
+				materialData.texture = appearance.texture[colorindex];
 			}
 
 			//if edge list and color list are same length, treat them as a parallel list
-			if (Array.isArray(this.edge_color) && this.edge_color.length == this.dice_color.length) {
-				this.edge_color_rand = this.edge_color[colorindex];
+			if (Array.isArray(appearance.edge) && appearance.edge.length == appearance.background.length) {
+				materialData.edge = appearance.edge[colorindex];
 			}
 
-			this.dice_color_rand = this.dice_color[colorindex];
+			materialData.background = appearance.background[colorindex];
 		} else {
-			this.dice_color_rand = this.dice_color;
+			materialData.background = appearance.background;
 		}
 
-		// set edge color if not set
-		if(this.edge_color_rand == ''){
-			if (Array.isArray(this.edge_color)) {
-
-				var colorindex = Math.floor(Math.random() * this.edge_color.length);
-
-				this.edge_color_rand = this.edge_color[colorindex];
-			} else {
-				this.edge_color_rand = this.edge_color;
+		if(!materialData.edge){
+			if (Array.isArray(appearance.edge)) {
+				colorindex = Math.floor(Math.random() * appearance.edge.length);
+				materialData.edge = appearance.edge[colorindex];
 			}
+			else
+				materialData.edge = appearance.edge;
 		}
 
 		// if selected label color is still not set, pick one
-		if (this.label_color_rand == '' && Array.isArray(this.label_color)) {
-			var colorindex = this.label_color[Math.floor(Math.random() * this.label_color.length)];
+		if(!materialData.foreground){
+			if(Array.isArray(appearance.foreground)){
+				colorindex = appearance.foreground[Math.floor(Math.random() * appearance.foreground.length)];
 
-			// if label list and outline list are same length, treat them as a parallel list
-			if (Array.isArray(this.label_outline) && this.label_outline.length == this.label_color.length) {
-				this.label_outline_rand = this.label_outline[colorindex];
+				// if label list and outline list are same length, treat them as a parallel list
+				if (Array.isArray(appearance.outline) && appearance.outline.length == appearance.foreground.length) {
+					materialData.outline = appearance.outline[colorindex];
+				}
+
+				materialData.foreground = appearance.foreground[colorindex];
 			}
-
-			this.label_color_rand = this.label_color[colorindex];
-
-		} else if (this.label_color_rand == '') {
-			this.label_color_rand = this.label_color;
+			else
+				materialData.foreground = appearance.foreground;
 		}
 
 		// if selected label outline is still not set, pick one
-		if (this.label_outline_rand == '' && Array.isArray(this.label_outline)) {
-			var colorindex = this.label_outline[Math.floor(Math.random() * this.label_outline.length)];
+		if (!materialData.outline){
+			if(Array.isArray(appearance.outline)) {
+				colorindex = appearance.outline[Math.floor(Math.random() * appearance.outline.length)];
 
-			this.label_outline_rand = this.label_outline[colorindex];
-			
-		} else if (this.label_outline_rand == '') {
-			this.label_outline_rand = this.label_outline;
+				materialData.outline = appearance.outline[colorindex];
+			} else {
+				materialData.outline = appearance.outline;
+			}
 		}
 
 		// same for textures list
-		if (this.dice_texture_rand == '' && Array.isArray(this.dice_texture)) {
-			this.dice_texture_rand = this.dice_texture[Math.floor(Math.random() * this.dice_texture.length)];
-		} else if (this.dice_texture_rand == '') {
-			this.dice_texture_rand = this.dice_texture;
+		if(!materialData.texture){
+			if (Array.isArray(appearance.texture)) {
+				materialData.texture = appearance.texture[Math.floor(Math.random() * appearance.texture.length)];
+			} else if(appearance.texture.name == "none"){
+				//set to none/theme
+				materialData.texture = colorsetData.texture;
+			} else {
+				materialData.texture = appearance.texture;
+			}
 		}
 
 		//Same for material
-		let baseTexture = Array.isArray(this.dice_texture_rand) ? this.dice_texture_rand[0]:this.dice_texture_rand;
-		if(this.material){
-			this.material_rand = this.material;
+		let baseTexture = Array.isArray(materialData.texture) ? materialData.texture[0]:materialData.texture;
+
+		if(appearance.material == "auto" || appearance.material == ""){
+			if(colorsetData.material)
+				materialData.material = colorsetData.material;
+			else
+				materialData.material = baseTexture.material;
+		} else {
+			materialData.material = appearance.material;
 		}
-		else if(this.colordata.material)
-			this.material_rand = this.colordata.material;
-		else if(baseTexture && baseTexture.material)
-			this.material_rand = baseTexture.material;
 
 		//for font, we priorize the dicepreset font, then custom, then coloret
-		if(this.font){
-			this.font_rand = this.font;
-		}
-		else if(this.colordata.font){
-			this.material_rand = this.colordata.font;
+		if(appearance.font == "auto"){
+			if(diceobj.font){
+				materialData.font = diceobj.font;
+			} else {
+				materialData.font = colorsetData.font;
+			}
+		} else {
+			materialData.font = appearance.font;
 		}
 
-		if(this.colordata.fontScale && Object.entries(this.colordata.fontScale).length)
-			this.font_scale_rand = this.colordata.fontScale;
-		
-		
-		if (this.colordata.id != prevcolordata.id) {
-			this.applyColorSet(prevcolordata);
-			this.applyTexture(prevtexture);
-			this.applyMaterial(prevmaterial);
-			this.applyFont(prevfont);
+		if(appearance.fontScale)
+			materialData.fontScale = appearance.fontScale;
+		else if(diceobj.fontScale){
+			materialData.fontScale = diceobj.fontScale;
+		} else {
+			materialData.fontScale = colorsetData.fontScale;
 		}
-		let cacheString = this.dice_color_rand+this.label_color_rand+this.label_outline_rand+this.dice_texture_rand.name+this.edge_color_rand+this.material_rand;
-		if(diceobj.font)
-			cacheString += diceobj.font;
-		else
-			cacheString += this.font_rand;
-		return cacheString;
+		
+		materialData.cacheString = materialData.background+materialData.foreground+materialData.outline+materialData.texture.name+materialData.edge+materialData.material+materialData.font;
+		return materialData;
 	}
 
 	calc_texture_size(approx, ceil = false) {

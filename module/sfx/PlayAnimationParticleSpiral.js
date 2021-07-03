@@ -1,6 +1,7 @@
 import { DiceSFX } from '../DiceSFX.js';
 import * as THREE from '../libs/three.module.js';
 import { Proton } from '../libs/three-modules/three.proton.js';
+import { DiceSFXManager } from '../DiceSFXManager.js';
 
 export class PlayAnimationParticleSpiral extends DiceSFX {
     static id = "PlayAnimationParticleSpiral";
@@ -11,7 +12,7 @@ export class PlayAnimationParticleSpiral extends DiceSFX {
 
     /**@override init */
     static async init() {
-        let map = new THREE.TextureLoader().load(PlayAnimationParticleSpiral.dot);
+        let map = await this.loadAsset(DiceSFXManager.TextureLoader, PlayAnimationParticleSpiral.dot);
         let material = new THREE.SpriteMaterial({
             map: map,
             color: 0xff0000,

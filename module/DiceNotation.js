@@ -111,12 +111,22 @@ export class DiceNotation {
 				for(let k=0;k<mergedRollCommands[i][j].dice.length;k++){
 					let specialEffects = Object.values(sfxList).filter(sfx => {
 						return !mergedRollCommands[i][j].dice[k].discarded &&
-						(((sfx.diceType != "d100" && sfx.diceType == mergedRollCommands[i][j].dice[k].type && sfx.onResult == mergedRollCommands[i][j].dice[k].result.toString())
+						(((sfx.diceType != "d100" && sfx.diceType == mergedRollCommands[i][j].dice[k].type && sfx.onResult.includes(mergedRollCommands[i][j].dice[k].result.toString()))
 							|| 
-						(sfx.diceType == "d100" && mergedRollCommands[i][j].dice[k].d100Result && mergedRollCommands[i][j].dice[k].d100Result.toString() == sfx.onResult)))
+						(sfx.diceType == "d100" && mergedRollCommands[i][j].dice[k].d100Result && sfx.onResult.includes(mergedRollCommands[i][j].dice[k].d100Result.toString())))
+							||
+						(mergedRollCommands[i][j].dice[k].options.sfx && mergedRollCommands[i][j].dice[k].options.sfx.id == sfx.diceType && sfx.onResult.includes(mergedRollCommands[i][j].dice[k].options.sfx.result.toString())))
 					});
-					if(specialEffects.length)
+					if(mergedRollCommands[i][j].dice[k].options.sfx && mergedRollCommands[i][j].dice[k].options.sfx.specialEffect)
+						specialEffects.push({
+							specialEffect:mergedRollCommands[i][j].dice[k].options.sfx.specialEffect,
+							options:mergedRollCommands[i][j].dice[k].options.sfx.options
+						});
+					if(specialEffects.length){
+						//remove duplicate
+						specialEffects = specialEffects.filter((v, i, a) => a.indexOf(v) === i);
 						mergedRollCommands[i][j].dice[k].specialEffects = specialEffects;
+					}
 				}
 			}
 		}
