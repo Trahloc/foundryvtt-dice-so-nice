@@ -997,10 +997,10 @@ export class DiceConfig extends FormApplication {
         this.box.dicefactory.disposeCachedMaterials("showcase");
     }
 
-    _onSubmit(event, options) {
+    async _onSubmit(event, options) {
         this.sfxDialogList.forEach((dialog) => {
             dialog.close();
         });
-        super._onSubmit(event,options);
+        await super._onSubmit(event,options);
     }
 }
