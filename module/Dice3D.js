@@ -81,8 +81,10 @@ import { Utils } from './Utils.js';
         game.users.forEach((other) => {
             if(other.isGM && other.id != user.id){
                 let GMSFX = Dice3D.SFX(other);
-                GMSFX = GMSFX.filter(sfx => sfx.options && sfx.options.isGlobal);
-                mergeObject(specialEffects,GMSFX);
+                if(Array.isArray(GMSFX)){
+                    GMSFX = GMSFX.filter(sfx => sfx.options && sfx.options.isGlobal);
+                    mergeObject(specialEffects,GMSFX);
+                }
             }
         });
         let config = mergeObject({ appearance: Dice3D.APPEARANCE(user) }, { specialEffects: specialEffects });
