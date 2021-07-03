@@ -210,7 +210,7 @@ export class DiceFactory {
 				} else {
 					diceobj.loadTextures();
 				}
-			} else if(this.systems.standard.dice[index].internalAdd && diceobj.system == this.preferredSystem) {
+			} else if(this.systems.standard.dice[index].internalAdd) {
 				//if it exists in the standard system but has been added by the internal call, we update it with its custom preset
 				this.systems.standard.dice[index] = diceobj;
 			}
@@ -283,9 +283,12 @@ export class DiceFactory {
 	//{type:"",labels:[],system:""}
 	//Should have been called "addDicePresetFromModel" but ¯\_(ツ)_/¯
 	addDicePreset(dice, shape = null){
-		if(!shape)
-			shape = dice.type;
-		let model = this.systems["standard"].dice.find(el => el.type == shape);
+		let model = this.systems["standard"].dice.find(el => el.type == dice.type);
+		if(!model || !model.internalAdd){
+			if(!shape)
+				shape = dice.type;
+			model = this.systems["standard"].dice.find(el => el.type == shape);
+		}
 		let preset = new DicePreset(dice.type, model.shape);
 
 		let roll = new Roll(dice.type).evaluate({async:false});

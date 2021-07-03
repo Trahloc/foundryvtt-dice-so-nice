@@ -1028,7 +1028,11 @@ export class DiceBox {
 					break;
 				let appearance = this.dicefactory.getAppearanceForDice(config.appearance,selectordice[count]);
 				let dicemesh = this.dicefactory.create(this.renderer.scopedTextureCache, selectordice[count], appearance);
-				dicemesh.scale.set(dicemesh.scale.x * 5 /  columns, dicemesh.scale.y * 5 /  columns, dicemesh.scale.z * 5 /  columns);
+				dicemesh.scale.set(
+					Math.min(dicemesh.scale.x * 5 /  columns, dicemesh.scale.x * 2 /  rows), 
+					Math.min(dicemesh.scale.y * 5 /  columns, dicemesh.scale.y * 2 /  rows), 
+					Math.min(dicemesh.scale.z * 5 /  columns,dicemesh.scale.z * 2 /  rows)
+				);
 
 				dicemesh.position.set(x * this.display.containerWidth / columns, -(y * this.display.containerHeight / rows), z);
 				
@@ -1277,7 +1281,8 @@ export class DiceBox {
 		if(pos){
 			this.mouse.constraintDown = true;
 			//disable FVTT mouse events
-			canvas.mouseInteractionManager.object.interactive = false;
+			if(canvas.mouseInteractionManager)
+				canvas.mouseInteractionManager.object.interactive = false;
 
 			// Vector to the clicked point, relative to the body
 			let v1 = new CANNON.Vec3(pos.x,pos.y,pos.z).vsub(entity.object.body_sim.position);
@@ -1306,7 +1311,8 @@ export class DiceBox {
 			this.world_sim.removeConstraint(this.mouse.constraint);
 
 			//re-enable fvtt canvas events
-			canvas.mouseInteractionManager.activate();
+			if(canvas.mouseInteractionManager)
+				canvas.mouseInteractionManager.activate();
 			return true;
 		}
 		return false;

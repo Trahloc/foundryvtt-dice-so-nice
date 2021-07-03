@@ -82,10 +82,14 @@ export class DicePreset {
 
 	setLabels(labels) {
 		this.labels = labels;
+		this.modelLoaded=false;
+		this.modelLoading=false;
 	}
 
 	setBumpMaps(normals) {
 		this.normals = normals;
+		this.modelLoaded=false;
+		this.modelLoading=false;
 	}
 
 	loadTextures() {

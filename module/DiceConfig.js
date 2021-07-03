@@ -395,7 +395,7 @@ export class DiceConfig extends FormApplication {
              */
             $(this.element).on("click", "[data-saveas]", async (ev) => {
                 let saves = game.user.getFlag("dice-so-nice", "saves");
-                let saveList = [];
+                let saveList = new Map();
                 if (saves)
                     saveList = new Map(Object.entries(saves));
 
