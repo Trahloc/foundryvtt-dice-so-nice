@@ -1,4 +1,3 @@
-import { DiceColors, COLORSETS } from './DiceColors.js';
 import { DICE_MODELS } from './DiceModels.js';
 import { RGBELoader } from './libs/three-modules/RGBELoader.js';
 import { DiceSFXManager } from './DiceSFXManager.js';

@@ -1,6 +1,6 @@
 import {DicePreset} from './DicePreset.js';
 import {BASE_PRESETS_LIST, EXTRA_PRESETS_LIST} from './DiceDefaultPresets.js';
-import {DiceColors, DICE_SCALE} from './DiceColors.js';
+import {DiceColors, DICE_SCALE, COLORSETS} from './DiceColors.js';
 import {DICE_MODELS} from './DiceModels.js';
 import * as THREE from './libs/three.module.js';
 import { GLTFLoader } from './libs/three-modules/GLTFLoader.js';
@@ -901,6 +901,7 @@ export class DiceFactory {
 			if(colorset){
 				let colorsetData = DiceColors.getColorSet(colorset);
 				mergeObject(appearance, colorsetData);
+				appearance.colorset = colorset;
 			}
 			if(dicenotation.options.appearance){
 				mergeObject(appearance, dicenotation.options.appearance);
@@ -988,20 +989,21 @@ export class DiceFactory {
 				materialData.texture = appearance.texture[Math.floor(Math.random() * appearance.texture.length)];
 			} else if(appearance.texture.name == "none"){
 				//set to none/theme
-				materialData.texture = colorsetData.texture;
+				if (Array.isArray(colorsetData.texture)){
+					materialData.texture = colorsetData.texture[0][Math.floor(Math.random() * colorsetData.texture[0].length)];
+				} else {
+					materialData.texture = colorsetData.texture;
+				}
 			} else {
 				materialData.texture = appearance.texture;
 			}
 		}
 
-		//Same for material
-		let baseTexture = Array.isArray(materialData.texture) ? materialData.texture[0]:materialData.texture;
-
 		if(appearance.material == "auto" || appearance.material == ""){
 			if(colorsetData.material)
 				materialData.material = colorsetData.material;
 			else
-				materialData.material = baseTexture.material;
+				materialData.material = materialData.texture.material;
 		} else {
 			materialData.material = appearance.material;
 		}
