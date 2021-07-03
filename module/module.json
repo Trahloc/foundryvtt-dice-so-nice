@@ -114,7 +114,7 @@
 		}
 	],
 	"url": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice",
-	"manifest": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/raw/master/module/module.json",
+	"manifest": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/raw/beta/module/module.json",
 	"download": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/jobs/artifacts/4.0.0-beta1/raw/dice-so-nice.zip?job=build",
 	"bugs": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/issues",
 	"readme": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/blob/master/README.md",
