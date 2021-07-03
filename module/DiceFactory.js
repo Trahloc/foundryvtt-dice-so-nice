@@ -990,7 +990,7 @@ export class DiceFactory {
 			} else if(appearance.texture.name == "none"){
 				//set to none/theme
 				if (Array.isArray(colorsetData.texture)){
-					materialData.texture = colorsetData.texture[0][Math.floor(Math.random() * colorsetData.texture[0].length)];
+					materialData.texture = colorsetData.texture[Math.floor(Math.random() * colorsetData.texture.length)];
 				} else {
 					materialData.texture = colorsetData.texture;
 				}
@@ -999,11 +999,14 @@ export class DiceFactory {
 			}
 		}
 
+		//Same for material
+		let baseTexture = Array.isArray(materialData.texture) ? materialData.texture[0]:materialData.texture;
+
 		if(appearance.material == "auto" || appearance.material == ""){
 			if(colorsetData.material)
 				materialData.material = colorsetData.material;
 			else
-				materialData.material = materialData.texture.material;
+				materialData.material = baseTexture.material;
 		} else {
 			materialData.material = appearance.material;
 		}
