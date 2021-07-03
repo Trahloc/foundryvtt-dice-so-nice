@@ -289,7 +289,7 @@ export class DiceConfig extends FormApplication {
                 let roll = new Roll(denominationList.join("+")).roll();
                 let data = new DiceNotation(roll);
 
-                let specialEffects = [];
+                let specialEffects = this.getShowcaseSFX();
                 let customization = mergeObject({ appearance: config.appearance }, { specialEffects: specialEffects });
 
                 game.dice3d._showAnimation(data, customization);
@@ -878,8 +878,16 @@ export class DiceConfig extends FormApplication {
             let sfx = {
                 diceType: $(element).find('[data-sfx-dicetype]').val(),
                 onResult: $(element).find('[data-sfx-result]').val(),
-                specialEffect: $(element).find('[data-sfx-specialeffect]').val()
+                specialEffect: $(element).find('[data-sfx-specialeffect]').val(),
+                options: {}
             };
+            $(element).find("[data-sfx-hidden-options]").find("input,select").each((i,el) =>{
+                let name = $(el).attr("name").match(/.*\[(.*)\]$/)[1];
+                if($(el).attr("type")=="checkbox")
+                    sfx.options[name] = $(el).prop("checked");
+                else
+                    sfx.options[name] = $(el).val();
+            });
             if (sfx.diceType && sfx.onResult && sfx.specialEffect)
                 sfxList.push(sfx);
         });
