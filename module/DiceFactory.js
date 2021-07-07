@@ -866,13 +866,21 @@ export class DiceFactory {
 			colorset: settings.colorset ? settings.colorset : appearances.global.colorset ? appearances.global.colorset : "custom",
 			foreground: settings.labelColor ? settings.labelColor:appearances.global.labelColor ? appearances.global.labelColor : "#FFFFFF",
 			background: settings.diceColor ? settings.diceColor:appearances.global.diceColor ? appearances.global.diceColor : "#000000",
-			outline: settings.outlineColor ? settings.outlineColor: appearances.global.outlineColor ? appearances.global.outlineColor : "",
-			edge: settings.edgeColor ? settings.edgeColor:appearances.global.edgeColor ? appearances.global.edgeColor:"",
+			//outline: settings.outlineColor ? settings.outlineColor: appearances.global.outlineColor ? appearances.global.outlineColor : "",
+			//edge: settings.edgeColor ? settings.edgeColor:appearances.global.edgeColor ? appearances.global.edgeColor:"",
 			texture: settings.texture ? settings.texture:appearances.global.texture ? appearances.global.texture : "none",
 			material: settings.material ? settings.material:appearances.global.material ? appearances.global.material : "auto",
 			font: settings.font ? settings.font:appearances.global.font ? appearances.global.font : "Arial",
 			system: settings.system ? settings.system:appearances.global.system ? appearances.global.system : "standard"
 		};
+
+		if(appearance.colorset == "custom"){
+			appearance.outline = settings.outlineColor ? settings.outlineColor:"";
+			appearance.edge = settings.edgeColor ? settings.edgeColor:"";
+		} else {
+			appearance.outline = settings.outlineColor ? settings.outlineColor: appearances.global.outlineColor ? appearances.global.outlineColor : "";
+			appearance.edge = settings.edgeColor ? settings.edgeColor:appearances.global.edgeColor ? appearances.global.edgeColor:"";
+		}
 
 		if(appearance.colorset && appearance.colorset != "custom"){
 			let colorsetData = DiceColors.getColorSet(appearance.colorset);

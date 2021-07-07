@@ -372,6 +372,10 @@ export class DiceConfig extends FormApplication {
                 }
             });
 
+            $(this.element).on("change", "[data-sfx-result]", (ev) => {
+                this.setPosition();
+            });
+
             $(this.element).on("change", "[data-sfx-specialeffect]", (ev) => {
                 this.sfxDialogList.forEach((dialog) => {
                     dialog.close();
