@@ -900,8 +900,8 @@ export class DiceFactory {
 			}
 			if(colorset){
 				let colorsetData = DiceColors.getColorSet(colorset);
-				mergeObject(appearance, colorsetData);
-				appearance.colorset = colorset;
+				colorsetData.edge = colorsetData.edge ? colorsetData.edge : "";
+				appearance = colorsetData;
 			}
 			if(dicenotation.options.appearance){
 				mergeObject(appearance, dicenotation.options.appearance);

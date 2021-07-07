@@ -442,25 +442,25 @@ import { Utils } from './Utils.js';
      */
     async showForRoll(roll, user = game.user, synchronize, users = null, blind, messageID = null, speaker = null) {
         //Compatibility with both roll sync and async
-        Promise.resolve(roll).then(roll => {
-            let context = {
-                roll: roll,
-                user: user,
-                users: users,
-                blind: blind
-            };
-            if(speaker){
-                let actor = game.actors.get(speaker.actor);
-                const isNpc = actor ? actor.data.type === 'npc' : false;
-                if (isNpc && game.settings.get("dice-so-nice", "hideNpcRolls")) {
-                    return false;
-                }
+        if(roll instanceof Promise)
+            roll = await roll;
+        let context = {
+            roll: roll,
+            user: user,
+            users: users,
+            blind: blind
+        };
+        if(speaker){
+            let actor = game.actors.get(speaker.actor);
+            const isNpc = actor ? actor.data.type === 'npc' : false;
+            if (isNpc && game.settings.get("dice-so-nice", "hideNpcRolls")) {
+                return false;
             }
-            Hooks.callAll("diceSoNiceRollStart", messageID, context);
+        }
+        Hooks.callAll("diceSoNiceRollStart", messageID, context);
 
-            let notation = new DiceNotation(context.roll);
-            return this.show(notation, context.user, synchronize, context.users, context.blind);
-        });
+        let notation = new DiceNotation(context.roll);
+        return this.show(notation, context.user, synchronize, context.users, context.blind);
     }
 
     /**
