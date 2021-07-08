@@ -199,8 +199,15 @@ export class DiceFactory {
 	}
 
 	register(diceobj) {
-		if(diceobj.system != "standard"){
-			let index = this.systems.standard.dice.findIndex(el => el.type == diceobj.type);
+		let index = this.systems.standard.dice.findIndex(el => el.type == diceobj.type);
+		if(diceobj.system == "standard"){
+			//if it already exist, we replace with the new DiceTerm
+			if(index >=0){
+				this.systems.standard.dice[index] = diceobj;
+			} else {
+				this.systems[diceobj.system].dice.push(diceobj);
+			}	
+		} else {
 			if(index<0){
 				//If for some reasons, we try to register a dice type that doesnt exist on the standard system, we add it there first.
 				//This should not happen because of internalAddDicePreset but I'm only 95% sure.
@@ -210,12 +217,9 @@ export class DiceFactory {
 				} else {
 					diceobj.loadTextures();
 				}
-			} else if(this.systems.standard.dice[index].internalAdd) {
-				//if it exists in the standard system but has been added by the internal call, we update it with its custom preset
-				this.systems.standard.dice[index] = diceobj;
 			}
+			this.systems[diceobj.system].dice.push(diceobj);
 		}
-		this.systems[diceobj.system].dice.push(diceobj);		
 	}
 
 	async preloadPresets(waitForLoad = true, userID = null, config = {}){
@@ -291,7 +295,7 @@ export class DiceFactory {
 		}
 		let preset = new DicePreset(dice.type, model.shape);
 
-		let roll = new Roll(dice.type).evaluate({async:false});
+		let roll = new Roll(`1${dice.type}`).evaluate({async:false});
 		preset.term = roll.terms[0].constructor.name;
 		
 		preset.setLabels(dice.labels);
