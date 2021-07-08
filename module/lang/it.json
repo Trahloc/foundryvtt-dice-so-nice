@@ -7,6 +7,7 @@
     "DICESONICE.settingsPreferences": "Preferenze",
     "DICESONICE.settingsPerformance": "Prestazioni",
     "DICESONICE.settingsSpecialEffects": "Effetti Speciali",
+    "DICESONICE.settingsBackup": "Backup e Ripristino",
     "DICESONICE.enable": "Abilita Dadi 3D",
     "DICESONICE.labelColor": "Colore Etichetta",
     "DICESONICE.diceColor": "Colore Dado",
@@ -25,7 +26,13 @@
     "DICESONICE.fps": "FPS Massimi",
     "DICESONICE.Save": "Salva",
     "DICESONICE.Reset": "Torna alle Impostazioni Predefinite",
+    "DICESONICE.Cancel": "Annulla",
     "DICESONICE.Apply": "Applica",
+    "DICESONICE.SaveAs": "Salva come...",
+    "DICESONICE.Load": "Carica...",
+    "DICESONICE.Import": "Importa...",
+    "DICESONICE.Export": "Esporta tutto",
+    "DICESONICE.ExportSFX": "Esporta Effetti Speciali",
     "DICESONICE.outlineColor": "Colore Contorno",
     "DICESONICE.edgeColor": "Colore Bordo",
     "DICESONICE.texture": "Texture",
@@ -51,6 +58,8 @@
     "DICESONICE.globalAnimationSpeedHint": "Imposta la velocità di animazione per tutti i giocatori invece di utilizzare mpostazioni personalizzate",
     "DICESONICE.disabledDuringCombat": "Disabilitato durante il combattimento",
     "DICESONICE.disabledDuringCombatHint": "Disabilita le animazioni 3D del tiro dei dadi quando un combattimento è attivo.",
+    "DICESONICE.disabledForInitiative": "Disabilita per i tiri iniziativa",
+    "DICESONICE.disabledForInitiativeHint": "Disabilita i dadi 3D quando tiri l'iniziativa dal combat tracker.",
     "DICESONICE.enabledSimultaneousRolls": "Unisci tiri simultanei",
     "DICESONICE.enabledSimultaneousRollsHint": "Combina tiri simultanei in un'unica animazione invece di attendere la fine di ogni tiro.",
     "DICESONICE.canvasZIndex": "Posizione del piano 3D",
@@ -67,9 +76,11 @@
     "DICESONICE.animateInlineRollHint" : "Quando possibile, visualizza i dadi 3D quando viene rilevato un tiro inline nella chat.",
     "DICESONICE.allowInteractivity" : "Consenti l'interazione con i dadi lanciati",
     "DICESONICE.allowInteractivityHint" : "Consenti ai giocatori di afferrare e lanciare i dadi dopo che sono stati lanciati sul tavolo (non ha effetto sui risultati)",
+    "DICESONICE.navAppearanceHint" : "(Clicca su un dado per personalizzarlo)",
 
     "DICESONICE.Add" : "Aggiungi",
     "DICESONICE.Delete" : "Rimuovi",
+    "DICESONICE.Options" : "Opzioni",
     "DICESONICE.diceType" : "Tipo Dado",
     "DICESONICE.onResult" : "Risultato",
     "DICESONICE.specialEffect" : "Effetto Speciale",
@@ -86,6 +97,8 @@
     "DICESONICE.PlayAnimationParticleSparkles" : "Particelle: Fiammata",
     "DICESONICE.PlayAnimationParticleVortex" : "Particelle: Vortice Magico",
     "DICESONICE.PlayAnimationThormund" : "Animazione: Thormund TTE",
+    "DICESONICE.PlaySoundCustom" : "Suono: file personalizzato",
+    "DICESONICE.PlayMacro": "Esegui: macro personalizzata",
 
     "DICESONICE.TextureClouds" : "Nuvole",
     "DICESONICE.TextureCloudsTransparent" : "Nuvole (Trasparenti)",
@@ -186,5 +199,19 @@
     "DICESONICE.WelcomeMessage3" : "Puoi sempre modificare queste impostazioni in un secondo momento in 'Impostazioni > Impostazioni modulo > Dice So Nice!'",
     "DICESONICE.WelcomeMessage4" : "Non vedrai più questo messaggio. Buon divertimento!",
 
-    "DICESONICE.FindMoreTheme" : "Scopri altri temi e modelli 3D"
+    "DICESONICE.FindMoreTheme" : "Scarica nuovi temi e modelli 3D",
+
+    "DICESONICE.BackupHint" : "Puoi salvare o caricare più impostazioni di dadi. Verranno salvate nelle impostazioni utente solo per questo mondo. Se desideri utilizzarle in un mondo diverso, utilizza invece i pulsanti Importa/Esporta.",
+    "DICESONICE.SaveAsHint" : "Salva tutte le tue impostazioni correnti (aspetto, effetti speciali, ecc.). Puoi sovrascrivere un salvataggio esistente o crearne uno nuovo.",
+    "DICESONICE.Overwrite":  "Sovrascrivi",
+    "DICESONICE.AddNew" : "Aggiungi nuovo",
+    "DICESONICE.SaveAsErrorName" : "Inserisci un nome per il tuo file di salvataggio",
+    "DICESONICE.SaveAsErrorAlreadyExist" : "Esiste già un file di salvataggio con questo nome. Scegli un altro nome o usa il pulsante Sovrascrivi per aggiornare il tuo salvataggio.",
+    "DICESONICE.ImportHint" : "Puoi importare un file JSON precedentemente esportato. Questo sovrascriverà le tue impostazioni correnti ma non i tuoi file di salvataggio. Questa operazione non può essere annullata.",
+    "DICESONICE.ImportNoFile" : "Nessun file trovato. Seleziona un file da importare.",
+    "DICESONICE.TestRoll" : "Prova",
+
+    "DICESONICE.sfxOptionsIsGlobal" : "(Solo GM) Abilita questi effetti per tutti i giocatori",
+    "DICESONICE.sfxOptionsCustomSound" : "Seleziona un file sonoro",
+    "DICESONICE.sfxOptionsMacro" : "Seleziona una macro"
 }
