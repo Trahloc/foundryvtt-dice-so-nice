@@ -184,7 +184,6 @@ import { Utils } from './Utils.js';
      * @param {String} id : Identifier of the trigger, ex: fate3df
      * @param {String} name : Localized name of the trigger, ex: Fate Roll
      * @param {Array(String)} results : Array of possible results for this trigger, ex: ["-3","3","0"]
-     * @returns 
      */
     addSFXTrigger(id, name, results){
         if(DiceSFXManager.EXTRA_TRIGGER_RESULTS[id])
@@ -197,7 +196,18 @@ import { Utils } from './Utils.js';
     }
 
     /**
-     * Ctor. Create and initialize a new Dice3d.
+     * Load a save file by its name
+     * @param {String} name 
+     * @returns {Promise}
+     */
+    async loadSaveFile(name){
+        if(game.user.getFlag("dice-so-nice", "saves").hasOwnProperty(name))
+            await Utils.actionLoadSave(name);
+    }
+
+
+    /**
+     * Constructor. Create and initialize a new Dice3d.
      */
     constructor() {
         Hooks.call("diceSoNiceInit", this);
