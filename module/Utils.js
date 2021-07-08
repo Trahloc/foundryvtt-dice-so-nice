@@ -21,42 +21,44 @@ import { DiceColors, TEXTURELIST, COLORSETS } from './DiceColors.js';
             return true;
         }
         let migrated = false;
-        //v1 to v2
-        let settings = game.settings.get("dice-so-nice", "settings");
-        if (settings.diceColor || settings.labelColor) {
-            let newSettings = mergeObject(Dice3D.DEFAULT_OPTIONS, settings, { insertKeys: false, insertValues: false });
-            let appearance = mergeObject(Dice3D.DEFAULT_APPEARANCE(), settings, { insertKeys: false, insertValues: false });
-            await game.settings.set("dice-so-nice", "settings", mergeObject(newSettings, { "-=dimensions": null, "-=fxList": null }));
-            await game.user.setFlag("dice-so-nice", "appearance", appearance);
-            migrated = true;
+        
+        if(formatversion == ""){
+            //v1 to v2
+            let settings = game.settings.get("dice-so-nice", "settings");
+            if (settings.diceColor || settings.labelColor) {
+                let newSettings = mergeObject(Dice3D.DEFAULT_OPTIONS, settings, { insertKeys: false, insertValues: false });
+                let appearance = mergeObject(Dice3D.DEFAULT_APPEARANCE(), settings, { insertKeys: false, insertValues: false });
+                await game.settings.set("dice-so-nice", "settings", mergeObject(newSettings, { "-=dimensions": null, "-=fxList": null }));
+                await game.user.setFlag("dice-so-nice", "appearance", appearance);
+                migrated = true;
+            }
+
+            //v2 to v4
+            await Promise.all(game.users.map(async (user) => {
+                let appearance = user.getFlag("dice-so-nice", "appearance") ? duplicate(user.getFlag("dice-so-nice", "appearance")) : null;
+                if (appearance && appearance.hasOwnProperty("labelColor")) {
+                    let data = {
+                        global: appearance
+                    };
+                    await user.unsetFlag("dice-so-nice", "appearance");
+                    await user.setFlag("dice-so-nice", "appearance", data);
+                    migrated = true;
+                }
+
+                let sfxList = user.getFlag("dice-so-nice", "sfxList") ? duplicate(user.getFlag("dice-so-nice", "sfxList")) : null;
+            
+                if(sfxList){
+                    if(!Array.isArray(sfxList))
+                        sfxList = Object.values(sfxList);
+                    sfxList.forEach((sfx)=>{
+                        sfx.onResult = [sfx.onResult];
+                    });
+                    await user.unsetFlag("dice-so-nice", "sfxList");
+                    await user.setFlag("dice-so-nice", "sfxList", sfxList);
+                    migrated = true;
+                }
+            }));
         }
-
-        //v2 to v4
-        await Promise.all(game.users.map(async (user) => {
-            let appearance = user.getFlag("dice-so-nice", "appearance") ? duplicate(user.getFlag("dice-so-nice", "appearance")) : null;
-            if (appearance && appearance.hasOwnProperty("labelColor")) {
-                let data = {
-                    global: appearance
-                };
-                await user.unsetFlag("dice-so-nice", "appearance");
-                await user.setFlag("dice-so-nice", "appearance", data);
-                migrated = true;
-            }
-
-            let sfxList = user.getFlag("dice-so-nice", "sfxList") ? duplicate(user.getFlag("dice-so-nice", "sfxList")) : null;
-           
-            if(sfxList){
-                if(!Array.isArray(sfxList))
-                    sfxList = Object.values(sfxList);
-                sfxList.forEach((sfx)=>{
-                    sfx.onResult = [sfx.onResult];
-                });
-                await user.unsetFlag("dice-so-nice", "sfxList");
-                await user.setFlag("dice-so-nice", "sfxList", sfxList);
-                migrated = true;
-            }
-        }));
-
         //v4 to v4.1 (fix)
         //Remove the extra properties, no idea why tho
         await Promise.all(game.users.map(async (user) => {
