@@ -2,9 +2,9 @@
 	"name": "dice-so-nice",
 	"title": "Dice So Nice!",
 	"description": "Adds the ability to show a nice 3D dice simulation when a roll is made.",
-	"version": "3.4.2",
+	"version": "4.0.0",
 	"minimumCoreVersion" : "0.8.4",
-	"compatibleCoreVersion" : "0.8.6",
+	"compatibleCoreVersion" : "0.8.8",
 	"author": "Simone, JDW",
 	"authors": [
 		{
@@ -22,11 +22,13 @@
 		"./main.js"
 	],
 	"scripts": [
-		"./libs/cannon.min.js"
+		"./libs/cannon.min.js",
+		"./libs/select2.min.js"
 	],
 	"socket": true,
 	"styles": [
-		"./style.css"
+		"./css/style.css",
+		"./css/select2.css"
 	],
 	"languages": [{
 		"lang": "en",
@@ -112,8 +114,8 @@
 		}
 	],
 	"url": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice",
-	"manifest": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/raw/master/module/module.json",
-	"download": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/jobs/artifacts/3.4.2/raw/dice-so-nice.zip?job=build",
+	"manifest": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/raw/master/module/module.json",
+	"download": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/jobs/artifacts/4.0.0/raw/dice-so-nice.zip?job=build",
 	"bugs": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/issues",
 	"readme": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/blob/master/README.md",
 	"flags": {
