@@ -12,12 +12,12 @@ import { DiceColors, TEXTURELIST, COLORSETS } from './DiceColors.js';
 
         let formatversion = game.settings.get("dice-so-nice", "formatVersion");
 
-        if (formatversion == "") { //Never updated or first install
+        if (formatversion == "" || formatversion != "4.1") { //Never updated or first install
             if (!game.user.isGM) {
                 ui.notifications.warn(game.i18n.localize("DICESONICE.migrateMessageNeedGM"));
                 return false;
             }
-        } else if (formatversion == "4") {
+        } else if (formatversion == "4.1") {
             return true;
         }
         let migrated = false;
@@ -56,7 +56,28 @@ import { DiceColors, TEXTURELIST, COLORSETS } from './DiceColors.js';
                 migrated = true;
             }
         }));
-        game.settings.set("dice-so-nice", "formatVersion", "4");
+
+        //v4 to v4.1 (fix)
+        //Remove the extra properties, no idea why tho
+        await Promise.all(game.users.map(async (user) => {
+            let appearance = user.getFlag("dice-so-nice", "appearance") ? duplicate(user.getFlag("dice-so-nice", "appearance")) : null;
+            if (appearance && appearance.hasOwnProperty("labelColor")) {
+                let data = {
+                    "-=colorset":null,
+                    "-=diceColor":null,
+                    "-=edgeColor":null,
+                    "-=font":null,
+                    "-=labelColor":null,
+                    "-=material":null,
+                    "-=outlineColor":null,
+                    "-=system":null,
+                    "-=texture":null
+                };
+                await user.setFlag("dice-so-nice", "appearance", data);
+            }
+        }));
+
+        game.settings.set("dice-so-nice", "formatVersion", "4.1");
         if(migrated)
             ui.notifications.info(game.i18n.localize("DICESONICE.migrateMessage"));
         return true;

@@ -83,7 +83,7 @@ import { Utils } from './Utils.js';
                 let GMSFX = Dice3D.SFX(other);
                 if(Array.isArray(GMSFX)){
                     GMSFX = GMSFX.filter(sfx => sfx.options && sfx.options.isGlobal);
-                    mergeObject(specialEffects,GMSFX);
+                    specialEffects = specialEffects.concat(GMSFX);
                 }
             }
         });
