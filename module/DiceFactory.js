@@ -199,18 +199,29 @@ export class DiceFactory {
 	}
 
 	register(diceobj) {
+		//If it is added to standard, it can be from automated system detecting DiceTerm, or the basic dice list. In those case, the internalAdd preorperty is set to true
+		//Everything should exist in the standard system
+		//We check to see if there's already this Dice DONOMINATOR in the standard system
 		let index = this.systems.standard.dice.findIndex(el => el.type == diceobj.type);
-		if(diceobj.system == "standard"){
-			//if it already exist, we replace with the new DiceTerm
-			if(index >=0){
-				this.systems.standard.dice[index] = diceobj;
+
+		//If it exists in the standard system, and it was added there by the automated system, we want to override and load it
+		if(index>=0 && this.systems.standard.dice[index].internalAdd){
+			this.systems.standard.dice[index] = diceobj;
+			if(diceobj.modelFile){
+				diceobj.loadModel(this.loaderGLTF);
 			} else {
+				diceobj.loadTextures();
+			}
+		}
+		if(diceobj.system == "standard"){
+			//If we're adding to the standard system directly, we only do it if it didn't exist previously
+			if(index < 0){
 				this.systems[diceobj.system].dice.push(diceobj);
 			}	
 		} else {
+			//If for some reasons, we try to register a dice type that doesnt exist on the standard system, we add it there first.
+			//This should not happen because of internalAddDicePreset but I'm only 95% sure.
 			if(index<0){
-				//If for some reasons, we try to register a dice type that doesnt exist on the standard system, we add it there first.
-				//This should not happen because of internalAddDicePreset but I'm only 95% sure.
 				this.systems.standard.dice.push(diceobj);
 				if(diceobj.modelFile){
 					diceobj.loadModel(this.loaderGLTF);
@@ -218,6 +229,7 @@ export class DiceFactory {
 					diceobj.loadTextures();
 				}
 			}
+			//Then we add it to its own system. No need to load it, that will be taken care of automatically
 			this.systems[diceobj.system].dice.push(diceobj);
 		}
 	}
