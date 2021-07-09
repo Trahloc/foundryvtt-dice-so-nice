@@ -596,54 +596,20 @@ export class DiceConfig extends FormApplication {
     }
 
     async actionSaveAs(name) {
-        let savesObject = game.user.getFlag("dice-so-nice", "saves");
-        let saves;
-        if (!savesObject) {
-            saves = new Map();
-        } else {
-            //temporary workaround for https://gitlab.com/foundrynet/foundryvtt/-/issues/5464
-            saves = new Map(Object.entries(savesObject));
-        }
-        //save current settings first
         await this.submit({
             preventClose: true,
             preventRender: true
         });
-        let saveObject = {
-            appearance: game.user.getFlag("dice-so-nice", "appearance"),
-            sfxList: game.user.getFlag("dice-so-nice", "sfxList"),
-            settings: game.settings.get("dice-so-nice", "settings")
-        };
 
-        saves.set(name, saveObject);
-        game.user.unsetFlag("dice-so-nice", "saves").then(() => {
-            game.user.setFlag("dice-so-nice", "saves", Object.fromEntries(saves));
-        });
+        Utils.actionSaveAs(name);
     }
 
     async actionDeleteSave(name) {
-        let savesObject = game.user.getFlag("dice-so-nice", "saves");
-        let saves = new Map(Object.entries(savesObject));
-        saves.delete(name);
-        game.user.unsetFlag("dice-so-nice", "saves").then(async () => {
-            await game.user.setFlag("dice-so-nice", "saves", Object.fromEntries(saves));
-            ui.notifications.info(game.i18n.localize("DICESONICE.saveMessage"));
-        });
+        await Utils.actionDeleteSave(name);
     }
 
     async actionLoadSave(name) {
-        let savesObject = game.user.getFlag("dice-so-nice", "saves");
-        let save = new Map(Object.entries(savesObject)).get(name);
-
-        if (save.appearance) {
-            await game.user.unsetFlag("dice-so-nice", "appearance");
-            await game.user.setFlag("dice-so-nice", "appearance", save.appearance);
-        }
-        if (save.sfxList) {
-            await game.user.unsetFlag("dice-so-nice", "sfxList");
-            await game.user.setFlag("dice-so-nice", "sfxList", save.sfxList);
-        }
-        await game.settings.set("dice-so-nice", "settings", save.settings);
+        await Utils.actionLoadSave(name);
     }
 
     async actionExportToJSON() {
