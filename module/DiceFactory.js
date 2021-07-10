@@ -205,7 +205,7 @@ export class DiceFactory {
 		let index = this.systems.standard.dice.findIndex(el => el.type == diceobj.type);
 
 		//If it exists in the standard system, and it was added there by the automated system, we want to override and load it
-		if(index>=0 && this.systems.standard.dice[index].internalAdd){
+		if(index>=0 && this.systems.standard.dice[index].internalAdd || diceobj.internalAdd){
 			this.systems.standard.dice[index] = diceobj;
 			if(diceobj.modelFile){
 				diceobj.loadModel(this.loaderGLTF);
