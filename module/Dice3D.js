@@ -466,7 +466,7 @@ import { Utils } from './Utils.js';
             let actor = game.actors.get(speaker.actor);
             const isNpc = actor ? actor.data.type === 'npc' : false;
             if (isNpc && game.settings.get("dice-so-nice", "hideNpcRolls")) {
-                return false;
+                return Promise.resolve(false);
             }
         }
         Hooks.callAll("diceSoNiceRollStart", messageID, context);
