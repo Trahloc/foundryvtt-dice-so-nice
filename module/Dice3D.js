@@ -68,9 +68,9 @@ import { Utils } from './Utils.js';
 
     static SFX(user = game.user) {
         if (Dice3D.CONFIG.showOthersSFX || user.id == game.user.id)
-            return user.getFlag("dice-so-nice", "sfxList") ? duplicate(user.getFlag("dice-so-nice", "sfxList")) : null;
+            return user.getFlag("dice-so-nice", "sfxList") ? duplicate(user.getFlag("dice-so-nice", "sfxList")) : [];
         else
-            return {};
+            return [];
     }
 
     /**
