@@ -18,6 +18,42 @@ import { DiceColors, TEXTURELIST, COLORSETS } from './DiceColors.js';
                 return false;
             }
         } else if (formatversion == "4.1") {
+            //Fuck it, lets do this so I'm sure it it not because of DsN itself.
+            if (game.user.isGM) {
+                await Promise.all(game.users.map(async (user) => {
+                    let appearance = user.getFlag("dice-so-nice", "appearance") ? duplicate(user.getFlag("dice-so-nice", "appearance")) : null;
+                    if (appearance && appearance.hasOwnProperty("labelColor")) {
+                        let data = {
+                            "-=colorset":null,
+                            "-=diceColor":null,
+                            "-=edgeColor":null,
+                            "-=font":null,
+                            "-=labelColor":null,
+                            "-=material":null,
+                            "-=outlineColor":null,
+                            "-=system":null,
+                            "-=texture":null
+                        };
+                        await user.setFlag("dice-so-nice", "appearance", data);
+                    }
+                }));
+            } else {
+                let appearance = game.user.getFlag("dice-so-nice", "appearance") ? duplicate(game.user.getFlag("dice-so-nice", "appearance")) : null;
+                if (appearance && appearance.hasOwnProperty("labelColor")) {
+                    let data = {
+                        "-=colorset":null,
+                        "-=diceColor":null,
+                        "-=edgeColor":null,
+                        "-=font":null,
+                        "-=labelColor":null,
+                        "-=material":null,
+                        "-=outlineColor":null,
+                        "-=system":null,
+                        "-=texture":null
+                    };
+                    await game.user.setFlag("dice-so-nice", "appearance", data);
+                }
+            }
             return true;
         }
         let migrated = false;

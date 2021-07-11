@@ -450,10 +450,12 @@ import { Utils } from './Utils.js';
      * @param speaker Object based on the ChatSpeakerData data schema related to this roll. Useful to fully support DsN settings like "hide npc rolls". (Default: null)
      * @returns {Promise<boolean>} when resolved true if the animation was displayed, false if not.
      */
-    async showForRoll(roll, user = game.user, synchronize, users = null, blind, messageID = null, speaker = null) {
+    showForRoll(roll, user = game.user, synchronize, users = null, blind, messageID = null, speaker = null) {
         //Compatibility with both roll sync and async
-        if(roll instanceof Promise)
-            roll = await roll;
+        //TODO: make it work with _dice3danimating
+        /*if(roll instanceof Promise)
+            roll = await roll;*/
+        
         let context = {
             roll: roll,
             user: user,
