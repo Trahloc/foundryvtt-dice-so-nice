@@ -306,9 +306,9 @@ export class DiceFactory {
 			model = this.systems["standard"].dice.find(el => el.type == shape);
 		}
 		let preset = new DicePreset(dice.type, model.shape);
+		let denominator = dice.type.substr(1);
 
-		let roll = new Roll(`1${dice.type}`).evaluate({async:false});
-		preset.term = roll.terms[0].constructor.name;
+		preset.term = isNaN(denominator) ? CONFIG.Dice.terms[denominator].name : "Die";
 		
 		preset.setLabels(dice.labels);
 		preset.setModel(dice.modelFile);
@@ -938,9 +938,23 @@ export class DiceFactory {
 		let materialData = {};
 		let colorindex;
 
-		let colorsetData = DiceColors.getColorSet(appearance.colorset);
 		if(appearance.texture && !appearance.texture.id)
 			appearance.texture = DiceColors.getTexture(appearance.texture);
+
+		let colorsetData = DiceColors.getColorSet(appearance.colorset);
+
+		// ignore custom colorset with unset properties
+		if(colorsetData.foreground == "custom")
+			colorsetData.foreground = appearance.foreground;
+		if(colorsetData.background == "custom")
+			colorsetData.background = appearance.background;
+		if(colorsetData.texture == "custom")
+			colorsetData.texture = appearance.texture;
+		if(colorsetData.material == "custom")
+			colorsetData.material = appearance.material;
+		if(colorsetData.font == "custom")
+			colorsetData.font = appearance.font;
+
 
 		// set base color first
 		if (Array.isArray(appearance.background)) {
