@@ -693,6 +693,10 @@ export class DiceConfig extends FormApplication {
                         font: $(element).find('[data-font]').val(),
                         system: $(element).find('[data-system]').val(),
                     };
+                    //disabled systems arent returned
+                    if(obj.system == null){
+                        obj.system = this.currentGlobalAppearance.system;
+                    }
                     appearanceArray.push(obj);
                 });
                 if (appearanceArray.length > 1) {
