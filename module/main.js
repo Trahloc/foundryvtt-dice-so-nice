@@ -81,13 +81,6 @@ Hooks.once('init', () => {
         config: true
     });
 
-    game.settings.register("dice-so-nice", "enabled", {
-        scope: "world",
-        type: Boolean,
-        default: true,
-        config: false
-    });
-
     game.settings.register("dice-so-nice", "formatVersion", {
         scope: "world",
         type: String,
