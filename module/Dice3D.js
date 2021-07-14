@@ -426,7 +426,7 @@ import { Utils } from './Utils.js';
      */
     isEnabled() {
         let combatEnabled = (!game.combat || !game.combat.started) || (game.combat && game.combat.started && !game.settings.get("dice-so-nice", "disabledDuringCombat"));
-        return Dice3D.CONFIG.enabled && game.settings.get("dice-so-nice", "enabled") && combatEnabled;
+        return Dice3D.CONFIG.enabled && combatEnabled;
     }
 
     /**
