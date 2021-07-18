@@ -296,7 +296,7 @@ export class DiceConfig extends FormApplication {
             });
 
             $(this.element).on("click", "[data-sfx-create]", (ev) => {
-                let ID = $(".sfx-line").length;
+                let ID =  $(this.element).find(".sfx-line").length;
                 let firstSFX = Object.keys(DiceSFXManager.SFX_MODE_LIST)[0];
                 let sfxClass = DiceSFXManager.SFX_MODE_CLASS[firstSFX];
                 let dialogContent = sfxClass.getDialogContent({},ID);
@@ -311,7 +311,7 @@ export class DiceConfig extends FormApplication {
                     possibleResultList: [],
                     options:hdbsTemplate(dialogContent.data)
                 }).then((html) => {
-                    $("#sfxs-list").append(html);
+                    $(this.element).find("#sfxs-list").append(html);
                     select2dsn.call($("[data-sfx-result]"), this.select2Options);
                     this.setPosition();
                 });
@@ -660,7 +660,8 @@ export class DiceConfig extends FormApplication {
 
     activateAppearanceTab(diceType) {
         let tabs = this._tabs[1];
-        tabs.activate(diceType, { triggerCallback: true });
+        if(tabs.active != diceType)
+            tabs.activate(diceType, { triggerCallback: true });
     }
 
     closeAppearanceTab(diceType) {
@@ -922,7 +923,8 @@ export class DiceConfig extends FormApplication {
             sfxLine = Object.values(sfxLine);
             //Remove empty lines
             for (let i = sfxLine.length - 1; i >= 0; i--) {
-                if (sfxLine[i].diceType == "" || sfxLine[i].onResult == "")
+                //also prevent bug #217, unknown cause
+                if (sfxLine[i].diceType == "" || sfxLine[i].onResult == "" || Array.isArray(sfxLine[i].diceType) || Array.isArray(sfxLine[i].specialEffect))
                     sfxLine.splice(i, 1);
             }
             //Remove duplicate lines
