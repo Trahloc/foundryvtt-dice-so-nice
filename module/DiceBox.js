@@ -810,7 +810,7 @@ export class DiceBox {
 			for (let i in this.scene.children) {
 				let container = this.scene.children[i];
 				let dicemesh = container.children && container.children.length && container.children[0].body_sim != undefined && !container.children[0].body_sim.dead ? container.children[0] : null;
-				if (dicemesh) {
+				if (dicemesh && dicemesh.body_sim.stepPositions[this.iteration]) {
 					container.position.copy(dicemesh.body_sim.stepPositions[this.iteration]);
 					container.quaternion.copy(dicemesh.body_sim.stepQuaternions[this.iteration]);
 
