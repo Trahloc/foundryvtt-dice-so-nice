@@ -663,8 +663,8 @@ export class DiceFactory {
 		contextBump.fillStyle = "#FFFFFF";
 		contextBump.fillRect(x, y, ts, ts);
 
-		context.rect(x, y, ts, ts);
-		context.stroke();
+		//context.rect(x, y, ts, ts);
+		//context.stroke();
 
 		//create underlying texture
 		if (texture.name != '' && texture.name != 'none') {

@@ -100,43 +100,42 @@ export class DiceBox {
 	}
 
 	preloadSounds() {
+		//Surfaces
+		fetch(`modules/dice-so-nice/sounds/surfaces.json`).then(res => {
+			res.json().then(json =>{
+				AudioHelper.preloadSound(`modules/dice-so-nice/sounds/${json.resources[0]}`).then(src => this.sounds_table.source = src);
+				Object.entries(json.spritemap).forEach(sound => {
+					let type = sound[0].match(/surface\_([a-z\_]*)/)[1];
+					if(!this.sounds_table[type])
+						this.sounds_table[type] = [];
+					this.sounds_table[type].push(sound[1]);
+				});
+			});
+		});
 
-		let surfaces = [
-			['felt', 7],
-			['wood_table', 7],
-			['wood_tray', 7],
-			['metal', 9]
-		];
+		//Hits
+		fetch(`modules/dice-so-nice/sounds/dicehit.json`).then(res => {
+			res.json().then(json =>{
+				this.sounds_dice.source = AudioHelper.preloadSound(`modules/dice-so-nice/sounds/${json.resources[0]}`).then(src => this.sounds_dice.source = src);
+				Object.entries(json.spritemap).forEach(sound => {
+					let type = sound[0].match(/dicehit\_([a-z\_]*)/)[1];
+					if(!this.sounds_dice[type])
+						this.sounds_dice[type] = [];
+					this.sounds_dice[type].push(sound[1]);
+				});
+			});
+		});
+	}
 
-		for (const [surface, numsounds] of surfaces) {
-			this.sounds_table[surface] = [];
-			for (let s = 1; s <= numsounds; ++s) {
-				let path = `modules/dice-so-nice/sounds/${surface}/surface_${surface}${s}.mp3`;
-				AudioHelper.preloadSound(path);
-				this.sounds_table[surface].push(path);
-			}
-		}
-
-		let materials = [
-			['plastic', 15],
-			['metal', 12],
-			['wood', 12]
-		];
-
-		for (const [material, numsounds] of materials) {
-			this.sounds_dice[material] = [];
-			for (let s = 1; s <= numsounds; ++s) {
-				let path = `modules/dice-so-nice/sounds/dicehit/dicehit${s}_${material}.mp3`;
-				AudioHelper.preloadSound(path);
-				this.sounds_dice[material].push(path);
-			}
-		}
-
-		for (let i = 1; i <= 6; ++i) {
-			let path = `modules/dice-so-nice/sounds/dicehit/coinhit${i}.mp3`;
-			AudioHelper.preloadSound(path);
-			this.sounds_coins.push(path);
-		}
+	playAudioSprite(source, sprite, selfVolume){
+		let gainNode = source.context.createGain();
+		gainNode.gain.value = selfVolume * this.volume;
+		const startTime = sprite.start;
+		const duration = sprite.end - sprite.start;
+		const sampleSource = source.context.createBufferSource();
+		sampleSource.buffer = source.container.buffer;
+		sampleSource.connect(gainNode).connect(source.context.destination);
+		sampleSource.start(source.context.currentTime, startTime, duration);
 	}
 
 	initialize() {
@@ -630,7 +629,7 @@ export class DiceBox {
 	eventCollide({ body, target }) {
 		// collision events happen simultaneously for both colliding bodies
 		// all this sanity checking helps limits sounds being played
-		if (!this.sounds || !body || !this.sounds_dice.plastic) return;
+		if (!this.sounds || !body || !this.sounds_dice.source) return;
 
 		let now = body.world.stepnumber;
 		let currentSoundType = (body.mass > 0) ? 'dice' : 'table';
@@ -657,11 +656,11 @@ export class DiceBox {
 				sound = sounds_dice[Math.floor(Math.random() * sounds_dice.length)];
 			}
 			else
-				sound = this.sounds_coins[Math.floor(Math.random() * this.sounds_coins.length)];
+				sound = this.sounds_dice['coin'][Math.floor(Math.random() * this.sounds_dice['coin'].length)];
 			if(this.animstate == "simulate"){
-				this.detectedCollides[this.iteration] = [sound, strength];
+				this.detectedCollides[this.iteration] = [this.sounds_dice.source, sound, strength];
 			} else {
-				this.playSoundCollide([sound, strength]);
+				this.playAudioSprite(this.sounds_dice.source, sound, strength);
 			}
 			this.lastSoundType = 'dice';
 
@@ -677,23 +676,15 @@ export class DiceBox {
 			let soundlist = this.sounds_table[surface];
 			let sound = soundlist[Math.floor(Math.random() * soundlist.length)];
 			if(this.animstate == "simulate"){
-				this.detectedCollides[this.iteration] = [sound, strength];
+				this.detectedCollides[this.iteration] = [this.sounds_table.source, sound, strength];
 			} else {
-				this.playSoundCollide([sound, strength]);
+				this.playAudioSprite(this.sounds_table.source, sound, strength);
 			}
 
 			this.lastSoundType = 'table';
 		}
 		this.lastSoundStep = body.world.stepnumber;
 		this.lastSound = body.world.stepnumber + this.soundDelay;
-	}
-
-	playSoundCollide(sound) {
-		let volume = sound[1] * this.volume;
-		AudioHelper.play({
-			src: sound[0],
-			volume: volume
-		}, false);
 	}
 
 	throwFinished(worldType = "render") {
@@ -810,7 +801,7 @@ export class DiceBox {
 			for (let i in this.scene.children) {
 				let container = this.scene.children[i];
 				let dicemesh = container.children && container.children.length && container.children[0].body_sim != undefined && !container.children[0].body_sim.dead ? container.children[0] : null;
-				if (dicemesh) {
+				if (dicemesh && dicemesh.body_sim.stepPositions[this.iteration]) {
 					container.position.copy(dicemesh.body_sim.stepPositions[this.iteration]);
 					container.quaternion.copy(dicemesh.body_sim.stepQuaternions[this.iteration]);
 
@@ -822,7 +813,7 @@ export class DiceBox {
 			}
 
 			if (this.detectedCollides[this.iteration]) {
-				this.playSoundCollide(this.detectedCollides[this.iteration]);
+				this.playAudioSprite(...this.detectedCollides[this.iteration]);
 			}
 		} else if(!this.rolling) {
 			let worldAsleep = true;
