@@ -124,7 +124,7 @@ export class DiceConfig extends FormApplication {
 
         //Filter out the SFX that are not registered
         if (specialEffects) {
-            let registeredTriggerTypes = triggerTypeList.map(trigger => trigger.id);
+            let registeredTriggerTypes = this.triggerTypeList.map(trigger => trigger.id);
             specialEffects = specialEffects.filter(sfx => registeredTriggerTypes.includes(sfx.diceType));
         }
 
