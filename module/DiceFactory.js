@@ -63,7 +63,7 @@ export class DiceFactory {
 			//If this is not a core dice type
 			if(![Coin, FateDie, Die].includes(term)){
 				let objTerm = new term({});
-				if([3, 4, 6, 8, 10, 12, 20].includes(objTerm.faces)){
+				if([2, 3, 4, 6, 8, 10, 12, 20].includes(objTerm.faces)){
 					this.internalAddDicePreset(objTerm);
 				}
 			}
@@ -274,13 +274,14 @@ export class DiceFactory {
         activePresets = activePresets.filter((v, i, a) => a.indexOf(v) === i);
 		let promiseArray = [];
 		activePresets.forEach((preset)=>{
-			
-			if(preset.modelFile){
-				//Custom 3D model
-				promiseArray.push(preset.loadModel(this.loaderGLTF));
-			} else {
-				//Classic 3D model
-				promiseArray.push(preset.loadTextures());
+			if(preset){
+				if(preset.modelFile){
+					//Custom 3D model
+					promiseArray.push(preset.loadModel(this.loaderGLTF));
+				} else {
+					//Classic 3D model
+					promiseArray.push(preset.loadTextures());
+				}
 			}
 		});
 
