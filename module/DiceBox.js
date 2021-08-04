@@ -9,7 +9,7 @@ export class DiceBox {
 
 	constructor(element_container, dice_factory, config) {
 		//private variables
-		this.known_types = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd100'];
+		this.known_types = ['d4', 'd6', 'd8', 'd10', 'd12', 'd14', 'd16', 'd20', 'd24', 'd30', 'd100'];
 		this.container = element_container;
 		this.dimensions = config.dimensions;
 		this.dicefactory = dice_factory;
@@ -519,9 +519,16 @@ export class DiceBox {
 			result = diceobj.valueMap[result];
 		}
 
+		// Make the last rolled dice and the DiceBox instance available for debugging
+		//CONFIG.DiceSoNice = {
+		//	dicemesh,
+		//	dicebox: this
+		//};
+
 		if (value == result) return;
 
 		let rotIndex = value > result ? result + "," + value : value + "," + result;
+		//console.log(`Needed ${result}, Rolled ${value}, Remap: ${rotIndex}`)
 		let rotationDegrees = DICE_MODELS[dicemesh.shape].rotationCombinations[rotIndex];
 		let eulerAngle = new THREE.Euler(THREE.MathUtils.degToRad(rotationDegrees[0]), THREE.MathUtils.degToRad(rotationDegrees[1]), THREE.MathUtils.degToRad(rotationDegrees[2]));
 		let quaternion = new THREE.Quaternion().setFromEuler(eulerAngle);
@@ -532,6 +539,49 @@ export class DiceBox {
 
 		dicemesh.resultReason = 'forced';
 	}
+
+  /*
+  // Apply an euler angle from rotationCombinations for debugging
+	swapTest(dicemesh, mapping, invert = false, revert = true) {
+
+		let rotationDegrees = DICE_MODELS[dicemesh.shape].rotationCombinations[mapping];
+		let eulerAngle = new THREE.Euler(THREE.MathUtils.degToRad(rotationDegrees[0]), THREE.MathUtils.degToRad(rotationDegrees[1]), THREE.MathUtils.degToRad(rotationDegrees[2]));
+		let quaternion = new THREE.Quaternion().setFromEuler(eulerAngle);
+		if (invert)
+			quaternion.invert();
+
+		dicemesh.applyQuaternion(quaternion);
+
+		if (revert) {
+			setTimeout(() => { this.swapTest(dicemesh, mapping, !invert, false) }, 2000 )
+		}
+
+		dicemesh.resultReason = 'forced';
+	}
+
+  // Apply an euler angle directly for debugging
+	swapTest(dicemesh, mapping, invert = false, revert = true) {
+	swapTestEuler(dicemesh, euler, invert = false, revert = true) {
+		let eulerAngle = new THREE.Euler(THREE.MathUtils.degToRad(euler[0]), THREE.MathUtils.degToRad(euler[1]), THREE.MathUtils.degToRad(euler[2]));
+		let quaternion = new THREE.Quaternion().setFromEuler(eulerAngle);
+		if (invert)
+			quaternion.invert();
+
+		dicemesh.applyQuaternion(quaternion);
+
+		if (revert) {
+			setTimeout(() => { this.swapTestEuler(dicemesh, euler, !invert, false) }, 2000 )
+		}
+
+		dicemesh.resultReason = 'forced';
+	}
+
+  // Extract the euler angle from a mesh in degrees for debugging
+	extractEuler(dicemesh) {
+		let euler = dicemesh.rotation
+		console.log("World Euler:", THREE.MathUtils.radToDeg(euler.x), THREE.MathUtils.radToDeg(euler.y), THREE.MathUtils.radToDeg(euler.z), euler.order)
+	}
+  */
 
 	//spawns one dicemesh object from a single vectordata object
 	spawnDice(dicedata, appearance) {
@@ -613,7 +663,6 @@ export class DiceBox {
 		function saveArrayBuffer( buffer, filename ) {
 			save( new Blob( [ buffer ], { type: 'application/octet-stream' } ), filename );
 		}*/
-
 
 		let objectContainer = new THREE.Group();
 		objectContainer.add(dicemesh);
@@ -1115,27 +1164,20 @@ export class DiceBox {
 					break;
 
 				case CANNON.Shape.types.CONVEXPOLYHEDRON:
-					var geo = new THREE.Geometry();
-
-					// Add vertices
-					for (var i = 0; i < shape.vertices.length; i++) {
-						var v = shape.vertices[i];
-						geo.vertices.push(new THREE.Vector3(v.x, v.y, v.z));
-					}
-
+					var geo = new THREE.BufferGeometry()
+					var points = []
 					for (var i = 0; i < shape.faces.length; i++) {
 						var face = shape.faces[i];
 
-						// add triangles
-						var a = face[0];
-						for (var j = 1; j < face.length - 1; j++) {
-							var b = face[j];
-							var c = face[j + 1];
-							geo.faces.push(new THREE.Face3(a, b, c));
+						for (var j = 0; j < face.length - 1; j++) {
+							var a = shape.vertices[face[j]];
+							var b = shape.vertices[face[j + 1]];
+							points.push(a);
+							points.push(b);
 						}
 					}
-					geo.computeBoundingSphere();
-					geo.computeFaceNormals();
+					geo.setFromPoints(points);
+					geo.computeVertexNormals();
 					mesh = new THREE.Mesh(geo, currentMaterial);
 					break;
 

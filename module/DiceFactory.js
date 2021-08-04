@@ -63,7 +63,7 @@ export class DiceFactory {
 			//If this is not a core dice type
 			if(![Coin, FateDie, Die].includes(term)){
 				let objTerm = new term({});
-				if([2, 3, 4, 6, 8, 10, 12, 20].includes(objTerm.faces)){
+				if([2, 3, 4, 6, 8, 10, 12, 14, 16, 20, 24, 30].includes(objTerm.faces)){
 					this.internalAddDicePreset(objTerm);
 				}
 			}
@@ -333,7 +333,7 @@ export class DiceFactory {
 		preset.fontScale = dice.fontScale || null;
 		preset.colorset = dice.colorset || null;
 		//If it overrides an existing model that isn't a numbered die, set a font scale to prevent undesired fontScale from previous model
-		if(!preset.fontScale && !["d2","d4","d6","d8","d10","d12","d20","d100"].includes(dice.type) && this.systems["standard"].dice.find(el => el.type == dice.type))
+		if(!preset.fontScale && !["d2","d4","d6","d8","d10","d12","d14","d16","d20","d24","d30","d100"].includes(dice.type) && this.systems["standard"].dice.find(el => el.type == dice.type))
 			preset.fontScale = DICE_SCALE[shape];
 		
 		if(dice.bumpMaps && dice.bumpMaps.length)
@@ -487,6 +487,8 @@ export class DiceFactory {
 			let labelIndex = dieValue;
 			if (['d10','d2'].includes(this.shape)) labelIndex += 1;
 			let label = diceobj.labels[labelIndex+1];
+
+			//console.log('Face Value', closest_face, dieValue, label)
 
 			return {value: dieValue, label: label, reason: reason};
 		};
@@ -714,6 +716,12 @@ export class DiceFactory {
 				//Needed for every fonts
 				switch(diceobj.shape){
 					case 'd10':
+						textstarty = textstartx*1.3;
+						break
+					case 'd14':
+						textstarty = textstartx*1.3;
+						break
+					case 'd16':
 						textstarty = textstartx*1.3;
 						break
 					case 'd8':
@@ -1104,8 +1112,20 @@ export class DiceFactory {
 			case 'd12':
 				geom = this.create_d12_geometry(radius, scopedScale);
 				break;
+			case 'd14':
+				geom = this.create_d14_geometry(radius, scopedScale);
+				break;
+			case 'd16':
+				geom = this.create_d16_geometry(radius, scopedScale);
+				break;
 			case 'd20':
 				geom = this.create_d20_geometry(radius, scopedScale);
+				break;
+			case 'd24':
+				geom = this.create_d24_geometry(radius, scopedScale);
+				break;
+			case 'd30':
+				geom = this.create_d30_geometry(radius, scopedScale);
 				break;
 		}
 		return geom;
@@ -1199,8 +1219,25 @@ export class DiceFactory {
 		return geom;
 	}
 
+	create_d14_geometry(radius, scopedScale) {
+		let geom = this.load_geometry("d14",scopedScale);
+
+		var vertices = [[-0.005093127489089966, 1.177548885345459, 0.002782404189929366], [-0.9908595681190491, 0.061759304255247116, 0.22585006058216095], [-0.9924551844596863, -0.06095181778073311, -0.23028047382831573], [-0.7984917163848877, 0.061637163162231445, -0.6402497291564941], [-0.4453684985637665, -0.06121010705828667, -0.9239609241485596], [-0.00504341721534729, 0.06129471957683563, -1.0241185426712036], [0.437289297580719, -0.06156954541802406, -0.9219886660575867], [0.7920035719871521, 0.06098949536681175, -0.6366959810256958], [0.9908595681190491, -0.06175928935408592, -0.22585000097751617], [0.9924551844596863, 0.0609518401324749, 0.23028059303760529], [0.7984917163848877, -0.061637137085199356, 0.6402497291564941], [0.4453684985637665, 0.061210136860609055, 0.9239609241485596], [0.00504341721534729, -0.06129469349980354, 1.0241185426712036], [-0.4372892379760742, 0.061569564044475555, 0.9219887852668762], [-0.7920035719871521, -0.060989461839199066, 0.6366960406303406], [0.005093127489089966, -1.177548885345459, -0.002782404189929366]];
+		var faces = [[0, 3, 2, 1], [1, 14, 13, 0], [12, 11, 0, 13], [10, 9, 0, 11], [8, 7, 0, 9], [6, 5, 0, 7], [4, 3, 0, 5], [10, 11, 12, 15], [14, 15, 12, 13], [2, 15, 14, 1], [2, 3, 4, 15], [4, 5, 6, 15], [6, 7, 8, 15], [8, 9, 10, 15]];
+		geom.cannon_shape = this.create_geom2(vertices, faces, radius * 0.85);
+		return geom;
+	}
+
+	create_d16_geometry(radius, scopedScale) {
+		let geom = this.load_geometry("d16",scopedScale);
+
+		var vertices = [[-1.0301814079284668, 0.002833150327205658, 1.0244150161743164], [-0.0018179342150688171, -0.006610371172428131, -1.4427297115325928], [1.4587815999984741, 0.0028328225016593933, -0.006545569747686386], [1.031739592552185, 0.0028328821063041687, -1.0375059843063354], [-1.4572231769561768, 0.0028332099318504333, -0.006545361131429672], [-1.0301814079284668, 0.002833150327205658, -1.0375059843063354], [1.031739592552185, 0.0028328821063041687, 1.0244150161743164], [-0.0018179342150688171, -0.006610371172428131, 1.4732751846313477], [0.0007793977856636047, 1.4608354568481445, -0.006545450538396835], [-0.0018181726336479187, -1.4646127223968506, 0.015272742137312889]];
+		var faces = [[5, 8, 1], [5, 4, 8], [4, 0, 8], [0, 7, 8], [8, 7, 6], [8, 6, 2], [2, 3, 8], [3, 1, 8], [3, 9, 1], [2, 9, 3], [6, 9, 2], [6, 7, 9], [0, 9, 7], [4, 9, 0], [5, 9, 4], [5, 1, 9]];
+		geom.cannon_shape = this.create_geom2(vertices, faces, radius * 0.83);
+		return geom;
+	}
+
 	create_d20_geometry(radius, scopedScale) {
-		
 		let geom = this.load_geometry("d20",scopedScale);
 
 		var t = (1 + Math.sqrt(5)) / 2;
@@ -1212,6 +1249,24 @@ export class DiceFactory {
 				[3, 9, 4, 11], [3, 4, 2, 12], [3, 2, 6, 13], [3, 6, 8, 14], [3, 8, 9, 15],
 				[4, 9, 5, 16], [2, 4, 11, 17], [6, 2, 10, 18], [8, 6, 7, 19], [9, 8, 1, 20]];
 		geom.cannon_shape = this.create_geom(vertices, faces, radius);
+		return geom;
+	}
+
+	create_d24_geometry(radius, scopedScale) {
+		let geom = this.load_geometry("d24",scopedScale);
+
+		var vertices = [[0.7070000171661377, -0.0, -0.7070000171661377], [0.7070000171661377, 0.7070000171661377, -0.0], [0.5468999743461609, 0.5468999743461609, -0.5468999743461609], [-0.0, -0.7070000171661377, -0.7070000171661377], [-0.0, 0.7070000171661377, -0.7070000171661377], [-0.5468999743461609, 0.5468999743461609, -0.5468999743461609], [-0.5468999743461609, -0.5468999743461609, -0.5468999743461609], [0.5468999743461609, 0.5468999743461609, 0.5468999743461609], [-0.0, -0.0, -1.0], [1.0, -0.0, -0.0], [0.5468999743461609, -0.5468999743461609, -0.5468999743461609], [-0.5468999743461609, 0.5468999743461609, 0.5468999743461609], [-0.0, -0.0, 1.0], [-0.0, 0.7070000171661377, 0.7070000171661377], [-0.0, 1.0, -0.0], [-0.7070000171661377, 0.7070000171661377, -0.0], [-0.7070000171661377, -0.0, -0.7070000171661377], [-0.7070000171661377, -0.7070000171661377, -0.0], [-0.0, -0.7070000171661377, 0.7070000171661377], [-0.5468999743461609, -0.5468999743461609, 0.5468999743461609], [-1.0, 0.0, -0.0], [0.5468999743461609, -0.5468999743461609, 0.5468999743461609], [0.7070000171661377, -0.0, 0.7070000171661377], [-0.0, -1.0, -0.0], [0.7070000171661377, -0.7070000171661377, -0.0], [-0.7070000171661377, -0.0, 0.7070000171661377]];
+		var faces = [[4, 5, 15, 14], [3, 10, 24, 23], [11, 15, 20, 25], [10, 3, 8, 0], [19, 18, 12, 25], [7, 22, 9, 1], [22, 21, 24, 9], [7, 13, 12, 22], [5, 4, 8, 16], [20, 17, 19, 25], [6, 3, 23, 17], [2, 4, 14, 1], [18, 19, 17, 23], [13, 7, 1, 14], [0, 2, 1, 9], [18, 21, 22, 12], [3, 6, 16, 8], [15, 5, 16, 20], [6, 17, 20, 16], [4, 2, 0, 8], [13, 11, 25, 12], [24, 10, 0, 9], [11, 13, 14, 15], [21, 18, 23, 24]];
+		geom.cannon_shape = this.create_geom(vertices, faces, radius);
+		return geom;
+	}
+
+	create_d30_geometry(radius, scopedScale) {
+		let geom = this.load_geometry("d30",scopedScale);
+
+		var vertices = [[-1.6180000305175781, 0.0, 1.0], [-1.6180000305175781, 0.6179999709129333, -0.0], [-0.0, 1.6180000305175781, 0.6179999709129333], [0.6179999709129333, 0.0, 1.6180000305175781], [-1.0, -1.6180000305175781, -0.0], [1.6180000305175781, 0.0, 1.0], [-1.6180000305175781, -0.6179999709129333, -0.0], [-0.6179999709129333, 0.0, 1.6180000305175781], [-0.0, 1.0, -1.6180000305175781], [-1.0, 1.0, -1.0], [1.6180000305175781, 0.6179999709129333, -0.0], [1.0, -1.6180000305175781, -0.0], [-1.0, -1.0, -1.0], [1.6180000305175781, -0.6179999709129333, -0.0], [-1.0, 1.6180000305175781, -0.0], [1.0, 1.0, -1.0], [1.0, 1.6180000305175781, -0.0], [-0.0, 1.0, 1.6180000305175781], [1.0, -1.0, -1.0], [-0.6179999709129333, 0.0, -1.6180000305175781], [-0.0, -1.0, -1.6180000305175781], [-1.0, 1.0, 1.0], [0.6179999709129333, 0.0, -1.6180000305175781], [-0.0, -1.0, 1.6180000305175781], [-1.0, -1.0, 1.0], [-0.0, 1.6180000305175781, 0.6179999709129333], [-1.6180000305175781, 0.0, -1.0], [1.0, 1.0, 1.0], [-0.0, -1.6180000305175781, -0.6179999709129333], [1.6180000305175781, 0.0, -1.0], [1.0, -1.0, 1.0], [-0.0, 1.6180000305175781, -0.6179999709129333], [-0.0, -1.6180000305175781, 0.6179999709129333]];
+		var faces = [[25, 16, 31, 14], [7, 0, 24, 23], [19, 20, 12, 26], [13, 5, 30, 11], [1, 0, 21, 14], [10, 29, 15, 16], [6, 0, 1, 26], [22, 29, 18, 20], [9, 14, 31, 8], [28, 4, 12, 20], [30, 5, 3, 23], [12, 4, 6, 26], [31, 16, 15, 8], [21, 17, 25, 14], [22, 20, 19, 8], [3, 17, 7, 23], [18, 11, 28, 20], [32, 23, 24, 4], [27, 5, 10, 16], [9, 8, 19, 26], [25, 17, 27, 16], [30, 23, 32, 11], [7, 17, 21, 0], [10, 5, 13, 29], [24, 0, 6, 4], [13, 11, 18, 29], [9, 26, 1, 14], [3, 5, 27, 17], [15, 29, 22, 8], [28, 11, 32, 4]];
+		geom.cannon_shape = this.create_geom2(vertices, faces, radius);
 		return geom;
 	}
 
@@ -1233,6 +1288,27 @@ export class DiceFactory {
 			vectors[i] = (new THREE.Vector3).fromArray(vertices[i]).normalize();
 		}
 		let cannon_shape = this.create_shape(vectors, faces, radius);
+		return cannon_shape;
+	}
+
+	create_shape2(vertices, faces, radius) {
+		var cv = new Array(vertices.length), cf = new Array(faces.length);
+		for (var i = 0; i < vertices.length; ++i) {
+			var v = vertices[i];
+			cv[i] = new CANNON.Vec3(v.x * radius, v.y * radius, v.z * radius);
+		}
+		for (var i = 0; i < faces.length; ++i) {
+			cf[i] = faces[i];//.slice(0, faces[i].length - 1);
+		}
+		return new CANNON.ConvexPolyhedron(cv, cf);
+	}
+
+	create_geom2(vertices, faces, radius) {
+		var vectors = new Array(vertices.length);
+		for (var i = 0; i < vertices.length; ++i) {
+			vectors[i] = (new THREE.Vector3).fromArray(vertices[i]).normalize();
+		}
+		let cannon_shape = this.create_shape2(vectors, faces, radius);
 		return cannon_shape;
 	}
 }
