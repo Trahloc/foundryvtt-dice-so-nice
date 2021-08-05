@@ -1087,6 +1087,9 @@ export class DiceBox {
 		this.last_time = 0;
 		if (this.selector.animate) {
 			this.container.style.opacity = 0;
+			this.last_time = window.performance.now();
+			this.start_time = this.last_time;
+			this.framerate = 1000 / 60;
 			canvas.app.ticker.remove(this.animateSelector, this);
 			canvas.app.ticker.add(this.animateSelector, this);
 		}
@@ -1100,24 +1103,23 @@ export class DiceBox {
 
 	animateSelector() {
 		this.animstate = 'selector';
-		let time = (new Date()).getTime();
-		let time_diff = (time - this.last_time) / 1000;
-		if (time_diff > 3) time_diff = this.framerate;
+		let now = window.performance.now();
+		let elapsed = now - this.last_time;
+		if(elapsed > this.framerate){
+			this.last_time = now - (elapsed % this.framerate);
 
-		if (this.container.style.opacity != '1') this.container.style.opacity = Math.min(1, (parseFloat(this.container.style.opacity) + 0.05));
+			if (this.container.style.opacity != '1') this.container.style.opacity = Math.min(1, (parseFloat(this.container.style.opacity) + 0.05));
 
-		if (this.selector.rotate) {
-			let angle_change = 0.005 * Math.PI;
-			for (let i = 0; i < this.diceList.length; i++) {
-				this.diceList[i].rotation.y += angle_change;
-				this.diceList[i].rotation.x += angle_change / 4;
-				this.diceList[i].rotation.z += angle_change / 10;
+			if (this.selector.rotate) {
+				let angle_change = 0.005 * Math.PI;
+				for (let i = 0; i < this.diceList.length; i++) {
+					this.diceList[i].rotation.y += angle_change;
+					this.diceList[i].rotation.x += angle_change / 4;
+					this.diceList[i].rotation.z += angle_change / 10;
+				}
 			}
+			this.renderer.render(this.scene, this.camera);
 		}
-
-		this.last_time = time;
-		this.renderer.render(this.scene, this.camera);
-
 	}
 
 	//used to debug cannon shape vs three shape
