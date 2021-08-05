@@ -1117,7 +1117,7 @@ export class DiceBox {
 			this.last_time = window.performance.now();
 			this.start_time = this.last_time;
 			this.framerate = 1000 / 60;
-            this.removeTicker(this.animateSelector);
+			this.removeTicker(this.animateSelector);
 			canvas.app.ticker.add(this.animateSelector, this);
 		}
 		else this.renderer.render(this.scene, this.camera);
