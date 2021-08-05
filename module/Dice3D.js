@@ -13,6 +13,7 @@ import { Utils } from './Utils.js';
     static get DEFAULT_OPTIONS() {
         return {
             enabled: true,
+            showExtraDice:false,
             hideAfterRoll: true,
             timeBeforeHide: 2000,
             hideFX: 'fadeOut',
@@ -250,9 +251,7 @@ import { Utils } from './Utils.js';
         else {
             $("#board").after(this.canvas);
         }
-        this.currentCanvasPosition = Dice3D.CONFIG.canvasZIndex;
-        this.currentBumpMapping = Dice3D.CONFIG.bumpMapping;
-        this.currentUseHighDPI = Dice3D.CONFIG.useHighDPI;
+        this.currentConfig = duplicate(Dice3D.CONFIG);
         this._resizeCanvas();
     }
 

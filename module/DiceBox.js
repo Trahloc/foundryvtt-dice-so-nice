@@ -86,6 +86,7 @@ export class DiceBox {
 			intersected: null,
 			dice: []
 		};
+		this.showExtraDice = false;
 
 		this.colors = {
 			ambient: 0xffffff,
@@ -148,6 +149,7 @@ export class DiceBox {
 			this.volume = this.config.soundsVolume;
 			this.soundsSurface = this.config.soundsSurface;
 			this.shadows = this.config.shadowQuality != "none";
+			this.showExtraDice = this.config.showExtraDice;
 
 			this.allowInteractivity = this.config.boxType == "board" && game.settings.get("dice-so-nice", "allowInteractivity");
 
@@ -376,6 +378,7 @@ export class DiceBox {
 	}
 
 	async update(config) {
+		this.showExtraDice = config.showExtraDice;
 		if (config.autoscale) {
 			this.display.scale = Math.sqrt(this.display.containerWidth * this.display.containerWidth + this.display.containerHeight * this.display.containerHeight) / 13;
 		} else {
@@ -962,6 +965,9 @@ export class DiceBox {
 		
 		if(this.config.boxType == "board"){
 			DiceSFXManager.clearQueue();
+			this.removeTicker(this.animateThrow);
+		} else {
+			this.removeTicker(this.animateSelector);
 		}
 		this.renderer.render(this.scene, this.camera);
 		this.isVisible = false;
@@ -976,6 +982,10 @@ export class DiceBox {
 		if (this.shadows) {
 			this.light.shadow.map.dispose();
 		}
+		if(this.config.boxType == "board")
+			this.removeTicker(this.animateThrow);
+		else 
+			this.removeTicker(this.animateSelector);
 	}
 
 	//Allow to remove an handler from a PIXI ticker even when the context changed.
@@ -1060,8 +1070,9 @@ export class DiceBox {
 		this.clearAll();
 
 		let selectordice = this.dicefactory.systems.standard.dice.map(dice => dice.type);
-		//remove the useless d3 and d5
-		selectordice = selectordice.filter((die) => die !== "d3" && die !== "d5");
+		const extraDiceTypes = ["d3","d5","d7","d14","d16","d24","d30"];
+		if(!this.showExtraDice)
+			selectordice = selectordice.filter((die) => !extraDiceTypes.includes(die));
 		
 		let proportion = this.display.containerWidth / this.display.containerHeight;
 		let columns = Math.min(selectordice.length, Math.round(Math.sqrt(proportion * selectordice.length)));

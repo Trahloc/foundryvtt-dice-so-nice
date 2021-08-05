@@ -6,7 +6,9 @@ import { Utils } from './Utils.js';
  * Registers the exposed settings for the various 3D dice options.
  */
 Hooks.once('init', () => {
-    const debouncedReload = foundry.utils.debounce(window.location.reload, 100);
+    const debouncedReload = foundry.utils.debounce(() => {
+        window.location.reload();
+    }, 100);
     game.settings.registerMenu("dice-so-nice", "dice-so-nice", {
         name: "DICESONICE.config",
         label: "DICESONICE.configTitle",
@@ -24,7 +26,11 @@ Hooks.once('init', () => {
         config: false,
         onChange: settings => {
             if (game.dice3d) {
-                if ((game.dice3d.currentCanvasPosition != settings.canvasZIndex) || (game.dice3d.currentBumpMapping != settings.bumpMapping) || (game.dice3d.currentUseHighDPI != settings.useHighDPI))
+                if (
+                    (game.dice3d.currentConfig.canvasZIndex != settings.canvasZIndex) || 
+                    (game.dice3d.currentConfig.bumpMapping != settings.bumpMapping) || 
+                    (game.dice3d.currentConfig.useHighDPI != settings.useHighDPI)
+                )
                     debouncedReload();
                 else
                     game.dice3d.update(settings);

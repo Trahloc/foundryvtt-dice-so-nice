@@ -240,6 +240,9 @@ export class DiceConfig extends FormApplication {
         select2dsn.call($(this.element).find("[data-sfx-result]"), this.select2Options);
 
         if(!this.reset){
+            $(this.element).on("change", "[data-showExtraDice]", (ev) => {
+                this.onApply(ev);
+            });
 
             $(this.element).on("change", "[data-hideAfterRoll]", (ev) => {
                 this.toggleHideAfterRoll(ev);
@@ -826,6 +829,7 @@ export class DiceConfig extends FormApplication {
             sounds: $('[data-sounds]').is(':checked'),
             throwingForce: $('[data-throwingForce]').val(),
             useHighDPI: $('[data-useHighDPI]').is(':checked'),
+            showExtraDice: $('[data-showExtraDice]').is(':checked'),
             appearance: {}
         };
         $(this.element).find('.tabAppearance').each((index, element) => {
