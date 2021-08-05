@@ -908,7 +908,7 @@ export class DiceBox {
 					this.callback = null;
 					this.throws = null;
 					if (!this.animatedDiceDetected && !(this.allowInteractivity && (this.deadDiceList.length + this.diceList.length)>0) && !DiceSFXManager.renderQueue.length)
-						canvas.app.ticker.remove(this.animateThrow, this);
+						this.removeTicker(this.animateThrow);
 				});
 			}
 			this.running = false;
@@ -978,6 +978,33 @@ export class DiceBox {
 		}
 	}
 
+	//Allow to remove an handler from a PIXI ticker even when the context changed.
+	removeTicker(fn){
+		let ticker = canvas.app.ticker;
+		let listener = ticker._head.next;
+
+        while (listener)
+        {
+            // We found a match, lets remove it
+            // no break to delete all possible matches
+            // incase a listener was added 2+ times
+            if (listener.fn === fn)
+            {
+                listener = listener.destroy();
+            }
+            else
+            {
+                listener = listener.next;
+            }
+        }
+
+        if (!ticker._head.next)
+        {
+            ticker._cancelIfNeeded();
+        }
+        return ticker;
+	}
+
 	rollDice(throws, callback) {
 
 		this.camera.position.z = this.cameraHeight.far;
@@ -1025,7 +1052,7 @@ export class DiceBox {
 		this.last_time = 0;
 		this.callback = callback;
 		this.throws = throws;
-		canvas.app.ticker.remove(this.animateThrow, this);
+		this.removeTicker(this.animateThrow);
 		canvas.app.ticker.add(this.animateThrow, this);
 	}
 
@@ -1090,7 +1117,7 @@ export class DiceBox {
 			this.last_time = window.performance.now();
 			this.start_time = this.last_time;
 			this.framerate = 1000 / 60;
-			canvas.app.ticker.remove(this.animateSelector, this);
+            this.removeTicker(this.animateSelector);
 			canvas.app.ticker.add(this.animateSelector, this);
 		}
 		else this.renderer.render(this.scene, this.camera);
