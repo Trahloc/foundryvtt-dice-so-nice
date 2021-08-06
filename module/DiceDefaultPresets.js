@@ -97,12 +97,52 @@ diceobj.inertia = 8;
 diceobj.scale = 0.9;
 BASE_PRESETS_LIST.push(diceobj);
 
+diceobj = new DicePreset('d14');
+diceobj.setLabels(['1','2','3','4','5','6','7','8','9','10','11','12', '13', '14']);
+diceobj.setValues(1,14);
+diceobj.mass = 450;
+diceobj.inertia = 8;
+diceobj.scale = 1;
+BASE_PRESETS_LIST.push(diceobj);
+
+diceobj = new DicePreset('d7','d14');
+diceobj.setLabels(['1','2','3','4','5','6','7','1','2','3', '4', '5', '6', '7']);
+diceobj.setValues(1,7);
+diceobj.mass = 450;
+diceobj.inertia = 8;
+diceobj.scale = 1;
+BASE_PRESETS_LIST.push(diceobj);
+
+diceobj = new DicePreset('d16');
+diceobj.setLabels(['1','2','3','4','5','6','7','8','9','10','11','12', '13', '14', '15', '16']);
+diceobj.setValues(1,16);
+diceobj.mass = 450;
+diceobj.inertia = 8;
+diceobj.scale = 1;
+BASE_PRESETS_LIST.push(diceobj);
+
 diceobj = new DicePreset('d20');
 diceobj.setLabels(['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20']);
 diceobj.setValues(1,20);
 diceobj.mass = 500;
 diceobj.scale = 1;
 diceobj.inertia = 6;
+BASE_PRESETS_LIST.push(diceobj);
+
+diceobj = new DicePreset('d24');
+diceobj.setLabels(['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20', '21', '22', '23', '24']);
+diceobj.setValues(1,24);
+diceobj.mass = 500;
+diceobj.scale = 1;
+diceobj.inertia = 10;
+BASE_PRESETS_LIST.push(diceobj);
+
+diceobj = new DicePreset('d30');
+diceobj.setLabels(['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30']);
+diceobj.setValues(1,30);
+diceobj.mass = 500;
+diceobj.scale = 1;
+diceobj.inertia = 10;
 BASE_PRESETS_LIST.push(diceobj);
 
 //////////////////////////////////////////////////

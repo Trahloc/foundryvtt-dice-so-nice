@@ -13,6 +13,7 @@ import { Utils } from './Utils.js';
     static get DEFAULT_OPTIONS() {
         return {
             enabled: true,
+            showExtraDice:false,
             hideAfterRoll: true,
             timeBeforeHide: 2000,
             hideFX: 'fadeOut',
@@ -27,7 +28,9 @@ import { Utils } from './Utils.js';
             canvasZIndex: 'over',
             throwingForce: 'medium',
             useHighDPI: true,
-            showOthersSFX: true
+            showOthersSFX: true,
+            muteSoundSecretRolls:false,
+            enableFlavorColorset:true
         };
     }
 
@@ -54,8 +57,9 @@ import { Utils } from './Utils.js';
         return options;
     }
 
-    static get CONFIG() {
-        let config = mergeObject(Dice3D.DEFAULT_OPTIONS, game.settings.get("dice-so-nice", "settings"));
+    static CONFIG(user = game.user) {
+        let userSettings = user.getFlag("dice-so-nice", "settings") ? duplicate(user.getFlag("dice-so-nice", "settings")) : null;
+        let config = mergeObject(Dice3D.DEFAULT_OPTIONS, userSettings);
         mergeObject(config, { "-=appearance": null, "-=sfxLine": null });
         return config;
     }
@@ -67,7 +71,7 @@ import { Utils } from './Utils.js';
     }
 
     static SFX(user = game.user) {
-        if (Dice3D.CONFIG.showOthersSFX || user.id == game.user.id)
+        if (Dice3D.CONFIG().showOthersSFX || user.id == game.user.id)
             return user.getFlag("dice-so-nice", "sfxList") ? duplicate(user.getFlag("dice-so-nice", "sfxList")) : [];
         else
             return [];
@@ -98,7 +102,7 @@ import { Utils } from './Utils.js';
     }
 
     static ALL_CONFIG(user = game.user) {
-        let ret = mergeObject(Dice3D.CONFIG, { appearance: Dice3D.APPEARANCE(user) });
+        let ret = mergeObject(Dice3D.CONFIG(user), { appearance: Dice3D.APPEARANCE(user) });
         ret.specialEffects = Dice3D.SFX(user);
         return ret;
     }
@@ -243,16 +247,13 @@ import { Utils } from './Utils.js';
      */
     _buildCanvas() {
         this.canvas = $('<div id="dice-box-canvas" style="position: absolute; left: 0; top: 0;pointer-events: none;"></div>');
-        if (Dice3D.CONFIG.canvasZIndex == "over") {
+        if (Dice3D.CONFIG().canvasZIndex == "over") {
             this.canvas.css("z-index", 1000);
             this.canvas.appendTo($('body'));
         }
         else {
             $("#board").after(this.canvas);
         }
-        this.currentCanvasPosition = Dice3D.CONFIG.canvasZIndex;
-        this.currentBumpMapping = Dice3D.CONFIG.bumpMapping;
-        this.currentUseHighDPI = Dice3D.CONFIG.useHighDPI;
         this._resizeCanvas();
     }
 
@@ -311,7 +312,7 @@ import { Utils } from './Utils.js';
                         this.show(request.data, game.users.get(request.user));
                     break;
                 case "update":
-                    if (request.user == game.user.id || Dice3D.CONFIG.showOthersSFX)
+                    if (request.user == game.user.id || Dice3D.CONFIG().showOthersSFX)
                         DiceSFXManager.init();
                     if (request.user != game.user.id) {
                         this.DiceFactory.preloadPresets(false, request.user);
@@ -351,7 +352,7 @@ import { Utils } from './Utils.js';
         if (hit)
             this._beforeShow();
         else {
-            const config = Dice3D.CONFIG;
+            const config = Dice3D.CONFIG();
             if (!config.hideAfterRoll && this.canvas.is(":visible") && !this.box.rolling) {
                 this.canvas.hide();
                 this.box.clearAll();
@@ -426,7 +427,7 @@ import { Utils } from './Utils.js';
      */
     isEnabled() {
         let combatEnabled = (!game.combat || !game.combat.started) || (game.combat && game.combat.started && !game.settings.get("dice-so-nice", "disabledDuringCombat"));
-        return Dice3D.CONFIG.enabled && combatEnabled;
+        return Dice3D.CONFIG().enabled && combatEnabled;
     }
 
     /**
@@ -469,9 +470,17 @@ import { Utils } from './Utils.js';
                 return Promise.resolve(false);
             }
         }
-        Hooks.callAll("diceSoNiceRollStart", messageID, context);
+        let chatMessage = game.messages.get(messageID);
+        if(chatMessage){
+            if(chatMessage.data.whisper.length > 0)
+                context.roll.secret = true;
+            if(!chatMessage.isContentVisible)
+                context.roll.ghost = true;
+        }
+        
 
-        let notation = new DiceNotation(context.roll);
+        Hooks.callAll("diceSoNiceRollStart", messageID, context);
+        let notation = new DiceNotation(context.roll, Dice3D.ALL_CONFIG(user));
         return this.show(notation, context.user, synchronize, context.users, context.blind);
     }
 
@@ -583,18 +592,18 @@ import { Utils } from './Utils.js';
      * @private
      */
     _afterShow() {
-        if (Dice3D.CONFIG.hideAfterRoll) {
+        if (Dice3D.CONFIG().hideAfterRoll) {
             if (DiceSFXManager.renderQueue.length) {
                 clearTimeout(this.timeoutHandle);
                 return;
             } else {
                 this.timeoutHandle = setTimeout(() => {
                     if (!this.box.rolling) {
-                        if (Dice3D.CONFIG.hideFX === 'none') {
+                        if (Dice3D.CONFIG().hideFX === 'none') {
                             this.canvas.hide();
                             this.box.clearAll();
                         }
-                        if (Dice3D.CONFIG.hideFX === 'fadeOut') {
+                        if (Dice3D.CONFIG().hideFX === 'fadeOut') {
                             this.canvas.fadeOut({
                                 duration: 1000,
                                 complete: () => {
@@ -606,7 +615,7 @@ import { Utils } from './Utils.js';
                             });
                         }
                     }
-                }, Dice3D.CONFIG.timeBeforeHide);
+                }, Dice3D.CONFIG().timeBeforeHide);
             }
         }
     }

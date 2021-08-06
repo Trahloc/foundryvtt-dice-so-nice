@@ -3,7 +3,7 @@ import { DiceBox } from './DiceBox.js';
 import { DiceSFXManager } from './DiceSFXManager.js';
 import { Utils } from './Utils.js';
 import { DiceNotation } from './DiceNotation.js';
-import {DiceColors, DICE_SCALE} from './DiceColors.js';
+import { DiceColors, DICE_SCALE } from './DiceColors.js';
 /**
  * Form application to configure settings of the 3D Dice.
  */
@@ -88,9 +88,9 @@ export class DiceConfig extends FormApplication {
         this.box = new DiceBox(this.canvas, game.dice3d.box.dicefactory, config);
         await this.box.initialize();
         if (!game.user.getFlag("dice-so-nice", "appearance")) {
-            if(this.box.dicefactory.preferredSystem != "standard")
+            if (this.box.dicefactory.preferredSystem != "standard")
                 config.appearance.global.system = this.box.dicefactory.preferredSystem;
-            if(this.box.dicefactory.preferredColorset != "standard")
+            if (this.box.dicefactory.preferredColorset != "standard")
                 config.appearance.global.colorset = this.box.dicefactory.preferredColorset;
         }
         this.box.showcase(config);
@@ -117,21 +117,21 @@ export class DiceConfig extends FormApplication {
         let specialEffectsList = [];
         let specialEffectsPromises = [];
         let specialEffects = Dice3D.SFX();
-        if(this.reset)
+        if (this.reset)
             specialEffects = [];
         this.triggerTypeList = [...triggerTypeList, ...DiceSFXManager.EXTRA_TRIGGER_TYPE];
         mergeObject(this.possibleResultList, DiceSFXManager.EXTRA_TRIGGER_RESULTS);
 
         //Filter out the SFX that are not registered
         if (specialEffects) {
-            let registeredTriggerTypes = triggerTypeList.map(trigger => trigger.id);
+            let registeredTriggerTypes = this.triggerTypeList.map(trigger => trigger.id);
             specialEffects = specialEffects.filter(sfx => registeredTriggerTypes.includes(sfx.diceType));
         }
 
         if (specialEffects) {
             specialEffects.forEach((sfx, index) => {
                 let sfxClass = DiceSFXManager.SFX_MODE_CLASS[sfx.specialEffect];
-                let dialogContent = sfxClass.getDialogContent(sfx,index);
+                let dialogContent = sfxClass.getDialogContent(sfx, index);
                 let hdbsTemplate = Handlebars.compile(dialogContent.content);
 
                 specialEffectsPromises.push(renderTemplate("modules/dice-so-nice/templates/partial-sfx.html", {
@@ -142,7 +142,7 @@ export class DiceConfig extends FormApplication {
                     specialEffectsMode: DiceSFXManager.SFX_MODE_LIST,
                     triggerTypeList: this.triggerTypeList,
                     possibleResultList: this.possibleResultList[sfx.diceType],
-                    options:hdbsTemplate(dialogContent.data)
+                    options: hdbsTemplate(dialogContent.data)
                 }).then((html) => {
                     specialEffectsList.push(html);
                 }));
@@ -239,7 +239,10 @@ export class DiceConfig extends FormApplication {
 
         select2dsn.call($(this.element).find("[data-sfx-result]"), this.select2Options);
 
-        if(!this.reset){
+        if (!this.reset) {
+            $(this.element).on("change", "[data-showExtraDice]", (ev) => {
+                this.onApply(ev);
+            });
 
             $(this.element).on("change", "[data-hideAfterRoll]", (ev) => {
                 this.toggleHideAfterRoll(ev);
@@ -296,10 +299,10 @@ export class DiceConfig extends FormApplication {
             });
 
             $(this.element).on("click", "[data-sfx-create]", (ev) => {
-                let ID =  $(this.element).find(".sfx-line").length;
+                let ID = $(this.element).find(".sfx-line").length;
                 let firstSFX = Object.keys(DiceSFXManager.SFX_MODE_LIST)[0];
                 let sfxClass = DiceSFXManager.SFX_MODE_CLASS[firstSFX];
-                let dialogContent = sfxClass.getDialogContent({},ID);
+                let dialogContent = sfxClass.getDialogContent({}, ID);
                 let hdbsTemplate = Handlebars.compile(dialogContent.content);
                 renderTemplate("modules/dice-so-nice/templates/partial-sfx.html", {
                     id: ID,
@@ -309,7 +312,7 @@ export class DiceConfig extends FormApplication {
                     specialEffectsMode: DiceSFXManager.SFX_MODE_LIST,
                     triggerTypeList: this.triggerTypeList,
                     possibleResultList: [],
-                    options:hdbsTemplate(dialogContent.data)
+                    options: hdbsTemplate(dialogContent.data)
                 }).then((html) => {
                     $(this.element).find("#sfxs-list").append(html);
                     select2dsn.call($("[data-sfx-result]"), this.select2Options);
@@ -331,7 +334,7 @@ export class DiceConfig extends FormApplication {
             $(this.element).on("click", "[data-sfx-options]", (ev) => {
                 let sfxLineOptions = $(ev.target).parents(".sfx-line").find("[data-sfx-hidden-options]");
 
-                if(sfxLineOptions.length<1)
+                if (sfxLineOptions.length < 1)
                     return;
 
                 let d = new Dialog({
@@ -385,11 +388,11 @@ export class DiceConfig extends FormApplication {
 
                 let ID = sfxLine.prevAll(".sfx-line").length;
                 let sfxClass = DiceSFXManager.SFX_MODE_CLASS[$(ev.target).val()];
-                let dialogContent = sfxClass.getDialogContent({},ID);
+                let dialogContent = sfxClass.getDialogContent({}, ID);
                 let hdbsTemplate = Handlebars.compile(dialogContent.content);
-                
+
                 sfxLine.find(".sfx-hidden [data-sfx-hidden-options]").html(hdbsTemplate(dialogContent.data));
-                for ( let fp of sfxLine.find(".sfx-hidden [data-sfx-hidden-options] button.file-picker") ) {
+                for (let fp of sfxLine.find(".sfx-hidden [data-sfx-hidden-options] button.file-picker")) {
                     fp.onclick = this._activateFilePicker.bind(this);
                 }
             });
@@ -622,7 +625,7 @@ export class DiceConfig extends FormApplication {
         let data = {
             appearance: game.user.getFlag("dice-so-nice", "appearance"),
             sfxList: game.user.getFlag("dice-so-nice", "sfxList"),
-            settings: game.settings.get("dice-so-nice", "settings")
+            settings: game.user.getFlag("dice-so-nice", "settings")
         };
 
         return JSON.stringify(data, null, 2);
@@ -654,13 +657,14 @@ export class DiceConfig extends FormApplication {
             await game.user.setFlag("dice-so-nice", "sfxList", data.sfxList);
         }
         if (data.settings) {
-            await game.settings.set("dice-so-nice", "settings", data.settings);
+            await game.user.unsetFlag("dice-so-nice", "settings");
+            await game.user.setFlag("dice-so-nice", "settings", data.settings);
         }
     }
 
     activateAppearanceTab(diceType) {
         let tabs = this._tabs[1];
-        if(tabs.active != diceType)
+        if (tabs.active != diceType)
             tabs.activate(diceType, { triggerCallback: true });
     }
 
@@ -695,7 +699,7 @@ export class DiceConfig extends FormApplication {
                         system: $(element).find('[data-system]').val(),
                     };
                     //disabled systems arent returned
-                    if(obj.system == null){
+                    if (obj.system == null) {
                         obj.system = this.currentGlobalAppearance.system;
                     }
                     appearanceArray.push(obj);
@@ -764,20 +768,20 @@ export class DiceConfig extends FormApplication {
                 let customizationElements = $(element).find('[data-colorset],[data-texture],[data-material],[data-font]');
                 if (system != "standard") {
                     let diceobj = this.box.dicefactory.systems[system].dice.find(obj => obj.type == diceType);
-                    if(diceobj){
+                    if (diceobj) {
                         let colorsetData = {};
-                        if(diceobj.colorset){
+                        if (diceobj.colorset) {
                             colorsetData = DiceColors.getColorSet(diceobj.colorset);
                         }
-                        customizationElements.each((index, el) =>{
+                        customizationElements.each((index, el) => {
                             let colorsetForce = false;
-                            if($(el).is("[data-colorset]") && !isObjectEmpty(colorsetData))
+                            if ($(el).is("[data-colorset]") && !isObjectEmpty(colorsetData))
                                 colorsetForce = true;
-                            else if($(el).is("[data-texture]") && !isObjectEmpty(colorsetData) && colorsetData.texture != "custom")
+                            else if ($(el).is("[data-texture]") && !isObjectEmpty(colorsetData) && colorsetData.texture != "custom")
                                 colorsetForce = true;
-                            else if($(el).is("[data-material]") && !isObjectEmpty(colorsetData) && colorsetData.material != "custom")
+                            else if ($(el).is("[data-material]") && !isObjectEmpty(colorsetData) && colorsetData.material != "custom")
                                 colorsetForce = true;
-                            else if($(el).is("[data-font]") && ((!isObjectEmpty(colorsetData) && colorsetData.font != "custom") || diceobj.font))
+                            else if ($(el).is("[data-font]") && ((!isObjectEmpty(colorsetData) && colorsetData.font != "custom") || diceobj.font))
                                 colorsetForce = true;
                             $(el).prop("disabled", diceobj.modelFile || colorsetForce);
                         });
@@ -801,7 +805,8 @@ export class DiceConfig extends FormApplication {
             let diceType = $(element).data("dicetype");
             if (diceType != "global") {
                 $(element).find("option").each((indexOpt, elementOpt) => {
-                    if (!this.box.dicefactory.systems[$(elementOpt).val()].dice.find(obj => obj.type == diceType))
+                    let model = this.box.dicefactory.systems["standard"].dice.find(obj => obj.type == diceType);
+                    if (!this.box.dicefactory.systems[$(elementOpt).val()].dice.find(obj => obj.type == diceType || (model && obj.shape == model.shape && obj.values.length == model.values.length)))
                         $(elementOpt).attr("disabled", "disabled");
                 });
             }
@@ -810,9 +815,9 @@ export class DiceConfig extends FormApplication {
 
     setPreferredOptions() {
         if (!game.user.getFlag("dice-so-nice", "appearance")) {
-            if(this.box.dicefactory.preferredSystem != "standard")
+            if (this.box.dicefactory.preferredSystem != "standard")
                 $(this.element).find('.tabAppearance[data-tab="global"] [data-system]').val(this.box.dicefactory.preferredSystem);
-            if(this.box.dicefactory.preferredColorset != "custom")
+            if (this.box.dicefactory.preferredColorset != "custom")
                 $(this.element).find('.tabAppearance[data-tab="global"] [data-colorset]').val(this.box.dicefactory.preferredColorset);
         }
     }
@@ -826,6 +831,9 @@ export class DiceConfig extends FormApplication {
             sounds: $('[data-sounds]').is(':checked'),
             throwingForce: $('[data-throwingForce]').val(),
             useHighDPI: $('[data-useHighDPI]').is(':checked'),
+            showExtraDice: $('[data-showExtraDice]').is(':checked'),
+            muteSoundSecretRolls: $('[data-muteSoundSecretRolls]').is(':checked'),
+            enableFlavorColorset: $('[data-enableFlavorColorset]').is(':checked'),
             appearance: {}
         };
         $(this.element).find('.tabAppearance').each((index, element) => {
@@ -856,9 +864,9 @@ export class DiceConfig extends FormApplication {
                 specialEffect: $(element).find('[data-sfx-specialeffect]').val(),
                 options: {}
             };
-            $(element).find("[data-sfx-hidden-options]").find("input,select").each((i,el) =>{
+            $(element).find("[data-sfx-hidden-options]").find("input,select").each((i, el) => {
                 let name = $(el).attr("name").match(/.*\[(.*)\]$/)[1];
-                if($(el).attr("type")=="checkbox")
+                if ($(el).attr("type") == "checkbox")
                     sfx.options[name] = $(el).prop("checked");
                 else
                     sfx.options[name] = $(el).val();
@@ -948,23 +956,33 @@ export class DiceConfig extends FormApplication {
                 }
             }
         }
+        let currentSettings = Dice3D.CONFIG();
 
         //required
         await game.user.unsetFlag("dice-so-nice", "sfxList");
         await game.user.unsetFlag("dice-so-nice", "appearance");
+        await game.user.unsetFlag("dice-so-nice", "settings");
 
 
         let appearance = mergeObject(Dice3D.APPEARANCE(), formData.appearance, { insertKeys: false, insertValues: false });
         delete formData.appearance;
-        let settings = mergeObject(Dice3D.CONFIG, formData, { insertKeys: false, insertValues: false });
+        let settings = mergeObject(Dice3D.CONFIG(), formData, { insertKeys: false, insertValues: false });
 
-        await game.settings.set('dice-so-nice', 'settings', settings);
+        await game.user.setFlag('dice-so-nice', 'settings', settings);
         await game.user.setFlag("dice-so-nice", "appearance", appearance);
         await game.user.setFlag("dice-so-nice", "sfxList", sfxLine);
 
         game.socket.emit("module.dice-so-nice", { type: "update", user: game.user.id });
         DiceSFXManager.init();
         ui.notifications.info(game.i18n.localize("DICESONICE.saveMessage"));
+
+        if ((currentSettings.canvasZIndex != settings.canvasZIndex) ||
+            (currentSettings.bumpMapping != settings.bumpMapping) ||
+            (currentSettings.useHighDPI != settings.useHighDPI)) {
+            window.location.reload();
+        }
+        else
+            this.box.update(settings);
     }
 
     close(options) {
@@ -977,6 +995,6 @@ export class DiceConfig extends FormApplication {
         this.sfxDialogList.forEach((dialog) => {
             dialog.close();
         });
-        await super._onSubmit(event,options);
+        await super._onSubmit(event, options);
     }
 }

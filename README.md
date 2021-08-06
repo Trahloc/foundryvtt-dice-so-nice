@@ -102,6 +102,8 @@ v2 of "Dice So Nice" based on Teal's fork from the awesome MajorVictory, with hi
 
 d10 Geometry created by Greewi who did all the maths for our custom "Pentagonal Trapezohedron". You can find his homebrewed (french) TTRPG Feerie/Solaires here: https://feerie.net
 
+d14, d16, d24 and d30 created and integrated by [Steve Barnett](https://gitlab.com/mooped). Huge thanks to him. He's a developer on the [DCC system](https://www.foundryvtt-hub.com/package/dcc/)
+
 Built on [ThreeJS](https://threejs.org/), [CannonJS](https://schteppe.github.io/cannon.js/) and [Proton](https://github.com/drawcall/three.proton)
 
 ## Theme and model credits:

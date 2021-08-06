@@ -12,7 +12,7 @@ export class PlaySoundCustom extends DiceSFX {
         if(options && options.path){
             AudioHelper.play({
                 src: options.path,
-                volume: this.box.volume
+                volume: this.volume
             }, false);
         }
     }

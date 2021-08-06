@@ -23,7 +23,7 @@ export class PlayAnimationDark extends DiceSFX {
         this.dicemesh.material = this.baseMaterial.clone();
         AudioHelper.play({
 			src: PlayAnimationDark.sound,
-            volume: this.box.volume
+            volume: this.volume
 		}, false);
         this.renderReady = true;
     }

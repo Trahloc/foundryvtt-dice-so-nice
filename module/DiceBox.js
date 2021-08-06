@@ -9,7 +9,7 @@ export class DiceBox {
 
 	constructor(element_container, dice_factory, config) {
 		//private variables
-		this.known_types = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd100'];
+		this.known_types = ['d4', 'd6', 'd8', 'd10', 'd12', 'd14', 'd16', 'd20', 'd24', 'd30', 'd100'];
 		this.container = element_container;
 		this.dimensions = config.dimensions;
 		this.dicefactory = dice_factory;
@@ -86,6 +86,8 @@ export class DiceBox {
 			intersected: null,
 			dice: []
 		};
+		this.showExtraDice = false;
+		this.muteSoundSecretRolls = false;
 
 		this.colors = {
 			ambient: 0xffffff,
@@ -148,6 +150,8 @@ export class DiceBox {
 			this.volume = this.config.soundsVolume;
 			this.soundsSurface = this.config.soundsSurface;
 			this.shadows = this.config.shadowQuality != "none";
+			this.showExtraDice = this.config.showExtraDice;
+			this.muteSoundSecretRolls = this.config.muteSoundSecretRolls;
 
 			this.allowInteractivity = this.config.boxType == "board" && game.settings.get("dice-so-nice", "allowInteractivity");
 
@@ -376,12 +380,16 @@ export class DiceBox {
 	}
 
 	async update(config) {
-		if (config.autoscale) {
-			this.display.scale = Math.sqrt(this.display.containerWidth * this.display.containerWidth + this.display.containerHeight * this.display.containerHeight) / 13;
-		} else {
-			this.display.scale = config.scale
+		this.showExtraDice = config.showExtraDice;
+		this.muteSoundSecretRolls = config.muteSoundSecretRolls;
+		if(this.config.boxType == "board"){
+			if (config.autoscale) {
+				this.display.scale = Math.sqrt(this.display.containerWidth * this.display.containerWidth + this.display.containerHeight * this.display.containerHeight) / 13;
+			} else {
+				this.display.scale = config.scale
+			}
+			this.dicefactory.setScale(this.display.scale);
 		}
-		this.dicefactory.setScale(this.display.scale);
 		this.dicefactory.setBumpMapping(config.bumpMapping);
 
 		let globalAnimationSpeed = game.settings.get("dice-so-nice", "globalAnimationSpeed");
@@ -519,9 +527,16 @@ export class DiceBox {
 			result = diceobj.valueMap[result];
 		}
 
+		// Make the last rolled dice and the DiceBox instance available for debugging
+		//CONFIG.DiceSoNice = {
+		//	dicemesh,
+		//	dicebox: this
+		//};
+
 		if (value == result) return;
 
 		let rotIndex = value > result ? result + "," + value : value + "," + result;
+		//console.log(`Needed ${result}, Rolled ${value}, Remap: ${rotIndex}`)
 		let rotationDegrees = DICE_MODELS[dicemesh.shape].rotationCombinations[rotIndex];
 		let eulerAngle = new THREE.Euler(THREE.MathUtils.degToRad(rotationDegrees[0]), THREE.MathUtils.degToRad(rotationDegrees[1]), THREE.MathUtils.degToRad(rotationDegrees[2]));
 		let quaternion = new THREE.Quaternion().setFromEuler(eulerAngle);
@@ -533,14 +548,54 @@ export class DiceBox {
 		dicemesh.resultReason = 'forced';
 	}
 
+  /*
+  // Apply an euler angle from rotationCombinations for debugging
+	swapTest(dicemesh, mapping, invert = false, revert = true) {
+
+		let rotationDegrees = DICE_MODELS[dicemesh.shape].rotationCombinations[mapping];
+		let eulerAngle = new THREE.Euler(THREE.MathUtils.degToRad(rotationDegrees[0]), THREE.MathUtils.degToRad(rotationDegrees[1]), THREE.MathUtils.degToRad(rotationDegrees[2]));
+		let quaternion = new THREE.Quaternion().setFromEuler(eulerAngle);
+		if (invert)
+			quaternion.invert();
+
+		dicemesh.applyQuaternion(quaternion);
+
+		if (revert) {
+			setTimeout(() => { this.swapTest(dicemesh, mapping, !invert, false) }, 2000 )
+		}
+
+		dicemesh.resultReason = 'forced';
+	}
+
+  // Apply an euler angle directly for debugging
+	swapTest(dicemesh, mapping, invert = false, revert = true) {
+	swapTestEuler(dicemesh, euler, invert = false, revert = true) {
+		let eulerAngle = new THREE.Euler(THREE.MathUtils.degToRad(euler[0]), THREE.MathUtils.degToRad(euler[1]), THREE.MathUtils.degToRad(euler[2]));
+		let quaternion = new THREE.Quaternion().setFromEuler(eulerAngle);
+		if (invert)
+			quaternion.invert();
+
+		dicemesh.applyQuaternion(quaternion);
+
+		if (revert) {
+			setTimeout(() => { this.swapTestEuler(dicemesh, euler, !invert, false) }, 2000 )
+		}
+
+		dicemesh.resultReason = 'forced';
+	}
+
+  // Extract the euler angle from a mesh in degrees for debugging
+	extractEuler(dicemesh) {
+		let euler = dicemesh.rotation
+		console.log("World Euler:", THREE.MathUtils.radToDeg(euler.x), THREE.MathUtils.radToDeg(euler.y), THREE.MathUtils.radToDeg(euler.z), euler.order)
+	}
+  */
+
 	//spawns one dicemesh object from a single vectordata object
 	spawnDice(dicedata, appearance) {
 		let vectordata = dicedata.vectors;
 		const diceobj = this.dicefactory.get(vectordata.type);
 		if (!diceobj) return;
-		
-
-		//TODO: Override dicedata.appearance with flavor
 
 		let dicemesh = this.dicefactory.create(this.renderer.scopedTextureCache, diceobj.type, appearance);
 		if (!dicemesh) return;
@@ -581,6 +636,7 @@ export class DiceBox {
 		//We add some informations about the dice to the CANNON body to be used in the collide event
 		dicemesh.body_sim.diceType = diceobj.type;
 		dicemesh.body_sim.diceMaterial = appearance.material;
+		dicemesh.body_sim.secretRoll = dicedata.options?.secret;
 
 		/*dicemesh.meshCannon = this.body2mesh(dicemesh.body_sim,true);
 
@@ -614,7 +670,6 @@ export class DiceBox {
 			save( new Blob( [ buffer ], { type: 'application/octet-stream' } ), filename );
 		}*/
 
-
 		let objectContainer = new THREE.Group();
 		objectContainer.add(dicemesh);
 
@@ -645,8 +700,9 @@ export class DiceBox {
 			let speed = body.velocity.length();
 			// also don't bother playing at low speeds
 			if (speed < 250) return;
-
 			let strength = Math.max(Math.min(speed / (550), 1), 0.2);
+			if(this.muteSoundSecretRolls && (body.secretRoll || target.secretRoll))
+				strength = 0;
 			let sound;
 
 			if (body.diceType != "dc") {
@@ -672,7 +728,8 @@ export class DiceBox {
 
 			let surface = this.soundsSurface;
 			let strength = Math.max(Math.min(speed / (500), 1), 0.2);
-
+			if(this.muteSoundSecretRolls && (body.secretRoll || target.secretRoll))
+				strength = 0;
 			let soundlist = this.sounds_table[surface];
 			let sound = soundlist[Math.floor(Math.random() * soundlist.length)];
 			if(this.animstate == "simulate"){
@@ -859,7 +916,7 @@ export class DiceBox {
 					this.callback = null;
 					this.throws = null;
 					if (!this.animatedDiceDetected && !(this.allowInteractivity && (this.deadDiceList.length + this.diceList.length)>0) && !DiceSFXManager.renderQueue.length)
-						canvas.app.ticker.remove(this.animateThrow, this);
+						this.removeTicker(this.animateThrow);
 				});
 			}
 			this.running = false;
@@ -913,6 +970,9 @@ export class DiceBox {
 		
 		if(this.config.boxType == "board"){
 			DiceSFXManager.clearQueue();
+			this.removeTicker(this.animateThrow);
+		} else {
+			this.removeTicker(this.animateSelector);
 		}
 		this.renderer.render(this.scene, this.camera);
 		this.isVisible = false;
@@ -927,6 +987,37 @@ export class DiceBox {
 		if (this.shadows) {
 			this.light.shadow.map.dispose();
 		}
+		if(this.config.boxType == "board")
+			this.removeTicker(this.animateThrow);
+		else 
+			this.removeTicker(this.animateSelector);
+	}
+
+	//Allow to remove an handler from a PIXI ticker even when the context changed.
+	removeTicker(fn){
+		let ticker = canvas.app.ticker;
+		let listener = ticker._head.next;
+
+        while (listener)
+        {
+            // We found a match, lets remove it
+            // no break to delete all possible matches
+            // incase a listener was added 2+ times
+            if (listener.fn === fn)
+            {
+                listener = listener.destroy();
+            }
+            else
+            {
+                listener = listener.next;
+            }
+        }
+
+        if (!ticker._head.next)
+        {
+            ticker._cancelIfNeeded();
+        }
+        return ticker;
 	}
 
 	rollDice(throws, callback) {
@@ -976,7 +1067,7 @@ export class DiceBox {
 		this.last_time = 0;
 		this.callback = callback;
 		this.throws = throws;
-		canvas.app.ticker.remove(this.animateThrow, this);
+		this.removeTicker(this.animateThrow);
 		canvas.app.ticker.add(this.animateThrow, this);
 	}
 
@@ -984,8 +1075,9 @@ export class DiceBox {
 		this.clearAll();
 
 		let selectordice = this.dicefactory.systems.standard.dice.map(dice => dice.type);
-		//remove the useless d3 and d5
-		selectordice = selectordice.filter((die) => die !== "d3" && die !== "d5");
+		const extraDiceTypes = ["d3","d5","d7","d14","d16","d24","d30"];
+		if(!this.showExtraDice)
+			selectordice = selectordice.filter((die) => !extraDiceTypes.includes(die));
 		
 		let proportion = this.display.containerWidth / this.display.containerHeight;
 		let columns = Math.min(selectordice.length, Math.round(Math.sqrt(proportion * selectordice.length)));
@@ -1038,7 +1130,10 @@ export class DiceBox {
 		this.last_time = 0;
 		if (this.selector.animate) {
 			this.container.style.opacity = 0;
-			canvas.app.ticker.remove(this.animateSelector, this);
+			this.last_time = window.performance.now();
+			this.start_time = this.last_time;
+			this.framerate = 1000 / 60;
+			this.removeTicker(this.animateSelector);
 			canvas.app.ticker.add(this.animateSelector, this);
 		}
 		else this.renderer.render(this.scene, this.camera);
@@ -1051,24 +1146,23 @@ export class DiceBox {
 
 	animateSelector() {
 		this.animstate = 'selector';
-		let time = (new Date()).getTime();
-		let time_diff = (time - this.last_time) / 1000;
-		if (time_diff > 3) time_diff = this.framerate;
+		let now = window.performance.now();
+		let elapsed = now - this.last_time;
+		if(elapsed > this.framerate){
+			this.last_time = now - (elapsed % this.framerate);
 
-		if (this.container.style.opacity != '1') this.container.style.opacity = Math.min(1, (parseFloat(this.container.style.opacity) + 0.05));
+			if (this.container.style.opacity != '1') this.container.style.opacity = Math.min(1, (parseFloat(this.container.style.opacity) + 0.05));
 
-		if (this.selector.rotate) {
-			let angle_change = 0.005 * Math.PI;
-			for (let i = 0; i < this.diceList.length; i++) {
-				this.diceList[i].rotation.y += angle_change;
-				this.diceList[i].rotation.x += angle_change / 4;
-				this.diceList[i].rotation.z += angle_change / 10;
+			if (this.selector.rotate) {
+				let angle_change = 0.005 * Math.PI;
+				for (let i = 0; i < this.diceList.length; i++) {
+					this.diceList[i].rotation.y += angle_change;
+					this.diceList[i].rotation.x += angle_change / 4;
+					this.diceList[i].rotation.z += angle_change / 10;
+				}
 			}
+			this.renderer.render(this.scene, this.camera);
 		}
-
-		this.last_time = time;
-		this.renderer.render(this.scene, this.camera);
-
 	}
 
 	//used to debug cannon shape vs three shape
@@ -1115,27 +1209,20 @@ export class DiceBox {
 					break;
 
 				case CANNON.Shape.types.CONVEXPOLYHEDRON:
-					var geo = new THREE.Geometry();
-
-					// Add vertices
-					for (var i = 0; i < shape.vertices.length; i++) {
-						var v = shape.vertices[i];
-						geo.vertices.push(new THREE.Vector3(v.x, v.y, v.z));
-					}
-
+					var geo = new THREE.BufferGeometry()
+					var points = []
 					for (var i = 0; i < shape.faces.length; i++) {
 						var face = shape.faces[i];
 
-						// add triangles
-						var a = face[0];
-						for (var j = 1; j < face.length - 1; j++) {
-							var b = face[j];
-							var c = face[j + 1];
-							geo.faces.push(new THREE.Face3(a, b, c));
+						for (var j = 0; j < face.length - 1; j++) {
+							var a = shape.vertices[face[j]];
+							var b = shape.vertices[face[j + 1]];
+							points.push(a);
+							points.push(b);
 						}
 					}
-					geo.computeBoundingSphere();
-					geo.computeFaceNormals();
+					geo.setFromPoints(points);
+					geo.computeVertexNormals();
 					mesh = new THREE.Mesh(geo, currentMaterial);
 					break;
 

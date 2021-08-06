@@ -75,7 +75,7 @@ export class PlayAnimationParticleVortex extends DiceSFX {
 
         AudioHelper.play({
             src: PlayAnimationParticleVortex.sound,
-            volume: this.box.volume
+            volume: this.volume
 		}, false);
         this.renderReady = true;
     }
