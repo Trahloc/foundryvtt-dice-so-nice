@@ -41,7 +41,7 @@ export class PlayAnimationParticleSpiral extends DiceSFX {
 
         AudioHelper.play({
             src: PlayAnimationParticleSpiral.sound,
-            volume: this.box.volume
+            volume: this.volume
 		}, false);
         this.renderReady = true;
         //Proton.Debug.drawZone(proton,scene,zone2);

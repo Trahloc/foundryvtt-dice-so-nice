@@ -65,7 +65,7 @@ export class PlayAnimationImpact extends DiceSFX {
         this.box.scene.add(this.plane);
         AudioHelper.play({
             src: PlayAnimationImpact.sound,
-            volume: this.box.volume
+            volume: this.volume
         }, false);
         this.dicemesh.position.z -= 1;
 

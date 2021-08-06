@@ -6,8 +6,9 @@ export class DiceNotation {
 	 * A roll object from Foundry 
 	 * @param {Roll} rolls 
 	 */
-	constructor(rolls) {
+	constructor(rolls, userConfig = null) {
 		this.throws = [{dice:[]}];
+		this.userConfig = userConfig;
 		
 		//First we need to prepare the data
 		rolls.dice.forEach(die => {
@@ -43,6 +44,12 @@ export class DiceNotation {
 					if(++diceNumber >= maxDiceNumber)
 						return true;
 					if(!die.results[i].hidden){
+						//ghost can't be secret
+						if(rolls.ghost)
+							die.options.ghost = true;
+						else if(rolls.secret)
+							die.options.secret = true;
+						
 						this.addDie(die, i);
 						if(die.faces == 100){
 							this.addDie(die, i, true);
@@ -87,6 +94,8 @@ export class DiceNotation {
 		dsnDie.vectors = [];
 		//Contains optionals flavor (core) and colorset (dsn) infos.
 		dsnDie.options = duplicate(fvttDie.options);
+		if(this.userConfig && !this.userConfig.enableFlavorColorset && dsnDie.options.flavor)
+			delete dsnDie.options.flavor;
 		this.throws[fvttDie.results[index].indexThrow].dice.push(dsnDie);
 	}
 
@@ -110,7 +119,7 @@ export class DiceNotation {
 				//dice
 				for(let k=0;k<mergedRollCommands[i][j].dice.length;k++){
 					let specialEffects = Object.values(sfxList).filter(sfx => {
-						return !mergedRollCommands[i][j].dice[k].discarded &&
+						return !mergedRollCommands[i][j].dice[k].discarded && !mergedRollCommands[i][j].dice[k].options.ghost &&
 						(((sfx.diceType != "d100" && sfx.diceType == mergedRollCommands[i][j].dice[k].type && sfx.onResult.includes(mergedRollCommands[i][j].dice[k].result.toString()))
 							|| 
 						(sfx.diceType == "d100" && mergedRollCommands[i][j].dice[k].d100Result && sfx.onResult.includes(mergedRollCommands[i][j].dice[k].d100Result.toString())))

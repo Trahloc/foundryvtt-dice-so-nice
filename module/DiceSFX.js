@@ -9,6 +9,7 @@ export class DiceSFX {
         this.destroyed = false;
         this.enableGC = false;
         this.renderReady = false;
+        this.volume = dicemesh.body_sim.secretRoll && box.muteSoundSecretRolls ? 0 : this.box.volume;
     }
 
     static async init(){

@@ -55,7 +55,7 @@ export class PlayAnimationParticleSparkles extends DiceSFX {
 
         AudioHelper.play({
             src: PlayAnimationParticleSparkles.sound,
-            volume: this.box.volume
+            volume: this.volume
 		}, false);
         this.renderReady = true;
     }

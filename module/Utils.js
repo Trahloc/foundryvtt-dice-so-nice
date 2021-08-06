@@ -10,6 +10,13 @@ import { DiceColors, TEXTURELIST, COLORSETS } from './DiceColors.js';
      */
     static async migrateOldSettings() {
 
+        //migrate settings to flags. This is a scoped migration, no GM needed
+        let userSettings = game.settings.get("dice-so-nice", "settings");
+        if(userSettings.hasOwnProperty("enabled")){
+            await game.user.setFlag("dice-so-nice", "settings", userSettings);
+            await game.settings.set("dice-so-nice","settings",{});
+        }
+
         let formatversion = game.settings.get("dice-so-nice", "formatVersion");
 
         if (formatversion == "" || formatversion != "4.1") { //Never updated or first install
@@ -60,7 +67,7 @@ import { DiceColors, TEXTURELIST, COLORSETS } from './DiceColors.js';
         
         if(formatversion == ""){
             //v1 to v2
-            let settings = game.settings.get("dice-so-nice", "settings");
+            let settings = duplicate(game.user.getFlag("dice-so-nice", "settings"));
             if (settings.diceColor || settings.labelColor) {
                 let newSettings = mergeObject(Dice3D.DEFAULT_OPTIONS, settings, { insertKeys: false, insertValues: false });
                 let appearance = mergeObject(Dice3D.DEFAULT_APPEARANCE(), settings, { insertKeys: false, insertValues: false });

@@ -44,7 +44,7 @@ export class PlayAnimationBright extends DiceSFX {
         }
         AudioHelper.play({
             src: PlayAnimationBright.sound,
-            volume: this.box.volume
+            volume: this.volume
 		}, false);
         this.renderReady = true;
     }

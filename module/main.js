@@ -18,24 +18,13 @@ Hooks.once('init', () => {
         restricted: false
     });
 
+    //Not used anymore but kept for compatibility with migration
     game.settings.register("dice-so-nice", "settings", {
         name: "3D Dice Settings",
         scope: "client",
-        default: Dice3D.DEFAULT_OPTIONS,
+        default: {},
         type: Object,
-        config: false,
-        onChange: settings => {
-            if (game.dice3d) {
-                if (
-                    (game.dice3d.currentConfig.canvasZIndex != settings.canvasZIndex) || 
-                    (game.dice3d.currentConfig.bumpMapping != settings.bumpMapping) || 
-                    (game.dice3d.currentConfig.useHighDPI != settings.useHighDPI)
-                )
-                    debouncedReload();
-                else
-                    game.dice3d.update(settings);
-            }
-        }
+        config: false
     });
 
     game.settings.register("dice-so-nice", "maxDiceNumber", {
@@ -158,6 +147,15 @@ Hooks.once('init', () => {
         onChange: debouncedReload
     });
 
+    game.settings.register("dice-so-nice", "showGhostDice", {
+        name: "DICESONICE.showGhostDice",
+        hint: "DICESONICE.showGhostDiceHint",
+        scope: "world",
+        type: Boolean,
+        default: false,
+        config: true
+    });
+
 });
 
 /**
@@ -180,8 +178,7 @@ Hooks.once('ready', () => {
 Hooks.on('createChatMessage', (chatMessage) => {
     //precheck for better perf
     let hasInlineRoll = game.settings.get("dice-so-nice", "animateInlineRoll") && chatMessage.data.content.indexOf('inline-roll') !== -1;
-    if ((!chatMessage.isRoll && !hasInlineRoll) ||
-        !chatMessage.isContentVisible ||
+    if ((!chatMessage.isRoll && !hasInlineRoll) || (!chatMessage.isContentVisible && !game.settings.get("dice-so-nice", "showGhostDice")) ||
         (game.view != "stream" && (!game.dice3d || game.dice3d.messageHookDisabled)) ||
         (chatMessage.getFlag("core", "RollTable") && !game.settings.get("dice-so-nice", "animateRollTable"))) {
         return;
@@ -210,7 +207,7 @@ Hooks.on('createChatMessage', (chatMessage) => {
         return;
 
     //Remove the chatmessage sound if it is the core dice sound.
-    if (Dice3D.CONFIG.sounds && chatMessage.data.sound == "sounds/dice.wav") {
+    if (Dice3D.CONFIG().sounds && chatMessage.data.sound == "sounds/dice.wav") {
         mergeObject(chatMessage.data, { "-=sound": null });
     }
     chatMessage._dice3danimating = true;

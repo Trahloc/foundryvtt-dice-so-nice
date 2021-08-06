@@ -208,7 +208,7 @@ export class DiceFactory {
 		let index = this.systems.standard.dice.findIndex(el => el.type == diceobj.type);
 
 		//If it exists in the standard system, and it was added there by the automated system, we want to override and load it
-		if(index>=0 && this.systems.standard.dice[index].internalAdd || diceobj.internalAdd){
+		if(index>=0 && (this.systems.standard.dice[index].internalAdd || diceobj.internalAdd)){
 			this.systems.standard.dice[index] = diceobj;
 			if(diceobj.modelFile){
 				diceobj.loadModel(this.loaderGLTF);
@@ -351,8 +351,9 @@ export class DiceFactory {
 	//Is called when trying to create a DicePreset by guessing its faces from the CONFIG entries
 	internalAddDicePreset(diceobj){
 		let shape = "d";
-		if(diceobj.faces == 3)
-			shape += "6";
+		let fakeShape = [3,5,7];
+		if(fakeShape.includes(diceobj.faces))
+			shape += (diceobj.faces*2);
 		else
 			shape += diceobj.faces;
 		let type = "d" + diceobj.constructor.DENOMINATION;
@@ -402,12 +403,18 @@ export class DiceFactory {
 	}
 
 	getPresetBySystem(type, system = "standard"){
+		let model = this.systems["standard"].dice.find(obj => obj.type == type);
 		let diceobj = null;
 		if(system != "standard"){
-			if(this.systems.hasOwnProperty(system))
-				diceobj = this.systems[system].dice.find(obj => obj.type == type);
+			if(this.systems.hasOwnProperty(system)){
+				diceobj = this.systems[system].dice.find(obj => obj.type == type && obj.shape == model.shape);
+				if(!diceobj){
+					//If it doesn't exist, we look for a similar shape and values
+					diceobj = this.systems[system].dice.find(obj => obj.shape == model.shape && obj.values.length == model.values.length);
+				}
+			}
 		}
-		//If not, or if it's the base system, load it
+
 		if(!diceobj){
 			diceobj = this.systems.standard.dice.find(obj => obj.type == type);
 		}
@@ -417,6 +424,9 @@ export class DiceFactory {
 	// returns a dicemesh (THREE.Mesh) object
 	create(scopedTextureCache, type, appearance) {
 		let diceobj = this.getPresetBySystem(type, appearance.system);
+		if(diceobj.model && appearance.isGhost){
+			diceobj = this.getPresetBySystem(type, "standard");
+		}
 		let scopedScale = scopedTextureCache.type == "board" ? this.baseScale : 60;
 		if (!diceobj) return null;
 		let dicemesh;
@@ -427,6 +437,7 @@ export class DiceFactory {
 			this.geometries[type+scopedScale] = geom;
 		}
 		if (!geom) return null;
+
 
 		if(diceobj.model){
 			dicemesh = diceobj.model.scene.children[0].clone();
@@ -657,7 +668,12 @@ export class DiceFactory {
 		if(Array.isArray(texture))
 			texture = texture[Math.floor(Math.random() * texture.length)];
 		
-		let text = labels[index];
+		let text;
+		if(materialData.isGhost)
+			text = "?";
+		else
+			text = labels[index];
+
 		let normal = diceobj.normals[index];
 		let isTexture = false;
 		let margin = 1.0;
@@ -943,6 +959,9 @@ export class DiceFactory {
 			if(dicenotation.options.appearance){
 				mergeObject(appearance, dicenotation.options.appearance);
 			}
+			if(dicenotation.options.ghost){
+				appearance.isGhost = true;
+			}
 		}
 		return appearance;
 	}
@@ -1080,8 +1099,10 @@ export class DiceFactory {
 		} else {
 			materialData.fontScale = colorsetData.fontScale;
 		}
-		
-		materialData.cacheString = materialData.background+materialData.foreground+materialData.outline+materialData.texture.name+materialData.edge+materialData.material+materialData.font;
+
+		materialData.isGhost = appearance.isGhost?appearance.isGhost:false;
+
+		materialData.cacheString = materialData.background+materialData.foreground+materialData.outline+materialData.texture.name+materialData.edge+materialData.material+materialData.font+materialData.isGhost;
 		return materialData;
 	}
 

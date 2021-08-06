@@ -48,6 +48,8 @@
     "DICESONICE.sounds" : "Effets sonores",
     "DICESONICE.soundsSurface" : "Surface de table pour les sons",
     "DICESONICE.soundsVolume": "Volume",
+    "DICESONICE.muteSoundSecretRolls": "Mettre en sourdine les jets cachés (GM/Blind/Self)",
+    "DICESONICE.enableFlavorColorset": "Remplacer l'apparence de vos dés lorsqu'un thème est donné par contexte. (ex: 1d20[acid])",
     "DICESONICE.system" : "Préréglages de dés (faces)",
     "DICESONICE.maxDiceNumber" : "Nombre maximum de dés",
     "DICESONICE.maxDiceNumberHint" : "Nombre maximum de dés affichés dans une animation. Des nombres plus élevés réduiront les performances",
@@ -78,6 +80,8 @@
     "DICESONICE.animateInlineRollHint" : "Quand possible, afficher les dés 3D dans un jet 'Inline' est détecté dans le chat.",
     "DICESONICE.allowInteractivity" : "Autoriser la manipulation des dés sur le plateau",
     "DICESONICE.allowInteractivityHint" : "Laisser les joueurs attraper les dés 3D une fois qu'ils sont sur le plateau (n'a pas d'effet sur les résultats).",
+    "DICESONICE.showGhostDice" : "Afficher un dé fantôme pour les jets cachés",
+    "DICESONICE.showGhostDiceHint" : "Quand possible, affiche un dé sans numéros aux joueurs lors d'un jet caché (MJ / Aveugle).",
     "DICESONICE.navAppearanceHint" : "(Cliquez sur un dé pour le modifier)",
 
     "DICESONICE.Add" : "Ajouter",

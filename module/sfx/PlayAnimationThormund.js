@@ -65,7 +65,7 @@ export class PlayAnimationThormund extends DiceSFX {
         this.box.scene.add(this.thormund);
         AudioHelper.play({
             src: PlayAnimationThormund.sound,
-            volume: this.box.volume
+            volume: this.volume
 		}, false);
         this.renderReady = true;
     }

@@ -87,6 +87,7 @@ export class DiceBox {
 			dice: []
 		};
 		this.showExtraDice = false;
+		this.muteSoundSecretRolls = false;
 
 		this.colors = {
 			ambient: 0xffffff,
@@ -150,6 +151,7 @@ export class DiceBox {
 			this.soundsSurface = this.config.soundsSurface;
 			this.shadows = this.config.shadowQuality != "none";
 			this.showExtraDice = this.config.showExtraDice;
+			this.muteSoundSecretRolls = this.config.muteSoundSecretRolls;
 
 			this.allowInteractivity = this.config.boxType == "board" && game.settings.get("dice-so-nice", "allowInteractivity");
 
@@ -379,12 +381,15 @@ export class DiceBox {
 
 	async update(config) {
 		this.showExtraDice = config.showExtraDice;
-		if (config.autoscale) {
-			this.display.scale = Math.sqrt(this.display.containerWidth * this.display.containerWidth + this.display.containerHeight * this.display.containerHeight) / 13;
-		} else {
-			this.display.scale = config.scale
+		this.muteSoundSecretRolls = config.muteSoundSecretRolls;
+		if(this.config.boxType == "board"){
+			if (config.autoscale) {
+				this.display.scale = Math.sqrt(this.display.containerWidth * this.display.containerWidth + this.display.containerHeight * this.display.containerHeight) / 13;
+			} else {
+				this.display.scale = config.scale
+			}
+			this.dicefactory.setScale(this.display.scale);
 		}
-		this.dicefactory.setScale(this.display.scale);
 		this.dicefactory.setBumpMapping(config.bumpMapping);
 
 		let globalAnimationSpeed = game.settings.get("dice-so-nice", "globalAnimationSpeed");
@@ -591,9 +596,6 @@ export class DiceBox {
 		let vectordata = dicedata.vectors;
 		const diceobj = this.dicefactory.get(vectordata.type);
 		if (!diceobj) return;
-		
-
-		//TODO: Override dicedata.appearance with flavor
 
 		let dicemesh = this.dicefactory.create(this.renderer.scopedTextureCache, diceobj.type, appearance);
 		if (!dicemesh) return;
@@ -634,6 +636,7 @@ export class DiceBox {
 		//We add some informations about the dice to the CANNON body to be used in the collide event
 		dicemesh.body_sim.diceType = diceobj.type;
 		dicemesh.body_sim.diceMaterial = appearance.material;
+		dicemesh.body_sim.secretRoll = dicedata.options?.secret;
 
 		/*dicemesh.meshCannon = this.body2mesh(dicemesh.body_sim,true);
 
@@ -697,8 +700,9 @@ export class DiceBox {
 			let speed = body.velocity.length();
 			// also don't bother playing at low speeds
 			if (speed < 250) return;
-
 			let strength = Math.max(Math.min(speed / (550), 1), 0.2);
+			if(this.muteSoundSecretRolls && (body.secretRoll || target.secretRoll))
+				strength = 0;
 			let sound;
 
 			if (body.diceType != "dc") {
@@ -724,7 +728,8 @@ export class DiceBox {
 
 			let surface = this.soundsSurface;
 			let strength = Math.max(Math.min(speed / (500), 1), 0.2);
-
+			if(this.muteSoundSecretRolls && (body.secretRoll || target.secretRoll))
+				strength = 0;
 			let soundlist = this.sounds_table[surface];
 			let sound = soundlist[Math.floor(Math.random() * soundlist.length)];
 			if(this.animstate == "simulate"){

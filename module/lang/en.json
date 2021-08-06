@@ -48,6 +48,8 @@
     "DICESONICE.sounds" : "Sound Effects",
     "DICESONICE.soundsSurface" : "Table surface for sounds",
     "DICESONICE.soundsVolume": "Sound Volume",
+    "DICESONICE.muteSoundSecretRolls": "Mute all sounds for GM/Blind/Self rolls",
+    "DICESONICE.enableFlavorColorset": "Override your dice appearance when a theme is passed as a Flavor (ex: 1d20[acid])",
     "DICESONICE.system" : "Dice Presets (Faces)",
     "DICESONICE.maxDiceNumber" : "Max Number of Dice",
     "DICESONICE.maxDiceNumberHint" : "Maximum number of displayed dice in an animation. Higher numbers will reduce performances",
@@ -78,6 +80,8 @@
     "DICESONICE.animateInlineRollHint" : "When possible, show a 3D dice when an inline roll is detected in the chat.",
     "DICESONICE.allowInteractivity" : "Allow interaction with rolled dice",
     "DICESONICE.allowInteractivityHint" : "Let players grab and throw 3D dice after they've been rolled on the table (this has no effect on the results)",
+    "DICESONICE.showGhostDice" : "Show Ghost dice for hidden rolls",
+    "DICESONICE.showGhostDiceHint" : "When possible, show a dice without numbers to players when rolling a GM or Blind roll.",
     "DICESONICE.navAppearanceHint" : "(Click on a die to customize it)",
 
     "DICESONICE.Add" : "Add",

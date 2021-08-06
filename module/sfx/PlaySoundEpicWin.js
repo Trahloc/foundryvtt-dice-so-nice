@@ -16,7 +16,7 @@ export class PlaySoundEpicWin extends DiceSFX {
     async play(){
         AudioHelper.play({
             src: PlaySoundEpicWin.path,
-            volume: this.box.volume
+            volume: this.volume
 		}, false);
     }
 }
