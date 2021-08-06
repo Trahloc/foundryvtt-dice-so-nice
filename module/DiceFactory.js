@@ -404,13 +404,15 @@ export class DiceFactory {
 
 	getPresetBySystem(type, system = "standard"){
 		let model = this.systems["standard"].dice.find(obj => obj.type == type);
+		if(!model)
+			return null;
 		let diceobj = null;
 		if(system != "standard"){
 			if(this.systems.hasOwnProperty(system)){
 				diceobj = this.systems[system].dice.find(obj => obj.type == type && obj.shape == model.shape);
 				if(!diceobj){
 					//If it doesn't exist, we look for a similar shape and values
-					diceobj = this.systems[system].dice.find(obj => obj.shape == model.shape && obj.values.length == model.values.length);
+					diceobj = this.systems[system].dice.find(obj => obj.shape == model.shape && obj.values.length == model.values.length && !model.colorset);
 				}
 			}
 		}

@@ -806,7 +806,7 @@ export class DiceConfig extends FormApplication {
             if (diceType != "global") {
                 $(element).find("option").each((indexOpt, elementOpt) => {
                     let model = this.box.dicefactory.systems["standard"].dice.find(obj => obj.type == diceType);
-                    if (!this.box.dicefactory.systems[$(elementOpt).val()].dice.find(obj => obj.type == diceType || (obj.shape == model.shape && obj.values.length == model.values.length)))
+                    if (!this.box.dicefactory.systems[$(elementOpt).val()].dice.find(obj => obj.type == diceType || (model && obj.shape == model.shape && obj.values.length == model.values.length)))
                         $(elementOpt).attr("disabled", "disabled");
                 });
             }
