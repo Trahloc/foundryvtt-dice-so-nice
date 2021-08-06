@@ -671,7 +671,7 @@ export class DiceFactory {
 			texture = texture[Math.floor(Math.random() * texture.length)];
 		
 		let text;
-		if(materialData.isGhost)
+		if(materialData.isGhost && labels[index] != "")
 			text = "?";
 		else
 			text = labels[index];
