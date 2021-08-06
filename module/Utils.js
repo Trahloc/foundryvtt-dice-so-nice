@@ -67,7 +67,7 @@ import { DiceColors, TEXTURELIST, COLORSETS } from './DiceColors.js';
         
         if(formatversion == ""){
             //v1 to v2
-            let settings = duplicate(game.user.getFlag("dice-so-nice", "settings"));
+            let settings = game.user.getFlag("dice-so-nice", "settings") ? duplicate(game.user.getFlag("dice-so-nice", "settings")):{};
             if (settings.diceColor || settings.labelColor) {
                 let newSettings = mergeObject(Dice3D.DEFAULT_OPTIONS, settings, { insertKeys: false, insertValues: false });
                 let appearance = mergeObject(Dice3D.DEFAULT_APPEARANCE(), settings, { insertKeys: false, insertValues: false });
