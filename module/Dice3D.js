@@ -13,7 +13,7 @@ import { Utils } from './Utils.js';
     static get DEFAULT_OPTIONS() {
         return {
             enabled: true,
-            showExtraDice:false,
+            showExtraDice: game.dice3d && game.dice3d.hasOwnProperty("defaultShowExtraDice") ? game.dice3d.defaultShowExtraDice : false,
             hideAfterRoll: true,
             timeBeforeHide: 2000,
             hideFX: 'fadeOut',
@@ -220,6 +220,7 @@ import { Utils } from './Utils.js';
             "showcase": null
         };
         this.hiddenAnimationQueue = [];
+        this.defaultShowExtraDice = Dice3D.DEFAULT_OPTIONS.showExtraDice;
         this._buildCanvas();
         this._initListeners();
         this._buildDiceBox();
@@ -529,6 +530,14 @@ import { Utils } from './Utils.js';
                 resolve();
             }
         });
+    }
+
+    /**
+     * Change the default value of the showExtraDice settings
+     * @param {Boolean} show 
+     */
+    showExtraDiceByDefault(show=true){
+        this.defaultShowExtraDice = show;
     }
 
     /**
