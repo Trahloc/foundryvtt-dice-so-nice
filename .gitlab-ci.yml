@@ -12,7 +12,7 @@ build:
   stage: build
   script:
     - cp -r module /tmp/module
-    - ls /tmp/module
+    - google-closure-compiler --version
     - google-closure-compiler --warning_level VERBOSE --js module/libs/three.module.js --js_output_file /tmp/module/libs/three.module.js
     - google-closure-compiler --js module/libs/three-modules/GLTFExporter.js --js_output_file /tmp/module/libs/three-modules/GLTFExporter.js
     - google-closure-compiler --js module/libs/three-modules/GLTFLoader.js --js_output_file /tmp/module/libs/three-modules/GLTFLoader.js
