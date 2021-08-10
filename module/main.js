@@ -226,7 +226,7 @@ Hooks.on('createChatMessage', (chatMessage) => {
                 window.ui.sidebar.popouts.chat.scrollBottom();
     }
 
-    if (game.view == "stream") {
+    if (game.view == "stream" && !game.modules.get("0streamutils")?.active) {
         setTimeout(showMessage, 2500, chatMessage);
     } else {
         game.dice3d.showForRoll(roll, chatMessage.user, false, null, false, chatMessage.id, chatMessage.data.speaker).then(showMessage);
