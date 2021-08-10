@@ -11,7 +11,7 @@ stages:
 build:
   stage: build
   script:
-    - cp module /tmp/module
+    - cp -r module /tmp/module
     - google-closure-compiler --js module/libs/three.module.js --js_output_file tmp/module/libs/three.module.js --language_in=ECMASCRIPT6_STRICT
     - google-closure-compiler --js module/libs/three-modules/GLTFExporter.js --js_output_file tmp/module/libs/three-modules/GLTFExporter.js --language_in=ECMASCRIPT6_STRICT
     - google-closure-compiler --js module/libs/three-modules/GLTFLoader.js --js_output_file tmp/module/libs/three-modules/GLTFLoader.js --language_in=ECMASCRIPT6_STRICT
