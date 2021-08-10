@@ -1,8 +1,9 @@
-image: python:3-alpine
+image: node:lts-alpine3.14
 
 before_script:
   - apk update
   - apk add zip
+  - npm i -g google-closure-compiler
 
 stages:
   - build
@@ -10,7 +11,13 @@ stages:
 build:
   stage: build
   script:
-    - zip dice-so-nice.zip -r module -x ".*"
+    - cp module /tmp/module
+    - google-closure-compiler --js module/libs/three.module.js --js_output_file tmp/module/libs/three.module.js --language_in=ECMASCRIPT6_STRICT
+    - google-closure-compiler --js module/libs/three-modules/GLTFExporter.js --js_output_file tmp/module/libs/three-modules/GLTFExporter.js --language_in=ECMASCRIPT6_STRICT
+    - google-closure-compiler --js module/libs/three-modules/GLTFLoader.js --js_output_file tmp/module/libs/three-modules/GLTFLoader.js --language_in=ECMASCRIPT6_STRICT
+    - google-closure-compiler --js module/libs/three-modules/RGBELoader.js --js_output_file tmp/module/libs/three-modules/RGBELoader.js --language_in=ECMASCRIPT6_STRICT
+    - google-closure-compiler --js module/libs/three-modules/three.proton.js --js_output_file tmp/module/libs/three-modules/three.proton.js --language_in=ECMASCRIPT6_STRICT
+    - zip dice-so-nice.zip -r /tmp/module -x ".*"
   artifacts:
     name: dice-so-nice
     when: on_success
