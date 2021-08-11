@@ -185,7 +185,7 @@ Hooks.on('createChatMessage', (chatMessage) => {
     }
     let roll = chatMessage.isRoll ? chatMessage.roll : null;
     if (hasInlineRoll) {
-        let JqInlineRolls = $($.parseHTML(chatMessage.data.content)).filter(".inline-roll.inline-result");
+        let JqInlineRolls = $($.parseHTML(chatMessage.data.content)).find(".inline-roll.inline-result");
         if (JqInlineRolls.length == 0 && !chatMessage.isRoll) //it was a false positive
             return;
         let inlineRollList = [];
