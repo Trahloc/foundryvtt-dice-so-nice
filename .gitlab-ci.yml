@@ -1,4 +1,4 @@
-image: femtopixel/google-closure-compiler
+image: node:lts-alpine3.14
 
 before_script:
   - apk update
