@@ -3,6 +3,8 @@ image: femtopixel/google-closure-compiler
 before_script:
   - apk update
   - apk add zip
+  - apk add openjdk11
+  - npm install google-closure-compiler
 
 stages:
   - build
@@ -11,11 +13,11 @@ build:
   stage: build
   script:
     - cp -r module /tmp/module
-    - google-closure-compiler --js module/libs/three.module.js --js_output_file /tmp/module/libs/three.module.js
-    - google-closure-compiler --js module/libs/three-modules/GLTFExporter.js --js_output_file /tmp/module/libs/three-modules/GLTFExporter.js
-    - google-closure-compiler --js module/libs/three-modules/GLTFLoader.js --js_output_file /tmp/module/libs/three-modules/GLTFLoader.js
-    - google-closure-compiler --js module/libs/three-modules/RGBELoader.js --js_output_file /tmp/module/libs/three-modules/RGBELoader.js
-    - google-closure-compiler --js module/libs/three-modules/three.proton.js --js_output_file /tmp/module/libs/three-modules/three.proton.js
+    - /usr/bin/java -jar /node_modules/google-closure-compiler-java/compiler.jar --js module/libs/three.module.js --js_output_file /tmp/module/libs/three.module.js
+    - /usr/bin/java -jar /node_modules/google-closure-compiler-java/compiler.jar --js module/libs/three-modules/GLTFExporter.js --js_output_file /tmp/module/libs/three-modules/GLTFExporter.js
+    - /usr/bin/java -jar /node_modules/google-closure-compiler-java/compiler.jar --js module/libs/three-modules/GLTFLoader.js --js_output_file /tmp/module/libs/three-modules/GLTFLoader.js
+    - /usr/bin/java -jar /node_modules/google-closure-compiler-java/compiler.jar --js module/libs/three-modules/RGBELoader.js --js_output_file /tmp/module/libs/three-modules/RGBELoader.js
+    - /usr/bin/java -jar /node_modules/google-closure-compiler-java/compiler.jar --js module/libs/three-modules/three.proton.js --js_output_file /tmp/module/libs/three-modules/three.proton.js
     - zip dice-so-nice.zip -r /tmp/module -x ".*"
   artifacts:
     name: dice-so-nice
