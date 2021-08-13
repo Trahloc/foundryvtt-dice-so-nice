@@ -932,7 +932,7 @@ export class DiceConfig extends FormApplication {
             //Remove empty lines
             for (let i = sfxLine.length - 1; i >= 0; i--) {
                 //also prevent bug #217, unknown cause
-                if (sfxLine[i].diceType == "" || sfxLine[i].onResult == "" || Array.isArray(sfxLine[i].diceType) || Array.isArray(sfxLine[i].specialEffect))
+                if (sfxLine[i].diceType == undefined || sfxLine[i].diceType == "" || sfxLine[i].onResult == "" || Array.isArray(sfxLine[i].diceType) || Array.isArray(sfxLine[i].specialEffect))
                     sfxLine.splice(i, 1);
             }
             //Remove duplicate lines
