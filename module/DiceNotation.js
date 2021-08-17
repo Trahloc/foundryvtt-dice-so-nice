@@ -19,6 +19,7 @@ export class DiceNotation {
 				let countExploded = 0;
 				let localNbThrow = 0;
 				for(let i =0; i< die.results.length; i++){
+					if (die.results[i].discarded) continue; //Continue if die result is discarded
 					if(localNbThrow >= this.throws.length)
 						this.throws.push({dice:[]});
 
