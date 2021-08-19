@@ -185,7 +185,7 @@ Hooks.on('createChatMessage', (chatMessage) => {
     }
     let roll = chatMessage.isRoll ? chatMessage.roll : null;
     if (hasInlineRoll) {
-        let JqInlineRolls = $($.parseHTML(chatMessage.data.content)).find(".inline-roll.inline-result");
+        let JqInlineRolls = $($.parseHTML(`<div>${chatMessage.data.content}</div>`)).find(".inline-roll.inline-result:not(.inline-dsn-hidden)");
         if (JqInlineRolls.length == 0 && !chatMessage.isRoll) //it was a false positive
             return;
         let inlineRollList = [];
@@ -221,9 +221,7 @@ Hooks.on('createChatMessage', (chatMessage) => {
 
             Hooks.callAll("diceSoNiceRollComplete", chatMessage.id);
 
-            window.ui.chat.scrollBottom();
-            if(window.ui.sidebar.popouts.chat)
-                window.ui.sidebar.popouts.chat.scrollBottom();
+            window.ui.chat.scrollBottom({popout:true});
     }
 
     if (game.view == "stream" && !game.modules.get("0streamutils")?.active) {
