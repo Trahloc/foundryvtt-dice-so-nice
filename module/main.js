@@ -221,9 +221,7 @@ Hooks.on('createChatMessage', (chatMessage) => {
 
             Hooks.callAll("diceSoNiceRollComplete", chatMessage.id);
 
-            window.ui.chat.scrollBottom();
-            if(window.ui.sidebar.popouts.chat)
-                window.ui.sidebar.popouts.chat.scrollBottom();
+            window.ui.chat.scrollBottom({popout:true});
     }
 
     if (game.view == "stream" && !game.modules.get("0streamutils")?.active) {
