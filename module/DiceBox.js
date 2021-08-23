@@ -619,6 +619,7 @@ export class DiceBox {
 		dicemesh.startAtIteration = dicedata.startAtIteration;
 		dicemesh.stopped = 0;
 		dicemesh.castShadow = this.shadows;
+		dicemesh.receiveShadow = this.shadows;
 		dicemesh.specialEffects = dicedata.specialEffects;
 
 		dicemesh.body_sim = new CANNON.Body({ allowSleep: true, sleepSpeedLimit: 75, sleepTimeLimit: 0.9, mass: mass, shape: dicemesh.geometry.cannon_shape, material: this.dice_body_material });
@@ -1119,6 +1120,7 @@ export class DiceBox {
 				dicemesh.position.set(x * this.display.containerWidth / columns, -(y * this.display.containerHeight / rows), z);
 				
 				dicemesh.castShadow = this.shadows;
+				
 				dicemesh.userData = selectordice[count];
 
 				this.diceList.push(dicemesh);
@@ -1282,8 +1284,8 @@ export class DiceBox {
 					throw "Visual type not recognized: " + shape.type;
 			}
 
-			//mesh.receiveShadow = true;
-			mesh.castShadow = true;
+			//mesh.receiveShadow = this.shadows;
+			mesh.castShadow = this.shadows;
 			if (mesh.children) {
 				for (var i = 0; i < mesh.children.length; i++) {
 					mesh.children[i].castShadow = true;
