@@ -107,11 +107,19 @@ export class DiceConfig extends FormApplication {
             let termClass = Object.values(CONFIG.Dice.terms).find(term => term.name == preset.term) || Die;
             let term = new termClass({});
 
-            preset.values.forEach((value) => {
-                let label = term.getResultLabel({ result: value });
-                let option = { id: value + "", name: label };
-                this.possibleResultList[el.userData].push(option);
-            });
+            if(el.userData == "d100"){
+                for(let i = 1; i<=100;i++){
+                    let label = term.getResultLabel({ result: i });
+                    let option = { id: i + "", name: label };
+                    this.possibleResultList[el.userData].push(option);
+                }
+            } else {
+                preset.values.forEach((value) => {
+                    let label = term.getResultLabel({ result: value });
+                    let option = { id: value + "", name: label };
+                    this.possibleResultList[el.userData].push(option);
+                });
+            }
         });
 
         let specialEffectsList = [];

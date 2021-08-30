@@ -66,6 +66,8 @@
     "DICESONICE.disabledForInitiativeHint": "Désactive les dés 3D lors d'un jet d'initiative depuis le gestionnaire de combat",
     "DICESONICE.enabledSimultaneousRolls": "Fusionner les jets simultanés",
     "DICESONICE.enabledSimultaneousRollsHint": "Combiner des jets de dés simultanés dans une seule animation au lieu d'attendre la fin de chaque jet.",
+    "DICESONICE.enabledSimultaneousRollForMessage" : "Fusionner les jets dans un message",
+    "DICESONICE.enabledSimultaneousRollForMessageHint" : "Quand un message contient plusieurs jets, jouer une seule animation combinée",
     "DICESONICE.canvasZIndex": "Position de la couche 3D",
     "DICESONICE.immediatelyDisplayChatMessages": "Afficher immédiatement le résultat dans le chat",
     "DICESONICE.immediatelyDisplayChatMessagesHint": "Si activé, ne pas attendre la fin de l'animation 3D pour afficher le résultat dans le chat",
