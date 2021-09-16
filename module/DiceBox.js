@@ -131,7 +131,7 @@ export class DiceBox {
 
 	playAudioSprite(source, sprite, selfVolume){
 		let gainNode = source.context.createGain();
-		gainNode.gain.value = selfVolume * this.volume;
+		gainNode.gain.value = selfVolume * this.volume * game.settings.get("core", "globalInterfaceVolume");
 		const startTime = sprite.start;
 		const duration = sprite.end - sprite.start;
 		const sampleSource = source.context.createBufferSource();

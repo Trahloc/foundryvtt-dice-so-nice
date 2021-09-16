@@ -982,7 +982,7 @@ export class DiceConfig extends FormApplication {
             window.location.reload();
         }
         else
-            this.box.update(settings);
+            game.dice3d.update(settings);
     }
 
     close(options) {
