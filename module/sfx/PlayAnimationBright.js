@@ -10,6 +10,7 @@ export class PlayAnimationBright extends DiceSFX {
     /**@override init */
     static async init() {
         PlayAnimationBright.brightColor = new THREE.Color(0.4,0.4,0.4);
+        this.glowingMesh=null;
         game.audio.pending.push(function(){
             AudioHelper.preloadSound(PlayAnimationBright.sound);
         }.bind(this));
@@ -17,15 +18,26 @@ export class PlayAnimationBright extends DiceSFX {
 
     /**@override play */
     async play() {
-        if(!this.dicemesh.material.emissiveMap && !this.dicemesh.material.bumpMap)
+        
+        if(!this.dicemesh.material && this.dicemesh.userData.glow){
+            //We check if there's a glow target specified
+            this.dicemesh.traverse(object => {
+                if (object.userData && object.userData.name && object.userData.name === this.dicemesh.userData.glow) this.glowingMesh=object;
+            });
+        } else if(this.dicemesh.material){
+            this.glowingMesh=this.dicemesh;
+        } else {
+            return false;
+        }
+        if(!this.glowingMesh.material.emissiveMap && !this.glowingMesh.material.bumpMap)
             return false;
         this.clock = new THREE.Clock();
-        this.baseColor = this.dicemesh.material.emissive.clone();
-        this.baseMaterial = this.dicemesh.material;
-        this.dicemesh.material = this.baseMaterial.clone();
-        if(!this.dicemesh.material.emissiveMap && this.dicemesh.material.bumpMap){
+        this.baseColor = this.glowingMesh.material.emissive.clone();
+        this.baseMaterial = this.glowingMesh.material;
+        this.glowingMesh.material = this.baseMaterial.clone();
+        if(!this.glowingMesh.material.emissiveMap && this.glowingMesh.material.bumpMap){
             //Change the emissive map shader to highlight black instead of white
-            this.dicemesh.material.onBeforeCompile = (shader) => {
+            this.glowingMesh.material.onBeforeCompile = (shader) => {
                 shader.fragmentShader = shader.fragmentShader.replace(
                     '#include <emissivemap_fragment>',
                     [
@@ -38,9 +50,9 @@ export class PlayAnimationBright extends DiceSFX {
                     ].join('\n')
                 );
             };
-            if(this.dicemesh.material.bumpMap)
-                this.dicemesh.material.emissiveMap = this.dicemesh.material.bumpMap;
-            this.dicemesh.material.emissiveIntensity = 1.5;
+            if(this.glowingMesh.material.bumpMap)
+                this.glowingMesh.material.emissiveMap = this.glowingMesh.material.bumpMap;
+            this.glowingMesh.material.emissiveIntensity = 1.5;
         }
         AudioHelper.play({
             src: PlayAnimationBright.sound,
@@ -57,14 +69,14 @@ export class PlayAnimationBright extends DiceSFX {
             this.destroy();
         } else {
             let val = (Math.sin(2 * Math.PI * (x - 1/4)) + 1) / 2;
-            this.dicemesh.material.emissive.copy(this.baseColor);
-            this.dicemesh.material.emissive.lerp(PlayAnimationBright.brightColor, val);
+            this.glowingMesh.material.emissive.copy(this.baseColor);
+            this.glowingMesh.material.emissive.lerp(PlayAnimationBright.brightColor, val);
         }
     }
 
     destroy(){
-        let sfxMaterial = this.dicemesh.material;
-        this.dicemesh.material = this.baseMaterial;
+        let sfxMaterial = this.glowingMesh.material;
+        this.glowingMesh.material = this.baseMaterial;
         sfxMaterial.dispose();
         this.destroyed = true;
     }

@@ -1308,10 +1308,20 @@ export class DiceBox {
 		return obj;
 	}
 
+	findRootObject(object){
+		if(object.hasOwnProperty("body_sim"))
+			return object;
+		else if(object.parent)
+			return this.findRootObject(object.parent);
+		else
+			return null;
+	}
+
 	findShowcaseDie(pos){
 		this.raycaster.setFromCamera(pos, this.camera);
-		const intersects = this.raycaster.intersectObjects(this.diceList);
+		const intersects = this.raycaster.intersectObjects(this.diceList, true);
 		if(intersects.length){
+
 			return intersects[0];
 		}
 		else
@@ -1321,7 +1331,7 @@ export class DiceBox {
 	findHoveredDie(){
 		if(this.isVisible && !this.running && !this.mouse.constraintDown){
 			this.raycaster.setFromCamera(this.mouse.pos, this.camera);
-			const intersects = this.raycaster.intersectObjects(this.diceList);
+			const intersects = this.raycaster.intersectObjects(this.diceList, true);
 			if(intersects.length){
 				this.hoveredDie = intersects[0];
 			}
@@ -1362,10 +1372,11 @@ export class DiceBox {
 				canvas.mouseInteractionManager.object.interactive = false;
 
 			// Vector to the clicked point, relative to the body
-			let v1 = new CANNON.Vec3(pos.x,pos.y,pos.z).vsub(entity.object.body_sim.position);
+			let root = this.findRootObject(entity.object);
+			let v1 = new CANNON.Vec3(pos.x,pos.y,pos.z).vsub(root.body_sim.position);
 
 			// Apply anti-quaternion to vector to tranform it into the local body coordinate system
-			let antiRot = entity.object.body_sim.quaternion.inverse();
+			let antiRot = root.body_sim.quaternion.inverse();
 			let pivot = antiRot.vmult(v1); // pivot is not in local body coordinates
   
 			// Move the cannon click marker particle to the click position
@@ -1373,7 +1384,7 @@ export class DiceBox {
   
 			// Create a new constraint
 			// The pivot for the jointBody is zero
-			this.mouse.constraint = new CANNON.PointToPointConstraint(entity.object.body_sim, pivot, this.jointBody, new CANNON.Vec3(0,0,0));
+			this.mouse.constraint = new CANNON.PointToPointConstraint(root.body_sim, pivot, this.jointBody, new CANNON.Vec3(0,0,0));
   
 			// Add the constriant to world
 			this.world_sim.addConstraint(this.mouse.constraint);
