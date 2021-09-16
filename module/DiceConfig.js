@@ -554,7 +554,7 @@ export class DiceConfig extends FormApplication {
                 let pos = { x: x, y: y };
                 let dice = this.box.findShowcaseDie(pos);
                 if (dice) {
-                    let diceType = dice.object.userData;
+                    let diceType = this.box.findRootObject(dice.object).userData;
                     if (!game.user.getFlag("dice-so-nice", "appearance") && (this.box.dicefactory.preferredSystem != "standard" || this.box.dicefactory.preferredColorset != "custom"))
                         this.getShowcaseAppearance();
                     if ($(this.element).find(`.dsn-appearance-tabs [data-tab="${diceType}"]`).length) {
