@@ -1311,7 +1311,7 @@ export class DiceBox {
 	}
 
 	findRootObject(object){
-		if(object.hasOwnProperty("body_sim"))
+		if(object.hasOwnProperty("shape"))
 			return object;
 		else if(object.parent)
 			return this.findRootObject(object.parent);
