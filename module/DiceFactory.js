@@ -78,7 +78,7 @@ export class DiceFactory {
 					'options':{
 						metalness: 0,
 						roughness: 0.6,
-						envMapIntensity:0.8
+						envMapIntensity:1
 					},
 					'scopedOptions':{
 						roughnessMap : "roughnessMap_fingerprint",
