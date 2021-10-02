@@ -1162,8 +1162,6 @@ export class DiceFactory {
 		var loader = new THREE.BufferGeometryLoader();
 		let bufferGeometry = loader.parse(DICE_MODELS[type]);
 		bufferGeometry.scale(scopedScale/100,scopedScale/100,scopedScale/100);
-		if(type!="d10")
-			bufferGeometry.rotateY(1.5708);
 		return bufferGeometry;
 	}
 
