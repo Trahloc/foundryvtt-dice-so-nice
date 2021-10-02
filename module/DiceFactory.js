@@ -1167,7 +1167,6 @@ export class DiceFactory {
 
 	create_d2_geometry(radius, scopedScale){
 		let geom = this.load_geometry("d2",scopedScale);
-		geom.lookAt(new THREE.Vector3(0,1,0));
 		geom.cannon_shape = new CANNON.Cylinder(1*radius,1*radius,0.1*radius,8);
 		return geom;
 	}

@@ -639,9 +639,9 @@ export class DiceBox {
 		dicemesh.body_sim.diceMaterial = appearance.material;
 		dicemesh.body_sim.secretRoll = dicedata.options?.secret;
 
-		/*dicemesh.meshCannon = this.body2mesh(dicemesh.body_sim,true);
+		dicemesh.meshCannon = this.body2mesh(dicemesh.body_sim,true);
 
-		var gltfExporter = new GLTFExporter();
+		/*var gltfExporter = new GLTFExporter();
 		gltfExporter.parse(dicemesh.meshCannon, function ( result ) {
 			if ( result instanceof ArrayBuffer ) {
 				saveArrayBuffer( result, 'scene.glb' );
@@ -677,7 +677,7 @@ export class DiceBox {
 		this.diceList.push(dicemesh);
 		if (dicemesh.startAtIteration == 0) {
 			this.scene.add(objectContainer);
-			//this.scene.add(dicemesh.meshCannon);
+			this.scene.add(dicemesh.meshCannon);
 			this.world_sim.addBody(dicemesh.body_sim);
 		}
 	}
