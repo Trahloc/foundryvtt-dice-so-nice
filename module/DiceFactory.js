@@ -88,7 +88,7 @@ export class DiceFactory {
 				'metal': {
 					'type':'standard',
 					'options': {
-						roughness: 1,
+						roughness: 0.95,
 						metalness: 1
 					},
 					'scopedOptions':{
