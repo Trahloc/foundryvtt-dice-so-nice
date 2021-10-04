@@ -1104,7 +1104,7 @@ export class DiceFactory {
 
 		materialData.isGhost = appearance.isGhost?appearance.isGhost:false;
 
-		materialData.cacheString = materialData.background+materialData.foreground+materialData.outline+materialData.texture.name+materialData.edge+materialData.material+materialData.font+materialData.isGhost;
+		materialData.cacheString = appearance.system+materialData.background+materialData.foreground+materialData.outline+materialData.texture.name+materialData.edge+materialData.material+materialData.font+materialData.isGhost;
 		return materialData;
 	}
 

@@ -91,7 +91,7 @@ export class DiceBox {
 
 		this.colors = {
 			ambient: 0xffffff,
-			spotlight: 0xffffff,
+			spotlight: 0x333333,
 			ground: 0x242644
 		};
 
@@ -335,14 +335,17 @@ export class DiceBox {
 		if (this.light) this.scene.remove(this.light);
 		if (this.light_amb) this.scene.remove(this.light_amb);
 
-		let intensity;
+		let intensity, intensity_amb;
 		if (this.dicefactory.bumpMapping) { //advanced lighting
-			intensity = 0.7;
+			intensity = 0.4;
+			intensity_amb = 0.5;
 		} else {
 			intensity = 0.7;
-			this.light_amb = new THREE.HemisphereLight(this.colors.ambient, this.colors.ground, 1);
-			this.scene.add(this.light_amb);
+			intensity_amb = 1.5;
 		}
+
+		this.light_amb = new THREE.HemisphereLight(this.colors.ambient, this.colors.ground, intensity_amb);
+		this.scene.add(this.light_amb);
 
 		this.light = new THREE.DirectionalLight(this.colors.spotlight, intensity);
 		if(this.config.boxType == "board")
