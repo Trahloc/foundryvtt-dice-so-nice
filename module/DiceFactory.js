@@ -740,10 +740,10 @@ export class DiceFactory {
 						textstarty = textstartx*1.3;
 						break
 					case 'd14':
-						textstarty = textstartx*1.3;
+						textstarty = textstartx*1.4;
 						break
 					case 'd16':
-						textstarty = textstartx*1.3;
+						textstarty = textstartx*1.4;
 						break
 					case 'd8':
 						textstarty = textstarty*1.1;
