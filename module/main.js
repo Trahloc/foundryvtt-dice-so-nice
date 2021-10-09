@@ -219,6 +219,10 @@ Hooks.on('createChatMessage', (chatMessage) => {
             return;
     }
 
+    //Because Better Roll 5e sends an empty roll object sometime
+    if(!roll.dice.length)
+        return;
+
     const isInitiativeRoll = chatMessage.getFlag("core","initiativeRoll");
     if(isInitiativeRoll && game.settings.get("dice-so-nice", "disabledForInitiative"))
         return;
