@@ -224,7 +224,7 @@ Hooks.on('createChatMessage', (chatMessage) => {
         return;
 
     //Remove the chatmessage sound if it is the core dice sound.
-    if (Dice3D.CONFIG().sounds && chatMessage.data.sound == "sounds/dice.wav") {
+    if (chatMessage.data.sound == "sounds/dice.wav") {
         mergeObject(chatMessage.data, { "-=sound": null });
     }
     chatMessage._dice3danimating = true;
