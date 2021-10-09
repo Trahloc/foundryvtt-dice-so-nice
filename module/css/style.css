@@ -214,3 +214,12 @@
 .dice-so-nice button[data-add-new] {
     flex: 0 0 150px;
 }
+
+/************** FONTS ************/
+
+@font-face {
+    font-family: "FoundryVTT";
+    src: url("../fonts/foundryvtt.woff2") format("woff2");
+    font-weight: normal;
+    font-style: normal;
+}

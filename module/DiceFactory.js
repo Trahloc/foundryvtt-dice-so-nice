@@ -78,7 +78,7 @@ export class DiceFactory {
 					'options':{
 						metalness: 0,
 						roughness: 0.6,
-						envMapIntensity:0.8
+						envMapIntensity:1
 					},
 					'scopedOptions':{
 						roughnessMap : "roughnessMap_fingerprint",
@@ -88,7 +88,7 @@ export class DiceFactory {
 				'metal': {
 					'type':'standard',
 					'options': {
-						roughness: 1,
+						roughness: 0.95,
 						metalness: 1
 					},
 					'scopedOptions':{
@@ -586,9 +586,16 @@ export class DiceFactory {
 		let contextBump = canvasBump.getContext("2d", {alpha: true});
 		contextBump.globalAlpha = 0;
 
-		let texturesPerLine = Math.ceil(Math.sqrt(labels.length));
+		let labelsTotal = labels.length;
+		if(["d3","d5","d7","df"].includes(diceobj.type)){
+			labelsTotal = labelsTotal*2 -2;
+			if(diceobj.shape == "d2" || diceobj.shape == "d10")
+				labelsTotal += 1;
+		}
+
+		let texturesPerLine = Math.ceil(Math.sqrt(labelsTotal));
 		let sizeTexture = 256;
-		let ts = this.calc_texture_size(Math.sqrt(labels.length)*sizeTexture, true);
+		let ts = this.calc_texture_size(Math.sqrt(labelsTotal)*sizeTexture, true);
 		
 		canvas.width = canvas.height = canvasBump.width = canvasBump.height = ts;
 		let x = 0;
@@ -615,8 +622,15 @@ export class DiceFactory {
 			texturesOnThisLine++;
 			x += sizeTexture;
 		}
-		if(diceobj.values.length == 3) {
-			for(i=2;i<5;i++){
+
+		//Special dice from shape divided by 2
+		//D3
+		if(["d3","d5","d7","df"].includes(diceobj.type)){
+			let startI = 2;
+			//for some reason, there's an extra empty cell for all shape except d2 and d10. Should fix that at some point.
+			if(diceobj.shape == "d2" || diceobj.shape == "d10")
+				startI = 1;
+			for(i=startI;i<labels.length;i++){
 				if(texturesOnThisLine == texturesPerLine){
 					y += sizeTexture;
 					x = 0;
@@ -627,6 +641,7 @@ export class DiceFactory {
 				x += sizeTexture;
 			}
 		}
+
 
 		//var img    = canvas.toDataURL("image/png");
 		//document.write('<img src="'+img+'"/>');
@@ -740,10 +755,10 @@ export class DiceFactory {
 						textstarty = textstartx*1.3;
 						break
 					case 'd14':
-						textstarty = textstartx*1.3;
+						textstarty = textstartx*1.4;
 						break
 					case 'd16':
-						textstarty = textstartx*1.3;
+						textstarty = textstartx*1.4;
 						break
 					case 'd8':
 						textstarty = textstarty*1.1;
@@ -1104,7 +1119,7 @@ export class DiceFactory {
 
 		materialData.isGhost = appearance.isGhost?appearance.isGhost:false;
 
-		materialData.cacheString = materialData.background+materialData.foreground+materialData.outline+materialData.texture.name+materialData.edge+materialData.material+materialData.font+materialData.isGhost;
+		materialData.cacheString = appearance.system+materialData.background+materialData.foreground+materialData.outline+materialData.texture.name+materialData.edge+materialData.material+materialData.font+materialData.isGhost;
 		return materialData;
 	}
 
@@ -1162,14 +1177,11 @@ export class DiceFactory {
 		var loader = new THREE.BufferGeometryLoader();
 		let bufferGeometry = loader.parse(DICE_MODELS[type]);
 		bufferGeometry.scale(scopedScale/100,scopedScale/100,scopedScale/100);
-		if(type!="d10")
-			bufferGeometry.rotateY(1.5708);
 		return bufferGeometry;
 	}
 
 	create_d2_geometry(radius, scopedScale){
 		let geom = this.load_geometry("d2",scopedScale);
-		geom.lookAt(new THREE.Vector3(0,1,0));
 		geom.cannon_shape = new CANNON.Cylinder(1*radius,1*radius,0.1*radius,8);
 		return geom;
 	}

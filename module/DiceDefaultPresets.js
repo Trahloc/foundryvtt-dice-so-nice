@@ -48,7 +48,7 @@ diceobj.scale = 0.9;
 BASE_PRESETS_LIST.push(diceobj);
 
 diceobj = new DicePreset('d3', 'd6');
-diceobj.setLabels(['1', '2', '3', '1', '2', '3']);
+diceobj.setLabels(['1', '2', '3']);
 diceobj.setValues(1,3);
 diceobj.scale = 0.9;
 BASE_PRESETS_LIST.push(diceobj);
@@ -74,7 +74,7 @@ diceobj.scale = 0.9;
 BASE_PRESETS_LIST.push(diceobj);
 
 diceobj = new DicePreset('d5','d10');
-diceobj.setLabels(['1','2','3','4','5','1','2','3','4','5']);
+diceobj.setLabels(['1','2','3','4','5']);
 diceobj.setValues(1,5);
 diceobj.mass = 450;
 diceobj.inertia = 9;
@@ -106,7 +106,7 @@ diceobj.scale = 1;
 BASE_PRESETS_LIST.push(diceobj);
 
 diceobj = new DicePreset('d7','d14');
-diceobj.setLabels(['1','2','3','4','5','6','7','1','2','3', '4', '5', '6', '7']);
+diceobj.setLabels(['1','2','3','4','5','6','7']);
 diceobj.setValues(1,7);
 diceobj.mass = 450;
 diceobj.inertia = 8;
@@ -197,12 +197,104 @@ EXTRA_PRESETS_LIST.push({
 /**
  * foundry_vtt System
  */
+ EXTRA_PRESETS_LIST.push({
+    type:"d2",
+    labels:['1','F'],
+    font: "FoundryVTT",
+    system:"foundry_vtt",
+    fontScale:1.2
+});
+EXTRA_PRESETS_LIST.push({
+    type:"d4",
+    labels:['1','2','3','E'],
+    font: "FoundryVTT",
+    system:"foundry_vtt",
+    fontScale:0.8
+});
+EXTRA_PRESETS_LIST.push({
+    type:"d6",
+    labels:['1','2','3','4','5','E'],
+    font: "FoundryVTT",
+    system:"foundry_vtt"
+});
+EXTRA_PRESETS_LIST.push({
+    type:"df",
+    labels:['−', ' ', '+'],
+    font: "FoundryVTT",
+    system:"foundry_vtt"
+});
+EXTRA_PRESETS_LIST.push({
+    type:"d3",
+    labels:['1', '2', 'E'],
+    font: "FoundryVTT",
+    system:"foundry_vtt"
+});
+EXTRA_PRESETS_LIST.push({
+    type:"d8",
+    labels:['1','2','3','4','5','6','7','F'],
+    font: "FoundryVTT",
+    system:"foundry_vtt"
+});
+EXTRA_PRESETS_LIST.push({
+    type:"d10",
+    labels:['1','2','3','4','5','6','7','8','9','E'],
+    font: "FoundryVTT",
+    system:"foundry_vtt",
+    fontScale:0.9
+});
+EXTRA_PRESETS_LIST.push({
+    type:"d5",
+    labels:['1','2','3','4','E'],
+    font: "FoundryVTT",
+    system:"foundry_vtt",
+    fontScale:0.9
+});
+EXTRA_PRESETS_LIST.push({
+    type:"d100",
+    labels:['10','20','30','40','50','60','70','80','90','E'],
+    font: "FoundryVTT",
+    system:"foundry_vtt"
+});
+EXTRA_PRESETS_LIST.push({
+    type:"d12",
+    labels:['1','2','3','4','5','6','7','8','9','10','11','E'],
+    font: "FoundryVTT",
+    system:"foundry_vtt"
+});
+EXTRA_PRESETS_LIST.push({
+    type:"d14",
+    labels:['1','2','3','4','5','6','7','8','9','10','11','12','13','E'],
+    font: "FoundryVTT",
+    system:"foundry_vtt"
+});
+EXTRA_PRESETS_LIST.push({
+    type:"d7",
+    labels:['1','2','3','4','5','6','E'],
+    font: "FoundryVTT",
+    system:"foundry_vtt"
+});
+EXTRA_PRESETS_LIST.push({
+    type:"d16",
+    labels:['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','E'],
+    font: "FoundryVTT",
+    system:"foundry_vtt"
+});
 EXTRA_PRESETS_LIST.push({
     type:"d20",
-    labels:['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','modules/dice-so-nice/textures/foundry_vtt/foundrynat20.webp'],
-    bumpMaps:[,,,,,,,,,,,,,,,,,,,'modules/dice-so-nice/textures/foundry_vtt/foundrynat20_bump.webp'],
-    font: "Arial Black",
-    fontScale: 0.8,
+    labels:['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','F'],
+    font: "FoundryVTT",
+    system:"foundry_vtt"
+});
+EXTRA_PRESETS_LIST.push({
+    type:"d24",
+    labels:['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','F'],
+    font: "FoundryVTT",
+    system:"foundry_vtt"
+});
+EXTRA_PRESETS_LIST.push({
+    type:"d30",
+    labels:['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','E'],
+    font: "FoundryVTT",
     system:"foundry_vtt"
 });
 

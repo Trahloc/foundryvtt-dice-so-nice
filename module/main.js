@@ -67,6 +67,15 @@ Hooks.once('init', () => {
         onChange: debouncedReload
     });
 
+    game.settings.register("dice-so-nice", "enabledSimultaneousRollForMessage", {
+        name: "DICESONICE.enabledSimultaneousRollForMessage",
+        hint: "DICESONICE.enabledSimultaneousRollForMessageHint",
+        scope: "world",
+        type: Boolean,
+        default: true,
+        config: true
+    });
+
     game.settings.register("dice-so-nice", "diceCanBeFlipped", {
         name: "DICESONICE.diceCanBeFlipped",
         hint: "DICESONICE.diceCanBeFlippedHint",
@@ -184,17 +193,25 @@ Hooks.on('createChatMessage', (chatMessage) => {
         return;
     }
     let roll = chatMessage.isRoll ? chatMessage.roll : null;
+    let maxRollOrder = roll ? 0:-1;
     if (hasInlineRoll) {
         let JqInlineRolls = $($.parseHTML(`<div>${chatMessage.data.content}</div>`)).find(".inline-roll.inline-result:not(.inline-dsn-hidden)");
         if (JqInlineRolls.length == 0 && !chatMessage.isRoll) //it was a false positive
             return;
         let inlineRollList = [];
         JqInlineRolls.each((index, el) => {
-            inlineRollList.push(Roll.fromJSON(unescape(el.dataset.roll)));
+            let roll = Roll.fromJSON(unescape(el.dataset.roll));
+            maxRollOrder++;
+            roll.dice.forEach(diceterm => {
+                if(!diceterm.options.hasOwnProperty("rollOrder"))
+                    diceterm.options.rollOrder = maxRollOrder;
+            });
+            inlineRollList.push(roll);
         });
         if (inlineRollList.length) {
             if (chatMessage.isRoll)
-                inlineRollList.push(chatMessage.roll);
+                inlineRollList.unshift(chatMessage.roll);
+            
             let pool = PoolTerm.fromRolls(inlineRollList);
             roll = Roll.fromTerms([pool]);
         }
@@ -207,7 +224,7 @@ Hooks.on('createChatMessage', (chatMessage) => {
         return;
 
     //Remove the chatmessage sound if it is the core dice sound.
-    if (Dice3D.CONFIG().sounds && chatMessage.data.sound == "sounds/dice.wav") {
+    if (chatMessage.data.sound == "sounds/dice.wav") {
         mergeObject(chatMessage.data, { "-=sound": null });
     }
     chatMessage._dice3danimating = true;
@@ -227,7 +244,44 @@ Hooks.on('createChatMessage', (chatMessage) => {
     if (game.view == "stream" && !game.modules.get("0streamutils")?.active) {
         setTimeout(showMessage, 2500, chatMessage);
     } else {
-        game.dice3d.showForRoll(roll, chatMessage.user, false, null, false, chatMessage.id, chatMessage.data.speaker).then(showMessage);
+        //1- We create a list of all 3D rolls, ordered ASC
+        //2- We create a Roll object with the correct formula and results
+        //3- We queue the showForRoll calls and then show the message
+        let orderedDiceList = [[]];
+        roll.dice.forEach(diceTerm => {
+            let index = 0;
+            if(!game.settings.get("dice-so-nice","enabledSimultaneousRollForMessage") && diceTerm.options.hasOwnProperty("rollOrder")){
+                index = diceTerm.options.rollOrder;
+                if(orderedDiceList[index] == null){
+                    orderedDiceList[index] = [];
+                }
+            }
+            orderedDiceList[index].push(diceTerm);
+        });
+        orderedDiceList = orderedDiceList.filter(el => el != null);
+        
+        let rollList = [];
+        const plus = new OperatorTerm({operator: "+"}).evaluate();
+        orderedDiceList.forEach(dice => {
+            //add a "plus" between each term
+            if(Array.isArray(dice) && dice.length){
+                let termList = [...dice].map((e, i) => i < dice.length - 1 ? [e, plus] : [e]).reduce((a, b) => a.concat(b));
+                rollList.push(Roll.fromTerms(termList));
+            }
+        });
+        
+        //call each promise one after the other, then call the showMessage function
+        const recursShowForRoll = (rollList, index) => {
+            game.dice3d.showForRoll(rollList[index], chatMessage.user, false, null, false, chatMessage.id, chatMessage.data.speaker).then(()=>{
+                index++;
+                if(rollList[index] != null)
+                    recursShowForRoll(rollList, index);
+                else
+                    showMessage();
+            });
+        };
+
+        recursShowForRoll(rollList, 0);
     }
 });
 
