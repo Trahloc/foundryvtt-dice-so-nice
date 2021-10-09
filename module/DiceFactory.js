@@ -586,9 +586,16 @@ export class DiceFactory {
 		let contextBump = canvasBump.getContext("2d", {alpha: true});
 		contextBump.globalAlpha = 0;
 
-		let texturesPerLine = Math.ceil(Math.sqrt(labels.length));
+		let labelsTotal = labels.length;
+		if(["d3","d5","d7","df"].includes(diceobj.type)){
+			labelsTotal = labelsTotal*2 -2;
+			if(diceobj.shape == "d2" || diceobj.shape == "d10")
+				labelsTotal += 1;
+		}
+
+		let texturesPerLine = Math.ceil(Math.sqrt(labelsTotal));
 		let sizeTexture = 256;
-		let ts = this.calc_texture_size(Math.sqrt(labels.length)*sizeTexture, true);
+		let ts = this.calc_texture_size(Math.sqrt(labelsTotal)*sizeTexture, true);
 		
 		canvas.width = canvas.height = canvasBump.width = canvasBump.height = ts;
 		let x = 0;
@@ -615,8 +622,15 @@ export class DiceFactory {
 			texturesOnThisLine++;
 			x += sizeTexture;
 		}
-		if(diceobj.values.length == 3) {
-			for(i=2;i<5;i++){
+
+		//Special dice from shape divided by 2
+		//D3
+		if(["d3","d5","d7","df"].includes(diceobj.type)){
+			let startI = 2;
+			//for some reason, there's an extra empty cell for all shape except d2 and d10. Should fix that at some point.
+			if(diceobj.shape == "d2" || diceobj.shape == "d10")
+				startI = 1;
+			for(i=startI;i<labels.length;i++){
 				if(texturesOnThisLine == texturesPerLine){
 					y += sizeTexture;
 					x = 0;
@@ -627,6 +641,7 @@ export class DiceFactory {
 				x += sizeTexture;
 			}
 		}
+
 
 		//var img    = canvas.toDataURL("image/png");
 		//document.write('<img src="'+img+'"/>');

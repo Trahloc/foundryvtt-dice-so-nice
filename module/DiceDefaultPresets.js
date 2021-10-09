@@ -48,7 +48,7 @@ diceobj.scale = 0.9;
 BASE_PRESETS_LIST.push(diceobj);
 
 diceobj = new DicePreset('d3', 'd6');
-diceobj.setLabels(['1', '2', '3', '1', '2', '3']);
+diceobj.setLabels(['1', '2', '3']);
 diceobj.setValues(1,3);
 diceobj.scale = 0.9;
 BASE_PRESETS_LIST.push(diceobj);
@@ -74,7 +74,7 @@ diceobj.scale = 0.9;
 BASE_PRESETS_LIST.push(diceobj);
 
 diceobj = new DicePreset('d5','d10');
-diceobj.setLabels(['1','2','3','4','5','1','2','3','4','5']);
+diceobj.setLabels(['1','2','3','4','5']);
 diceobj.setValues(1,5);
 diceobj.mass = 450;
 diceobj.inertia = 9;
@@ -106,7 +106,7 @@ diceobj.scale = 1;
 BASE_PRESETS_LIST.push(diceobj);
 
 diceobj = new DicePreset('d7','d14');
-diceobj.setLabels(['1','2','3','4','5','6','7','1','2','3', '4', '5', '6', '7']);
+diceobj.setLabels(['1','2','3','4','5','6','7']);
 diceobj.setValues(1,7);
 diceobj.mass = 450;
 diceobj.inertia = 8;
@@ -224,6 +224,12 @@ EXTRA_PRESETS_LIST.push({
     system:"foundry_vtt"
 });
 EXTRA_PRESETS_LIST.push({
+    type:"d3",
+    labels:['1', '2', 'E'],
+    font: "FoundryVTT",
+    system:"foundry_vtt"
+});
+EXTRA_PRESETS_LIST.push({
     type:"d8",
     labels:['1','2','3','4','5','6','7','F'],
     font: "FoundryVTT",
@@ -232,6 +238,13 @@ EXTRA_PRESETS_LIST.push({
 EXTRA_PRESETS_LIST.push({
     type:"d10",
     labels:['1','2','3','4','5','6','7','8','9','E'],
+    font: "FoundryVTT",
+    system:"foundry_vtt",
+    fontScale:0.9
+});
+EXTRA_PRESETS_LIST.push({
+    type:"d5",
+    labels:['1','2','3','4','E'],
     font: "FoundryVTT",
     system:"foundry_vtt",
     fontScale:0.9
@@ -251,6 +264,12 @@ EXTRA_PRESETS_LIST.push({
 EXTRA_PRESETS_LIST.push({
     type:"d14",
     labels:['1','2','3','4','5','6','7','8','9','10','11','12','13','E'],
+    font: "FoundryVTT",
+    system:"foundry_vtt"
+});
+EXTRA_PRESETS_LIST.push({
+    type:"d7",
+    labels:['1','2','3','4','5','6','E'],
     font: "FoundryVTT",
     system:"foundry_vtt"
 });
