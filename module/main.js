@@ -250,7 +250,7 @@ Hooks.on('createChatMessage', (chatMessage) => {
         let orderedDiceList = [[]];
         roll.dice.forEach(diceTerm => {
             let index = 0;
-            if(diceTerm.options.hasOwnProperty("rollOrder")){
+            if(!game.settings.get("dice-so-nice","enabledSimultaneousRollForMessage") && diceTerm.options.hasOwnProperty("rollOrder")){
                 index = diceTerm.options.rollOrder;
                 if(orderedDiceList[index] == null){
                     orderedDiceList[index] = [];
