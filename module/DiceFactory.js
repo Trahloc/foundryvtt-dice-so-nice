@@ -587,7 +587,8 @@ export class DiceFactory {
 		contextBump.globalAlpha = 0;
 
 		let labelsTotal = labels.length;
-		if(["d3","d5","d7","df"].includes(diceobj.type)){
+		let isHeritedFromShape = ["d3","d5","d7"].includes(diceobj.type) || (diceobj.type == "df"&&diceobj.shape == "d6");
+		if(isHeritedFromShape){
 			labelsTotal = labelsTotal*2 -2;
 			if(diceobj.shape == "d2" || diceobj.shape == "d10")
 				labelsTotal += 1;
@@ -625,7 +626,7 @@ export class DiceFactory {
 
 		//Special dice from shape divided by 2
 		//D3
-		if(["d3","d5","d7","df"].includes(diceobj.type)){
+		if(isHeritedFromShape){
 			let startI = 2;
 			//for some reason, there's an extra empty cell for all shape except d2 and d10. Should fix that at some point.
 			if(diceobj.shape == "d2" || diceobj.shape == "d10")
