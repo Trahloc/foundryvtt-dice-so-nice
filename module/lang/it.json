@@ -222,5 +222,13 @@
 
     "DICESONICE.sfxOptionsIsGlobal" : "(Solo GM) Abilita questi effetti per tutti i giocatori",
     "DICESONICE.sfxOptionsCustomSound" : "Seleziona un file sonoro",
-    "DICESONICE.sfxOptionsMacro" : "Seleziona una macro"
+    "DICESONICE.sfxOptionsMacro" : "Seleziona una macro",
+
+    "DICESONICE.RollableAreaConfig":  "Impostazioni Area di Tiro",
+    "DICESONICE.RollableAreaConfigTitle": "Impostazioni Area di Tiro",
+    "DICESONICE.RollableAreaConfigHint": "Definisci la porzione dello schermo che mostra l'animazione dei dadi 3D.",
+    "DICESONICE.RollableAreaText": "Area di Tiro",
+    "DICESONICE.RollableAreaConfigDescription1": "Ridimensiona e/o sposta l'area a fianco per definire l'\"Area di Tiro\" all'interno della quale verrà visualizza l'animazione dei dadi 3D.",
+    "DICESONICE.RollableAreaConfigDescription2": "Premi \"Applica\" per salvare e applicare la modifica o premi \"Ripristina\" per tornare alle impostazioni predefinite.",
+    "DICESONICE.Restore": "Ripristina"
 }

@@ -30,7 +30,8 @@ import { Utils } from './Utils.js';
             useHighDPI: true,
             showOthersSFX: true,
             muteSoundSecretRolls:false,
-            enableFlavorColorset:true
+            enableFlavorColorset:true,
+            rollingArea: false
         };
     }
 
@@ -247,27 +248,25 @@ import { Utils } from './Utils.js';
      * @private
      */
     _buildCanvas() {
-        this.canvas = $('<div id="dice-box-canvas" style="position: absolute; left: 0; top: 0;pointer-events: none;"></div>');
-        if (Dice3D.CONFIG().canvasZIndex == "over") {
+        const config = Dice3D.CONFIG();
+        const sidebarWidth = $('#sidebar').width();
+        const sidebarOffset = sidebarWidth > window.innerWidth / 2 ? 0 : sidebarWidth;
+        const area = config.rollingArea ? config.rollingArea : {
+            left: 0,
+            top: 0,
+            width: window.innerWidth - sidebarOffset,
+            height: window.innerHeight - 1
+        };
+        this.canvas = $(`<div id="dice-box-canvas" style="position: absolute; left: ${area.left}px; top: ${area.top}px; pointer-events: none;"></div>`);
+        if (config.canvasZIndex === "over") {
             this.canvas.css("z-index", 1000);
             this.canvas.appendTo($('body'));
         }
         else {
             $("#board").after(this.canvas);
         }
-        this._resizeCanvas();
-    }
-
-    /**
-     * resize to the window total size.
-     *
-     * @private
-     */
-    _resizeCanvas() {
-        const sidebarWidth = $('#sidebar').width();
-        const sidebarOffset = sidebarWidth > window.innerWidth / 2 ? 0 : sidebarWidth;
-        this.canvas.width(window.innerWidth - sidebarOffset + 'px');
-        this.canvas.height(window.innerHeight - 1 + 'px');
+        this.canvas.width(area.width + 'px');
+        this.canvas.height(area.height + 'px');
     }
 
     /**
@@ -376,16 +375,19 @@ import { Utils } from './Utils.js';
         } else {
             this._timeout = false;
             //resize ended probably, lets remake the canvas
-            this.canvas[0].remove();
-            this.box.clearScene();
-            this._buildCanvas();
-            this._resizeCanvas();
-            let config = Dice3D.ALL_CONFIG();
-            config.boxType = "board";
-            this.box = new DiceBox(this.canvas[0], this.DiceFactory, config);
-            this.box.initialize();
-            this.box.preloadSounds();
+            this.resizeAndRebuild();
         }
+    }
+
+    resizeAndRebuild() {
+        this.canvas[0].remove();
+        this.box.clearScene();
+        this._buildCanvas();
+        let config = Dice3D.ALL_CONFIG();
+        config.boxType = "board";
+        this.box = new DiceBox(this.canvas[0], this.DiceFactory, config);
+        this.box.initialize();
+        this.box.preloadSounds();
     }
 
     /**

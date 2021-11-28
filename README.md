@@ -79,6 +79,18 @@ There's two type of settings:
 - **Export Special effects**: Export only the Special effects list to a JSON file.
 - **Reset to Default**: Reset all settings to their default value.
 
+## Rollable Area Settings
+
+![Preview](./rollable-area-settings.jpg?raw=true)
+
+With this setting it is possible to limit the area of the screen that shows the animation of the 3D dice.
+Useful for example for those who stream online sessions and show only a portion of Foundry canvas on the screen
+Just resize and/or move the shape and press **"Apply"** on the left window to change and save the Rolling Area for the current user.   
+Press **"Restore"** to return to default settings.   
+A few considerations:
+- The custom rollable area defined in this way is static, therefore it does not adapt to the resize of the browser window
+- If "auto scale" is enabled, the size of the dice adapts to the size of the rollable area, so it shrinks compared to when the area occupies the entire screen. Disable the auto scale and set a custom size that is correct for your use.
+
 # Documentation and API
 A complete API and documentation for developers and artists alike is available in the [Wiki](https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/wikis/home)
 
