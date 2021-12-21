@@ -976,6 +976,9 @@ export class DiceConfig extends FormApplication {
         delete formData.appearance;
         let settings = mergeObject(Dice3D.CONFIG(), formData, { insertKeys: false, insertValues: false });
 
+        // preserve rollingArea config
+        settings.rollingArea = currentSettings.rollingArea;
+
         await game.user.setFlag('dice-so-nice', 'settings', settings);
         await game.user.setFlag("dice-so-nice", "appearance", appearance);
         await game.user.setFlag("dice-so-nice", "sfxList", sfxLine);
