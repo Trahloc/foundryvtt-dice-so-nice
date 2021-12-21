@@ -297,7 +297,7 @@ export class DiceConfig extends FormApplication {
                     if (el.userData != "d10")
                         denominationList.push(el.userData);
                 });
-                let roll = new Roll(denominationList.join("+")).roll();
+                let roll = new Roll(denominationList.join("+")).evaluate({ async:false});
                 let data = new DiceNotation(roll);
 
                 let specialEffects = this.getShowcaseSFX();
@@ -975,9 +975,6 @@ export class DiceConfig extends FormApplication {
         let appearance = mergeObject(Dice3D.APPEARANCE(), formData.appearance, { insertKeys: false, insertValues: false });
         delete formData.appearance;
         let settings = mergeObject(Dice3D.CONFIG(), formData, { insertKeys: false, insertValues: false });
-
-        // preserve rollingArea config
-        settings.rollingArea = currentSettings.rollingArea;
 
         await game.user.setFlag('dice-so-nice', 'settings', settings);
         await game.user.setFlag("dice-so-nice", "appearance", appearance);

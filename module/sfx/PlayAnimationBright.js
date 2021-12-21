@@ -3,7 +3,7 @@ import * as THREE from '../libs/three.module.js';
 
 export class PlayAnimationBright extends DiceSFX {
     static id = "PlayAnimationBright";
-    static name = "DICESONICE.PlayAnimationBright";
+    static soundname = "DICESONICE.PlayAnimationBright";
     static brightColor = null;
     static duration = 0.6;
     static sound = "modules/dice-so-nice/sfx/sounds/bright.mp3";
