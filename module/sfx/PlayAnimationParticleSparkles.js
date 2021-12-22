@@ -5,7 +5,7 @@ import { DiceSFXManager } from '../DiceSFXManager.js';
 
 export class PlayAnimationParticleSparkles extends DiceSFX {
     static id = "PlayAnimationParticleSparkles";
-    static soundname = "DICESONICE.PlayAnimationParticleSparkles";
+    static specialEffectName = "DICESONICE.PlayAnimationParticleSparkles";
     static sprite = null;
     static sound = "modules/dice-so-nice/sfx/sounds/sparkles.mp3";
     /**@override init */

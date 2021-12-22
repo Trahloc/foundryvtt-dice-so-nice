@@ -5,7 +5,7 @@ import { DiceSFXManager } from '../DiceSFXManager.js';
 
 export class PlayAnimationParticleVortex extends DiceSFX {
     static id = "PlayAnimationParticleVortex";
-    static soundname = "DICESONICE.PlayAnimationParticleVortex";
+    static specialEffectName = "DICESONICE.PlayAnimationParticleVortex";
     static sprite = null;
     static sound = "modules/dice-so-nice/sfx/sounds/vortex.mp3";
     /**@override init */

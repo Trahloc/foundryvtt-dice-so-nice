@@ -2,7 +2,7 @@ import { DiceSFX } from '../DiceSFX.js';
 
 export class PlaySoundEpicFail extends DiceSFX {
     static id = "PlaySoundEpicFail";
-    static soundname = "DICESONICE.PlaySoundEpicFail";
+    static specialEffectName = "DICESONICE.PlaySoundEpicFail";
     static path = 'modules/dice-so-nice/sfx/sounds/epic_fail.mp3';
     /**@override init */
     static async init(){
