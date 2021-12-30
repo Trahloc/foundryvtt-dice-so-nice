@@ -297,13 +297,14 @@ export class DiceConfig extends FormApplication {
                     if (el.userData != "d10")
                         denominationList.push(el.userData);
                 });
-                let roll = new Roll(denominationList.join("+")).evaluate({ async:false});
-                let data = new DiceNotation(roll);
+                let roll = new Roll(denominationList.join("+")).evaluate().then((roll) =>{
+                    let data = new DiceNotation(roll);
 
-                let specialEffects = this.getShowcaseSFX();
-                let customization = mergeObject({ appearance: config.appearance }, { specialEffects: specialEffects });
+                    let specialEffects = this.getShowcaseSFX();
+                    let customization = mergeObject({ appearance: config.appearance }, { specialEffects: specialEffects });
 
-                game.dice3d._showAnimation(data, customization);
+                    game.dice3d._showAnimation(data, customization);
+                });
             });
 
             $(this.element).on("click", "[data-sfx-create]", (ev) => {
