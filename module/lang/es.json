@@ -69,6 +69,8 @@
     "DICESONICE.disabledForInitiativeHint": "Deshabilita las tiradas de dados 3D cuando se tira iniciativa desde el asistente de combate",
     "DICESONICE.enabledSimultaneousRolls": "Unir tiradas simultáneas",
     "DICESONICE.enabledSimultaneousRollsHint": "Combina tiradas simultáneas en una única animación en lugar de esperar a que cada una de ellas termine",
+    "DICESONICE.enabledSimultaneousRollForMessage" : "Unir mensajes del mismo tipo",
+    "DICESONICE.enabledSimultaneousRollForMessageHint" : "Cuando un mensaje contiene varias tiradas, hacerlas simultáneamente",
     "DICESONICE.canvasZIndex": "Posición de la capa 3D",
     "DICESONICE.immediatelyDisplayChatMessages": "Mostrar mensaje en el chat inmediatamente",
     "DICESONICE.immediatelyDisplayChatMessagesHint": "Cuando se activa, no se esperará a que las tiradas 3D terminen antes de mostrar la tarjeta en el chat",

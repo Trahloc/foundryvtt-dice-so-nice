@@ -5,7 +5,7 @@ import * as THREE from '../libs/three.module.js';
 
 export class PlayAnimationThormund extends DiceSFX {
     static id = "PlayAnimationThormund";
-    static name = "DICESONICE.PlayAnimationThormund";
+    static specialEffectName = "DICESONICE.PlayAnimationThormund";
     static file = "modules/dice-so-nice/sfx/models/thormund.glb";
     static sound = "modules/dice-so-nice/sfx/sounds/thormund.mp3";
     static model = null;

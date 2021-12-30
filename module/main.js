@@ -1,5 +1,6 @@
 import { Dice3D } from './Dice3D.js';
 import { DiceConfig } from './DiceConfig.js';
+import { RollableAreaConfig } from './RollableAreaConfig.js';
 import { Utils } from './Utils.js';
 
 /**
@@ -15,6 +16,15 @@ Hooks.once('init', () => {
         hint: "DICESONICE.configHint",
         icon: "fas fa-dice-d20",
         type: DiceConfig,
+        restricted: false
+    });
+
+    game.settings.registerMenu("dice-so-nice", "rollable-area", {
+        name: "DICESONICE.RollableAreaConfig",
+        label: "DICESONICE.RollableAreaConfigTitle",
+        hint: "DICESONICE.RollableAreaConfigHint",
+        icon: "fas fa-crop-alt",
+        type: RollableAreaConfig,
         restricted: false
     });
 
