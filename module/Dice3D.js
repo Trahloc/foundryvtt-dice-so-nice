@@ -72,10 +72,15 @@ import { Utils } from './Utils.js';
     }
 
     static SFX(user = game.user) {
+        let sfxArray;
         if (Dice3D.CONFIG().showOthersSFX || user.id == game.user.id)
-            return user.getFlag("dice-so-nice", "sfxList") ? duplicate(user.getFlag("dice-so-nice", "sfxList")) : [];
+            sfxArray = user.getFlag("dice-so-nice", "sfxList") ? duplicate(user.getFlag("dice-so-nice", "sfxList")) : [];
         else
-            return [];
+            sfxArray = [];
+        if(!Array.isArray(sfxArray)){
+            sfxArray = [];
+        }
+        return sfxArray;
     }
 
     /**

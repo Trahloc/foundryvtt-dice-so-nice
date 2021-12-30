@@ -222,5 +222,14 @@
 
     "DICESONICE.sfxOptionsIsGlobal" : "(MJ) Activer cet effet pour tous les joueurs",
     "DICESONICE.sfxOptionsCustomSound" : "Choisissez un fichier audio",
-    "DICESONICE.sfxOptionsMacro" : "Choisissez une macro"
+    "DICESONICE.sfxOptionsMacro" : "Choisissez une macro",
+
+    "DICESONICE.RollableAreaConfig":  "Zone d'affichage des dés",
+    "DICESONICE.RollableAreaConfigTitle": "Zone d'affichage des dés",
+    "DICESONICE.RollableAreaConfigHint": "Limiter l'affichage des dés à une partie de l'écran. Ce paramètre n'affectera pas les autres joueurs.",
+    "DICESONICE.RollableAreaText": "Zone d'affichage",
+    "DICESONICE.RollableAreaConfigDescription1": "Redimensionnez et/ou déplacez la zone orange pour définir la \"zone d'affichage\" dans laquelle l'animation des dés en 3D sera visible.",
+    "DICESONICE.RollableAreaConfigDescription3": "Lorsqu'une zone d'affichage est active, le redimensionnement de la fenêtre n'entraîne pas automatiquement le redimensionnement de la zone d'affichage. Vous devrez rétablir ou redimensionner la zone vous-même.",
+    "DICESONICE.RollableAreaConfigDescription2": "Appuyez sur \"Appliquer\" pour enregistrer vos modifications ou appuyez sur \"Rétablir\" pour revenir aux paramètres automatiques.",
+    "DICESONICE.Restore": "Rétablir"
 }

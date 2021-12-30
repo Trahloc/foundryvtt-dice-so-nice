@@ -217,21 +217,31 @@
 
 /***** Rollable Area Config ******/
 
-.rollable-area {
+.dice-so-nice .dsn-warning {
+    font-weight: bold;
+    margin: 0.5em 0;
+}
+
+.dice-so-nice .dsn-warning::before {
+    content: "⚠️";
+    font-weight: normal;
+}
+
+.dice-so-nice.rollable-area {
     position: absolute;
     background: rgba(255, 255, 255, 0.5);
     z-index: 10000;
     cursor: move;
 }
 
-.rollable-area .resizers {
+.dice-so-nice.rollable-area .resizers {
     width: 100%;
     height: 100%;
     border: 4px solid #ff6300;
     box-sizing: border-box;
 }
 
-.rollable-area .resizers .resizer {
+.dice-so-nice.rollable-area .resizers .resizer {
     width: 20px;
     height: 20px;
     border-radius: 50%;
@@ -240,31 +250,31 @@
     position: absolute;
 }
 
-.rollable-area .resizers .resizer.nw {
+.dice-so-nice.rollable-area .resizers .resizer.nw {
     left: -8px;
     top: -8px;
     cursor: nwse-resize;
 }
 
-.rollable-area .resizers .resizer.ne {
+.dice-so-nice.rollable-area .resizers .resizer.ne {
     right: -8px;
     top: -8px;
     cursor: nesw-resize;
 }
 
-.rollable-area .resizers .resizer.sw {
+.dice-so-nice.rollable-area .resizers .resizer.sw {
     left: -8px;
     bottom: -8px;
     cursor: nesw-resize;
 }
 
-.rollable-area .resizers .resizer.se {
+.dice-so-nice.rollable-area .resizers .resizer.se {
     right: -8px;
     bottom: -8px;
     cursor: nwse-resize;
 }
 
-.rollable-area .resizers .info {
+.dice-so-nice.rollable-area .resizers .info {
     position: absolute;
     top: 50%;
     left: 50%;

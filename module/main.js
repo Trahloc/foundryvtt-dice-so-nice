@@ -306,7 +306,7 @@ Hooks.on("renderChatMessage", (message, html, data) => {
     if (game.dice3d && game.dice3d.messageHookDisabled) {
         return;
     }
-    if (message._dice3danimating) {
+    if (message._dice3danimating && !game.settings.get("dice-so-nice", "immediatelyDisplayChatMessages")) {
         html.hide();
     }
 });
