@@ -47,7 +47,7 @@ export const DiceSFXManager = {
             Object.values(DiceSFXManager.SFX_MODE_CLASS).forEach((sfx)=>{
                 if(sfx.id.startsWith("PlayConfettiStrength") && (!game.modules.get("confetti") || !game.modules.get("confetti").active))
                     return;
-                DiceSFXManager.SFX_MODE_LIST[sfx.id] = sfx.name;
+                DiceSFXManager.SFX_MODE_LIST[sfx.id] = sfx.specialEffectName;
             });
         }
 
@@ -76,7 +76,7 @@ export const DiceSFXManager = {
         });
     },
     addSFXMode : async function(sfx){
-        if(sfx.id && sfx.name && !sfx.initialized){
+        if(sfx.id && sfx.specialEffectName && !sfx.initialized){
             DiceSFXManager.SFX_CLASS[sfx.id] = sfx;
             sfx.initialized = true;
             await sfx.init();

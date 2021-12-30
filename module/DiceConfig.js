@@ -297,7 +297,7 @@ export class DiceConfig extends FormApplication {
                     if (el.userData != "d10")
                         denominationList.push(el.userData);
                 });
-                let roll = new Roll(denominationList.join("+")).roll();
+                let roll = new Roll(denominationList.join("+")).evaluate({ async:false});
                 let data = new DiceNotation(roll);
 
                 let specialEffects = this.getShowcaseSFX();

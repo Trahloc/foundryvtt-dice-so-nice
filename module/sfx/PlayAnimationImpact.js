@@ -4,7 +4,7 @@ import * as THREE from '../libs/three.module.js';
 
 export class PlayAnimationImpact extends DiceSFX {
     static id = "PlayAnimationImpact";
-    static name = "DICESONICE.PlayAnimationImpact";
+    static specialEffectName = "DICESONICE.PlayAnimationImpact";
     static sound = "modules/dice-so-nice/sfx/sounds/hit_glass.mp3";
     static planeImpact = null;
     static duration = 0.1;
