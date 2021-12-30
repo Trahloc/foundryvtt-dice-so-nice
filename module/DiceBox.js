@@ -261,7 +261,7 @@ export class DiceBox {
 				this.pmremGenerator.compileEquirectangularShader();
 
 				new RGBELoader()
-					.setDataType(THREE.UnsignedByteType)
+					.setDataType(THREE.HalfFloatType)
 					.setPath('modules/dice-so-nice/textures/equirectangular/')
 					.load('foyer.hdr', function (texture) {
 						this.renderer.scopedTextureCache.textureCube = this.pmremGenerator.fromEquirectangular(texture).texture;

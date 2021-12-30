@@ -7,7 +7,6 @@ export class RollableAreaConfig extends FormApplication {
             title: game.i18n.localize("DICESONICE.RollableAreaConfigTitle"),
             template: "modules/dice-so-nice/templates/rollable-area-config.html",
             width: 280,
-            height: 230,
             top: 70,
             left: window.innerWidth - 290
         });
@@ -15,7 +14,7 @@ export class RollableAreaConfig extends FormApplication {
 
     render(force, context={}) {
         this.area = $(`
-            <div class='rollable-area'>
+            <div class='dice-so-nice rollable-area'>
                 <div class='resizers'>
                     <div class='resizer nw'></div>
                     <div class='resizer ne'></div>
