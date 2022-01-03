@@ -1,7 +1,6 @@
 import { DiceSFX } from '../DiceSFX.js';
-import * as THREE from '../libs/three.module.js';
+import * as THREE from 'three.module.js';
 import { Proton } from '../libs/three-modules/three.proton.js';
-import { DiceSFXManager } from '../DiceSFXManager.js';
 
 export class PlayAnimationParticleVortex extends DiceSFX {
     static id = "PlayAnimationParticleVortex";

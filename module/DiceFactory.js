@@ -2,8 +2,8 @@ import {DicePreset} from './DicePreset.js';
 import {BASE_PRESETS_LIST, EXTRA_PRESETS_LIST} from './DiceDefaultPresets.js';
 import {DiceColors, DICE_SCALE, COLORSETS} from './DiceColors.js';
 import {DICE_MODELS} from './DiceModels.js';
-import * as THREE from './libs/three.module.js';
-import { GLTFLoader } from './libs/three-modules/GLTFLoader.js';
+import * as THREE from 'three.module.js';
+import { GLTFLoader } from 'GLTFLoader.js';
 export class DiceFactory {
 
 	constructor() {

@@ -10,16 +10,20 @@
     "type": "git",
     "url": "git+https://gitlab.com/riccisi/foundryvtt-dice-so-nice.git"
   },
-  "author": "JDM",
+  "author": "Simone, JDW",
   "license": "CC-BY-4.0",
   "bugs": {
     "url": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/issues"
   },
   "homepage": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice#readme",
   "devDependencies": {
+    "@rollup/plugin-node-resolve": "^13.1.2",
     "rollup": "^2.58.3",
     "rollup-plugin-copy": "^3.4.0",
     "rollup-plugin-sourcemaps": "^0.6.3",
     "rollup-plugin-terser": "^7.0.2"
+  },
+  "dependencies": {
+    "three": "^0.136.0"
   }
 }

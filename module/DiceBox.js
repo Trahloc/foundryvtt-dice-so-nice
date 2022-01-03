@@ -1,9 +1,9 @@
 import { DICE_MODELS } from './DiceModels.js';
-import { RGBELoader } from './libs/three-modules/RGBELoader.js';
 import { DiceSFXManager } from './DiceSFXManager.js';
-//import {GLTFExporter} from './libs/three-modules/GLTFExporter.js';
 import { RendererStats } from './libs/three-modules/threex.rendererstats.js';
-import * as THREE from './libs/three.module.js';
+//import {GLTFExporter} from 'GLTFExporter.js';
+import { RGBELoader } from 'RGBELoader.js';
+import * as THREE from 'three.module.js';
 
 export class DiceBox {
 
@@ -1229,58 +1229,6 @@ export class DiceBox {
 					geo.setFromPoints(points);
 					geo.computeVertexNormals();
 					mesh = new THREE.Mesh(geo, currentMaterial);
-					break;
-
-				case CANNON.Shape.types.HEIGHTFIELD:
-					var geometry = new THREE.Geometry();
-
-					var v0 = new CANNON.Vec3();
-					var v1 = new CANNON.Vec3();
-					var v2 = new CANNON.Vec3();
-					for (var xi = 0; xi < shape.data.length - 1; xi++) {
-						for (var yi = 0; yi < shape.data[xi].length - 1; yi++) {
-							for (var k = 0; k < 2; k++) {
-								shape.getConvexTrianglePillar(xi, yi, k === 0);
-								v0.copy(shape.pillarConvex.vertices[0]);
-								v1.copy(shape.pillarConvex.vertices[1]);
-								v2.copy(shape.pillarConvex.vertices[2]);
-								v0.vadd(shape.pillarOffset, v0);
-								v1.vadd(shape.pillarOffset, v1);
-								v2.vadd(shape.pillarOffset, v2);
-								geometry.vertices.push(
-									new THREE.Vector3(v0.x, v0.y, v0.z),
-									new THREE.Vector3(v1.x, v1.y, v1.z),
-									new THREE.Vector3(v2.x, v2.y, v2.z)
-								);
-								var i = geometry.vertices.length - 3;
-								geometry.faces.push(new THREE.Face3(i, i + 1, i + 2));
-							}
-						}
-					}
-					geometry.computeBoundingSphere();
-					geometry.computeFaceNormals();
-					mesh = new THREE.Mesh(geometry, currentMaterial);
-					break;
-
-				case CANNON.Shape.types.TRIMESH:
-					var geometry = new THREE.Geometry();
-
-					var v0 = new CANNON.Vec3();
-					var v1 = new CANNON.Vec3();
-					var v2 = new CANNON.Vec3();
-					for (var i = 0; i < shape.indices.length / 3; i++) {
-						shape.getTriangleVertices(i, v0, v1, v2);
-						geometry.vertices.push(
-							new THREE.Vector3(v0.x, v0.y, v0.z),
-							new THREE.Vector3(v1.x, v1.y, v1.z),
-							new THREE.Vector3(v2.x, v2.y, v2.z)
-						);
-						var j = geometry.vertices.length - 3;
-						geometry.faces.push(new THREE.Face3(j, j + 1, j + 2));
-					}
-					geometry.computeBoundingSphere();
-					geometry.computeFaceNormals();
-					mesh = new THREE.Mesh(geometry, currentMaterial);
 					break;
 
 				default:

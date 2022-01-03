@@ -7,7 +7,7 @@
  * http://www.opensource.org/licenses/mit-license
  *
  */
-import * as THREE from '../three.module.js';
+import * as THREE from 'three.module.js';
     //the max particle number in pool
     Proton.POOL_MAX = 500;
     Proton.TIME_STEP = 60;
