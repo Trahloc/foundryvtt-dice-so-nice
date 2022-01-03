@@ -1,0 +1,25 @@
+{
+  "name": "foundryvtt-dice-so-nice",
+  "version": "4.2.2",
+  "description": "Adds the ability to show a nice 3D dice simulation when a roll is made.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/riccisi/foundryvtt-dice-so-nice.git"
+  },
+  "author": "JDM",
+  "license": "CC-BY-4.0",
+  "bugs": {
+    "url": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/issues"
+  },
+  "homepage": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice#readme",
+  "devDependencies": {
+    "rollup": "^2.58.3",
+    "rollup-plugin-copy": "^3.4.0",
+    "rollup-plugin-sourcemaps": "^0.6.3",
+    "rollup-plugin-terser": "^7.0.2"
+  }
+}
