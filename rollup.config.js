@@ -2,6 +2,7 @@ import sourcemaps from "rollup-plugin-sourcemaps";
 import { terser } from "rollup-plugin-terser";
 import copy from "rollup-plugin-copy";
 import { nodeResolve } from '@rollup/plugin-node-resolve';
+import del from 'rollup-plugin-delete';
 
 const staticFiles = [
   { name: "css" },
@@ -23,15 +24,21 @@ const staticFiles = [
  * @type {import('rollup').RollupOptions}
  */
 const config = {
-  input: "module/main.js",
+  input: {
+    "main": "module/main.js",
+    "DiceColors": "module/DiceColors.js",
+    "Utils": "module/Utils.js"
+  },
   output: {
     dir: "dist",
     format: "es",
-    sourcemap: true,
-    minifyInternalExports:false,
-    preserveModules: true, // remove this to bundle into a single file, cannon.min.js and select2.min.js will still be copied over as-is
+    sourcemap: true
   },
   plugins: [
+    del({
+      targets: 'dist/*',
+      runOnce: true
+    }),
     nodeResolve(),
     sourcemaps(),
     process.env.NODE_ENV === "production" && terser({ ecma: 2020, keep_fnames: true }),
@@ -41,7 +48,7 @@ const config = {
         dest: `dist${file.folder ? `/${file.folder}` : ""}`,
       })),
     }),
-  ],
+  ]
 };
 
 module.exports = config;

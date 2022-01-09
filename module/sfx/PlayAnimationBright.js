@@ -1,5 +1,5 @@
 import { DiceSFX } from '../DiceSFX.js';
-import * as THREE from '../libs/three.module.js';
+import * as THREE from 'three';
 
 export class PlayAnimationBright extends DiceSFX {
     static id = "PlayAnimationBright";
@@ -9,7 +9,7 @@ export class PlayAnimationBright extends DiceSFX {
     static sound = "modules/dice-so-nice/sfx/sounds/bright.mp3";
     /**@override init */
     static async init() {
-        PlayAnimationBright.brightColor = new THREE.Color(0.4,0.4,0.4);
+        PlayAnimationBright.brightColor = new THREE.Color(0.3,0.3,0.3);
         this.glowingMesh=null;
         game.audio.pending.push(function(){
             AudioHelper.preloadSound(PlayAnimationBright.sound);
@@ -29,31 +29,10 @@ export class PlayAnimationBright extends DiceSFX {
         } else {
             return false;
         }
-        if(!this.glowingMesh.material.emissiveMap && !this.glowingMesh.material.bumpMap)
+        if(!this.glowingMesh.material.emissiveMap)
             return false;
         this.clock = new THREE.Clock();
         this.baseColor = this.glowingMesh.material.emissive.clone();
-        this.baseMaterial = this.glowingMesh.material;
-        this.glowingMesh.material = this.baseMaterial.clone();
-        if(!this.glowingMesh.material.emissiveMap && this.glowingMesh.material.bumpMap){
-            //Change the emissive map shader to highlight black instead of white
-            this.glowingMesh.material.onBeforeCompile = (shader) => {
-                shader.fragmentShader = shader.fragmentShader.replace(
-                    '#include <emissivemap_fragment>',
-                    [
-                        '#ifdef USE_EMISSIVEMAP',
-                        'vec4 emissiveColorOg = texture2D( emissiveMap, vUv );',
-                        'vec4 emissiveColor = vec4(1.0 - emissiveColorOg.r,1.0 -emissiveColorOg.g,1.0 -emissiveColorOg.b,1);',
-                        'emissiveColor.rgb = emissiveMapTexelToLinear( emissiveColor ).rgb;',
-                        'totalEmissiveRadiance *= emissiveColor.rgb;',
-                        '#endif'
-                    ].join('\n')
-                );
-            };
-            if(this.glowingMesh.material.bumpMap)
-                this.glowingMesh.material.emissiveMap = this.glowingMesh.material.bumpMap;
-            this.glowingMesh.material.emissiveIntensity = 1.5;
-        }
         AudioHelper.play({
             src: PlayAnimationBright.sound,
             volume: this.volume
@@ -75,9 +54,6 @@ export class PlayAnimationBright extends DiceSFX {
     }
 
     destroy(){
-        let sfxMaterial = this.glowingMesh.material;
-        this.glowingMesh.material = this.baseMaterial;
-        sfxMaterial.dispose();
         this.destroyed = true;
     }
 }

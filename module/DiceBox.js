@@ -1,9 +1,15 @@
 import { DICE_MODELS } from './DiceModels.js';
 import { DiceSFXManager } from './DiceSFXManager.js';
-import { RendererStats } from './libs/three-modules/threex.rendererstats.js';
-//import {GLTFExporter} from 'GLTFExporter.js';
-import { RGBELoader } from 'RGBELoader.js';
-import * as THREE from 'three.module.js';
+import { RendererStats } from './libs/threex.rendererstats.js';
+//import {GLTFExporter} from 'three/examples/jsm/loaders/exporters/GLTFExporter.js';
+import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+import { SMAAPass } from 'three/examples/jsm/postprocessing/SMAAPass.js';
+
+import * as THREE from 'three';
+import { TransparentUnrealBloomPass } from './libs/TransparentUnrealBloomPass.js';
 
 export class DiceBox {
 
@@ -99,6 +105,7 @@ export class DiceBox {
 
 		this.rethrowFunctions = {};
 		this.afterThrowFunctions = {};
+
 	}
 
 	preloadSounds() {
@@ -200,7 +207,7 @@ export class DiceBox {
 			this.renderer.shadowMap.type = this.config.shadowQuality == "high" ? THREE.PCFSoftShadowMap : THREE.PCFShadowMap;
 			this.renderer.setClearColor(0x000000, 0);
 
-			this.setDimensions(this.config.dimensions);
+			this.setScene(this.config.dimensions);
 
 			this.world_sim.gravity.set(0, 0, -9.8 * 800);
 			this.world_sim.broadphase = new CANNON.NaiveBroadphase();
@@ -243,7 +250,7 @@ export class DiceBox {
             this.jointBody.collisionFilterMask = 0;
             this.world_sim.addBody(this.jointBody)
 
-			this.renderer.render(this.scene, this.camera);
+			//this.renderer.render(this.scene, this.camera);
 			resolve();
 		});
 	}
@@ -266,6 +273,7 @@ export class DiceBox {
 					.load('foyer.hdr', function (texture) {
 						this.renderer.scopedTextureCache.textureCube = this.pmremGenerator.fromEquirectangular(texture).texture;
 						this.scene.environment = this.renderer.scopedTextureCache.textureCube;
+						//this.scene.background = this.renderer.scopedTextureCache.textureCube;
 						texture.dispose();
 						this.pmremGenerator.dispose();
 						resolve();
@@ -285,7 +293,7 @@ export class DiceBox {
 		});
 	}
 
-	setDimensions(dimensions) {
+	setScene(dimensions) {
 		this.display.currentWidth = this.container.clientWidth / 2;
 		this.display.currentHeight = this.container.clientHeight / 2;
 
@@ -368,7 +376,6 @@ export class DiceBox {
 		this.light.shadow.camera.bottom = - d;
 		this.scene.add(this.light);
 
-
 		if (this.desk)
 			this.scene.remove(this.desk);
 
@@ -379,7 +386,53 @@ export class DiceBox {
 		this.desk.position.set(0, 0, -1);
 		this.scene.add(this.desk);
 
-		this.renderer.render(this.scene, this.camera);
+		let renderScene = new RenderPass(this.scene, this.camera);
+		renderScene.clearAlpha = 1;
+		const canvasSize = new THREE.Vector2(this.display.currentWidth * 2, this.display.currentHeight * 2);
+		let bloomPass = new TransparentUnrealBloomPass(canvasSize, 2, 0.4, 0);
+
+		this.bloomComposer = new EffectComposer(this.renderer);
+		this.bloomComposer.renderToScreen = false;
+		this.bloomComposer.addPass(renderScene);
+		this.bloomComposer.addPass(bloomPass);
+
+		let finalPass = new ShaderPass(
+			new THREE.ShaderMaterial({
+				uniforms: {
+					baseTexture: { value: null },
+					bloomTexture: { value: this.bloomComposer.renderTarget2.texture },
+				},
+				vertexShader: `
+					varying vec2 vUv;
+					void main() {
+						vUv = uv;
+						gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+					}
+				`,
+				fragmentShader: `
+					uniform sampler2D baseTexture;
+					uniform sampler2D bloomTexture;
+					varying vec2 vUv;
+					void main() {
+						vec4 base = texture2D( baseTexture, vUv );
+						vec4 bloom = texture2D( bloomTexture, vUv );
+						gl_FragColor = vec4(base.rgb + ( vec3( 1.0 ) * bloom.rgb ), bloom.a);
+					}
+				`,
+				defines: {}
+			}), "baseTexture"
+		);
+		//( texture2D( baseTexture, vUv ) + vec4( 1.0 ) * texture2D( bloomTexture, vUv ) );
+		finalPass.needsSwap = true;
+		this.finalComposer = new EffectComposer(this.renderer);
+		this.finalComposer.addPass(renderScene);
+		this.finalComposer.addPass(finalPass);
+
+		let size = canvasSize.multiplyScalar(this.renderer.getPixelRatio());
+		let AApass = new SMAAPass(size.x, size.y);
+		AApass.renderToScreen = true;
+		this.finalComposer.addPass(AApass);
+		//this.renderer.render(this.scene, this.camera);
 	}
 
 	async update(config) {
@@ -822,7 +875,7 @@ export class DiceBox {
 			}
 		}
 	}
-
+	//This is the render loop
 	animateThrow() {
 		this.animstate = 'throw';
 		let time = (new Date()).getTime();
@@ -904,7 +957,8 @@ export class DiceBox {
 
 		if (this.isVisible && (this.allowInteractivity || this.animatedDiceDetected || neededSteps || DiceSFXManager.renderQueue.length)){
 			DiceSFXManager.renderSFX();
-			this.renderer.render(this.scene, this.camera);
+
+			this.renderScene();
 		}
 		if(this.rendererStats)
 			this.rendererStats.update(this.renderer);
@@ -978,8 +1032,19 @@ export class DiceBox {
 		} else {
 			this.removeTicker(this.animateSelector);
 		}
-		this.renderer.render(this.scene, this.camera);
+
+		this.renderScene();
+
 		this.isVisible = false;
+	}
+
+	renderScene(){
+		game.dice3d.uniforms.globalBloom.value = 1;
+		if(!this.finalComposer)
+			return;
+		this.bloomComposer.render();
+		game.dice3d.uniforms.globalBloom.value = 0;
+		this.finalComposer.render();
 	}
 
 	clearScene() {
@@ -1141,7 +1206,7 @@ export class DiceBox {
 			this.removeTicker(this.animateSelector);
 			canvas.app.ticker.add(this.animateSelector, this);
 		}
-		else this.renderer.render(this.scene, this.camera);
+		else this.renderScene();
 		setTimeout(() => {
 			this.scene.traverse(object => {
 				if (object.type === 'Mesh') object.material.needsUpdate = true;
@@ -1166,7 +1231,7 @@ export class DiceBox {
 					this.diceList[i].rotation.z += angle_change / 10;
 				}
 			}
-			this.renderer.render(this.scene, this.camera);
+			this.renderScene();
 		}
 	}
 

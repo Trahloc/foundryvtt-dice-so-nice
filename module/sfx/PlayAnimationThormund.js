@@ -1,5 +1,5 @@
 import { DiceSFX } from '../DiceSFX.js';
-import * as THREE from 'three.module.js';
+import * as THREE from 'three';
 
 
 export class PlayAnimationThormund extends DiceSFX {

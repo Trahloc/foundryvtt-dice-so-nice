@@ -1,4 +1,5 @@
 
+import { ShaderUtils } from './ShaderUtils';
 export class DicePreset {
 
 	constructor(type, shape = '') {
@@ -12,7 +13,9 @@ export class DicePreset {
 		this.labels = [];
 		this.valueMap = null;
 		this.values = [];
-		this.normals = [];
+		this.bumps = [];
+		this.emissiveMaps = [];
+		this.emissive = 0x000000;
 		this.mass = 300;
 		this.inertia = 13;
 		this.geometry = null;
@@ -74,10 +77,18 @@ export class DicePreset {
 		} else {
 			Array.prototype.push.apply(tab, faces)
 		}
-		if (type == "labels")
-			this.labels = tab;
-		else
-			this.normals = tab;
+
+		switch(type){
+			case "labels":
+				this.labels = tab;
+				break;
+			case "bumps":
+				this.bumps = tab;
+				break;
+			case "emissive":
+				this.emissiveMaps = tab;
+				break;
+		}
 	}
 
 	setLabels(labels) {
@@ -86,8 +97,14 @@ export class DicePreset {
 		this.modelLoading=false;
 	}
 
-	setBumpMaps(normals) {
-		this.normals = normals;
+	setBumpMaps(bumps) {
+		this.bumps = bumps;
+		this.modelLoaded=false;
+		this.modelLoading=false;
+	}
+
+	setEmissiveMaps(emissiveMaps) {
+		this.emissiveMaps = emissiveMaps;
 		this.modelLoaded=false;
 		this.modelLoading=false;
 	}
@@ -98,13 +115,20 @@ export class DicePreset {
 				let textures;
 				let type;
 				let textureTypeLoaded = 0;
-				for(let i = 0; i < 2;i++){
-					if(i == 0){
-						textures = this.labels;
-						type = "labels";
-					} else {
-						textures = this.normals;
-						type = "bump";
+				for(let i = 0; i < 3;i++){
+					switch(i){
+						case 0:
+							textures = this.labels;
+							type = "labels";
+							break;
+						case 1:
+							textures = this.bumps;
+							type = "bumps";
+							break;
+						case 2:
+							textures = this.emissiveMaps;
+							type = "emissive";
+							break;
 					}
 					let loadedImages = 0;
 					let numImages = textures.length;
@@ -123,7 +147,7 @@ export class DicePreset {
 						imgElements[i].onload = function(){
 							if (++loadedImages >= numImages) {
 								this.registerFaces(imgElements, imgElements.textureType);
-								if(textureTypeLoaded < 1)
+								if(textureTypeLoaded < 2)
 									textureTypeLoaded++;
 								else{
 									resolve();
@@ -135,7 +159,7 @@ export class DicePreset {
 					}
 					if (!hasTextures){
 						this.registerFaces(imgElements, type);
-						if(textureTypeLoaded < 1)
+						if(textureTypeLoaded < 2)
 							textureTypeLoaded++;
 						else{
 							resolve();
@@ -169,6 +193,7 @@ export class DicePreset {
 					gltf.scene.traverse(function (node) {
 						if (node.isMesh) {
 							node.castShadow = true; 
+							node.material.onBeforeCompile = ShaderUtils.selectiveBloomShaderFragment;
 						}
 					});
 					this.model = gltf;

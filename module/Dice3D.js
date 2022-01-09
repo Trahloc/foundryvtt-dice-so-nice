@@ -225,6 +225,12 @@ import { Utils } from './Utils.js';
             "board": null,
             "showcase": null
         };
+        this.uniforms = {
+            globalBloom: { value: 1 },
+            bloomStrength: { value: 2 },
+            bloomRadius: { value: 0.4 },
+            bloomThreshold: { value: 0 }
+        };
         this.hiddenAnimationQueue = [];
         this.defaultShowExtraDice = Dice3D.DEFAULT_OPTIONS.showExtraDice;
         this._buildCanvas();

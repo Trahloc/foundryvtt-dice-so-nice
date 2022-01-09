@@ -2,8 +2,9 @@ import {DicePreset} from './DicePreset.js';
 import {BASE_PRESETS_LIST, EXTRA_PRESETS_LIST} from './DiceDefaultPresets.js';
 import {DiceColors, DICE_SCALE, COLORSETS} from './DiceColors.js';
 import {DICE_MODELS} from './DiceModels.js';
-import * as THREE from 'three.module.js';
-import { GLTFLoader } from 'GLTFLoader.js';
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { ShaderUtils } from './ShaderUtils';
 export class DiceFactory {
 
 	constructor() {
@@ -341,6 +342,12 @@ export class DiceFactory {
 		
 		if(dice.bumpMaps && dice.bumpMaps.length)
 			preset.setBumpMaps(dice.bumpMaps);
+
+		if(dice.emissiveMaps && dice.emissiveMaps.length)
+			preset.setEmissiveMaps(dice.emissiveMaps);
+
+		if(dice.emissive)
+			preset.emissive = dice.emissive;
 		this.register(preset);
 
 		if(dice.font && !this.fontFamilies.includes(dice.font)){
@@ -378,7 +385,9 @@ export class DiceFactory {
 			if(type == null || material.substr(0,type.length) == type){
 				this.baseTextureCache[material].map.dispose();
 				if(this.baseTextureCache[material].bumpMap)
-				this.baseTextureCache[material].bumpMap.dispose();
+					this.baseTextureCache[material].bumpMap.dispose();
+				if(this.baseTextureCache[material].emissiveMap)
+					this.baseTextureCache[material].emissiveMap.dispose();
 				this.baseTextureCache[material].dispose();
 				delete this.baseTextureCache[material];
 			}
@@ -530,7 +539,6 @@ export class DiceFactory {
 	}
 
 	createMaterials(scopedTextureCache, baseTextureCacheString, diceobj, materialData) {
-		//TODO : createMaterials
 		if(this.baseTextureCache[baseTextureCacheString])
 			return this.baseTextureCache[baseTextureCacheString];
 
@@ -586,6 +594,9 @@ export class DiceFactory {
 		let contextBump = canvasBump.getContext("2d", {alpha: true});
 		contextBump.globalAlpha = 0;
 
+		let canvasEmissive = document.createElement("canvas");
+		let contextEmissive = canvasEmissive.getContext("2d");
+		
 		let labelsTotal = labels.length;
 		let isHeritedFromShape = ["d3","d5","d7"].includes(diceobj.type) || (diceobj.type == "df"&&diceobj.shape == "d6");
 		if(isHeritedFromShape){
@@ -598,7 +609,7 @@ export class DiceFactory {
 		let sizeTexture = 256;
 		let ts = this.calc_texture_size(Math.sqrt(labelsTotal)*sizeTexture, true);
 		
-		canvas.width = canvas.height = canvasBump.width = canvasBump.height = ts;
+		canvas.width = canvas.height = canvasBump.width = canvasBump.height = canvasEmissive.width = canvasEmissive.height = ts;
 		let x = 0;
 		let y = 0;
 		let texturesOnThisLine = 0;
@@ -614,11 +625,11 @@ export class DiceFactory {
 				let texture = {name:"none"};
 				if(dice_texture.composite != "source-over")
 					texture = dice_texture;
-				this.createTextMaterial(context, contextBump, x, y, sizeTexture, diceobj, labels, font, i, texture, materialData);
+				this.createTextMaterial(context, contextBump, contextEmissive, x, y, sizeTexture, diceobj, labels, font, i, texture, materialData);
 			}
 			else
 			{
-				this.createTextMaterial(context, contextBump, x, y, sizeTexture, diceobj, labels, font, i, materialData.texture, materialData);
+				this.createTextMaterial(context, contextBump, contextEmissive, x, y, sizeTexture, diceobj, labels, font, i, materialData.texture, materialData);
 			}
 			texturesOnThisLine++;
 			x += sizeTexture;
@@ -637,14 +648,14 @@ export class DiceFactory {
 					x = 0;
 					texturesOnThisLine = 0;
 				}
-				this.createTextMaterial(context, contextBump, x, y, sizeTexture, diceobj, labels, font, i, materialData.texture, materialData);
+				this.createTextMaterial(context, contextBump, contextEmissive, x, y, sizeTexture, diceobj, labels, font, i, materialData.texture, materialData);
 				texturesOnThisLine++;
 				x += sizeTexture;
 			}
 		}
 
 
-		//var img    = canvas.toDataURL("image/png");
+		//var img    = canvasEmissive.toDataURL("image/png");
 		//document.write('<img src="'+img+'"/>');
 		//generate basetexture for caching
 		if(!this.baseTextureCache[baseTextureCacheString]){
@@ -657,6 +668,12 @@ export class DiceFactory {
 				bumpMap.flipY = false;
 				mat.bumpMap = bumpMap;
 				mat.bumpMap.anisotropy = 4;
+
+				let emissiveMap = new THREE.CanvasTexture(canvasEmissive);
+				emissiveMap.flipY = false;
+				mat.emissiveMap = emissiveMap;
+				mat.emissiveIntensity = 1;
+				mat.emissive = new THREE.Color(diceobj.emissive);
 			}
 		}
 
@@ -673,10 +690,13 @@ export class DiceFactory {
 		mat.transparent = true;
 		mat.depthTest = true;
 		mat.needUpdate = true;
+
+		mat.onBeforeCompile = ShaderUtils.selectiveBloomShaderFragment;
+
 		this.baseTextureCache[baseTextureCacheString] = mat;
 		return mat;
 	}
-	createTextMaterial(context, contextBump, x, y, ts, diceobj, labels, font, index, texture, materialData) {
+	createTextMaterial(context, contextBump, contextEmissive, x, y, ts, diceobj, labels, font, index, texture, materialData) {
 		if (labels[index] === undefined) return null;
 
 		let forecolor = materialData.foreground;
@@ -692,7 +712,8 @@ export class DiceFactory {
 		else
 			text = labels[index];
 
-		let normal = diceobj.normals[index];
+		let bump = diceobj.bumps[index];
+		let emissive = diceobj.emissiveMaps[index];
 		let isTexture = false;
 		let margin = 1.0;
 
@@ -702,6 +723,9 @@ export class DiceFactory {
 
 		contextBump.fillStyle = "#FFFFFF";
 		contextBump.fillRect(x, y, ts, ts);
+
+		contextEmissive.fillStyle = "#000000";
+		contextEmissive.fillRect(x, y, ts, ts);
 
 		//context.rect(x, y, ts, ts);
 		//context.stroke();
@@ -732,6 +756,9 @@ export class DiceFactory {
 		contextBump.shadowOffsetX = 1;
 		contextBump.shadowOffsetY = 1;
 		contextBump.shadowBlur = 3;
+
+		contextEmissive.textAlign = "center";
+		contextEmissive.textBaseline = "middle";
 		
 		if (diceobj.shape != 'd4') {
 			
@@ -739,8 +766,10 @@ export class DiceFactory {
 			if(text instanceof HTMLImageElement){
 				isTexture = true;
 				context.drawImage(text, 0,0,text.width,text.height,x,y,ts,ts);
-				if(normal)
-					contextBump.drawImage(normal, 0,0,text.width,text.height,x,y,ts,ts);
+				if(bump)
+					contextBump.drawImage(bump, 0,0,text.width,text.height,x,y,ts,ts);
+				if(emissive)
+					contextEmissive.drawImage(emissive, 0,0,text.width,text.height,x,y,ts,ts);
 			}
 			else{
 				let fontsize = ts / (1 + 2 * margin);
@@ -777,6 +806,8 @@ export class DiceFactory {
 
 				context.font =  fontsize+ 'pt '+font.type;
 				contextBump.font =  fontsize+ 'pt '+font.type;
+				contextEmissive.font =  fontsize+ 'pt '+font.type;
+
 				var lineHeight = fontsize;
 				
 				let textlines = text.split("\n");
@@ -785,6 +816,7 @@ export class DiceFactory {
 					fontsize = fontsize / textlines.length;
 					context.font =  fontsize+ 'pt '+font.type;
 					contextBump.font =  fontsize+ 'pt '+font.type;
+					contextEmissive.font =  fontsize+ 'pt '+font.type;
 
 					//to find the correct text height for every possible fonts, we have no choice but to use the great (and complex) pixi method
 					//First we create a PIXI.TextStyle object, to pass later to the measure method
@@ -820,9 +852,15 @@ export class DiceFactory {
 						contextBump.strokeStyle = "#555555";
 						contextBump.lineWidth = 5;
 						contextBump.strokeText(textlines[i], textstartx+x, textstarty+y);
+
+						contextEmissive.strokeStyle = "#999999";
+						contextEmissive.lineWidth = 5;
+						contextEmissive.strokeText(textlines[i], textstartx+x, textstarty+y);
+
 						if (textline == '6' || textline == '9') {
 							context.strokeText('  .', textstartx+x, textstarty+y);
 							contextBump.strokeText('  .', textstartx+x, textstarty+y);
+							contextEmissive.strokeText('  .', textstartx+x, textstarty+y);
 						}
 					}
 
@@ -831,9 +869,14 @@ export class DiceFactory {
 
 					contextBump.fillStyle = "#555555";
 					contextBump.fillText(textlines[i], textstartx+x, textstarty+y);
+
+					contextEmissive.fillStyle = "#999999";
+					contextEmissive.fillText(textlines[i], textstartx+x, textstarty+y);
+
 					if (textline == '6' || textline == '9') {
 						context.fillText('  .', textstartx+x, textstarty+y);
 						contextBump.fillText('  .', textstartx+x, textstarty+y);
+						contextEmissive.fillText('  .', textstartx+x, textstarty+y);
 					}
 					textstarty += (lineHeight * 1.5);
 				}
@@ -848,6 +891,7 @@ export class DiceFactory {
 				fontsize *= font.scale;
 			context.font =  fontsize+'pt '+font.type;
 			contextBump.font =  fontsize+'pt '+font.type;
+			contextEmissive.font =  fontsize+'pt '+font.type;
 
 			//draw the numbers
 			let wShift = 1;
@@ -871,6 +915,11 @@ export class DiceFactory {
 					isTexture = true;
 					let textureSize = 60 / (text[i].width / ts);
 					context.drawImage(text[i],0,0,text[i].width,text[i].height,destX-(textureSize/2),destY-(textureSize/2),textureSize,textureSize);
+					//There's an issue with bump texture because they are smaller than the dice face so it causes visual glitches
+					/*if(bump)
+						contextBump.drawImage(text[i],0,0,text[i].width,text[i].height,destX-(textureSize/2),destY-(textureSize/2),textureSize,textureSize);*/
+					if(emissive)
+						contextEmissive.drawImage(text[i],0,0,text[i].width,text[i].height,destX-(textureSize/2),destY-(textureSize/2),textureSize,textureSize);
 				}
 				else{
 					// attempt to outline the text with a meaningful color
@@ -883,6 +932,10 @@ export class DiceFactory {
 						contextBump.strokeStyle = "#555555";
 						contextBump.lineWidth = 5;
 						contextBump.strokeText(text[i], destX, destY);
+
+						contextEmissive.strokeStyle = "#999999";
+						contextEmissive.lineWidth = 5;
+						contextEmissive.strokeText(text[i], destX, destY);
 					}
 
 					//draw label in top middle section
@@ -890,6 +943,8 @@ export class DiceFactory {
 					context.fillText(text[i], destX, destY);
 					contextBump.fillStyle = "#555555";
 					contextBump.fillText(text[i], destX, destY);
+					contextEmissive.fillStyle = "#999999";
+					contextEmissive.fillText(text[i], destX, destY);
 					//var img    = canvas.toDataURL("image/png");
 					//document.write('<img src="'+img+'"/>');
 				}
@@ -902,6 +957,10 @@ export class DiceFactory {
 				contextBump.translate(hw+x, hh+y);
 				contextBump.rotate(Math.PI * 2 / 3);
 				contextBump.translate(-hw-x, -hh-y);
+
+				contextEmissive.translate(hw+x, hh+y);
+				contextEmissive.rotate(Math.PI * 2 / 3);
+				contextEmissive.translate(-hw-x, -hh-y);
 			}
 		}
 	}

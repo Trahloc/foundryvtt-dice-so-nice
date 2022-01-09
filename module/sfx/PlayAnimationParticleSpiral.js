@@ -1,6 +1,6 @@
 import { DiceSFX } from '../DiceSFX.js';
-import * as THREE from 'three.module.js';
-import { Proton } from '../libs/three-modules/three.proton.js';
+import * as THREE from 'three';
+import { Proton } from '../libs/three.proton.js';
 
 export class PlayAnimationParticleSpiral extends DiceSFX {
     static id = "PlayAnimationParticleSpiral";

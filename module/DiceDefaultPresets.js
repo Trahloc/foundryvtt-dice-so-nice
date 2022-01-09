@@ -310,6 +310,12 @@ EXTRA_PRESETS_LIST.push({
         'modules/dice-so-nice/textures/spectrumdice/df-0.webp',
         'modules/dice-so-nice/textures/spectrumdice/df-p.webp'
     ],
+    emissiveMaps:[
+        'modules/dice-so-nice/textures/spectrumdice/df-m.webp',
+        'modules/dice-so-nice/textures/spectrumdice/df-0.webp',
+        'modules/dice-so-nice/textures/spectrumdice/df-p.webp'
+    ],
+    emissive:0xffffff,
     system:"spectrum"
 });
 
@@ -319,6 +325,11 @@ EXTRA_PRESETS_LIST.push({
         'modules/dice-so-nice/textures/spectrumdice/d2-1.webp',
         'modules/dice-so-nice/textures/spectrumdice/d2-2.webp'
     ],
+    emissiveMaps:[
+        'modules/dice-so-nice/textures/spectrumdice/d2-1.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d2-2.webp'
+    ],
+    emissive:0xffffff,
     system:"spectrum"
 });
 
@@ -328,6 +339,11 @@ EXTRA_PRESETS_LIST.push({
         'modules/dice-so-nice/textures/spectrumdice/dc-h.webp',
         'modules/dice-so-nice/textures/spectrumdice/dc-t.webp'
     ],
+    emissiveMaps:[
+        'modules/dice-so-nice/textures/spectrumdice/dc-h.webp',
+        'modules/dice-so-nice/textures/spectrumdice/dc-t.webp'
+    ],
+    emissive:0xffffff,
     system:"spectrum"
 });
 
@@ -339,6 +355,13 @@ EXTRA_PRESETS_LIST.push({
         'modules/dice-so-nice/textures/spectrumdice/d4-3.webp',
         'modules/dice-so-nice/textures/spectrumdice/d4-4.webp'
     ],
+    emissiveMaps:[
+        'modules/dice-so-nice/textures/spectrumdice/d4-1.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d4-2.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d4-3.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d4-4.webp'
+    ],
+    emissive:0xffffff,
     system:"spectrum"
 });
 
@@ -352,6 +375,15 @@ EXTRA_PRESETS_LIST.push({
         'modules/dice-so-nice/textures/spectrumdice/d6-5.webp',
         'modules/dice-so-nice/textures/spectrumdice/d6-6.webp'
     ],
+    emissiveMaps:[
+        'modules/dice-so-nice/textures/spectrumdice/d6-1.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d6-2.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d6-3.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d6-4.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d6-5.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d6-6.webp'
+    ],
+    emissive:0x999999,
     system:"spectrum"
 });
 
@@ -367,6 +399,17 @@ EXTRA_PRESETS_LIST.push({
         'modules/dice-so-nice/textures/spectrumdice/d8-7.webp',
         'modules/dice-so-nice/textures/spectrumdice/d8-8.webp'
     ],
+    emissiveMaps:[
+        'modules/dice-so-nice/textures/spectrumdice/d8-1.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d8-2.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d8-3.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d8-4.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d8-5.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d8-6.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d8-7.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d8-8.webp'
+    ],
+    emissive:0xffffff,
     system:"spectrum"
 });
 
@@ -384,6 +427,19 @@ EXTRA_PRESETS_LIST.push({
         'modules/dice-so-nice/textures/spectrumdice/d10-9.webp',
         'modules/dice-so-nice/textures/spectrumdice/d10-0.webp'
     ],
+    emissiveMaps:[
+        'modules/dice-so-nice/textures/spectrumdice/d10-1.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d10-2.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d10-3.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d10-4.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d10-5.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d10-6.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d10-7.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d10-8.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d10-9.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d10-0.webp'
+    ],
+    emissive:0xffffff,
     system:"spectrum"
 });
 
@@ -403,6 +459,21 @@ EXTRA_PRESETS_LIST.push({
         'modules/dice-so-nice/textures/spectrumdice/d12-11.webp',
         'modules/dice-so-nice/textures/spectrumdice/d12-12.webp'
     ],
+    emissiveMaps:[
+        'modules/dice-so-nice/textures/spectrumdice/d12-1.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d12-2.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d12-3.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d12-4.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d12-5.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d12-6.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d12-7.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d12-8.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d12-9.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d12-10.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d12-11.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d12-12.webp'
+    ],
+    emissive:0xffffff,
     system:"spectrum"
 });
 
@@ -420,6 +491,19 @@ EXTRA_PRESETS_LIST.push({
         'modules/dice-so-nice/textures/spectrumdice/d100-90.webp',
         'modules/dice-so-nice/textures/spectrumdice/d100-00.webp'
     ],
+    emissiveMaps:[
+        'modules/dice-so-nice/textures/spectrumdice/d100-10.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d100-20.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d100-30.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d100-40.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d100-50.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d100-60.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d100-70.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d100-80.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d100-90.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d100-00.webp'
+    ],
+    emissive:0xffffff,
     system:"spectrum"
 });
 
@@ -447,5 +531,28 @@ EXTRA_PRESETS_LIST.push({
         'modules/dice-so-nice/textures/spectrumdice/d20-19.webp',
         'modules/dice-so-nice/textures/spectrumdice/d20-20.webp'
     ],
+    emissiveMaps:[
+        'modules/dice-so-nice/textures/spectrumdice/d20-1.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d20-2.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d20-3.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d20-4.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d20-5.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d20-6.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d20-7.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d20-8.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d20-9.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d20-10.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d20-11.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d20-12.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d20-13.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d20-14.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d20-15.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d20-16.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d20-17.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d20-18.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d20-19.webp',
+        'modules/dice-so-nice/textures/spectrumdice/d20-20.webp'
+    ],
+    emissive:0xffffff,
     system:"spectrum"
 });
