@@ -973,7 +973,7 @@ export class DiceConfig extends FormApplication {
         await game.user.unsetFlag("dice-so-nice", "settings");
 
 
-        let appearance = mergeObject(Dice3D.APPEARANCE(), formData.appearance, { insertKeys: false, insertValues: false });
+        let appearance = mergeObject(Dice3D.APPEARANCE(), formData.appearance, { insertKeys: true, insertValues: false });
         delete formData.appearance;
         let settings = mergeObject(Dice3D.CONFIG(), formData, { insertKeys: false, insertValues: false });
 

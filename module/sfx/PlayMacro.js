@@ -26,7 +26,7 @@ export class PlayMacro extends DiceSFX {
                                         </div>
                                     </div>`);
 
-        dialogContent.data.macroList = game.macros.map(macro => {return {id:macro.id,name:macro.name}});
+        dialogContent.data.macroList = game.macros.filter(macro => macro.testUserPermission(game.user, CONST.DOCUMENT_PERMISSION_LEVELS.OBSERVER)).map(macro => {return {id:macro.id,name:macro.name}});
         dialogContent.data.macroList.sort((a, b) => a.name > b.name && 1 || -1);
         dialogContent.data.macroId = sfxLine.options?sfxLine.options.macroId:null;
         return dialogContent;
