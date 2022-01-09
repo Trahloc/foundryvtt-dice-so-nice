@@ -225,5 +225,14 @@
 
     "DICESONICE.sfxOptionsIsGlobal" : "(Solo GM) Habilita los SFX para todos los jugadores",
     "DICESONICE.sfxOptionsCustomSound" : "Seleccione un fichero de audio",
-    "DICESONICE.sfxOptionsMacro" : "Seleccione una macro"
+    "DICESONICE.sfxOptionsMacro" : "Seleccione una macro",
+
+    "DICESONICE.RollableAreaConfig":  "Configuración del área de lanzamiento",
+    "DICESONICE.RollableAreaConfigTitle": "Ajustes del área de lanzamiento",
+    "DICESONICE.RollableAreaConfigHint": "Define una región de la pantalla en la que se muestra la animación 3D. Esto no afectará al resto de jugadores",
+    "DICESONICE.RollableAreaText": "Área de lanzamiento",
+    "DICESONICE.RollableAreaConfigDescription1": "Cambie el tamaño y/o mueva el área para definir el \"área de lanzamiento\" donde se mostrará la animación 3D",
+    "DICESONICE.RollableAreaConfigDescription3": "Mientras tenga activa un área de lanzamiento, cambiar el tamaño de la ventana no redimensionará automáticamente el área de lanzamiento. Deberá restaurar o volver a definir el área manualmente",
+    "DICESONICE.RollableAreaConfigDescription2": "Haga clic en \"Aplicar\" para guardar los cambios o \"Restaurar\" para volver a los ajustes automáticos",
+    "DICESONICE.Restore": "Restaurar"
 }
