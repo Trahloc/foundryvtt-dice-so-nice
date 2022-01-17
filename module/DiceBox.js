@@ -138,6 +138,8 @@ export class DiceBox {
 	}
 
 	playAudioSprite(source, sprite, selfVolume){
+		if(!source || !source.context)
+			return false;
 		let gainNode = source.context.createGain();
 		gainNode.gain.value = selfVolume * this.volume * game.settings.get("core", "globalInterfaceVolume");
 		const startTime = sprite.start;
@@ -399,7 +401,7 @@ export class DiceBox {
 				type: THREE.FloatType,
 				stencilBuffer: false
 			};
-			
+
 			let composerTarget;
 			if(this.renderer.capabilities.isWebGL2 && this.dicefactory.aa == "smaa")
 				composerTarget = new THREE.WebGLMultisampleRenderTarget(size.x, size.y, options);

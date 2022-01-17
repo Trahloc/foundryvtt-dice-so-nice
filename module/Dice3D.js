@@ -527,7 +527,7 @@ import { TextureLoader } from 'three';
             } else {
 
                 if (synchronize) {
-                    users = users && users.length > 0 ? (users[0].id ? users.map(user => user.id) : users) : users;
+                    users = users && users.length > 0 ? (users[0]?.id ? users.map(user => user.id) : users) : users;
                     game.socket.emit("module.dice-so-nice", { type: "show", data: data, user: user.id, users: users });
                 }
 

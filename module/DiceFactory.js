@@ -721,12 +721,7 @@ export class DiceFactory {
 		if(Array.isArray(texture))
 			texture = texture[Math.floor(Math.random() * texture.length)];
 		
-		let text;
-		if(materialData.isGhost && labels[index] != "")
-			text = "?";
-		else
-			text = labels[index];
-
+		let text = labels[index];
 		let bump = diceobj.bumps[index];
 		let emissive = diceobj.emissiveMaps[index];
 		let isTexture = false;
@@ -776,7 +771,8 @@ export class DiceFactory {
 		contextEmissive.textBaseline = "middle";
 		
 		if (diceobj.shape != 'd4') {
-			
+			if(materialData.isGhost && labels[index] != "")
+				text = "?";
 			//custom texture face
 			if(text instanceof HTMLImageElement){
 				isTexture = true;
@@ -912,6 +908,8 @@ export class DiceFactory {
 			let wShift = 1;
 			let hShift = 1;
 			for (let i=0;i<text.length;i++) {
+				if(materialData.isGhost)
+					text[i] = "?";
 				switch(i){
 					case 0:
 						hShift = 1.13;
