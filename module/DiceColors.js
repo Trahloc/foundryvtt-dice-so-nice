@@ -223,6 +223,18 @@ export const COLORSETS = {
 		texture: 'metal',
 		visibility: 'hidden'
 	},
+	'spectrum_default': {
+		name: 'spectrum_default',
+		description: 'DICESONICE.ColorSpectrumDefault',
+		category: 'DICESONICE.AcquiredTaste',
+		foreground: '#ffffff',
+		background: '#000000',
+		outline: '#ffffff',
+		edge: '#000000',
+		texture: 'none',
+		visibility: 'hidden',
+		material: 'pristine'
+	},
 	'radiant': {
 		name: 'radiant',
 		description: 'DICESONICE.ColorRadiant',

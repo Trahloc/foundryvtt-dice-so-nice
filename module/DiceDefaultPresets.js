@@ -316,6 +316,7 @@ EXTRA_PRESETS_LIST.push({
         'modules/dice-so-nice/textures/spectrumdice/df-p.webp'
     ],
     emissive:0xffffff,
+    colorset: "spectrum_default",
     system:"spectrum"
 });
 
@@ -330,6 +331,7 @@ EXTRA_PRESETS_LIST.push({
         'modules/dice-so-nice/textures/spectrumdice/d2-2.webp'
     ],
     emissive:0xffffff,
+    colorset: "spectrum_default",
     system:"spectrum"
 });
 
@@ -344,6 +346,7 @@ EXTRA_PRESETS_LIST.push({
         'modules/dice-so-nice/textures/spectrumdice/dc-t.webp'
     ],
     emissive:0xffffff,
+    colorset: "spectrum_default",
     system:"spectrum"
 });
 
@@ -362,6 +365,7 @@ EXTRA_PRESETS_LIST.push({
         'modules/dice-so-nice/textures/spectrumdice/d4-4.webp'
     ],
     emissive:0xffffff,
+    colorset: "spectrum_default",
     system:"spectrum"
 });
 
@@ -384,6 +388,7 @@ EXTRA_PRESETS_LIST.push({
         'modules/dice-so-nice/textures/spectrumdice/d6-6.webp'
     ],
     emissive:0x999999,
+    colorset: "spectrum_default",
     system:"spectrum"
 });
 
@@ -410,6 +415,7 @@ EXTRA_PRESETS_LIST.push({
         'modules/dice-so-nice/textures/spectrumdice/d8-8.webp'
     ],
     emissive:0xffffff,
+    colorset: "spectrum_default",
     system:"spectrum"
 });
 
@@ -440,6 +446,7 @@ EXTRA_PRESETS_LIST.push({
         'modules/dice-so-nice/textures/spectrumdice/d10-0.webp'
     ],
     emissive:0xffffff,
+    colorset: "spectrum_default",
     system:"spectrum"
 });
 
@@ -474,6 +481,7 @@ EXTRA_PRESETS_LIST.push({
         'modules/dice-so-nice/textures/spectrumdice/d12-12.webp'
     ],
     emissive:0xffffff,
+    colorset: "spectrum_default",
     system:"spectrum"
 });
 
@@ -504,6 +512,7 @@ EXTRA_PRESETS_LIST.push({
         'modules/dice-so-nice/textures/spectrumdice/d100-00.webp'
     ],
     emissive:0xffffff,
+    colorset: "spectrum_default",
     system:"spectrum"
 });
 
@@ -554,5 +563,6 @@ EXTRA_PRESETS_LIST.push({
         'modules/dice-so-nice/textures/spectrumdice/d20-20.webp'
     ],
     emissive:0xffffff,
+    colorset: "spectrum_default",
     system:"spectrum"
 });

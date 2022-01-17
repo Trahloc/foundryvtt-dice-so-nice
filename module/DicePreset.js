@@ -1,4 +1,5 @@
 
+import { ThinFilmFresnelMap } from './libs/ThinFilmFresnelMap.js';
 import { ShaderUtils } from './ShaderUtils';
 export class DicePreset {
 
@@ -194,6 +195,7 @@ export class DicePreset {
 						if (node.isMesh) {
 							node.castShadow = true; 
 							node.material.onBeforeCompile = ShaderUtils.selectiveBloomShaderFragment;
+							//node.material.onBeforeCompile = ShaderUtils.iridescentShaderFragment;
 						}
 					});
 					this.model = gltf;

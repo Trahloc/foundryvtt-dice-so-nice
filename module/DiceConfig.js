@@ -46,10 +46,21 @@ export class DiceConfig extends FormApplication {
             }),
             fontList: Utils.prepareFontList(),
             colorsetList: Utils.prepareColorsetList(),
+            imageQualityList: Utils.localize({
+                "low": "DICESONICE.Low",
+                "medium": "DICESONICE.Medium",
+                "high": "DICESONICE.High",
+                "custom": "DICESONICE.Custom"
+            }),
             shadowQualityList: Utils.localize({
                 "none": "DICESONICE.None",
                 "low": "DICESONICE.Low",
                 "high": "DICESONICE.High"
+            }),
+            antialiasingList: Utils.localize({
+                "none": "DICESONICE.None",
+                "fxaa": "DICESONICE.FXAA",
+                "smaa": "DICESONICE.SMAA"
             }),
             systemList: Utils.prepareSystemList(),
             soundsSurfaceList: Utils.localize({
@@ -836,7 +847,10 @@ export class DiceConfig extends FormApplication {
             autoscale: false,
             scale: 60,
             shadowQuality: $('[data-shadowQuality]').val(),
+            imageQuality: $('[data-imageQuality]').val(),
+            antialiasing: $('[data-antialiasing]').val(),
             bumpMapping: $('[data-bumpMapping]').is(':checked'),
+            glow: $('[data-glow]').is(':checked'),
             sounds: $('[data-sounds]').is(':checked'),
             throwingForce: $('[data-throwingForce]').val(),
             useHighDPI: $('[data-useHighDPI]').is(':checked'),
@@ -988,13 +1002,14 @@ export class DiceConfig extends FormApplication {
         DiceSFXManager.init();
         ui.notifications.info(game.i18n.localize("DICESONICE.saveMessage"));
 
-        if ((currentSettings.canvasZIndex != settings.canvasZIndex) ||
-            (currentSettings.bumpMapping != settings.bumpMapping) ||
-            (currentSettings.useHighDPI != settings.useHighDPI)) {
+        let reloadRequiredIfChanged = ["canvasZIndex", "bumpMapping", "useHighDPI", "glow", "antialiasing"];
+        let reloadRequired = reloadRequiredIfChanged.some(setting => settings[setting] != currentSettings[setting]);
+
+        if (reloadRequired) {
             window.location.reload();
-        }
-        else
+        } else {
             game.dice3d.update(settings);
+        }
     }
 
     close(options) {

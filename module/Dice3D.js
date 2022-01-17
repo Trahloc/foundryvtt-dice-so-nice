@@ -5,6 +5,8 @@ import { DiceNotation } from './DiceNotation.js';
 import { DiceSFXManager } from './DiceSFXManager.js';
 import { Accumulator } from './Accumulator.js';
 import { Utils } from './Utils.js';
+import { ThinFilmFresnelMap } from './libs/ThinFilmFresnelMap.js';
+import { TextureLoader } from 'three';
 /**
  * Main class to handle 3D Dice animations.
  */
@@ -20,6 +22,7 @@ import { Utils } from './Utils.js';
             autoscale: true,
             scale: 75,
             speed: 1,
+            imageQuality: "high",
             shadowQuality: 'high',
             bumpMapping: true,
             sounds: true,
@@ -28,6 +31,8 @@ import { Utils } from './Utils.js';
             canvasZIndex: 'over',
             throwingForce: 'medium',
             useHighDPI: true,
+            antialiasing: "smaa",
+            glow: true,
             showOthersSFX: true,
             muteSoundSecretRolls:false,
             enableFlavorColorset:true,
@@ -227,10 +232,14 @@ import { Utils } from './Utils.js';
         };
         this.uniforms = {
             globalBloom: { value: 1 },
-            bloomStrength: { value: 2 },
-            bloomRadius: { value: 0.4 },
-            bloomThreshold: { value: 0 }
+            bloomStrength: { value: 1.3 },
+            bloomRadius: { value: 0.3 },
+            bloomThreshold: { value: 0.05 },
+            iridescenceLookUp: { value: new ThinFilmFresnelMap()},
+            iridescenceNoise: { value: new TextureLoader().load( "modules/dice-so-nice/textures/noise-thin-film.webp" )},
+            boost: { value: 1.5 }
         };
+
         this.hiddenAnimationQueue = [];
         this.defaultShowExtraDice = Dice3D.DEFAULT_OPTIONS.showExtraDice;
         this._buildCanvas();

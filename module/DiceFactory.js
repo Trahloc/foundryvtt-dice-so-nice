@@ -18,22 +18,21 @@ export class DiceFactory {
 		this.cache_hits = 0;
 		this.cache_misses = 0;
 
-		this.bumpMapping = true;
+		this.realisticLighting = true;
 
 		this.loaderGLTF = new GLTFLoader();
 
 		this.baseTextureCache = {};
 		this.fontFamilies = [
 			"Arial",
+			"Arial Black",
 			"Verdana",
 			"Trebuchet MS",
 			"Times New Roman",
-			"Didot",
-			"American Typewriter",
-			"Andale Mono",
-			"Courier",
-			"Bradley Hand",
-			"Luminari"
+			"Tahoma",
+			"Georgia",
+			"Papyrus",
+			"Courier New"
 		];
 
 		// fixes texture rotations on specific dice models
@@ -72,7 +71,7 @@ export class DiceFactory {
 	}
 
 	initializeMaterials(){
-		if(this.bumpMapping){
+		if(this.realisticLighting){
 			this.material_options = {
 				'plastic': {
 					'type':"standard",
@@ -127,6 +126,17 @@ export class DiceFactory {
 					},
 					'scopedOptions':{
 						roughnessMap : "roughnessMap_fingerprint",
+						envMap : true
+					}
+				},
+				'pristine': {
+					'type':'standard',
+					'options': {
+						metalness: 0,
+						roughness: 0.6,
+						envMapIntensity:1
+					},
+					'scopedOptions':{
 						envMap : true
 					}
 				}
@@ -198,8 +208,12 @@ export class DiceFactory {
 		this.baseScale = scale;
 	}
 
-	setBumpMapping(bumpMapping){
-		this.bumpMapping = bumpMapping;
+	setQualitySettings(config){
+		this.realisticLighting = config.bumpMapping;
+		this.aa = config.antialiasing;
+		this.glow = config.glow;
+		this.useHighDPI = config.useHighDPI;
+		this.shadows = config.shadowQuality != "none";
 	}
 
 	register(diceobj) {
@@ -419,8 +433,8 @@ export class DiceFactory {
 		if(system != "standard"){
 			if(this.systems.hasOwnProperty(system)){
 				diceobj = this.systems[system].dice.find(obj => obj.type == type && obj.shape == model.shape);
-				if(!diceobj){
-					//If it doesn't exist, we look for a similar shape and values
+				if(!diceobj && !['Coin', 'FateDie', 'Die'].includes(model.term)){
+					//If it doesn't exist and is not a core DiceTerm, we look for a similar shape and values
 					diceobj = this.systems[system].dice.find(obj => obj.shape == model.shape && obj.values.length == model.values.length && !model.colorset);
 				}
 			}
@@ -475,7 +489,7 @@ export class DiceFactory {
 
 			if (diceobj.color) {
 				dicemesh.material[0].color = new THREE.Color(diceobj.color);
-				dicemesh.material[0].emissive = new THREE.Color(diceobj.color);
+				//dicemesh.material[0].emissive = new THREE.Color(diceobj.color);
 				dicemesh.material[0].emissiveIntensity = 1;
 				dicemesh.material[0].needsUpdate = true;
 			}
@@ -551,7 +565,7 @@ export class DiceFactory {
 
 		var mat;
 		let materialSelected = this.material_options[materialData.material] ? this.material_options[materialData.material] : this.material_options["plastic"];
-		if(!this.bumpMapping){
+		if(!this.realisticLighting){
 			delete materialSelected.roughnessMap;
 		}
 		switch(materialSelected.type){
@@ -663,7 +677,8 @@ export class DiceFactory {
 			texture.flipY = false;
 			mat.map = texture;
 			mat.map.anisotropy = 4;
-			if(this.bumpMapping){
+
+			if(this.realisticLighting){
 				let bumpMap = new THREE.CanvasTexture(canvasBump);
 				bumpMap.flipY = false;
 				mat.bumpMap = bumpMap;
@@ -681,7 +696,7 @@ export class DiceFactory {
 
 		switch(materialData.material){
 			case "chrome":
-				if(this.bumpMapping)
+				if(this.realisticLighting)
 					mat.metalnessMap = mat.bumpMap;
 				break;
 		}

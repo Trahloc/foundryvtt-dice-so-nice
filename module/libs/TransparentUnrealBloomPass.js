@@ -1,6 +1,7 @@
 import {
 	AdditiveBlending,
 	Color,
+	FloatType,
 	LinearFilter,
 	MeshBasicMaterial,
 	RGBAFormat,
@@ -8,6 +9,7 @@ import {
 	UniformsUtils,
 	Vector2,
 	Vector3,
+	WebGLMultisampleRenderTarget,
 	WebGLRenderTarget
 } from 'three';
 import { Pass, FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass.js';
@@ -35,10 +37,10 @@ class TransparentUnrealBloomPass extends Pass {
 		this.resolution = ( resolution !== undefined ) ? new Vector2( resolution.x, resolution.y ) : new Vector2( 256, 256 );
 
 		// create color only once here, reuse it later inside the render function
-		this.clearColor = new Color( 0, 0, 0 );
+		this.clearColor = new Color( 0, 0, 0);
 
 		// render targets
-		const pars = { minFilter: LinearFilter, magFilter: LinearFilter, format: RGBAFormat };
+		const pars = { minFilter: LinearFilter, magFilter: LinearFilter, format: RGBAFormat, type: FloatType, stencilBuffer: false };
 		this.renderTargetsHorizontal = [];
 		this.renderTargetsVertical = [];
 		this.nMips = 5;
@@ -197,7 +199,6 @@ class TransparentUnrealBloomPass extends Pass {
 	}
 
 	render( renderer, writeBuffer, readBuffer, deltaTime, maskActive ) {
-
 		renderer.getClearColor( this._oldClearColor );
 		this.oldClearAlpha = renderer.getClearAlpha();
 		const oldAutoClear = renderer.autoClear;
