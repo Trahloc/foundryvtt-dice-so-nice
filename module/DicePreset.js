@@ -194,7 +194,7 @@ export class DicePreset {
 					gltf.scene.traverse(function (node) {
 						if (node.isMesh) {
 							node.castShadow = true; 
-							node.material.onBeforeCompile = ShaderUtils.selectiveBloomShaderFragment;
+							node.material.onBeforeCompile = ShaderUtils.applyDiceSoNiceShader;
 							//node.material.onBeforeCompile = ShaderUtils.iridescentShaderFragment;
 						}
 					});

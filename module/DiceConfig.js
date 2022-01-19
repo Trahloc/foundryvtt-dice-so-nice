@@ -38,11 +38,14 @@ export class DiceConfig extends FormApplication {
             textureList: Utils.prepareTextureList(),
             materialList: Utils.localize({
                 "auto": "DICESONICE.MaterialAuto",
-                "plastic": "DICESONICE.MaterialPlastic",
-                "metal": "DICESONICE.MaterialMetal",
+                "chrome": "DICESONICE.MaterialChrome",
                 "glass": "DICESONICE.MaterialGlass",
-                "wood": "DICESONICE.MaterialWood",
-                "chrome": "DICESONICE.MaterialChrome"
+                "iridescent": "DICESONICE.MaterialIridescent",
+                "metal": "DICESONICE.MaterialMetal",
+                "plastic": "DICESONICE.MaterialPlastic",
+                "pristine": "DICESONICE.MaterialPristine",
+                "stone": "DICESONICE.MaterialStone",
+                "wood": "DICESONICE.MaterialWood"
             }),
             fontList: Utils.prepareFontList(),
             colorsetList: Utils.prepareColorsetList(),
@@ -59,8 +62,8 @@ export class DiceConfig extends FormApplication {
             }),
             antialiasingList: Utils.localize({
                 "none": "DICESONICE.None",
-                "fxaa": "DICESONICE.FXAA",
-                "smaa": "DICESONICE.SMAA"
+                "smaa": "DICESONICE.SMAA",
+                "msaa": "DICESONICE.MSAA"
             }),
             systemList: Utils.prepareSystemList(),
             soundsSurfaceList: Utils.localize({

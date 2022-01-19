@@ -7,8 +7,7 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { SMAAPass } from 'three/examples/jsm/postprocessing/SMAAPass.js';
-import { GammaCorrectionShader} from 'three/examples/jsm/shaders/GammaCorrectionShader.js';
-import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader.js';
+import { GammaCorrectionShader } from 'three/examples/jsm/shaders/GammaCorrectionShader.js';
 import { TransparentUnrealBloomPass } from './libs/TransparentUnrealBloomPass.js';
 
 import * as THREE from 'three';
@@ -29,7 +28,7 @@ export class DiceBox {
 		this.running = false;
 		this.allowInteractivity = false;
 		this.raycaster = new THREE.Raycaster();
-		this.blackColor = new THREE.Color(0,0,0);
+		this.blackColor = new THREE.Color(0, 0, 0);
 		this.nbIterationsBetweenRolls = 15;
 
 		this.display = {
@@ -45,8 +44,8 @@ export class DiceBox {
 			pos: new THREE.Vector2(),
 			startDrag: undefined,
 			startDragTime: undefined,
-			constraintDown:false,
-			constraint:null
+			constraintDown: false,
+			constraint: null
 		};
 
 		this.cameraHeight = {
@@ -112,11 +111,11 @@ export class DiceBox {
 	preloadSounds() {
 		//Surfaces
 		fetch(`modules/dice-so-nice/sounds/surfaces.json`).then(res => {
-			res.json().then(json =>{
+			res.json().then(json => {
 				AudioHelper.preloadSound(`modules/dice-so-nice/sounds/${json.resources[0]}`).then(src => this.sounds_table.source = src);
 				Object.entries(json.spritemap).forEach(sound => {
 					let type = sound[0].match(/surface\_([a-z\_]*)/)[1];
-					if(!this.sounds_table[type])
+					if (!this.sounds_table[type])
 						this.sounds_table[type] = [];
 					this.sounds_table[type].push(sound[1]);
 				});
@@ -125,11 +124,11 @@ export class DiceBox {
 
 		//Hits
 		fetch(`modules/dice-so-nice/sounds/dicehit.json`).then(res => {
-			res.json().then(json =>{
+			res.json().then(json => {
 				this.sounds_dice.source = AudioHelper.preloadSound(`modules/dice-so-nice/sounds/${json.resources[0]}`).then(src => this.sounds_dice.source = src);
 				Object.entries(json.spritemap).forEach(sound => {
 					let type = sound[0].match(/dicehit\_([a-z\_]*)/)[1];
-					if(!this.sounds_dice[type])
+					if (!this.sounds_dice[type])
 						this.sounds_dice[type] = [];
 					this.sounds_dice[type].push(sound[1]);
 				});
@@ -137,8 +136,8 @@ export class DiceBox {
 		});
 	}
 
-	playAudioSprite(source, sprite, selfVolume){
-		if(!source || !source.context)
+	playAudioSprite(source, sprite, selfVolume) {
+		if (!source || !source.context)
 			return false;
 		let gainNode = source.context.createGain();
 		gainNode.gain.value = selfVolume * this.volume * game.settings.get("core", "globalInterfaceVolume");
@@ -194,20 +193,20 @@ export class DiceBox {
 				game.dice3dRenderers[this.config.boxType] = this.renderer;
 			}
 
-			if(false && this.config.boxType == "board"){
-				this.rendererStats	= new RendererStats()
+			if (false && this.config.boxType == "board") {
+				this.rendererStats = new RendererStats()
 
-				this.rendererStats.domElement.style.position	= 'absolute';
-				this.rendererStats.domElement.style.left	= '44px';
-				this.rendererStats.domElement.style.bottom	= '178px';
-				this.rendererStats.domElement.style.transform	= 'scale(2)';
-				document.body.appendChild( this.rendererStats.domElement );
+				this.rendererStats.domElement.style.position = 'absolute';
+				this.rendererStats.domElement.style.left = '44px';
+				this.rendererStats.domElement.style.bottom = '178px';
+				this.rendererStats.domElement.style.transform = 'scale(2)';
+				document.body.appendChild(this.rendererStats.domElement);
 			}
 
 			this.container.appendChild(this.renderer.domElement);
 			this.renderer.shadowMap.enabled = this.dicefactory.shadows;
 			this.renderer.shadowMap.type = this.dicefactory.shadows == "high" ? THREE.PCFSoftShadowMap : THREE.PCFShadowMap;
-			this.renderer.setClearColor(0x000000, 0.0); 
+			this.renderer.setClearColor(0x000000, 0.0);
 
 			this.setScene(this.config.dimensions);
 
@@ -246,11 +245,11 @@ export class DiceBox {
 			this.world_sim.addBody(barrier);
 
 			let shape = new CANNON.Sphere(0.1);
-            this.jointBody = new CANNON.Body({ mass: 0 });
-            this.jointBody.addShape(shape);
-            this.jointBody.collisionFilterGroup = 0;
-            this.jointBody.collisionFilterMask = 0;
-            this.world_sim.addBody(this.jointBody)
+			this.jointBody = new CANNON.Body({ mass: 0 });
+			this.jointBody.addShape(shape);
+			this.jointBody.collisionFilterGroup = 0;
+			this.jointBody.collisionFilterMask = 0;
+			this.world_sim.addBody(this.jointBody)
 
 			//this.renderer.render(this.scene, this.camera);
 			resolve();
@@ -265,6 +264,7 @@ export class DiceBox {
 				this.renderer.scopedTextureCache.roughnessMap_fingerprint = textureLoader.load('modules/dice-so-nice/textures/roughnessMap_finger.webp');
 				this.renderer.scopedTextureCache.roughnessMap_wood = textureLoader.load('modules/dice-so-nice/textures/roughnessMap_wood.webp');
 				this.renderer.scopedTextureCache.roughnessMap_metal = textureLoader.load('modules/dice-so-nice/textures/roughnessMap_metal.webp');
+				this.renderer.scopedTextureCache.roughnessMap_stone = textureLoader.load('modules/dice-so-nice/textures/roughnessMap_stone.webp');
 
 				this.pmremGenerator = new THREE.PMREMGenerator(this.renderer);
 				this.pmremGenerator.compileEquirectangularShader();
@@ -303,7 +303,7 @@ export class DiceBox {
 			this.display.containerWidth = dimensions.w;
 			this.display.containerHeight = dimensions.h;
 
-			if(!this.display.currentWidth || !this.display.currentHeight){
+			if (!this.display.currentWidth || !this.display.currentHeight) {
 				this.display.currentWidth = dimensions.w / 2;
 				this.display.currentHeight = dimensions.h / 2;
 			}
@@ -358,7 +358,7 @@ export class DiceBox {
 		this.scene.add(this.light_amb);
 
 		this.light = new THREE.DirectionalLight(this.colors.spotlight, intensity);
-		if(this.config.boxType == "board")
+		if (this.config.boxType == "board")
 			this.light.position.set(-this.display.containerWidth / 10, this.display.containerHeight / 10, maxwidth / 2);
 		else
 			this.light.position.set(0, this.display.containerHeight / 10, maxwidth / 2);
@@ -387,7 +387,7 @@ export class DiceBox {
 		this.desk.receiveShadow = this.dicefactory.shadows;
 		this.desk.position.set(0, 0, -1);
 		this.scene.add(this.desk);
-		if(this.dicefactory.realisticLighting){
+		if (this.dicefactory.realisticLighting) {
 			let renderScene = new RenderPass(this.scene, this.camera);
 			const canvasSize = new THREE.Vector2(this.display.currentWidth * 2, this.display.currentHeight * 2);
 			let bloomPass = new TransparentUnrealBloomPass(canvasSize, game.dice3d.uniforms.bloomStrength.value, game.dice3d.uniforms.bloomRadius.value, game.dice3d.uniforms.bloomThreshold.value);
@@ -403,18 +403,23 @@ export class DiceBox {
 			};
 
 			let composerTarget;
-			if(this.renderer.capabilities.isWebGL2 && this.dicefactory.aa == "smaa")
+
+			// When using postprocessing, the native antialiasing is disabled because it uses a RenderTarget instead of the renderer directly.
+			// We can use a MultisamplingRenderTarget to get around this but it's not supported in WebGL1.
+			// In that case, we offer a software fallback with an SMAA pass.
+			if (this.renderer.capabilities.isWebGL2 && this.dicefactory.aa == "msaa")
 				composerTarget = new THREE.WebGLMultisampleRenderTarget(size.x, size.y, options);
 			else
 				composerTarget = new THREE.WebGLRenderTarget(size.x, size.y, options);
 
-			this.bloomComposer = new EffectComposer(this.renderer,composerTarget);
+			// This EffectComposer is in charge of rendering the Bloom/Glow effect
+			this.bloomComposer = new EffectComposer(this.renderer, composerTarget);
 			this.bloomComposer.renderToScreen = false;
 			this.bloomComposer.addPass(renderScene);
 			this.bloomComposer.addPass(bloomPass);
 
 			//This shader will blend the bloom effect with the scene. Only the alpha from the bloom effect will be used.
-			this.finalPass = new ShaderPass(
+			this.blendingPass = new ShaderPass(
 				new THREE.ShaderMaterial({
 					uniforms: {
 						baseTexture: { value: null },
@@ -440,44 +445,31 @@ export class DiceBox {
 					defines: {}
 				}), "baseTexture"
 			);
+			this.blendingPass.needsSwap = true;
 
-			//Anti-aliasing pass
-			let AApass;
-			if(this.dicefactory.aa != "none"){
-				switch(this.dicefactory.aa) {
-					case "fxaa":
-						AApass = new ShaderPass(FXAAShader);
-
-						AApass.material.uniforms[ 'resolution' ].value.x = 1 / ( size.x );
-						AApass.material.uniforms[ 'resolution' ].value.y = 1 / ( size.y );
-						break;
-					case "smaa":
-						//If the renderer supports webgl2, use the multisample render target
-						if(this.renderer.capabilities.isWebGL2)
-							AApass = {enabled:false};
-						else
-							AApass = new SMAAPass(size.x, size.y);
-						break;
-				}
-
-				AApass.renderToScreen = true;
-			}
-			this.finalPass.needsSwap = true;
-			this.finalComposer = new EffectComposer(this.renderer,composerTarget);
+			// This EffectComposer is in charge of rendering the final image
+			// The blendingPass won't be rendered if no emissive textures are found during the render loop
+			this.finalComposer = new EffectComposer(this.renderer, composerTarget);
 			this.finalComposer.addPass(renderScene);
-			this.finalComposer.addPass(this.finalPass);
+			this.finalComposer.addPass(this.blendingPass);
+
+			//Software Anti-aliasing pass. Should be rendered in a linear space.
+			if (this.dicefactory.aa == "smaa") {
+				let AAPass = new SMAAPass(size.x, size.y);
+				AAPass.renderToScreen = true;
+				this.finalComposer.addPass(AAPass);
+			}
+
+			//Gamma correction pass. Convert the image to a gamma space.
 			this.finalComposer.addPass(gammaPass);
-			if(this.dicefactory.aa != "none" && AApass.enabled !== false)
-				this.finalComposer.addPass(AApass);
-		} else {
-			this.renderer.render(this.scene, this.camera);
 		}
+		this.renderScene();
 	}
 
 	async update(config) {
 		this.showExtraDice = config.showExtraDice;
 		this.muteSoundSecretRolls = config.muteSoundSecretRolls;
-		if(this.config.boxType == "board"){
+		if (this.config.boxType == "board") {
 			if (config.autoscale) {
 				this.display.scale = Math.sqrt(this.display.containerWidth * this.display.containerWidth + this.display.containerHeight * this.display.containerHeight) / 13;
 			} else {
@@ -492,7 +484,7 @@ export class DiceBox {
 			this.speed = parseInt(config.speed, 10);
 		else
 			this.speed = parseInt(globalAnimationSpeed, 10);
-	
+
 		this.light.castShadow = this.dicefactory.shadows;
 		this.desk.receiveShadow = this.dicefactory.shadows;
 		this.renderer.shadowMap.enabled = this.dicefactory.shadows;
@@ -643,48 +635,48 @@ export class DiceBox {
 		dicemesh.resultReason = 'forced';
 	}
 
-  /*
-  // Apply an euler angle from rotationCombinations for debugging
-	swapTest(dicemesh, mapping, invert = false, revert = true) {
-
-		let rotationDegrees = DICE_MODELS[dicemesh.shape].rotationCombinations[mapping];
-		let eulerAngle = new THREE.Euler(THREE.MathUtils.degToRad(rotationDegrees[0]), THREE.MathUtils.degToRad(rotationDegrees[1]), THREE.MathUtils.degToRad(rotationDegrees[2]));
-		let quaternion = new THREE.Quaternion().setFromEuler(eulerAngle);
-		if (invert)
-			quaternion.invert();
-
-		dicemesh.applyQuaternion(quaternion);
-
-		if (revert) {
-			setTimeout(() => { this.swapTest(dicemesh, mapping, !invert, false) }, 2000 )
-		}
-
-		dicemesh.resultReason = 'forced';
-	}
-
-  // Apply an euler angle directly for debugging
-	swapTest(dicemesh, mapping, invert = false, revert = true) {
-	swapTestEuler(dicemesh, euler, invert = false, revert = true) {
-		let eulerAngle = new THREE.Euler(THREE.MathUtils.degToRad(euler[0]), THREE.MathUtils.degToRad(euler[1]), THREE.MathUtils.degToRad(euler[2]));
-		let quaternion = new THREE.Quaternion().setFromEuler(eulerAngle);
-		if (invert)
-			quaternion.invert();
-
-		dicemesh.applyQuaternion(quaternion);
-
-		if (revert) {
-			setTimeout(() => { this.swapTestEuler(dicemesh, euler, !invert, false) }, 2000 )
-		}
-
-		dicemesh.resultReason = 'forced';
-	}
-
-  // Extract the euler angle from a mesh in degrees for debugging
-	extractEuler(dicemesh) {
-		let euler = dicemesh.rotation
-		console.log("World Euler:", THREE.MathUtils.radToDeg(euler.x), THREE.MathUtils.radToDeg(euler.y), THREE.MathUtils.radToDeg(euler.z), euler.order)
-	}
-  */
+	/*
+	// Apply an euler angle from rotationCombinations for debugging
+	  swapTest(dicemesh, mapping, invert = false, revert = true) {
+  
+		  let rotationDegrees = DICE_MODELS[dicemesh.shape].rotationCombinations[mapping];
+		  let eulerAngle = new THREE.Euler(THREE.MathUtils.degToRad(rotationDegrees[0]), THREE.MathUtils.degToRad(rotationDegrees[1]), THREE.MathUtils.degToRad(rotationDegrees[2]));
+		  let quaternion = new THREE.Quaternion().setFromEuler(eulerAngle);
+		  if (invert)
+			  quaternion.invert();
+  
+		  dicemesh.applyQuaternion(quaternion);
+  
+		  if (revert) {
+			  setTimeout(() => { this.swapTest(dicemesh, mapping, !invert, false) }, 2000 )
+		  }
+  
+		  dicemesh.resultReason = 'forced';
+	  }
+  
+	// Apply an euler angle directly for debugging
+	  swapTest(dicemesh, mapping, invert = false, revert = true) {
+	  swapTestEuler(dicemesh, euler, invert = false, revert = true) {
+		  let eulerAngle = new THREE.Euler(THREE.MathUtils.degToRad(euler[0]), THREE.MathUtils.degToRad(euler[1]), THREE.MathUtils.degToRad(euler[2]));
+		  let quaternion = new THREE.Quaternion().setFromEuler(eulerAngle);
+		  if (invert)
+			  quaternion.invert();
+  
+		  dicemesh.applyQuaternion(quaternion);
+  
+		  if (revert) {
+			  setTimeout(() => { this.swapTestEuler(dicemesh, euler, !invert, false) }, 2000 )
+		  }
+  
+		  dicemesh.resultReason = 'forced';
+	  }
+  
+	// Extract the euler angle from a mesh in degrees for debugging
+	  extractEuler(dicemesh) {
+		  let euler = dicemesh.rotation
+		  console.log("World Euler:", THREE.MathUtils.radToDeg(euler.x), THREE.MathUtils.radToDeg(euler.y), THREE.MathUtils.radToDeg(euler.z), euler.order)
+	  }
+	*/
 
 	//spawns one dicemesh object from a single vectordata object
 	spawnDice(dicedata, appearance) {
@@ -706,8 +698,11 @@ export class DiceBox {
 			case "glass":
 				mass *= 2;
 				break;
+			case "stone":
+				mass *= 1.5;
+				break;
 		}
-		
+
 		dicemesh.notation = vectordata;
 		dicemesh.result = [];
 		dicemesh.forcedResult = dicedata.result;
@@ -797,7 +792,7 @@ export class DiceBox {
 			// also don't bother playing at low speeds
 			if (speed < 250) return;
 			let strength = Math.max(Math.min(speed / (550), 1), 0.2);
-			if(this.muteSoundSecretRolls && (body.secretRoll || target.secretRoll))
+			if (this.muteSoundSecretRolls && (body.secretRoll || target.secretRoll))
 				strength = 0;
 			let sound;
 
@@ -809,7 +804,7 @@ export class DiceBox {
 			}
 			else
 				sound = this.sounds_dice['coin'][Math.floor(Math.random() * this.sounds_dice['coin'].length)];
-			if(this.animstate == "simulate"){
+			if (this.animstate == "simulate") {
 				this.detectedCollides[this.iteration] = [this.sounds_dice.source, sound, strength];
 			} else {
 				this.playAudioSprite(this.sounds_dice.source, sound, strength);
@@ -824,11 +819,11 @@ export class DiceBox {
 
 			let surface = this.soundsSurface;
 			let strength = Math.max(Math.min(speed / (500), 1), 0.2);
-			if(this.muteSoundSecretRolls && (body.secretRoll || target.secretRoll))
+			if (this.muteSoundSecretRolls && (body.secretRoll || target.secretRoll))
 				strength = 0;
 			let soundlist = this.sounds_table[surface];
 			let sound = soundlist[Math.floor(Math.random() * soundlist.length)];
-			if(this.animstate == "simulate"){
+			if (this.animstate == "simulate") {
 				this.detectedCollides[this.iteration] = [this.sounds_table.source, sound, strength];
 			} else {
 				this.playAudioSprite(this.sounds_table.source, sound, strength);
@@ -968,15 +963,15 @@ export class DiceBox {
 			if (this.detectedCollides[this.iteration]) {
 				this.playAudioSprite(...this.detectedCollides[this.iteration]);
 			}
-		} else if(!this.rolling) {
+		} else if (!this.rolling) {
 			let worldAsleep = true;
-			for(let i=0;i<this.world_sim.bodies.length;i++){
-				if(this.world_sim.bodies[i].allowSleep && this.world_sim.bodies[i].sleepState < 2){
+			for (let i = 0; i < this.world_sim.bodies.length; i++) {
+				if (this.world_sim.bodies[i].allowSleep && this.world_sim.bodies[i].sleepState < 2) {
 					worldAsleep = false;
 					break;
 				}
 			}
-			if(!worldAsleep){
+			if (!worldAsleep) {
 				this.world_sim.step(this.framerate, time_diff);
 				for (let i in this.scene.children) {
 					let container = this.scene.children[i];
@@ -994,15 +989,15 @@ export class DiceBox {
 			}
 		}
 
-		if (this.isVisible && (this.allowInteractivity || this.animatedDiceDetected || neededSteps || DiceSFXManager.renderQueue.length)){
+		if (this.isVisible && (this.allowInteractivity || this.animatedDiceDetected || neededSteps || DiceSFXManager.renderQueue.length)) {
 			DiceSFXManager.renderSFX();
 			//use darknessLevel to change toneMapping
-			if(this.dicefactory.realisticLighting){
+			if (this.dicefactory.realisticLighting) {
 				this.renderer.toneMappingExposure = 0.4 + (0.6 - canvas.lighting.darknessLevel * 0.6);
 			}
 			this.renderScene();
 		}
-		if(this.rendererStats)
+		if (this.rendererStats)
 			this.rendererStats.update(this.renderer);
 		this.last_time = this.last_time + neededSteps * this.framerate * 1000;
 
@@ -1010,12 +1005,12 @@ export class DiceBox {
 		if (this.throwFinished("render")) {
 			//if animated dice still on the table, keep animating
 			this.rolling = false;
-			if(this.running){
-				this.handleSpecialEffectsInit().then(()=>{
+			if (this.running) {
+				this.handleSpecialEffectsInit().then(() => {
 					this.callback(this.throws);
 					this.callback = null;
 					this.throws = null;
-					if (!this.animatedDiceDetected && !(this.allowInteractivity && (this.deadDiceList.length + this.diceList.length)>0) && !DiceSFXManager.renderQueue.length)
+					if (!this.animatedDiceDetected && !(this.allowInteractivity && (this.deadDiceList.length + this.diceList.length) > 0) && !DiceSFXManager.renderQueue.length)
 						this.removeTicker(this.animateThrow);
 				});
 			}
@@ -1067,8 +1062,8 @@ export class DiceBox {
 		}
 
 		if (this.pane) this.scene.remove(this.pane);
-		
-		if(this.config.boxType == "board"){
+
+		if (this.config.boxType == "board") {
 			DiceSFXManager.clearQueue();
 			this.removeTicker(this.animateThrow);
 		} else {
@@ -1080,26 +1075,26 @@ export class DiceBox {
 		this.isVisible = false;
 	}
 
-	renderScene(){
-		if(this.dicefactory.realisticLighting){
+	renderScene() {
+		if (this.dicefactory.realisticLighting) {
 			game.dice3d.uniforms.globalBloom.value = 1;
-			if(!this.finalComposer)
+			if (!this.finalComposer)
 				return;
-			
+
 			//Check if there is any emissive materials before rendering the bloom pass
 			let hasEmissive = false;
 			let black = this.blackColor;
-			this.scene.traverseVisible(function(object){
-				if(object.material && object.material.emissive != undefined && !object.material.emissive.equals(black)){
+			this.scene.traverseVisible(function (object) {
+				if (object.material && object.material.emissive != undefined && !object.material.emissive.equals(black)) {
 					hasEmissive = true;
 					return;
 				}
 			});
-			if(hasEmissive && this.dicefactory.glow){
+			if (hasEmissive && this.dicefactory.glow) {
 				this.bloomComposer.render();
-				this.finalPass.enabled = true;
+				this.blendingPass.enabled = true;
 			} else {
-				this.finalPass.enabled = false;
+				this.blendingPass.enabled = false;
 			}
 			game.dice3d.uniforms.globalBloom.value = 0;
 			this.finalComposer.render();
@@ -1117,37 +1112,33 @@ export class DiceBox {
 		if (this.dicefactory.shadows) {
 			this.light.shadow.map.dispose();
 		}
-		if(this.config.boxType == "board")
+		if (this.config.boxType == "board")
 			this.removeTicker(this.animateThrow);
-		else 
+		else
 			this.removeTicker(this.animateSelector);
 	}
 
 	//Allow to remove an handler from a PIXI ticker even when the context changed.
-	removeTicker(fn){
+	removeTicker(fn) {
 		let ticker = canvas.app.ticker;
 		let listener = ticker._head.next;
 
-        while (listener)
-        {
-            // We found a match, lets remove it
-            // no break to delete all possible matches
-            // incase a listener was added 2+ times
-            if (listener.fn === fn)
-            {
-                listener = listener.destroy();
-            }
-            else
-            {
-                listener = listener.next;
-            }
-        }
+		while (listener) {
+			// We found a match, lets remove it
+			// no break to delete all possible matches
+			// incase a listener was added 2+ times
+			if (listener.fn === fn) {
+				listener = listener.destroy();
+			}
+			else {
+				listener = listener.next;
+			}
+		}
 
-        if (!ticker._head.next)
-        {
-            ticker._cancelIfNeeded();
-        }
-        return ticker;
+		if (!ticker._head.next) {
+			ticker._cancelIfNeeded();
+		}
+		return ticker;
 	}
 
 	rollDice(throws, callback) {
@@ -1158,10 +1149,10 @@ export class DiceBox {
 
 		for (let j = 0; j < throws.length; j++) {
 			let notationVectors = throws[j];
-			
+
 			for (let i = 0, len = notationVectors.dice.length; i < len; ++i) {
 				notationVectors.dice[i].startAtIteration = j * this.nbIterationsBetweenRolls;
-				let appearance = this.dicefactory.getAppearanceForDice(notationVectors.dsnConfig.appearance,notationVectors.dice[i].type, notationVectors.dice[i]);
+				let appearance = this.dicefactory.getAppearanceForDice(notationVectors.dsnConfig.appearance, notationVectors.dice[i].type, notationVectors.dice[i]);
 				this.spawnDice(notationVectors.dice[i], appearance);
 			}
 		}
@@ -1205,28 +1196,28 @@ export class DiceBox {
 		this.clearAll();
 
 		let selectordice = this.dicefactory.systems.standard.dice.map(dice => dice.type);
-		const extraDiceTypes = ["d3","d5","d7","d14","d16","d24","d30"];
-		if(!this.showExtraDice)
+		const extraDiceTypes = ["d3", "d5", "d7", "d14", "d16", "d24", "d30"];
+		if (!this.showExtraDice)
 			selectordice = selectordice.filter((die) => !extraDiceTypes.includes(die));
-		
+
 		let proportion = this.display.containerWidth / this.display.containerHeight;
 		let columns = Math.min(selectordice.length, Math.round(Math.sqrt(proportion * selectordice.length)));
 		let rows = Math.floor((selectordice.length + columns - 1) / columns);
 
 		this.camera.position.z = this.cameraHeight.medium;
-		this.camera.position.x = this.display.containerWidth/2 - (this.display.containerWidth/columns/2);
-		this.camera.position.y = -this.display.containerHeight/2 + (this.display.containerHeight/rows/2);
-		this.camera.fov = 2 * Math.atan(this.display.containerHeight / (2*this.camera.position.z)) * (180 / Math.PI);
+		this.camera.position.x = this.display.containerWidth / 2 - (this.display.containerWidth / columns / 2);
+		this.camera.position.y = -this.display.containerHeight / 2 + (this.display.containerHeight / rows / 2);
+		this.camera.fov = 2 * Math.atan(this.display.containerHeight / (2 * this.camera.position.z)) * (180 / Math.PI);
 		this.camera.updateProjectionMatrix();
 
 		if (this.pane) this.scene.remove(this.pane);
 		if (this.desk) this.scene.remove(this.desk);
 		if (this.dicefactory.shadows) {
-			
+
 			let shadowplane = new THREE.ShadowMaterial();
 			shadowplane.opacity = 0.5;
 
-			this.pane = new THREE.Mesh(new THREE.PlaneGeometry(this.display.containerWidth*2, this.display.containerHeight*2, 1, 1), shadowplane);
+			this.pane = new THREE.Mesh(new THREE.PlaneGeometry(this.display.containerWidth * 2, this.display.containerHeight * 2, 1, 1), shadowplane);
 			this.pane.receiveShadow = this.dicefactory.shadows;
 			this.pane.position.set(0, 0, -70);
 			this.scene.add(this.pane);
@@ -1234,22 +1225,22 @@ export class DiceBox {
 
 		let z = 0;
 		let count = 0;
-		for(let y = 0;y < rows;y++){
-			for(let x = 0; x < columns;x++){
-				if(count>=selectordice.length)
+		for (let y = 0; y < rows; y++) {
+			for (let x = 0; x < columns; x++) {
+				if (count >= selectordice.length)
 					break;
-				let appearance = this.dicefactory.getAppearanceForDice(config.appearance,selectordice[count]);
+				let appearance = this.dicefactory.getAppearanceForDice(config.appearance, selectordice[count]);
 				let dicemesh = this.dicefactory.create(this.renderer.scopedTextureCache, selectordice[count], appearance);
 				dicemesh.scale.set(
-					Math.min(dicemesh.scale.x * 5 /  columns, dicemesh.scale.x * 2 /  rows), 
-					Math.min(dicemesh.scale.y * 5 /  columns, dicemesh.scale.y * 2 /  rows), 
-					Math.min(dicemesh.scale.z * 5 /  columns,dicemesh.scale.z * 2 /  rows)
+					Math.min(dicemesh.scale.x * 5 / columns, dicemesh.scale.x * 2 / rows),
+					Math.min(dicemesh.scale.y * 5 / columns, dicemesh.scale.y * 2 / rows),
+					Math.min(dicemesh.scale.z * 5 / columns, dicemesh.scale.z * 2 / rows)
 				);
 
 				dicemesh.position.set(x * this.display.containerWidth / columns, -(y * this.display.containerHeight / rows), z);
-				
+
 				dicemesh.castShadow = this.dicefactory.shadows;
-				
+
 				dicemesh.userData = selectordice[count];
 
 				this.diceList.push(dicemesh);
@@ -1279,7 +1270,7 @@ export class DiceBox {
 		this.animstate = 'selector';
 		let now = window.performance.now();
 		let elapsed = now - this.last_time;
-		if(elapsed > this.framerate){
+		if (elapsed > this.framerate) {
 			this.last_time = now - (elapsed % this.framerate);
 
 			if (this.container.style.opacity != '1') this.container.style.opacity = Math.min(1, (parseFloat(this.container.style.opacity) + 0.05));
@@ -1387,19 +1378,19 @@ export class DiceBox {
 		return obj;
 	}
 
-	findRootObject(object){
-		if(object.hasOwnProperty("shape"))
+	findRootObject(object) {
+		if (object.hasOwnProperty("shape"))
 			return object;
-		else if(object.parent)
+		else if (object.parent)
 			return this.findRootObject(object.parent);
 		else
 			return null;
 	}
 
-	findShowcaseDie(pos){
+	findShowcaseDie(pos) {
 		this.raycaster.setFromCamera(pos, this.camera);
 		const intersects = this.raycaster.intersectObjects(this.diceList, true);
-		if(intersects.length){
+		if (intersects.length) {
 
 			return intersects[0];
 		}
@@ -1407,11 +1398,11 @@ export class DiceBox {
 			return null;
 	}
 
-	findHoveredDie(){
-		if(this.isVisible && !this.running && !this.mouse.constraintDown){
+	findHoveredDie() {
+		if (this.isVisible && !this.running && !this.mouse.constraintDown) {
 			this.raycaster.setFromCamera(this.mouse.pos, this.camera);
 			const intersects = this.raycaster.intersectObjects(this.diceList, true);
-			if(intersects.length){
+			if (intersects.length) {
 				this.hoveredDie = intersects[0];
 			}
 			else
@@ -1419,52 +1410,52 @@ export class DiceBox {
 		}
 	}
 
-	onMouseMove(event,ndc){
+	onMouseMove(event, ndc) {
 		this.mouse.pos.x = ndc.x;
 		this.mouse.pos.y = ndc.y;
 
-		if(this.mouse.constraint){
+		if (this.mouse.constraint) {
 			this.raycaster.setFromCamera(this.mouse.pos, this.camera);
 			const intersects = this.raycaster.intersectObjects([this.desk]);
-			if(intersects.length){
+			if (intersects.length) {
 				let pos = intersects[0].point;
-				this.jointBody.position.set(pos.x,pos.y,pos.z+150);
-            	this.mouse.constraint.update();
+				this.jointBody.position.set(pos.x, pos.y, pos.z + 150);
+				this.mouse.constraint.update();
 			}
 		}
 	}
 
-	onMouseDown(event,ndc){
+	onMouseDown(event, ndc) {
 		this.mouse.pos.x = ndc.x;
 		this.mouse.pos.y = ndc.y;
 		this.hoveredDie = null;
 		this.findHoveredDie();
 
 		let entity = this.hoveredDie;
-		if(!entity)
+		if (!entity)
 			return;
 		let pos = entity.point;
-		if(pos){
+		if (pos) {
 			this.mouse.constraintDown = true;
 			//disable FVTT mouse events
-			if(canvas.mouseInteractionManager)
+			if (canvas.mouseInteractionManager)
 				canvas.mouseInteractionManager.object.interactive = false;
 
 			// Vector to the clicked point, relative to the body
 			let root = this.findRootObject(entity.object);
-			let v1 = new CANNON.Vec3(pos.x,pos.y,pos.z).vsub(root.body_sim.position);
+			let v1 = new CANNON.Vec3(pos.x, pos.y, pos.z).vsub(root.body_sim.position);
 
 			// Apply anti-quaternion to vector to tranform it into the local body coordinate system
 			let antiRot = root.body_sim.quaternion.inverse();
 			let pivot = antiRot.vmult(v1); // pivot is not in local body coordinates
-  
+
 			// Move the cannon click marker particle to the click position
-			this.jointBody.position.set(pos.x,pos.y,pos.z+150);
-  
+			this.jointBody.position.set(pos.x, pos.y, pos.z + 150);
+
 			// Create a new constraint
 			// The pivot for the jointBody is zero
-			this.mouse.constraint = new CANNON.PointToPointConstraint(root.body_sim, pivot, this.jointBody, new CANNON.Vec3(0,0,0));
-  
+			this.mouse.constraint = new CANNON.PointToPointConstraint(root.body_sim, pivot, this.jointBody, new CANNON.Vec3(0, 0, 0));
+
 			// Add the constriant to world
 			this.world_sim.addConstraint(this.mouse.constraint);
 			return true;
@@ -1472,23 +1463,23 @@ export class DiceBox {
 		return false;
 	}
 
-	onMouseUp(event){
-		if(this.mouse.constraintDown){
+	onMouseUp(event) {
+		if (this.mouse.constraintDown) {
 			this.mouse.constraintDown = false;
 			this.world_sim.removeConstraint(this.mouse.constraint);
 
 			//re-enable fvtt canvas events
-			if(canvas.mouseInteractionManager)
+			if (canvas.mouseInteractionManager)
 				canvas.mouseInteractionManager.activate();
 			return true;
 		}
 		return false;
 	}
 
-	async handleSpecialEffectsInit(){
+	async handleSpecialEffectsInit() {
 		let promisesSFX = [];
-		this.diceList.forEach(dice =>{
-			if(dice.specialEffects){
+		this.diceList.forEach(dice => {
+			if (dice.specialEffects) {
 				dice.specialEffects.forEach(sfx => {
 					promisesSFX.push(DiceSFXManager.playSFX(sfx, this, dice));
 				});

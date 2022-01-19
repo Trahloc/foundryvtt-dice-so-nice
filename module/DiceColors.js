@@ -94,7 +94,7 @@ export const TEXTURELIST = {
 		composite: 'multiply',
 		source: 'modules/dice-so-nice/textures/stainedglass.webp',
 		bump: 'modules/dice-so-nice/textures/stainedglass-bump.webp',
-		material: 'glass'
+		material: 'iridescent'
 	},
 	'skulls': {
 		name: 'DICESONICE.TextureSkulls',
@@ -160,6 +160,13 @@ export const TEXTURELIST = {
 		source: 'modules/dice-so-nice/textures/metal.webp',
 		bump: '',
 		material: 'metal'
+	},
+	'stone': {
+		name: 'DICESONICE.TextureStone',
+		composite: 'soft-light',
+		source: 'modules/dice-so-nice/textures/stone.webp',
+		bump: 'modules/dice-so-nice/textures/stone.webp',
+		material: 'stone'
 	},
 	'radial': {
 		name: 'DICESONICE.TextureRadial',
@@ -387,8 +394,8 @@ export const COLORSETS = {
 		category: 'DICESONICE.ThemesSoNice',
 		foreground: '#FFD800',
 		background: '#C4C4B6',
-		outline: '#8E8E86',
-		texture: 'none'
+		outline: '#000000',
+		texture: 'stone'
 	},
 	'bloodmoon': {
 		name: 'bloodmoon',
@@ -511,6 +518,15 @@ export const COLORSETS = {
 		background: '#FFFFFF',
 		outline: '#FFFFFF',
 		texture: 'none'
+	},
+	'prism': {
+		name: 'prism',
+		description: 'DICESONICE.ColorPrism',
+		category: 'DICESONICE.AcquiredTaste',
+		foreground: '#FFFFFF',
+		background: '#FFFFFF',
+		outline: 'black',
+		texture: 'stainedglass'
 	},
 	'bronze': {
 		name: 'bronze',

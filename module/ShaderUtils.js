@@ -1,7 +1,35 @@
+/**
+ * This class contains utility functions for working with shaders.
+ * These functions are called during the onBeforeCompile event.
+ * @class ShaderUtils
+ */
 export class ShaderUtils {
-    // Use the emissive map for the bloom pass
 
-	static selectiveBloomShaderFragment(shader){
+	static applyDiceSoNiceShader(shader) {
+
+		if(this.emissive !== undefined) {
+			ShaderUtils.selectiveBloomShaderFragment(shader);
+		}
+
+		if (this.userData.iridescent) {
+			ShaderUtils.iridescentShaderFragment(shader);
+		}
+
+		if (shader.shaderName == "MeshPhysicalMaterial" && shader.transmission) {
+			ShaderUtils.transmissionAlphaShaderFragment(shader);
+		}
+	}
+
+	static transmissionAlphaShaderFragment(shader) {
+		shader.fragmentShader = shader.fragmentShader.replace(`#include <transmission_fragment>`,
+			`#include <transmission_fragment>
+			totalDiffuse = mix( totalDiffuse, transmission.rgb, transmissionFactor);
+			float grey = (material.diffuseColor.r + material.diffuseColor.g + material.diffuseColor.b) / 3.0;
+			transmissionAlpha = mix( transmissionAlpha, 1.0-grey, transmissionFactor );`);
+		console.log(shader.fragmentShader);
+	}
+
+	static selectiveBloomShaderFragment(shader) {
 		shader.uniforms.globalBloom = game.dice3d.uniforms.globalBloom;
 		shader.fragmentShader = `
 			uniform float globalBloom;
@@ -20,7 +48,7 @@ export class ShaderUtils {
 		);
 	}
 
-	static iridescentShaderFragment(shader){
+	static iridescentShaderFragment(shader) {
 		shader.uniforms.iridescenceLookUp = game.dice3d.uniforms.iridescenceLookUp;
 		shader.uniforms.iridescenceNoise = game.dice3d.uniforms.iridescenceNoise;
 		shader.uniforms.boost = game.dice3d.uniforms.boost;

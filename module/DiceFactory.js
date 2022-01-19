@@ -139,6 +139,30 @@ export class DiceFactory {
 					'scopedOptions':{
 						envMap : true
 					}
+				},
+				'iridescent': {
+					'type':'standard',
+					'options': {
+						metalness: 1,
+						roughness: 0.2,
+						userData:{
+							iridescent:true
+						}
+					},
+					'scopedOptions':{
+						envMap : true
+					}
+				},
+				'stone': {
+					'type':'standard',
+					'options': {
+						metalness: 0,
+						roughness: 1
+					},
+					'scopedOptions':{
+						roughnessMap : "roughnessMap_stone",
+						envMap : true
+					}
 				}
 			}
 		} else {
@@ -195,6 +219,42 @@ export class DiceFactory {
 						shininess: 1,
 						reflectivity:0.7,
 						combine:THREE.AddOperation
+					},
+					'scopedOptions':{
+						envMap:true
+					}
+				},
+				//no difference with plastic without advanced ligthing
+				'pristine': {
+					'type':'phong',
+					'options':{
+						specular: 0xffffff,
+						color: 0xb5b5b5,
+						shininess: 3,
+						flatShading: true
+					}
+				},
+				'iridescent': {
+					'type':'standard',
+					'options': {
+						color: 0xdddddd,
+						emissive:0x111111,
+						roughness: 0.2,
+						metalness: 1,
+						envMapIntensity:2,
+						userData:{
+							iridescent:true
+						}
+					},
+					'scopedOptions':{
+						envMap:true
+					}
+				},
+				'stone': {
+					'type':'lambert',
+					'options': {
+						color: 0xb5b5b5,
+						reflectivity:0.2
 					},
 					'scopedOptions':{
 						envMap:true
@@ -575,6 +635,12 @@ export class DiceFactory {
 			case "standard":
 				mat = new THREE.MeshStandardMaterial(materialSelected.options);
 				break;
+			case "lambert":
+				mat = new THREE.MeshLambertMaterial(materialSelected.options);
+				break;
+			case "physical":
+				mat = new THREE.MeshPhysicalMaterial(materialSelected.options);
+				break;
 			default: //plastic
 				mat = new THREE.MeshPhongMaterial(this.material_options.plastic.options);
 		}
@@ -699,6 +765,10 @@ export class DiceFactory {
 				if(this.realisticLighting)
 					mat.metalnessMap = mat.bumpMap;
 				break;
+			case "iridescent":
+				if(this.realisticLighting)
+					mat.metalnessMap = mat.bumpMap;
+				break;
 		}
 		
 		mat.opacity = 1;
@@ -706,7 +776,7 @@ export class DiceFactory {
 		mat.depthTest = true;
 		mat.needUpdate = true;
 
-		mat.onBeforeCompile = ShaderUtils.selectiveBloomShaderFragment;
+		mat.onBeforeCompile = ShaderUtils.applyDiceSoNiceShader;
 
 		this.baseTextureCache[baseTextureCacheString] = mat;
 		return mat;

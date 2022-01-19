@@ -31,7 +31,7 @@ import { TextureLoader } from 'three';
             canvasZIndex: 'over',
             throwingForce: 'medium',
             useHighDPI: true,
-            antialiasing: "smaa",
+            antialiasing: game.canvas.app.renderer.context.webGLVersion===2 ?"msaa":"smaa",
             glow: true,
             showOthersSFX: true,
             muteSoundSecretRolls:false,
