@@ -350,8 +350,13 @@ export class DiceBox {
 			intensity = 0.4;
 			intensity_amb = 0.35;
 		} else {
-			intensity = 1;
-			intensity_amb = 1.7;
+			if(this.config.boxType == "board") {
+				intensity = 1.2;
+				intensity_amb = 2.2;
+			} else {
+				intensity = 1.5;
+				intensity_amb = 3;
+			}
 		}
 
 		this.light_amb = new THREE.HemisphereLight(this.colors.ambient, this.colors.ground, intensity_amb);

@@ -1,4 +1,5 @@
 import { DiceColors, TEXTURELIST, COLORSETS } from './DiceColors.js';
+import { Dice3D } from './Dice3D';
 
 /**
  * Generic utilities class...

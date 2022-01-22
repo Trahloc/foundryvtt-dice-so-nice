@@ -1,5 +1,6 @@
 import { DiceSFX } from '../DiceSFX.js';
 import * as THREE from 'three';
+import { ShaderUtils } from './../ShaderUtils';
 
 export class PlayAnimationBright extends DiceSFX {
     static id = "PlayAnimationBright";
@@ -33,6 +34,9 @@ export class PlayAnimationBright extends DiceSFX {
             return false;
         this.clock = new THREE.Clock();
         this.baseColor = this.glowingMesh.material.emissive.clone();
+        this.baseMaterial = this.glowingMesh.material;
+        this.glowingMesh.material = this.baseMaterial.clone();
+        this.glowingMesh.material.onBeforeCompile = ShaderUtils.applyDiceSoNiceShader;
         AudioHelper.play({
             src: PlayAnimationBright.sound,
             volume: this.volume
@@ -54,6 +58,9 @@ export class PlayAnimationBright extends DiceSFX {
     }
 
     destroy(){
+        let sfxMaterial = this.glowingMesh.material;
+        this.glowingMesh.material = this.baseMaterial;
+        sfxMaterial.dispose();
         this.destroyed = true;
     }
 }

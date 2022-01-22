@@ -1,5 +1,6 @@
 import { DiceSFX } from '../DiceSFX.js';
 import * as THREE from 'three';
+import { ShaderUtils } from './../ShaderUtils';
 
 export class PlayAnimationDark extends DiceSFX {
     static id = "PlayAnimationDark";
@@ -31,6 +32,7 @@ export class PlayAnimationDark extends DiceSFX {
         this.baseColor = this.glowingMesh.material.color.clone();
         this.baseMaterial = this.glowingMesh.material;
         this.glowingMesh.material = this.baseMaterial.clone();
+        this.glowingMesh.material.onBeforeCompile = ShaderUtils.applyDiceSoNiceShader;
         AudioHelper.play({
 			src: PlayAnimationDark.sound,
             volume: this.volume

@@ -34,6 +34,11 @@ const config = {
     format: "es",
     sourcemap: true
   },
+  onwarn(warning, rollupWarn) {
+    if (warning.code !== 'CIRCULAR_DEPENDENCY') {
+      rollupWarn(warning);
+    }
+  },
   plugins: [
     del({
       targets: 'dist/*',

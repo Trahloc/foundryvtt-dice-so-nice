@@ -7,7 +7,7 @@ export class ShaderUtils {
 
 	static applyDiceSoNiceShader(shader) {
 
-		if(this.emissive !== undefined) {
+		if(this.emissive !== undefined && game.dice3d.DiceFactory.realisticLighting) {
 			ShaderUtils.selectiveBloomShaderFragment(shader);
 		}
 

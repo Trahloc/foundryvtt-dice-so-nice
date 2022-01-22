@@ -254,7 +254,7 @@ export class DiceFactory {
 					'type':'lambert',
 					'options': {
 						color: 0xb5b5b5,
-						reflectivity:0.2
+						reflectivity:0.01
 					},
 					'scopedOptions':{
 						envMap:true
