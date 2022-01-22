@@ -34,6 +34,7 @@ import { TextureLoader } from 'three';
             antialiasing: game.canvas.app.renderer.context.webGLVersion===2 ?"msaa":"smaa",
             glow: true,
             showOthersSFX: true,
+            immersiveDarkness: true,
             muteSoundSecretRolls:false,
             enableFlavorColorset:true,
             rollingArea: false

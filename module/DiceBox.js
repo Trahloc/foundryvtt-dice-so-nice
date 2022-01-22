@@ -87,6 +87,7 @@ export class DiceBox {
 		this.soundsSurface = "felt";
 		this.animstate = '';
 		this.throwingForce = "medium";
+		this.immersiveDarkness = true;
 
 		this.selector = {
 			animate: true,
@@ -170,6 +171,7 @@ export class DiceBox {
 			else
 				this.speed = parseInt(globalAnimationSpeed, 10);
 			this.throwingForce = this.config.throwingForce;
+			this.immersiveDarkness = this.config.immersiveDarkness;
 			this.scene = new THREE.Scene();
 			if (game.dice3dRenderers[this.config.boxType] != null) {
 				this.renderer = game.dice3dRenderers[this.config.boxType];
@@ -501,6 +503,7 @@ export class DiceBox {
 		await this.dicefactory.preloadPresets(true, null, config.appearance);
 
 		this.throwingForce = config.throwingForce;
+		this.immersiveDarkness = config.immersiveDarkness;
 		this.scene.traverse(object => {
 			if (object.type === 'Mesh') object.material.needsUpdate = true;
 		});
@@ -997,7 +1000,7 @@ export class DiceBox {
 		if (this.isVisible && (this.allowInteractivity || this.animatedDiceDetected || neededSteps || DiceSFXManager.renderQueue.length)) {
 			DiceSFXManager.renderSFX();
 			//use darknessLevel to change toneMapping
-			if (this.dicefactory.realisticLighting) {
+			if (this.dicefactory.realisticLighting && this.immersiveDarkness) {
 				this.renderer.toneMappingExposure = 0.4 + (0.6 - canvas.lighting.darknessLevel * 0.6);
 			}
 			this.renderScene();

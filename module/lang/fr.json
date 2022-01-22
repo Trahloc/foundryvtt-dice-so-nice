@@ -58,6 +58,7 @@
     "DICESONICE.soundsVolume": "Volume",
     "DICESONICE.muteSoundSecretRolls": "Mettre en sourdine les jets cachés (GM/Blind/Self)",
     "DICESONICE.enableFlavorColorset": "Remplacer l'apparence de vos dés lorsqu'un thème est donné par contexte. (ex: 1d20[acid])",
+    "DICESONICE.immersiveDarkness": "Activer le mode Luminosité Immersives (Les dés réagissent à la luminosité de la scène)",
     "DICESONICE.system" : "Préréglages de dés (faces)",
     "DICESONICE.maxDiceNumber" : "Nombre maximum de dés",
     "DICESONICE.maxDiceNumberHint" : "Nombre maximum de dés affichés dans une animation. Des nombres plus élevés réduiront les performances",

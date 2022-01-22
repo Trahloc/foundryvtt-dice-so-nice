@@ -58,6 +58,7 @@
     "DICESONICE.soundsVolume": "Sound Volume",
     "DICESONICE.muteSoundSecretRolls": "Mute all sounds for GM/Blind/Self rolls",
     "DICESONICE.enableFlavorColorset": "Override your dice appearance when a theme is passed as a Flavor (ex: 1d20[acid])",
+    "DICESONICE.immersiveDarkness": "Enable Immersive Darkness mode (Dice react to scene lighting)",
     "DICESONICE.system" : "Dice Presets (Faces)",
     "DICESONICE.maxDiceNumber" : "Max Number of Dice",
     "DICESONICE.maxDiceNumberHint" : "Maximum number of displayed dice in an animation. Higher numbers will reduce performances",

@@ -85,6 +85,12 @@ export class DiceConfig extends FormApplication {
             this.reset ? Dice3D.ALL_DEFAULT_OPTIONS() : Dice3D.ALL_CONFIG()
         );
         delete data.sfxLine;
+
+        //remove MSAA if not supported
+        if (game.canvas.app.renderer.context.webGLVersion<2){
+            delete data.antialiasingList.msaa;
+        }
+
         //fix corupted save from #139
         if (data.specialEffects) {
             for (let [key, value] of Object.entries(data.specialEffects)) {
@@ -618,6 +624,48 @@ export class DiceConfig extends FormApplication {
                     }
                 }
             });
+
+            $(this.element).on("change", "[data-imageQuality]", (event) => {
+                let quality = {
+                    bumpMapping: true,
+                    shadowQuality: "high",
+                    glow: true,
+                    antialiasing: game.canvas.app.renderer.context.webGLVersion===2 ?"msaa":"smaa",
+                    useHighDPI: true
+                };
+                switch(event.target.value) {
+                    case "low":
+                        quality.bumpMapping = false;
+                        quality.shadowQuality = "low";
+                        quality.glow = false;
+                        quality.antialiasing = "none";
+                        quality.useHighDPI = false;
+                        break;
+                    case "medium":
+                        quality.bumpMapping = true;
+                        quality.shadowQuality = "low";
+                        quality.glow = false;
+                        quality.antialiasing = "none";
+                        quality.useHighDPI = false;
+                        break;
+                    case "high":
+                        quality.bumpMapping = true;
+                        quality.shadowQuality = "high";
+                        quality.glow = true;
+                        quality.antialiasing = game.canvas.app.renderer.context.webGLVersion===2 ?"msaa":"smaa";
+                        quality.useHighDPI = true;
+                        break;
+                }
+                $(this.element).find("[data-bumpMapping]").prop("checked", quality.bumpMapping);
+                $(this.element).find("[data-shadowQuality]").val(quality.shadowQuality);
+                $(this.element).find("[data-glow]").prop("checked", quality.glow);
+                $(this.element).find("[data-antialiasing]").val(quality.antialiasing);
+                $(this.element).find("[data-useHighDPI]").prop("checked", quality.useHighDPI);
+            });
+
+            $(this.element).on("change", "[data-bumpMapping],[data-shadowQuality],[data-glow],[data-antialiasing],[data-useHighDPI]", (event) => {
+                $(this.element).find("[data-imageQuality]").val("custom");
+            });
         }
     }
 
@@ -860,6 +908,7 @@ export class DiceConfig extends FormApplication {
             showExtraDice: $('[data-showExtraDice]').is(':checked'),
             muteSoundSecretRolls: $('[data-muteSoundSecretRolls]').is(':checked'),
             enableFlavorColorset: $('[data-enableFlavorColorset]').is(':checked'),
+            immersiveDarkness: $('[data-immersiveDarkness]').is(':checked'),
             appearance: {}
         };
         $(this.element).find('.tabAppearance').each((index, element) => {
