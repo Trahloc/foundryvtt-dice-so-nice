@@ -12,7 +12,7 @@ build:
   script:
     - npm install
     - npx rollup -c
-    - zip dice-so-nice.zip -r dist -x ".*"
+    - zip dice-so-nice.zip -j -r dist -x ".*"
   artifacts:
     name: dice-so-nice
     when: on_success
