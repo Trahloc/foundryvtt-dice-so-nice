@@ -210,7 +210,8 @@ Hooks.on('createChatMessage', (chatMessage) => {
             return;
         let inlineRollList = [];
         JqInlineRolls.each((index, el) => {
-            let roll = Roll.fromJSON(unescape(el.dataset.roll));
+            //We use the Roll class registered in the CONFIG constant in case the system overwrites it (eg: HeXXen)
+            let roll = CONFIG.Dice.rolls[0].fromJSON(unescape(el.dataset.roll));
             maxRollOrder++;
             roll.dice.forEach(diceterm => {
                 if(!diceterm.options.hasOwnProperty("rollOrder"))
@@ -223,7 +224,8 @@ Hooks.on('createChatMessage', (chatMessage) => {
                 inlineRollList.unshift(chatMessage.roll);
             
             let pool = PoolTerm.fromRolls(inlineRollList);
-            roll = Roll.fromTerms([pool]);
+            //We use the Roll class registered in the CONFIG constant in case the system overwrites it (eg: HeXXen)
+            roll = CONFIG.Dice.rolls[0].fromTerms([pool]);
         }
         else if (!chatMessage.isRoll)
             return;
@@ -280,7 +282,8 @@ Hooks.on('createChatMessage', (chatMessage) => {
             //add a "plus" between each term
             if(Array.isArray(dice) && dice.length){
                 let termList = [...dice].map((e, i) => i < dice.length - 1 ? [e, plus] : [e]).reduce((a, b) => a.concat(b));
-                rollList.push(Roll.fromTerms(termList));
+                //We use the Roll class registered in the CONFIG constant in case the system overwrites it (eg: HeXXen)
+                rollList.push(CONFIG.Dice.rolls[0].fromTerms(termList));
             }
         });
         
