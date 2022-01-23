@@ -1,6 +1,27 @@
 import { DataTexture, LinearFilter, LinearMipMapLinearFilter, MathUtils, RepeatWrapping, RGBAFormat, UnsignedByteType, UVMapping, Vector2 } from 'three';
 
 /**
+ * MIT License
+ * Copyright (c) 2019 David Lenaerts
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
  * @classdesc
  * ThinFilmFresnelMap is a lookup texture containing the reflection colour. The texture index value
  * is dot(normal, view). The texture values are stored in approximated gamma space (power 2.0), so
@@ -20,6 +41,7 @@ import { DataTexture, LinearFilter, LinearMipMapLinearFilter, MathUtils, RepeatW
  * @extends DataTexture
  *
  * @author David Lenaerts <http://www.derschmale.com>
+ * @author Mathias Latournerie
  */
 class ThinFilmFresnelMap extends DataTexture {
 
@@ -159,13 +181,13 @@ class ThinFilmFresnelMap extends DataTexture {
         var waveLenRange = 780 - 380; // the entire visible range
 
         for (var i = 0; i < size; ++i) {
-            for(var k = 0; k < size; ++k) {
+            for (var k = 0; k < size; ++k) {
                 var cosThetaI = i / size;
                 var cosThetaT = Math.sqrt(1 - refrRatioSqr * (1.0 - cosThetaI * cosThetaI));
                 var cosThetaT2 = Math.sqrt(1 - refrRatioSqrBase * (1.0 - cosThetaT * cosThetaT));
 
                 // this is essentially the extra distance traveled by a ray if it bounds through the film
-                var pathDiff = 2.0 * refractiveIndexFilm * ((waveLenRange/size*k)+280) * cosThetaT;
+                var pathDiff = 2.0 * refractiveIndexFilm * ((waveLenRange / size * k) + 280) * cosThetaT;
                 var pathDiff2PI = 2.0 * Math.PI * pathDiff;
 
                 this._fresnelRefl(1.0, refractiveIndexFilm, cosThetaI, cosThetaT, R12, phi12);
@@ -191,7 +213,6 @@ class ThinFilmFresnelMap extends DataTexture {
                 var x = 0, y = 0, z = 0;
                 var totX = 0, totY = 0, totZ = 0;
 
-                // TODO: we could also put the thickness in the look-up table, make it a 2D table
                 for (var j = 0; j < numBands; ++j) {
                     var waveLen = 380 + j / (numBands - 1) * waveLenRange;
                     var deltaPhase = pathDiff2PI / waveLen;
@@ -228,9 +249,9 @@ class ThinFilmFresnelMap extends DataTexture {
                 b = MathUtils.clamp(b, 0.0, 1.0);
 
                 // linear to gamma
-                r = Math.pow(r,0.7);
-                g = Math.pow(g,0.7);
-                b = Math.pow(b,0.7);
+                r = Math.pow(r, 0.7);
+                g = Math.pow(g, 0.7);
+                b = Math.pow(b, 0.7);
 
                 // CIE XYZ to linear rgb conversion matrix:
                 // 3.2406 -1.5372 -0.4986

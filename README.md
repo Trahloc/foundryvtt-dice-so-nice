@@ -9,13 +9,15 @@ This module for Foundry VTT adds the ability to show a 3D dice simulation when a
 
 # Installation
 
-To install, follow these instructions:
+To install, search for "Dice so Nice" in your module browser inside Foundry VTT.
+
+Alternatively, you can manually install the module by following these steps:
 
 1.  Inside Foundry, select the Game Modules tab in the Configuration and Setup menu.
 2.  Click the Install Module button and enter the following URL: https://gitlab.com/riccisi/foundryvtt-dice-so-nice/raw/master/module/module.json
 3.  Click Install and wait for installation to complete.
 
-Alternatively, use the integrated module manager in Foundry.
+Dice So Nice! is also available on [The Forge](https://forge-vtt.com/bazaar#package=dice-so-nice).
 
 # Usage Instructions
 
@@ -30,6 +32,7 @@ There's two type of settings:
 ## Appearance
 ![Preview](./settings-appearance.jpg?raw=true)
 - **Enable 3D dices**: Enable the 3D dice display in this browser session.
+- **Enable Extra Dice Customization**: Let you customize the appearance of special dice, like d7 or d30.
 - **Dice Presets (Faces)**: Allows to select the dices faces. Default is "Standard" where every face is a text label. Some game systems can force this value for all players to display their own dices.
 - **Theme**: Allows to select a color theme for your dices. Themes changes every color settings and can pack multiple colors that will be selected at random each time you roll. A theme can also include a default texture that will be displayed if you selected "None / Auto (Theme)" in the "Texture" dropdown.
 - **Texture**: Allows to select a texture for the dice. Selecting "None / Auto (Theme)" will show the theme texture if there is one.
@@ -48,6 +51,7 @@ There's two type of settings:
 - **Millisecs Before Hiding**: time in milliseconds after which the dice disappear automatically.
 - **Hide FX**: Effect used during dice hiding
 - **Sound Effects**: When enabled, custom sounds with "realistic" collision effects are played when the dices roll.
+- **Mute all sounds for GM/Blind/Self rolls**: Useful if you don't want your players to hear your secret dice rolls through Voice Chat.
 - **Sound Volume**: Let you change the dice sound effect volume. This setting is applied on top of the "Interface" volume bar.
 - **Table surface for sounds**: Allows to select the type of sound made by dice hitting the virtual table.
 - **Auto Scale**: When enabled, auto scale the dice dimension based on the display size.
@@ -55,6 +59,7 @@ There's two type of settings:
 - **Animation Speed**: Change the speed at which the dices roll.
 - **3D layer position**: Select if dice appear on top of the UI or under.
 - **Throwing force**: Change the magnitude of the vector applied to roll the dice. Let you either gently roll the dice or throw them with full force like a mad man.
+- **Override your dice appearance**: By default, a dice appearance can be changed when a flavor text is added to the roll. Uncheck to disable. 
 
 ## Special Effects
 ![Preview](./settings-sfx.jpg?raw=true)
@@ -66,9 +71,12 @@ There's two type of settings:
 
 ## Performance
 ![Preview](./settings-performance.jpg?raw=true)
+- **Image Quality**: Quality presets to help you optimize your image quality.
+- **Advanced lighting**: When enabled, use realistic lighting (HDRI). Disabling this setting will drastically change the image quality but will improve performance.
 - **Shadows Quality**: Allows to select the shadows quality. Can help with performances on some PCs.
-- **Advanced lighting**: When enabled, use realistic lighting (HDRI). Disable for better performances.
-- **Enable 'high density' screen support**: When enabled, it will upscale the 3D view to benefit from the extra pixels. Only have an effect on HDPI screens (like Retina display, 4k, etc). High-end GPU needed.
+- **Glowing lights**: When enabled, dice with light effects will glow.
+- **Anti-aliasing**: When enabled, dice will be rendered with anti-aliasing. MSAA is the best option for this but requires a GPU with WebGL2 capabilities.
+- **UHD resolution support**: When enabled, it will upscale the 3D view to benefit from the extra pixels. Only have an effect on HDPI screens (like Retina display, 4k, etc). High-end GPU needed. No effect if you screen is not HDPI.
 
 ## Backup & Restore
 ![Preview](./settings-backuprestore.jpg?raw=true)
@@ -94,13 +102,17 @@ A few considerations:
 # Documentation and API
 A complete API and documentation for developers and artists alike is available in the [Wiki](https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/wikis/home)
 
-# Known limitations
+# Development and Contributing
+Dice So Nice! is a free and open source project. You can contribute to the project by making a merge request or by creating a [Gitlab issue](https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/issues).  
 
-- Works with vanilla foundry and with modules that do not substantially modify the Roll API.
+## Build instructions
+    npm install
+    npx rollup -c -w
 
 # Compatibility
 
-Tested on Foundry VTT 0.8.8  
+Compatible with Foundry VTT v0.8.5 and later.
+Tested with Foundry VTT v9.
 If you need to use an older Foundry version, please [download a compatible older version](https://foundryvtt.com/packages/dice-so-nice/)
 
 # Acknowledgment
@@ -130,7 +142,7 @@ Many thanks to the people who continue to support us on Discord, to the amazing 
 
 # Feedback
 
-Every suggestions/feedback are appreciated, if so, please contact (Simone#6710) or JDW (JDW#6422) on discord 
+Every suggestions/feedback are appreciated, if so, please contact JDW (JDW#6422) or Simone (Simone#6710) on discord.  
 
 To report a bug, please open a new issue [in our tracker](https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/issues) or use the [Bug Reporter module](https://www.foundryvtt-hub.com/package/bug-reporter/)
 
