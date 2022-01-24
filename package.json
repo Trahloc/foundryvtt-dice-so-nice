@@ -23,6 +23,6 @@
     "rollup-plugin-delete": "^2.0.0",
     "rollup-plugin-sourcemaps": "^0.6.3",
     "rollup-plugin-terser": "^7.0.2",
-    "three": "https://github.com/JiDW/three.js.git#master"
+    "three": "github:JiDW/three.js#master"
   }
 }
