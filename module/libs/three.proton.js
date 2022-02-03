@@ -7,7 +7,7 @@
  * http://www.opensource.org/licenses/mit-license
  *
  */
-import * as THREE from '../three.module.js';
+import * as THREE from 'three';
     //the max particle number in pool
     Proton.POOL_MAX = 500;
     Proton.TIME_STEP = 60;
@@ -3339,7 +3339,7 @@ import * as THREE from '../three.module.js';
 
     /**
      * MeshZone is a threejs mesh zone
-     * @param {Geometry|Mesh} geometry - a THREE.Geometry or THREE.Mesh object
+     * @param {Mesh} geometry - a THREE.Mesh object
      * @example 
      * var geometry = new THREE.CylinderGeometry( 5, 5, 20, 32 );
      * var cylinder = new THREE.Mesh( geometry, material );
@@ -3352,11 +3352,8 @@ import * as THREE from '../three.module.js';
 
     function MeshZone(geometry, scale) {
         MeshZone._super_.call(this);
-        if (geometry instanceof THREE.Geometry) {
-            this.geometry = geometry;
-        } else {
-            this.geometry = geometry.geometry;
-        }
+      
+        this.geometry = geometry.geometry.toBufferGeometry();
 
         this.scale = scale || 1;
     }
@@ -3726,10 +3723,8 @@ import * as THREE from '../three.module.js';
             } else if (zone instanceof Proton.SphereZone) {
                 geometry = new THREE.SphereGeometry(zone.radius, 10, 10);
             } else if (zone instanceof Proton.MeshZone) {
-                if (zone.geometry instanceof THREE.Geometry)
-                    geometry = zone.geometry;
-                else
-                    geometry = zone.geometry.geometry;
+                //There's an error here but not sure what should be done. Leaving it for now.
+                geometry = zone.geometry.geometry.toBufferGeometry();
 
                 geometry = new THREE.SphereGeometry(zone.radius, 10, 10);
             }

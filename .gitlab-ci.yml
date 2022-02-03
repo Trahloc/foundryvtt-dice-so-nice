@@ -1,8 +1,8 @@
-image: python:3-alpine
+image: node:latest
 
 before_script:
-  - apk update
-  - apk add zip
+  - apt-get update
+  - apt-get install zip
 
 stages:
   - build
@@ -10,13 +10,16 @@ stages:
 build:
   stage: build
   script:
-    - zip dice-so-nice.zip -r module -x ".*"
+    - npm install
+    - npx rollup -c
+    - cd dist
+    - zip dice-so-nice.zip -r . -x ".*"
   artifacts:
     name: dice-so-nice
     when: on_success
     expire_in: never
     paths:
-      - dice-so-nice.zip
+      - dist/dice-so-nice.zip
   when: on_success
   only:
     - tags

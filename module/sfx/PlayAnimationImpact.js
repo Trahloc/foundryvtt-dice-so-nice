@@ -1,6 +1,6 @@
 import { DiceSFX } from '../DiceSFX.js';
-import { DiceSFXManager } from '../DiceSFXManager.js';
-import * as THREE from '../libs/three.module.js';
+import * as THREE from 'three';
+import { DiceSFXManager } from './../DiceSFXManager';
 
 export class PlayAnimationImpact extends DiceSFX {
     static id = "PlayAnimationImpact";

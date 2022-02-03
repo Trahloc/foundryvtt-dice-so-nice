@@ -1,5 +1,5 @@
-import * as THREE from './libs/three.module.js';
-import { GLTFLoader } from './libs/three-modules/GLTFLoader.js';
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import { PlaySoundEpicFail } from './sfx/PlaySoundEpicFail.js';
 import { PlaySoundEpicWin } from './sfx/PlaySoundEpicWin.js';

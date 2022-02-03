@@ -1,5 +1,4 @@
-import { DiceColors, TEXTURELIST, COLORSETS } from './DiceColors.js';
-
+import { TEXTURELIST, COLORSETS } from './DiceColors.js';
 /**
  * Generic utilities class...
  */
@@ -69,8 +68,8 @@ import { DiceColors, TEXTURELIST, COLORSETS } from './DiceColors.js';
             //v1 to v2
             let settings = game.user.getFlag("dice-so-nice", "settings") ? duplicate(game.user.getFlag("dice-so-nice", "settings")):{};
             if (settings.diceColor || settings.labelColor) {
-                let newSettings = mergeObject(Dice3D.DEFAULT_OPTIONS, settings, { insertKeys: false, insertValues: false });
-                let appearance = mergeObject(Dice3D.DEFAULT_APPEARANCE(), settings, { insertKeys: false, insertValues: false });
+                let newSettings = mergeObject(game.dice3d.constructor.DEFAULT_OPTIONS, settings, { insertKeys: false, insertValues: false });
+                let appearance = mergeObject(game.dice3d.constructor.DEFAULT_APPEARANCE(), settings, { insertKeys: false, insertValues: false });
                 await game.settings.set("dice-so-nice", "settings", mergeObject(newSettings, { "-=dimensions": null, "-=fxList": null }));
                 await game.user.setFlag("dice-so-nice", "appearance", appearance);
                 migrated = true;

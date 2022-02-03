@@ -5,6 +5,8 @@ import { DiceNotation } from './DiceNotation.js';
 import { DiceSFXManager } from './DiceSFXManager.js';
 import { Accumulator } from './Accumulator.js';
 import { Utils } from './Utils.js';
+import { ThinFilmFresnelMap } from './libs/ThinFilmFresnelMap.js';
+import { TextureLoader } from 'three';
 /**
  * Main class to handle 3D Dice animations.
  */
@@ -20,6 +22,7 @@ import { Utils } from './Utils.js';
             autoscale: true,
             scale: 75,
             speed: 1,
+            imageQuality: "high",
             shadowQuality: 'high',
             bumpMapping: true,
             sounds: true,
@@ -28,7 +31,10 @@ import { Utils } from './Utils.js';
             canvasZIndex: 'over',
             throwingForce: 'medium',
             useHighDPI: true,
+            antialiasing: game.canvas.app.renderer.context.webGLVersion===2 ?"msaa":"smaa",
+            glow: true,
             showOthersSFX: true,
+            immersiveDarkness: true,
             muteSoundSecretRolls:false,
             enableFlavorColorset:true,
             rollingArea: false
@@ -225,6 +231,16 @@ import { Utils } from './Utils.js';
             "board": null,
             "showcase": null
         };
+        this.uniforms = {
+            globalBloom: { value: 1 },
+            bloomStrength: { value: 1.3 },
+            bloomRadius: { value: 0.3 },
+            bloomThreshold: { value: 0.05 },
+            iridescenceLookUp: { value: new ThinFilmFresnelMap()},
+            iridescenceNoise: { value: new TextureLoader().load( "modules/dice-so-nice/textures/noise-thin-film.webp" )},
+            boost: { value: 1.5 }
+        };
+
         this.hiddenAnimationQueue = [];
         this.defaultShowExtraDice = Dice3D.DEFAULT_OPTIONS.showExtraDice;
         this._buildCanvas();
@@ -512,7 +528,7 @@ import { Utils } from './Utils.js';
             } else {
 
                 if (synchronize) {
-                    users = users && users.length > 0 ? (users[0].id ? users.map(user => user.id) : users) : users;
+                    users = users && users.length > 0 ? (users[0]?.id ? users.map(user => user.id) : users) : users;
                     game.socket.emit("module.dice-so-nice", { type: "show", data: data, user: user.id, users: users });
                 }
 

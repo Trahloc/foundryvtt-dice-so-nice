@@ -1,4 +1,3 @@
-import * as THREE from '../three.module.js';
 /**
  * @author mrdoob / http://mrdoob.com/
  * @author jetienne / http://jetienne.com/

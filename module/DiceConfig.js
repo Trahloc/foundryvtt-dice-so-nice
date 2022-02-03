@@ -38,18 +38,32 @@ export class DiceConfig extends FormApplication {
             textureList: Utils.prepareTextureList(),
             materialList: Utils.localize({
                 "auto": "DICESONICE.MaterialAuto",
-                "plastic": "DICESONICE.MaterialPlastic",
-                "metal": "DICESONICE.MaterialMetal",
+                "chrome": "DICESONICE.MaterialChrome",
                 "glass": "DICESONICE.MaterialGlass",
-                "wood": "DICESONICE.MaterialWood",
-                "chrome": "DICESONICE.MaterialChrome"
+                "iridescent": "DICESONICE.MaterialIridescent",
+                "metal": "DICESONICE.MaterialMetal",
+                "plastic": "DICESONICE.MaterialPlastic",
+                "pristine": "DICESONICE.MaterialPristine",
+                "stone": "DICESONICE.MaterialStone",
+                "wood": "DICESONICE.MaterialWood"
             }),
             fontList: Utils.prepareFontList(),
             colorsetList: Utils.prepareColorsetList(),
+            imageQualityList: Utils.localize({
+                "low": "DICESONICE.Low",
+                "medium": "DICESONICE.Medium",
+                "high": "DICESONICE.High",
+                "custom": "DICESONICE.Custom"
+            }),
             shadowQualityList: Utils.localize({
                 "none": "DICESONICE.None",
                 "low": "DICESONICE.Low",
                 "high": "DICESONICE.High"
+            }),
+            antialiasingList: Utils.localize({
+                "none": "DICESONICE.None",
+                "smaa": "DICESONICE.SMAA",
+                "msaa": "DICESONICE.MSAA"
             }),
             systemList: Utils.prepareSystemList(),
             soundsSurfaceList: Utils.localize({
@@ -71,6 +85,12 @@ export class DiceConfig extends FormApplication {
             this.reset ? Dice3D.ALL_DEFAULT_OPTIONS() : Dice3D.ALL_CONFIG()
         );
         delete data.sfxLine;
+
+        //remove MSAA if not supported
+        if (game.canvas.app.renderer.context.webGLVersion<2){
+            delete data.antialiasingList.msaa;
+        }
+
         //fix corupted save from #139
         if (data.specialEffects) {
             for (let [key, value] of Object.entries(data.specialEffects)) {
@@ -297,7 +317,7 @@ export class DiceConfig extends FormApplication {
                     if (el.userData != "d10")
                         denominationList.push(el.userData);
                 });
-                let roll = new Roll(denominationList.join("+")).evaluate().then((roll) =>{
+                let roll = new Roll(denominationList.join("+")).evaluate({async:true}).then((roll) =>{
                     let data = new DiceNotation(roll);
 
                     let specialEffects = this.getShowcaseSFX();
@@ -604,6 +624,48 @@ export class DiceConfig extends FormApplication {
                     }
                 }
             });
+
+            $(this.element).on("change", "[data-imageQuality]", (event) => {
+                let quality = {
+                    bumpMapping: true,
+                    shadowQuality: "high",
+                    glow: true,
+                    antialiasing: game.canvas.app.renderer.context.webGLVersion===2 ?"msaa":"smaa",
+                    useHighDPI: true
+                };
+                switch(event.target.value) {
+                    case "low":
+                        quality.bumpMapping = false;
+                        quality.shadowQuality = "low";
+                        quality.glow = false;
+                        quality.antialiasing = "none";
+                        quality.useHighDPI = false;
+                        break;
+                    case "medium":
+                        quality.bumpMapping = true;
+                        quality.shadowQuality = "low";
+                        quality.glow = false;
+                        quality.antialiasing = "none";
+                        quality.useHighDPI = false;
+                        break;
+                    case "high":
+                        quality.bumpMapping = true;
+                        quality.shadowQuality = "high";
+                        quality.glow = true;
+                        quality.antialiasing = game.canvas.app.renderer.context.webGLVersion===2 ?"msaa":"smaa";
+                        quality.useHighDPI = true;
+                        break;
+                }
+                $(this.element).find("[data-bumpMapping]").prop("checked", quality.bumpMapping);
+                $(this.element).find("[data-shadowQuality]").val(quality.shadowQuality);
+                $(this.element).find("[data-glow]").prop("checked", quality.glow);
+                $(this.element).find("[data-antialiasing]").val(quality.antialiasing);
+                $(this.element).find("[data-useHighDPI]").prop("checked", quality.useHighDPI);
+            });
+
+            $(this.element).on("change", "[data-bumpMapping],[data-shadowQuality],[data-glow],[data-antialiasing],[data-useHighDPI]", (event) => {
+                $(this.element).find("[data-imageQuality]").val("custom");
+            });
         }
     }
 
@@ -836,13 +898,17 @@ export class DiceConfig extends FormApplication {
             autoscale: false,
             scale: 60,
             shadowQuality: $('[data-shadowQuality]').val(),
+            imageQuality: $('[data-imageQuality]').val(),
+            antialiasing: $('[data-antialiasing]').val(),
             bumpMapping: $('[data-bumpMapping]').is(':checked'),
+            glow: $('[data-glow]').is(':checked'),
             sounds: $('[data-sounds]').is(':checked'),
             throwingForce: $('[data-throwingForce]').val(),
             useHighDPI: $('[data-useHighDPI]').is(':checked'),
             showExtraDice: $('[data-showExtraDice]').is(':checked'),
             muteSoundSecretRolls: $('[data-muteSoundSecretRolls]').is(':checked'),
             enableFlavorColorset: $('[data-enableFlavorColorset]').is(':checked'),
+            immersiveDarkness: $('[data-immersiveDarkness]').is(':checked'),
             appearance: {}
         };
         $(this.element).find('.tabAppearance').each((index, element) => {
@@ -988,13 +1054,14 @@ export class DiceConfig extends FormApplication {
         DiceSFXManager.init();
         ui.notifications.info(game.i18n.localize("DICESONICE.saveMessage"));
 
-        if ((currentSettings.canvasZIndex != settings.canvasZIndex) ||
-            (currentSettings.bumpMapping != settings.bumpMapping) ||
-            (currentSettings.useHighDPI != settings.useHighDPI)) {
+        let reloadRequiredIfChanged = ["canvasZIndex", "bumpMapping", "useHighDPI", "glow", "antialiasing"];
+        let reloadRequired = reloadRequiredIfChanged.some(setting => settings[setting] != currentSettings[setting]);
+
+        if (reloadRequired) {
             window.location.reload();
-        }
-        else
+        } else {
             game.dice3d.update(settings);
+        }
     }
 
     close(options) {

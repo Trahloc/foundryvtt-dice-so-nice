@@ -1,6 +1,7 @@
 import { DiceSFX } from '../DiceSFX.js';
-import { DiceSFXManager } from '../DiceSFXManager.js';
-import * as THREE from '../libs/three.module.js';
+import * as THREE from 'three';
+import { DiceSFXManager } from './../DiceSFXManager';
+import { ShaderUtils } from './../ShaderUtils';
 
 
 export class PlayAnimationThormund extends DiceSFX {
@@ -23,9 +24,11 @@ export class PlayAnimationThormund extends DiceSFX {
         gltf.scene.traverse(function (node) {
             if (node.isMesh) {
                 node.castShadow = true; 
+                node.material.onBeforeCompile = ShaderUtils.applyDiceSoNiceShader;
             }
         });
         PlayAnimationThormund.model = gltf.scene.children[0];
+        console.log(PlayAnimationThormund.model);
     }
     /**@override play */
     async play() {
