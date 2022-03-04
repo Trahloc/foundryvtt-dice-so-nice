@@ -19,13 +19,13 @@ export class DiceNotation {
 				let countExploded = 0;
 				let localNbThrow = 0;
 				for(let i =0; i< die.results.length; i++){
-					//if (die.results[i].discarded) continue; //Continue if die result is discarded
 					if(localNbThrow >= this.throws.length)
 						this.throws.push({dice:[]});
 
 					if(die.results[i].exploded)
 						countExploded++;
 					die.results[i].indexThrow = localNbThrow;
+					if (die.results[i].discarded) continue; //Continue if die result is discarded
 					//If we have a new throw
 					if(--cnt <= 0){
 						localNbThrow++;
