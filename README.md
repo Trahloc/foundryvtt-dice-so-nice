@@ -1,4 +1,4 @@
-# Foundry VTT - Dice So Nice!
+![Banner](./banner.jpg?raw=true)
 [![Forge Installs](https://img.shields.io/badge/dynamic/json?label=Forge%20Installs&query=package.installs&suffix=%25&url=https%3A%2F%2Fforge-vtt.com%2Fapi%2Fbazaar%2Fpackage%2Fdice-so-nice&colorB=4aa94a)](https://forge-vtt.com/bazaar#package=dice-so-nice)
 [![Foundry Hub Endorsements](https://img.shields.io/endpoint?logoColor=white&url=https%3A%2F%2Fwww.foundryvtt-hub.com%2Fwp-json%2Fhubapi%2Fv1%2Fpackage%2Fdice-so-nice%2Fshield%2Fendorsements)](https://www.foundryvtt-hub.com/package/dice-so-nice/)
 [![Foundry Hub Comments](https://img.shields.io/endpoint?logoColor=white&url=https%3A%2F%2Fwww.foundryvtt-hub.com%2Fwp-json%2Fhubapi%2Fv1%2Fpackage%2Fdice-so-nice%2Fshield%2Fcomments)](https://www.foundryvtt-hub.com/package/dice-so-nice/)
@@ -135,7 +135,7 @@ Built on [ThreeJS](https://threejs.org/), [CannonJS](https://schteppe.github.io/
 - **Foundry VTT:** For the FVTT Logo in the `Foundry VTT` preset.
 - **LyncsCwtsh:** For the `Spectrum` system (Discord: LyncsCwtsh#7116).
 - **MajorVictory:** For all the other theme in this module!
-- **[Joost Vanhoutte](https://joost3d.com/hdris/):** For the "Foyer" HDRI map
+- **[Christian Bloch](http://www.hdrlabs.com/sibl/archive.html):** For the "Footprint Court" HDRI map, released under the [CC-BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) license.
 - Additional sound effects from https://www.zapsplat.com
 
 Many thanks to the people who continue to support us on Discord, to the amazing system and module developers who integrate our module and to the artists who have let us integrate their textures in Dice So Nice!
@@ -148,6 +148,6 @@ To report a bug, please open a new issue [in our tracker](https://gitlab.com/ric
 
 # License
 
-FoundryVTT Dice So Nice is a module for Foundry VTT by Simone and JDW and is licensed under a [Creative Commons Attribution 4.0 International License](http://creativecommons.org/licenses/by/4.0/).
+FoundryVTT Dice So Nice is a module for Foundry VTT by Simone and JDW and is licensed under [GNU AFFERO GENERAL PUBLIC LICENSE](./LICENSE.md).
 
-This work is licensed under Foundry Virtual Tabletop [EULA - Limited License Agreement for module development](https://foundryvtt.com/article/license/).
+The Foundry VTT platform integration is licensed under Foundry Virtual Tabletop [EULA - Limited License Agreement for module development](https://foundryvtt.com/article/license/).

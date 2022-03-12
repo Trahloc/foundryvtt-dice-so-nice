@@ -263,6 +263,9 @@ import { TEXTURELIST, COLORSETS } from './DiceColors.js';
             await game.user.unsetFlag("dice-so-nice", "sfxList");
             await game.user.setFlag("dice-so-nice", "sfxList", save.sfxList);
         }
-        await game.settings.set("dice-so-nice", "settings", save.settings);
+        if (save.settings) {
+            await game.user.unsetFlag("dice-so-nice", "settings");
+            await game.user.setFlag("dice-so-nice", "settings", save.settings);
+        }
     }
 }

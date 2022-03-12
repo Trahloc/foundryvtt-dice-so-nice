@@ -144,6 +144,7 @@ export class DicePreset {
 						}
 						hasTextures = true;
 						imgElements[i] = new Image();
+						imgElements[i].crossOrigin = "Anonymous";
 						imgElements.textureType = type;
 						imgElements[i].onload = function(){
 							if (++loadedImages >= numImages) {
@@ -156,6 +157,21 @@ export class DicePreset {
 								}
 							}
 						}.bind(this);
+
+						//We still consider the image as loaded even if it fails to load
+						//so that we can still initialize the module
+						imgElements[i].onerror = function(texture){
+							console.error("[Dice So Nice] Error loading texture:" + texture);
+							if (++loadedImages >= numImages) {
+								if(textureTypeLoaded < 2)
+									textureTypeLoaded++;
+								else{
+									resolve();
+									this.modelLoaded = true;
+								}
+							}
+						}.bind(this, textures[i]);
+
 						imgElements[i].src = textures[i];
 					}
 					if (!hasTextures){
@@ -195,7 +211,6 @@ export class DicePreset {
 						if (node.isMesh) {
 							node.castShadow = true; 
 							node.material.onBeforeCompile = ShaderUtils.applyDiceSoNiceShader;
-							//node.material.onBeforeCompile = ShaderUtils.iridescentShaderFragment;
 						}
 					});
 					this.model = gltf;

@@ -587,6 +587,7 @@ export class DiceColors {
 			}
 	
 			images[key] = new Image();
+			images[key].crossOrigin = "Anonymous";
 			images[key].onload = function() {
 	
 				if (++loadedImages >= numImages) {
@@ -603,6 +604,7 @@ export class DiceColors {
 			}
 
 			bumps[key] = new Image();
+			bumps[key].crossOrigin = "Anonymous";
 			bumps[key].onload = function() {
 	
 				if (++loadedImages >= numImages) {

@@ -188,7 +188,7 @@ import { TextureLoader } from 'three';
 
         if (colorset.font && !this.DiceFactory.fontFamilies.includes(colorset.font)) {
             this.DiceFactory.fontFamilies.push(colorset.font);
-            await this.DiceFactory._loadFonts();
+            await this.DiceFactory.loadFonts();
         }
         if(mode=="preferred")
             this.DiceFactory.preferredColorset = colorset.name;
@@ -227,15 +227,23 @@ import { TextureLoader } from 'three';
      */
     constructor() {
         Hooks.call("diceSoNiceInit", this);
-        game.dice3dRenderers = {
+        this.dice3dRenderers = {
             "board": null,
             "showcase": null
         };
+
+        this.exports = {
+            "Utils": Utils,
+            "DiceColors": DiceColors,
+            "TEXTURELIST": TEXTURELIST,
+            "COLORSETS": COLORSETS
+        };
+
         this.uniforms = {
             globalBloom: { value: 1 },
-            bloomStrength: { value: 1.3 },
-            bloomRadius: { value: 0.3 },
-            bloomThreshold: { value: 0.05 },
+            bloomStrength: { value: 2.5 },
+            bloomRadius: { value: 0.5 },
+            bloomThreshold: { value: 0.03 },
             iridescenceLookUp: { value: new ThinFilmFresnelMap()},
             iridescenceNoise: { value: new TextureLoader().load( "modules/dice-so-nice/textures/noise-thin-film.webp" )},
             boost: { value: 1.5 }
@@ -250,7 +258,7 @@ import { TextureLoader } from 'three';
             DiceColors.initColorSets();
             
             Hooks.call("diceSoNiceReady", this);
-            await this.DiceFactory._loadFonts();
+            await this.DiceFactory.loadFonts();
             await this.DiceFactory.preloadPresets();
         });
         DiceSFXManager.init();
@@ -443,7 +451,6 @@ import { TextureLoader } from 'three';
             }
             game.user.setFlag("dice-so-nice", "welcomeMessageShown", true);
         }
-
     }
 
     /**
@@ -650,25 +657,5 @@ import { TextureLoader } from 'three';
                 }, Dice3D.CONFIG().timeBeforeHide);
             }
         }
-    }
-
-    copyto(obj, res) {
-        if (obj == null || typeof obj !== 'object') return obj;
-        if (obj instanceof Array) {
-            for (var i = obj.length - 1; i >= 0; --i)
-                res[i] = Dice3D.copy(obj[i]);
-        }
-        else {
-            for (var i in obj) {
-                if (obj.hasOwnProperty(i))
-                    res[i] = Dice3D.copy(obj[i]);
-            }
-        }
-        return res;
-    }
-
-    copy(obj) {
-        if (!obj) return obj;
-        return Dice3D.copyto(obj, new obj.constructor());
     }
 }

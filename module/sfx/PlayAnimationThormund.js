@@ -28,7 +28,6 @@ export class PlayAnimationThormund extends DiceSFX {
             }
         });
         PlayAnimationThormund.model = gltf.scene.children[0];
-        console.log(PlayAnimationThormund.model);
     }
     /**@override play */
     async play() {
