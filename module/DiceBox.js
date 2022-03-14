@@ -624,6 +624,10 @@ export class DiceBox {
 		let rotIndex = value > result ? result + "," + value : value + "," + result;
 		//console.log(`Needed ${result}, Rolled ${value}, Remap: ${rotIndex}`)
 		let rotationDegrees = DICE_MODELS[dicemesh.shape].rotationCombinations[rotIndex];
+		if (!rotationDegrees) {
+			console.error(`[Dice So Nice] No dice rotation found for ${dicemesh.shape} ${rotIndex}`);
+			return;
+		}
 		let eulerAngle = new THREE.Euler(THREE.MathUtils.degToRad(rotationDegrees[0]), THREE.MathUtils.degToRad(rotationDegrees[1]), THREE.MathUtils.degToRad(rotationDegrees[2]));
 		let quaternion = new THREE.Quaternion().setFromEuler(eulerAngle);
 		if (value > result)
