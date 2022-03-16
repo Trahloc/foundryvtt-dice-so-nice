@@ -277,6 +277,7 @@ export class DiceFactory {
 		this.glow = config.glow;
 		this.useHighDPI = config.useHighDPI;
 		this.shadows = config.shadowQuality != "none";
+		this.shadowQuality = config.shadowQuality;
 	}
 
 	register(diceobj) {

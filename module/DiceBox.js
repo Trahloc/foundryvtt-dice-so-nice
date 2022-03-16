@@ -1406,7 +1406,7 @@ export class DiceBox {
 
 	findShowcaseDie(pos) {
 		this.raycaster.setFromCamera(pos, this.camera);
-		const intersects = this.raycaster.intersectObjects(this.diceList, true);
+		const intersects = this.raycaster.intersectObjects([...this.diceList, ...this.deadDiceList], true);
 		if (intersects.length) {
 
 			return intersects[0];
@@ -1418,7 +1418,7 @@ export class DiceBox {
 	findHoveredDie() {
 		if (this.isVisible && !this.running && !this.mouse.constraintDown) {
 			this.raycaster.setFromCamera(this.mouse.pos, this.camera);
-			const intersects = this.raycaster.intersectObjects(this.diceList, true);
+			const intersects = this.raycaster.intersectObjects([...this.diceList, ...this.deadDiceList], true);
 			if (intersects.length) {
 				this.hoveredDie = intersects[0];
 			}
