@@ -26,7 +26,6 @@ export class ShaderUtils {
 			totalDiffuse = mix( totalDiffuse, transmission.rgb, transmissionFactor);
 			float grey = (material.diffuseColor.r + material.diffuseColor.g + material.diffuseColor.b) / 3.0;
 			transmissionAlpha = mix( transmissionAlpha, 1.0-grey, transmissionFactor );`);
-		console.log(shader.fragmentShader);
 	}
 
 	static selectiveBloomShaderFragment(shader) {

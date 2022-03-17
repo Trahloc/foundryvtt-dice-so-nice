@@ -87,7 +87,7 @@ export class DiceNotation {
 
 		//If it is not a standard die ("d"), we need to prepend "d" to the denominator. If it is, we append the number of face
 		dsnDie.type = fvttDie.constructor.DENOMINATION;
-		if(fvttDie.constructor.name == "Die")
+		if(fvttDie.constructor.name == CONFIG.Dice.terms["d"].name)
 			dsnDie.type += isd10of100 ? "10":fvttDie.faces;
 		else {
 			dsnDie.type = "d"+dsnDie.type;

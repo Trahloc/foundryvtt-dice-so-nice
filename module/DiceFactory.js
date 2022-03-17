@@ -21,6 +21,7 @@ export class DiceFactory {
 		this.realisticLighting = true;
 
 		this.loaderGLTF = new GLTFLoader();
+		this.loadedFonts = new Set();
 
 		this.baseTextureCache = {};
 		this.fontFamilies = [
@@ -88,7 +89,7 @@ export class DiceFactory {
 				'metal': {
 					'type':'standard',
 					'options': {
-						roughness: 0.95,
+						roughness: 0.6,
 						metalness: 1
 					},
 					'scopedOptions':{
@@ -130,11 +131,13 @@ export class DiceFactory {
 					}
 				},
 				'pristine': {
-					'type':'standard',
+					'type':'physical',
 					'options': {
 						metalness: 0,
 						roughness: 0.6,
-						envMapIntensity:1
+						envMapIntensity:1,
+						clearcoat: 1,
+						clearcoatRoughness: 0.5
 					},
 					'scopedOptions':{
 						envMap : true
@@ -274,6 +277,7 @@ export class DiceFactory {
 		this.glow = config.glow;
 		this.useHighDPI = config.useHighDPI;
 		this.shadows = config.shadowQuality != "none";
+		this.shadowQuality = config.shadowQuality;
 	}
 
 	register(diceobj) {
@@ -473,9 +477,12 @@ export class DiceFactory {
 	 * @return {Promise<void>}
 	 * @private
 	 */
-	async _loadFonts() {
+	async loadFonts() {
 		for (let font of this.fontFamilies) {
-			document.fonts.load(`1rem ${font}`);
+			if(!this.loadedFonts.has(font)){
+				document.fonts.load(`1rem ${font}`);
+				this.loadedFonts.add(font);
+			}
 		}
 		const timeout = new Promise(resolve => setTimeout(resolve, 3000));
 		return Promise.race([document.fonts.ready, timeout]);
@@ -549,6 +556,8 @@ export class DiceFactory {
 
 			if (diceobj.color) {
 				dicemesh.material[0].color = new THREE.Color(diceobj.color);
+				if(this.realisticLighting)
+					dicemesh.material[0].color.convertLinearToSRGB();
 				//dicemesh.material[0].emissive = new THREE.Color(diceobj.color);
 				dicemesh.material[0].emissiveIntensity = 1;
 				dicemesh.material[0].needsUpdate = true;
@@ -740,6 +749,8 @@ export class DiceFactory {
 		//generate basetexture for caching
 		if(!this.baseTextureCache[baseTextureCacheString]){
 			let texture = new THREE.CanvasTexture(canvas);
+			if(this.realisticLighting)
+				texture.encoding = THREE.sRGBEncoding;
 			texture.flipY = false;
 			mat.map = texture;
 			mat.map.anisotropy = 4;
@@ -751,10 +762,14 @@ export class DiceFactory {
 				mat.bumpMap.anisotropy = 4;
 
 				let emissiveMap = new THREE.CanvasTexture(canvasEmissive);
+				if(this.realisticLighting)
+					emissiveMap.encoding = THREE.sRGBEncoding;
 				emissiveMap.flipY = false;
 				mat.emissiveMap = emissiveMap;
 				mat.emissiveIntensity = 1;
 				mat.emissive = new THREE.Color(diceobj.emissive);
+				if(this.realisticLighting)
+					mat.emissive.convertLinearToSRGB();
 			}
 		}
 
