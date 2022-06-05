@@ -196,16 +196,16 @@ Hooks.once('ready', () => {
  */
 Hooks.on('createChatMessage', (chatMessage) => {
     //precheck for better perf
-    let hasInlineRoll = game.settings.get("dice-so-nice", "animateInlineRoll") && chatMessage.data.content.indexOf('inline-roll') !== -1;
+    let hasInlineRoll = game.settings.get("dice-so-nice", "animateInlineRoll") && chatMessage.content.indexOf('inline-roll') !== -1;
     if ((!chatMessage.isRoll && !hasInlineRoll) || (!chatMessage.isContentVisible && !game.settings.get("dice-so-nice", "showGhostDice")) ||
         (game.view != "stream" && (!game.dice3d || game.dice3d.messageHookDisabled)) ||
         (chatMessage.getFlag("core", "RollTable") && !game.settings.get("dice-so-nice", "animateRollTable"))) {
         return;
     }
-    let roll = chatMessage.isRoll ? chatMessage.roll : null;
-    let maxRollOrder = roll ? 0:-1;
+    let rolls = chatMessage.isRoll ? chatMessage.rolls : null;
+    let maxRollOrder = rolls ? 0:-1;
     if (hasInlineRoll) {
-        let JqInlineRolls = $($.parseHTML(`<div>${chatMessage.data.content}</div>`)).find(".inline-roll.inline-result:not(.inline-dsn-hidden)");
+        let JqInlineRolls = $($.parseHTML(`<div>${chatMessage.content}</div>`)).find(".inline-roll.inline-result:not(.inline-dsn-hidden)");
         if (JqInlineRolls.length == 0 && !chatMessage.isRoll) //it was a false positive
             return;
         let inlineRollList = [];
@@ -225,14 +225,14 @@ Hooks.on('createChatMessage', (chatMessage) => {
             
             let pool = PoolTerm.fromRolls(inlineRollList);
             //We use the Roll class registered in the CONFIG constant in case the system overwrites it (eg: HeXXen)
-            roll = CONFIG.Dice.rolls[0].fromTerms([pool]);
+            rolls = [CONFIG.Dice.rolls[0].fromTerms([pool])];
         }
         else if (!chatMessage.isRoll)
             return;
     }
 
     //Because Better Roll 5e sends an empty roll object sometime
-    if(!roll.dice.length)
+    if(!rolls.length || !rolls[0].dice.length)
         return;
 
     const isInitiativeRoll = chatMessage.getFlag("core","initiativeRoll");
@@ -240,66 +240,12 @@ Hooks.on('createChatMessage', (chatMessage) => {
         return;
 
     //Remove the chatmessage sound if it is the core dice sound.
-    if (Dice3D.CONFIG().enabled && chatMessage.data.sound == "sounds/dice.wav") {
-        mergeObject(chatMessage.data, { "-=sound": null });
+    if (Dice3D.CONFIG().enabled && chatMessage.sound == "sounds/dice.wav") {
+        mergeObject(chatMessage, { "-=sound": null });
     }
     chatMessage._dice3danimating = true;
 
-    const showMessage = () => {
-            delete chatMessage._dice3danimating;
-            
-            window.ui.chat.element.find(`.message[data-message-id="${chatMessage.id}"]`).show();
-            if(window.ui.sidebar.popouts.chat)
-                window.ui.sidebar.popouts.chat.element.find(`.message[data-message-id="${chatMessage.id}"]`).show();
-
-            Hooks.callAll("diceSoNiceRollComplete", chatMessage.id);
-
-            window.ui.chat.scrollBottom({popout:true});
-    }
-
-    if (game.view == "stream" && !game.modules.get("0streamutils")?.active) {
-        setTimeout(showMessage, 2500, chatMessage);
-    } else {
-        //1- We create a list of all 3D rolls, ordered ASC
-        //2- We create a Roll object with the correct formula and results
-        //3- We queue the showForRoll calls and then show the message
-        let orderedDiceList = [[]];
-        roll.dice.forEach(diceTerm => {
-            let index = 0;
-            if(!game.settings.get("dice-so-nice","enabledSimultaneousRollForMessage") && diceTerm.options.hasOwnProperty("rollOrder")){
-                index = diceTerm.options.rollOrder;
-                if(orderedDiceList[index] == null){
-                    orderedDiceList[index] = [];
-                }
-            }
-            orderedDiceList[index].push(diceTerm);
-        });
-        orderedDiceList = orderedDiceList.filter(el => el != null);
-        
-        let rollList = [];
-        const plus = new OperatorTerm({operator: "+"}).evaluate();
-        orderedDiceList.forEach(dice => {
-            //add a "plus" between each term
-            if(Array.isArray(dice) && dice.length){
-                let termList = [...dice].map((e, i) => i < dice.length - 1 ? [e, plus] : [e]).reduce((a, b) => a.concat(b));
-                //We use the Roll class registered in the CONFIG constant in case the system overwrites it (eg: HeXXen)
-                rollList.push(CONFIG.Dice.rolls[0].fromTerms(termList));
-            }
-        });
-        
-        //call each promise one after the other, then call the showMessage function
-        const recursShowForRoll = (rollList, index) => {
-            game.dice3d.showForRoll(rollList[index], chatMessage.user, false, null, false, chatMessage.id, chatMessage.data.speaker).then(()=>{
-                index++;
-                if(rollList[index] != null)
-                    recursShowForRoll(rollList, index);
-                else
-                    showMessage();
-            });
-        };
-
-        recursShowForRoll(rollList, 0);
-    }
+    game.dice3d.renderRolls(chatMessage, rolls);
 });
 
 /**
@@ -310,7 +256,28 @@ Hooks.on("renderChatMessage", (message, html, data) => {
         return;
     }
     if (message._dice3danimating && !game.settings.get("dice-so-nice", "immediatelyDisplayChatMessages")) {
-        html.hide();
+        
+        if(message._countNewRolls)
+            html.find(`.dice-roll:nth-last-child(-n+${message._countNewRolls})`).hide();
+        else
+            html.hide();
+    }
+});
+
+/**
+ * Hide and roll new rolls added in a chat message in a update
+ */
+ Hooks.on("updateChatMessage", (message, updated, mergeObject) => {
+    if (!updated.rolls || !message.isRoll || (!message.isContentVisible && !game.settings.get("dice-so-nice", "showGhostDice")) ||
+        (game.view != "stream" && (!game.dice3d || game.dice3d.messageHookDisabled)) ||
+        (message.getFlag("core", "RollTable") && !game.settings.get("dice-so-nice", "animateRollTable"))) {
+        return;
+    }
+    const countNewRolls =  mergeObject._diff.rolls.length - mergeObject._backup.rolls.length;
+    if(countNewRolls > 0){
+        message._dice3danimating = true;
+        message._countNewRolls = countNewRolls;
+        game.dice3d.renderRolls(message, message.rolls.slice(-countNewRolls));
     }
 });
 

@@ -44,10 +44,10 @@ import { TextureLoader } from 'three';
     static DEFAULT_APPEARANCE(user = game.user) {
         return {
             global: {
-                labelColor: Utils.contrastOf(user.data.color),
-                diceColor: user.data.color,
-                outlineColor: user.data.color,
-                edgeColor: user.data.color,
+                labelColor: Utils.contrastOf(user.color),
+                diceColor: user.color,
+                outlineColor: user.color,
+                edgeColor: user.color,
                 texture: "none",
                 material: "auto",
                 font: "auto",
@@ -471,6 +471,73 @@ import { TextureLoader } from 'three';
     }
 
     /**
+     * Parse, sort and add the dice animation to the queue for a chat message and an array of Roll
+     * Used internally by the message Hooks. Not meant to be used outside of the module.
+     * Please use the showForRoll method instead.
+     * @param {ChatMessage} chatMessage 
+     * @param {Array<Roll>} rolls 
+     */
+    renderRolls(chatMessage, rolls) {
+        const showMessage = () => {
+            delete chatMessage._dice3danimating;
+            
+            window.ui.chat.element.find(`.message[data-message-id="${chatMessage.id}"]`).show().find(".dice-roll").show();
+            if(window.ui.sidebar.popouts.chat)
+                window.ui.sidebar.popouts.chat.element.find(`.message[data-message-id="${chatMessage.id}"]`).show().find(".dice-roll").show();;
+
+            Hooks.callAll("diceSoNiceRollComplete", chatMessage.id);
+
+            window.ui.chat.scrollBottom({popout:true});
+        }
+
+        if (game.view == "stream" && !game.modules.get("0streamutils")?.active) {
+            setTimeout(showMessage, 2500, chatMessage);
+        } else {
+            //1- We create a list of all 3D rolls, ordered ASC
+            //2- We create a Roll object with the correct formula and results
+            //3- We queue the showForRoll calls and then show the message
+            let orderedDiceList = [[]];
+            rolls.forEach(roll => {
+                roll.dice.forEach(diceTerm => {
+                    let index = 0;
+                    if(!game.settings.get("dice-so-nice","enabledSimultaneousRollForMessage") && diceTerm.options.hasOwnProperty("rollOrder")){
+                        index = diceTerm.options.rollOrder;
+                        if(orderedDiceList[index] == null){
+                            orderedDiceList[index] = [];
+                        }
+                    }
+                    orderedDiceList[index].push(diceTerm);
+                });
+            });
+            orderedDiceList = orderedDiceList.filter(el => el != null);
+            
+            let rollList = [];
+            const plus = new OperatorTerm({operator: "+"}).evaluate();
+            orderedDiceList.forEach(dice => {
+                //add a "plus" between each term
+                if(Array.isArray(dice) && dice.length){
+                    let termList = [...dice].map((e, i) => i < dice.length - 1 ? [e, plus] : [e]).reduce((a, b) => a.concat(b));
+                    //We use the Roll class registered in the CONFIG constant in case the system overwrites it (eg: HeXXen)
+                    rollList.push(CONFIG.Dice.rolls[0].fromTerms(termList));
+                }
+            });
+            
+            //call each promise one after the other, then call the showMessage function
+            const recursShowForRoll = (rollList, index) => {
+               this.showForRoll(rollList[index], chatMessage.user, false, null, false, chatMessage.id, chatMessage.speaker).then(()=>{
+                    index++;
+                    if(rollList[index] != null)
+                        recursShowForRoll(rollList, index);
+                    else
+                        showMessage();
+                });
+            };
+
+            recursShowForRoll(rollList, 0);
+        }
+    }
+
+    /**
      * Show the 3D Dice animation for the Roll made by the User.
      *
      * @param roll an instance of Roll class to show 3D dice animation.
@@ -483,11 +550,6 @@ import { TextureLoader } from 'three';
      * @returns {Promise<boolean>} when resolved true if the animation was displayed, false if not.
      */
     showForRoll(roll, user = game.user, synchronize, users = null, blind, messageID = null, speaker = null) {
-        //Compatibility with both roll sync and async
-        //TODO: make it work with _dice3danimating
-        /*if(roll instanceof Promise)
-            roll = await roll;*/
-        
         let context = {
             roll: roll,
             user: user,
@@ -496,14 +558,14 @@ import { TextureLoader } from 'three';
         };
         if(speaker){
             let actor = game.actors.get(speaker.actor);
-            const isNpc = actor ? actor.data.type === 'npc' : false;
+            const isNpc = actor ? actor.type === 'npc' : false;
             if (isNpc && game.settings.get("dice-so-nice", "hideNpcRolls")) {
                 return Promise.resolve(false);
             }
         }
         let chatMessage = game.messages.get(messageID);
         if(chatMessage){
-            if(chatMessage.data.whisper.length > 0)
+            if(chatMessage.whisper.length > 0)
                 context.roll.secret = true;
             if(!chatMessage.isContentVisible)
                 context.roll.ghost = true;
