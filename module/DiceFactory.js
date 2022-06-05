@@ -134,10 +134,10 @@ export class DiceFactory {
 					'type':'physical',
 					'options': {
 						metalness: 0,
-						roughness: 0.6,
+						roughness: 0.8,
 						envMapIntensity:1,
 						clearcoat: 1,
-						clearcoatRoughness: 0.5
+						clearcoatRoughness: 0.9
 					},
 					'scopedOptions':{
 						envMap : true
