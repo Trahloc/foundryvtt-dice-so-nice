@@ -29,6 +29,7 @@ export class PlayAnimationThormund extends DiceSFX {
         });
         PlayAnimationThormund.model = gltf.scene.children[0];
     }
+
     /**@override play */
     async play() {
         this.step = 1;
@@ -37,12 +38,20 @@ export class PlayAnimationThormund extends DiceSFX {
         let scale = this.box.dicefactory.baseScale/100;
 
         let boundingBox = new THREE.Vector3();
-        new THREE.Box3().setFromObject(this.dicemesh.parent).getSize(boundingBox);
+        let parent = null;
+        if(this.dicemesh.isMesh){
+            parent = this.dicemesh.parent;
+        } else {
+            parent = this.dicemesh.parent.clone();
+            delete parent.children[0].geometry;
+        }
+        new THREE.Box3().setFromObject(parent).getSize(boundingBox);
+        
 		this.thormund.scale.set(scale,scale,scale);
         this.thormund.rotation.x = Math.PI/2;
-        this.thormund.position.x = this.dicemesh.parent.position.x;
-        this.thormund.position.y = this.dicemesh.parent.position.y;
-        this.thormund.position.z = this.dicemesh.parent.position.z + (boundingBox.z/2);
+        this.thormund.position.x = parent.position.x;
+        this.thormund.position.y = parent.position.y;
+        this.thormund.position.z = parent.position.z + (boundingBox.z/2);
 
         this.curve = new THREE.CatmullRomCurve3( [
             new THREE.Vector3( this.thormund.position.x, this.thormund.position.y,-50),

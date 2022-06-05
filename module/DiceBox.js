@@ -181,7 +181,7 @@ export class DiceBox {
 				});
 			}
 			else {
-				this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+				this.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: "high-performance" });
 				if (this.dicefactory.useHighDPI)
 					this.renderer.setPixelRatio(window.devicePixelRatio);
 				if (this.dicefactory.realisticLighting) {
@@ -405,7 +405,8 @@ export class DiceBox {
 			//Create a RenderTarget with high precision
 			let options = {
 				type: THREE.FloatType,
-				samples: this.dicefactory.aa == "msaa" ? 4 : 0
+				samples: this.dicefactory.aa == "msaa" ? 4 : 0,
+				anisotropy: 4
 			};
 
 			this.composerTarget = new THREE.WebGLRenderTarget(size.x, size.y, options);
