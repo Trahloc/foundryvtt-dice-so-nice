@@ -211,6 +211,21 @@ export class DicePreset {
 						if (node.isMesh) {
 							node.castShadow = true; 
 							node.material.onBeforeCompile = ShaderUtils.applyDiceSoNiceShader;
+							
+							if(node.material.map !== null)
+								node.material.map.anisotropy = 8;
+							
+							if(node.material.normalMap !== null)
+								node.material.normalMap.anisotropy = 8;
+							
+							if(node.material.emissiveMap !== null)
+								node.material.emissiveMap.anisotropy = 8;
+
+							if(node.material.roughnessMap !== null)
+								node.material.roughnessMap.anisotropy = 8;
+
+							if(node.material.metalnessMap !== null)
+								node.material.metalnessMap.anisotropy = 8;
 						}
 					});
 					this.model = gltf;
