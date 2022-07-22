@@ -41,12 +41,20 @@ export class PlayAnimationParticleSparkles extends DiceSFX {
         this.emitter.addBehaviour(new Proton.Scale(1, 0.5));
 
         this.emitter.addBehaviour(new Proton.Force(0, 0, 1));
-        this.emitter.p.x = this.dicemesh.parent.position.x;
-        this.emitter.p.y = this.dicemesh.parent.position.y;
+
+        let parent = null;
+        if(this.dicemesh.isMesh){
+            parent = this.dicemesh.parent;
+        } else {
+            parent = this.dicemesh.parent.clone();
+            delete parent.children[0].geometry;
+        }
+
+        this.emitter.p.x = parent.position.x;
+        this.emitter.p.y = parent.position.y;
 
         let boundingBox = new THREE.Vector3();
-        new THREE.Box3().setFromObject(this.dicemesh.parent).getSize(boundingBox);
-
+        new THREE.Box3().setFromObject(parent).getSize(boundingBox);
 
         this.emitter.p.z = boundingBox.z/2;
         this.emitter.emit('once',true);

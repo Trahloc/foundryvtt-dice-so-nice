@@ -25,9 +25,7 @@ const staticFiles = [
  */
 const config = {
   input: {
-    "main": "module/main.js",
-    "DiceColors": "module/DiceColors.js",
-    "Utils": "module/Utils.js"
+    "main": "module/main.js"
   },
   output: {
     dir: "dist",
@@ -44,7 +42,7 @@ const config = {
       targets: 'dist/*',
       runOnce: true
     }),
-    nodeResolve(),
+    nodeResolve({ preferBuiltins: false }),
     sourcemaps(),
     process.env.NODE_ENV === "production" && terser({ ecma: 2020, keep_fnames: true }),
     copy({

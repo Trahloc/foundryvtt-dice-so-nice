@@ -387,7 +387,7 @@ EXTRA_PRESETS_LIST.push({
         'modules/dice-so-nice/textures/spectrumdice/d6-5.webp',
         'modules/dice-so-nice/textures/spectrumdice/d6-6.webp'
     ],
-    emissive: 0x999999,
+    emissive: 0xffffff,
     colorset: "spectrum_default",
     system: "spectrum"
 });
