@@ -1,10 +1,15 @@
 {
+	"id": "dice-so-nice",
 	"name": "dice-so-nice",
 	"title": "Dice So Nice!",
-	"description": "Adds the ability to show a nice 3D dice simulation when a roll is made.",
-	"version": "4.5.1",
+	"description": "Adds customizable 3D dice to Foundry VTT with lots of options to fit your playstyle.",
+	"version": "4.6.0",
 	"minimumCoreVersion" : "0.8.4",
-	"compatibleCoreVersion" : "9",
+	"compatibleCoreVersion" : "10",
+	"compatibility": {
+		"minimum": "0.8.4",
+		"verified": "10"
+	},
 	"author": "Simone, JDW",
 	"authors": [
 		{

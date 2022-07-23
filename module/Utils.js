@@ -68,9 +68,9 @@ import { TEXTURELIST, COLORSETS } from './DiceColors.js';
             //v1 to v2
             let settings = game.user.getFlag("dice-so-nice", "settings") ? duplicate(game.user.getFlag("dice-so-nice", "settings")):{};
             if (settings.diceColor || settings.labelColor) {
-                let newSettings = mergeObject(game.dice3d.constructor.DEFAULT_OPTIONS, settings, { insertKeys: false, insertValues: false });
-                let appearance = mergeObject(game.dice3d.constructor.DEFAULT_APPEARANCE(), settings, { insertKeys: false, insertValues: false });
-                await game.settings.set("dice-so-nice", "settings", mergeObject(newSettings, { "-=dimensions": null, "-=fxList": null }));
+                let newSettings = mergeObject(game.dice3d.constructor.DEFAULT_OPTIONS, settings, { insertKeys: false, insertValues: false,performDeletions:true });
+                let appearance = mergeObject(game.dice3d.constructor.DEFAULT_APPEARANCE(), settings, { insertKeys: false, insertValues: false,performDeletions:true});
+                await game.settings.set("dice-so-nice", "settings", mergeObject(newSettings, { "-=dimensions": null, "-=fxList": null },{performDeletions:true}));
                 await game.user.setFlag("dice-so-nice", "appearance", appearance);
                 migrated = true;
             }
@@ -179,10 +179,7 @@ import { TEXTURELIST, COLORSETS } from './DiceColors.js';
         let fontList = {
             "auto": game.i18n.localize("DICESONICE.FontAuto")
         };
-        game.dice3d.box.dicefactory.fontFamilies.forEach(font => {
-            fontList[font] = font;
-        });
-        return fontList;
+        return mergeObject(fontList,FontConfig.getAvailableFontChoices());
     };
 
     static prepareColorsetList() {
