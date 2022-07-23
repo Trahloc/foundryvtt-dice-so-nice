@@ -997,7 +997,9 @@ export class DiceBox {
 			DiceSFXManager.renderSFX();
 			//use darknessLevel to change toneMapping
 			if (this.dicefactory.realisticLighting && this.immersiveDarkness) {
-				this.renderer.toneMappingExposure = 0.4 + (0.6 - canvas.lighting.darknessLevel * 0.6);
+				//If the darkness level is not defined, we set it to 0
+				let darknessLevel = this.darknessLevel || 0;
+				this.renderer.toneMappingExposure = 0.4 + (0.6 - darknessLevel * 0.6);
 			}
 			this.renderScene();
 		}

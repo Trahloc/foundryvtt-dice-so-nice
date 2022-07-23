@@ -203,10 +203,7 @@ Hooks.on('createChatMessage', (chatMessage) => {
         return;
     }
 
-    //Compatibility with FVTT < v10
-    let chatRolls = chatMessage.rolls ? chatMessage.rolls : [chatMessage.roll];
-
-    let rolls = chatMessage.isRoll ? chatRolls : null;
+    let rolls = chatMessage.isRoll ? chatMessage.rolls : null;
     let maxRollOrder = rolls ? 0:-1;
     if (hasInlineRoll) {
         let JqInlineRolls = $($.parseHTML(`<div>${chatMessage.content}</div>`)).find(".inline-roll.inline-result:not(.inline-dsn-hidden)");
@@ -225,7 +222,7 @@ Hooks.on('createChatMessage', (chatMessage) => {
         });
         if (inlineRollList.length) {
             if (chatMessage.isRoll)
-                inlineRollList = [...chatRolls, ...inlineRollList];
+                inlineRollList = [...chatMessage.rolls, ...inlineRollList];
             
             let pool = PoolTerm.fromRolls(inlineRollList);
             //We use the Roll class registered in the CONFIG constant in case the system overwrites it (eg: HeXXen)
