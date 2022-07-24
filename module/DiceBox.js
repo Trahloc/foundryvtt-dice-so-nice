@@ -299,8 +299,11 @@ export class DiceBox {
 	}
 
 	setScene(dimensions) {
-		this.display.currentWidth = this.container.clientWidth / 2;
-		this.display.currentHeight = this.container.clientHeight / 2;
+		this.display.currentWidth = this.container.clientWidth > 0 ? this.container.clientWidth : parseInt(this.container.style.width);
+		this.display.currentHeight = this.container.clientHeight > 0 ? this.container.clientHeight : parseInt(this.container.style.height);
+
+		this.display.currentWidth /= 2;
+		this.display.currentHeight /= 2;
 
 		if (dimensions) {
 			this.display.containerWidth = dimensions.w;
@@ -314,6 +317,7 @@ export class DiceBox {
 			this.display.containerWidth = this.display.currentWidth;
 			this.display.containerHeight = this.display.currentHeight;
 		}
+	
 		this.display.aspect = Math.min(this.display.currentWidth / this.display.containerWidth, this.display.currentHeight / this.display.containerHeight);
 
 		if (this.config.autoscale)
@@ -408,7 +412,6 @@ export class DiceBox {
 				samples: this.dicefactory.aa == "msaa" ? 4 : 0,
 				anisotropy: 4
 			};
-
 			this.composerTarget = new THREE.WebGLRenderTarget(size.x, size.y, options);
 
 			// This EffectComposer is in charge of rendering the Bloom/Glow effect
@@ -626,7 +629,7 @@ export class DiceBox {
 		//console.log(`Needed ${result}, Rolled ${value}, Remap: ${rotIndex}`)
 		let rotationDegrees = DICE_MODELS[dicemesh.shape].rotationCombinations[rotIndex];
 		if (!rotationDegrees) {
-			console.error(`[Dice So Nice] No dice rotation found for ${dicemesh.shape} ${rotIndex}`);
+			console.error(`[Dice So Nice] No dice rotation found for ${dicemesh.shape} ${value} ${result}`);
 			return;
 		}
 		let eulerAngle = new THREE.Euler(THREE.MathUtils.degToRad(rotationDegrees[0]), THREE.MathUtils.degToRad(rotationDegrees[1]), THREE.MathUtils.degToRad(rotationDegrees[2]));

@@ -7,6 +7,7 @@ import { Accumulator } from './Accumulator.js';
 import { Utils } from './Utils.js';
 import { ThinFilmFresnelMap } from './libs/ThinFilmFresnelMap.js';
 import { TextureLoader } from 'three';
+import { DiceTourMain } from './tours/DiceTourMain.js';
 /**
  * Main class to handle 3D Dice animations.
  */
@@ -264,6 +265,7 @@ export class Dice3D {
         this._startQueueHandler();
         this._nextAnimationHandler();
         this._welcomeMessage();
+        this._registerTours();
     }
 
     get canInteract() {
@@ -285,6 +287,7 @@ export class Dice3D {
             width: window.innerWidth - sidebarOffset,
             height: window.innerHeight - 1
         };
+
         this.canvas = $(`<div id="dice-box-canvas" style="position: absolute; left: ${area.left}px; top: ${area.top}px; pointer-events: none;"></div>`);
         if (config.canvasZIndex === "over") {
             this.canvas.css("z-index", 1000);
@@ -450,6 +453,13 @@ export class Dice3D {
             }
             game.user.setFlag("dice-so-nice", "welcomeMessageShown", true);
         }
+    }
+
+    /**
+     * Register the tours to the Tour Manager
+     */
+    _registerTours() {
+        game.tours.register("dice-so-nice", "dice-so-nice-tour", new DiceTourMain());
     }
 
     /**
