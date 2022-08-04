@@ -228,6 +228,8 @@
     "DICESONICE.WelcomeMessage2" : "You can configure (or disable) your 3D dice by clicking this button:",
     "DICESONICE.WelcomeMessage3" : "You can always change these settings later under 'Configure Settings > Module Settings > Dice So Nice!'",
     "DICESONICE.WelcomeMessage4" : "You won't see this message again. Happy rolling!",
+    "DICESONICE.WelcomeMessageTour" : "To take a quick tour of Dice So Nice features, check your Tour Management window or click this button.",
+    "DICESONICE.WelcomeMessageTourBtn" : "Take the tour (45s)",
 
     "DICESONICE.FindMoreTheme" : "Download new themes and 3D models",
 
