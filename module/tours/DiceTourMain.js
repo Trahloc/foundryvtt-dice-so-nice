@@ -11,87 +11,87 @@ export class DiceTourMain extends DiceTour {
                 {
                     id: "goto-settings",
                     selector: "[data-tab=\"settings\"]",
-                    title: "Settings tab",
-                    content: "Go to your Settings tab",
+                    title: game.i18n.localize("DICESONICE.TourMainTitleGotoSettings"),
+                    content: game.i18n.localize("DICESONICE.TourMainContentGotoSettings"),
                     action: "click"
                 },
                 {
                     id: "goto-configure",
                     selector: "[data-action=\"configure\"]",
-                    title: "Configure Settings",
-                    content: "Click on the Configure Settings button",
+                    title: game.i18n.localize("DICESONICE.TourMainTitleGotoConfigure"),
+                    content: game.i18n.localize("DICESONICE.TourMainContentGotoConfigure"),
                     action: "click"
                 },
                 {
                     id: "goto-modulessettings",
-                    title: "Modules settings",
+                    title: game.i18n.localize("DICESONICE.TourMainTitleGotoModulesSettings"),
                     selector: "[data-tab=\"modules\"]",
-                    content: "Navigate to the Modules settings tab",
+                    content: game.i18n.localize("DICESONICE.TourMainContentGotoModulesSettings"),
                     action: "click"
                 },
                 {
                     id: "goto-dicesonice",
-                    title: "Dice So Nice settings",
+                    title: game.i18n.localize("DICESONICE.TourMainTitleGotoDiceSoNice"),
                     selector: "[data-tab=\"modules\"] h2.dice-tour",
-                    content: "This is where the GM and users can configure settings for Dice So Nice! Anything outside of the 3D Dice Settings is affecting all players.",
+                    content: game.i18n.localize("DICESONICE.TourMainContentGotoDiceSoNice"),
                     action: "scrollTo"
                 },
                 {
                     id: "goto-dicesonice-settings",
-                    title: "3D Dice Settings",
+                    title: game.i18n.localize("DICESONICE.TourMainTitleGotoDiceSoNiceSettings"),
                     selector: "[data-key=\"dice-so-nice.dice-so-nice\"]",
-                    content: "Open your personnal 3D dice settings to customize your dice.",
+                    content: game.i18n.localize("DICESONICE.TourMainContentGotoDiceSoNiceSettings"),
                     action: "click"
                 },
                 {
                     id: "show-3d-dice",
-                    title: "Where the magic happens",
+                    title: game.i18n.localize("DICESONICE.TourMainTitleShow3DDice"),
                     selector: "#dice-configuration-canvas",
-                    content: "This is the 3D dice preview. You can see your own dice here. Each player has their own dice. You can also click on a dice to customize it."
+                    content: game.i18n.localize("DICESONICE.TourMainContentShow3DDice")
                 },
                 {
                     id: "show-appearance",
-                    title: "Appearance",
+                    title: game.i18n.localize("DICESONICE.TourMainTitleShowAppearance"),
                     selector: "#dsn-appearance-content",
-                    content: "Below the preview, you can change your dice appearance. Browse the available themes or create your own.",
+                    content: game.i18n.localize("DICESONICE.TourMainContentShowAppearance"),
                     action: "click",
                     target: ".dice-so-nice a[data-tab=\"preferences\"]"
                 },
                 {
                     id:"show-preferences",
-                    title: "Preferences",
+                    title: game.i18n.localize("DICESONICE.TourMainTitleShowPreferences"),
                     selector: ".dice-so-nice div.tab.active[data-tab=\"preferences\"]",
-                    content: "Change your preferences to your liking. Sounds, animation speed, dice scale and more.",
+                    content: game.i18n.localize("DICESONICE.TourMainContentShowPreferences"),
                     action: "click",
                     target: ".dice-so-nice a[data-tab=\"sfx\"]"
                 },
                 {
                     id: "show-sfx",
-                    title: "Special effects",
+                    title: game.i18n.localize("DICESONICE.TourMainTitleShowSFX"),
                     selector: ".dice-so-nice div.tab.active[data-tab=\"sfx\"]",
-                    content: "You can add special effects to your rolls. For example, you can add a sound effect when you roll a 20!",
+                    content: game.i18n.localize("DICESONICE.TourMainContentShowSFX"),
                     action: "click",
                     target: ".dice-so-nice a[data-tab=\"performance\"]"
                 },
                 {
                     id: "show-performance",
-                    title: "Performance",
+                    title: game.i18n.localize("DICESONICE.TourMainTitleShowPerformance"),
                     selector: ".dice-so-nice div.tab.active[data-tab=\"performance\"]",
-                    content: "If your computer is a bit slow, you can tweak these settings to improve the performance of the 3D animation.",
+                    content: game.i18n.localize("DICESONICE.TourMainContentShowPerformance"),
                     action: "click",
                     target: ".dice-so-nice a[data-tab=\"backup\"]"
                 },
                 {
                     id: "show-backup",
-                    title: "Backup & Restore",
+                    title: game.i18n.localize("DICESONICE.TourMainTitleShowBackup"),
                     selector: ".dice-so-nice div.tab.active[data-tab=\"backup\"]",
-                    content: "You can save your settings in multiple save files. This is useful if you wish to switch quickly between multiple custom appearance you created.",
+                    content: game.i18n.localize("DICESONICE.TourMainContentShowBackup")
                 },
                 {
                     id: "end-tour",
-                    title: "End of the tour",
+                    title: game.i18n.localize("DICESONICE.TourMainTitleEndTour"),
                     selector: ".dice-so-nice div.tab.active[data-tab=\"backup\"]",
-                    content: "If you want more info, check our help page in your Module Management window. Happy rolling!"
+                    content: game.i18n.localize("DICESONICE.TourMainContentEndTour")
                 }
             ]
         });
