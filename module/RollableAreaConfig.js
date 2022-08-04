@@ -139,7 +139,7 @@ export class RollableAreaConfig extends FormApplication {
     async saveSettingsAndRebuild(rollingArea) {
         let settings = mergeObject(Dice3D.CONFIG(), {
             rollingArea: rollingArea
-        });
+        },{performDeletions:true});
         await game.user.setFlag('dice-so-nice', 'settings', settings);
         game.dice3d.resizeAndRebuild();
     }

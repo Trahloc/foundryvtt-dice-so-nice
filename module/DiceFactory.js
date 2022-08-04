@@ -21,20 +21,9 @@ export class DiceFactory {
 		this.realisticLighting = true;
 
 		this.loaderGLTF = new GLTFLoader();
-		this.loadedFonts = new Set();
+		this.fontLoadingPromises = [];
 
 		this.baseTextureCache = {};
-		this.fontFamilies = [
-			"Arial",
-			"Arial Black",
-			"Verdana",
-			"Trebuchet MS",
-			"Times New Roman",
-			"Tahoma",
-			"Georgia",
-			"Papyrus",
-			"Courier New"
-		];
 
 		// fixes texture rotations on specific dice models
 		this.rotate = {
@@ -331,8 +320,8 @@ export class DiceFactory {
 			this.systems["standard"].dice.forEach((obj) =>{
 				activePresets.push(obj);
 			});
-			mergeObject(appearance, config);
-			if(!isObjectEmpty(appearance)){
+			mergeObject(appearance, config,{performDeletions:true});
+			if(!isEmpty(appearance)){
 				for (let scope in appearance) {
 					if (appearance.hasOwnProperty(scope)) {
 						if(scope != "global")
@@ -428,8 +417,8 @@ export class DiceFactory {
 			preset.emissive = dice.emissive;
 		this.register(preset);
 
-		if(dice.font && !this.fontFamilies.includes(dice.font)){
-			this.fontFamilies.push(dice.font);
+		if(dice.font && !FontConfig.getAvailableFonts().includes(dice.font)){
+			this.fontLoadingPromises.push(FontConfig.loadFont(dice.font,{editor:false,fonts:[]}));
 		}
 	}
 
@@ -472,20 +461,12 @@ export class DiceFactory {
 		}
 	}
 
-	/**
-	 * Copied from FVTT core and modified for DsN
-	 * @return {Promise<void>}
-	 * @private
-	 */
-	async loadFonts() {
-		for (let font of this.fontFamilies) {
-			if(!this.loadedFonts.has(font)){
-				document.fonts.load(`1rem ${font}`);
-				this.loadedFonts.add(font);
-			}
-		}
-		const timeout = new Promise(resolve => setTimeout(resolve, 3000));
-		return Promise.race([document.fonts.ready, timeout]);
+	//Stripped version from the Foundry Core library to avoid reloading fonts
+	async _loadFonts(){
+		const timeout = new Promise(resolve => setTimeout(resolve, 4500));
+		const ready = Promise.all(this.fontLoadingPromises).then(() => document.fonts.ready);
+		this.fontLoadingPromises = [];
+		await Promise.race([ready, timeout]);
 	}
 
 	get(type) {
@@ -1115,7 +1096,7 @@ export class DiceFactory {
 				if(opt[1] == "custom")
 					delete colorsetData[opt[0]];
 			});
-			mergeObject(appearance, colorsetData);
+			mergeObject(appearance, colorsetData,{performDeletions:true});
 			appearance.colorset = diceobj.colorset;
 		}
 		
@@ -1132,7 +1113,7 @@ export class DiceFactory {
 				appearance = colorsetData;
 			}
 			if(dicenotation.options.appearance){
-				mergeObject(appearance, dicenotation.options.appearance);
+				mergeObject(appearance, dicenotation.options.appearance,{performDeletions:true});
 			}
 			if(dicenotation.options.ghost){
 				appearance.isGhost = true;

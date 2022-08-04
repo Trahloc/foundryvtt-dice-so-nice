@@ -148,7 +148,7 @@ export class DiceConfig extends FormApplication {
         if (this.reset)
             specialEffects = [];
         this.triggerTypeList = [...triggerTypeList, ...DiceSFXManager.EXTRA_TRIGGER_TYPE];
-        mergeObject(this.possibleResultList, DiceSFXManager.EXTRA_TRIGGER_RESULTS);
+        mergeObject(this.possibleResultList, DiceSFXManager.EXTRA_TRIGGER_RESULTS,{performDeletions:true});
 
         //Filter out the SFX that are not registered
         if (specialEffects) {
@@ -321,7 +321,7 @@ export class DiceConfig extends FormApplication {
                     let data = new DiceNotation(roll);
 
                     let specialEffects = this.getShowcaseSFX();
-                    let customization = mergeObject({ appearance: config.appearance }, { specialEffects: specialEffects });
+                    let customization = mergeObject({ appearance: config.appearance }, { specialEffects: specialEffects },{performDeletions:true});
 
                     game.dice3d._showAnimation(data, customization);
                 });
@@ -777,7 +777,7 @@ export class DiceConfig extends FormApplication {
                 });
                 if (appearanceArray.length > 1) {
                     let diff = diffObject(appearanceArray[0], appearanceArray[1]);
-                    if (isObjectEmpty(diff)) {
+                    if (isEmpty(diff)) {
                         this.closeAppearanceTab(this.lastActiveAppearanceTab)
                     }
                 }
@@ -846,13 +846,13 @@ export class DiceConfig extends FormApplication {
                         }
                         customizationElements.each((index, el) => {
                             let colorsetForce = false;
-                            if ($(el).is("[data-colorset]") && !isObjectEmpty(colorsetData))
+                            if ($(el).is("[data-colorset]") && !isEmpty(colorsetData))
                                 colorsetForce = true;
-                            else if ($(el).is("[data-texture]") && !isObjectEmpty(colorsetData) && colorsetData.texture != "custom")
+                            else if ($(el).is("[data-texture]") && !isEmpty(colorsetData) && colorsetData.texture != "custom")
                                 colorsetForce = true;
-                            else if ($(el).is("[data-material]") && !isObjectEmpty(colorsetData) && colorsetData.material != "custom")
+                            else if ($(el).is("[data-material]") && !isEmpty(colorsetData) && colorsetData.material != "custom")
                                 colorsetForce = true;
-                            else if ($(el).is("[data-font]") && ((!isObjectEmpty(colorsetData) && colorsetData.font != "custom") || diceobj.font))
+                            else if ($(el).is("[data-font]") && ((!isEmpty(colorsetData) && colorsetData.font != "custom") || diceobj.font))
                                 colorsetForce = true;
                             $(el).prop("disabled", diceobj.modelFile || colorsetForce);
                         });
@@ -1039,9 +1039,9 @@ export class DiceConfig extends FormApplication {
         await game.user.unsetFlag("dice-so-nice", "settings");
 
 
-        let appearance = mergeObject(Dice3D.APPEARANCE(), formData.appearance, { insertKeys: true, insertValues: false });
+        let appearance = mergeObject(Dice3D.APPEARANCE(), formData.appearance, { insertKeys: true, insertValues: false, performDeletions:true});
         delete formData.appearance;
-        let settings = mergeObject(Dice3D.CONFIG(), formData, { insertKeys: false, insertValues: false });
+        let settings = mergeObject(Dice3D.CONFIG(), formData, { insertKeys: false, insertValues: false ,performDeletions:true});
 
         // preserve rollingArea config
         settings.rollingArea = currentSettings.rollingArea;

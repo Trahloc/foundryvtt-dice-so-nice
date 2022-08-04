@@ -7,10 +7,11 @@ import { Accumulator } from './Accumulator.js';
 import { Utils } from './Utils.js';
 import { ThinFilmFresnelMap } from './libs/ThinFilmFresnelMap.js';
 import { TextureLoader } from 'three';
+import { DiceTourMain } from './tours/DiceTourMain.js';
 /**
  * Main class to handle 3D Dice animations.
  */
- export class Dice3D {
+export class Dice3D {
 
     static get DEFAULT_OPTIONS() {
         return {
@@ -31,12 +32,12 @@ import { TextureLoader } from 'three';
             canvasZIndex: 'over',
             throwingForce: 'medium',
             useHighDPI: true,
-            antialiasing: game.canvas.app.renderer.context.webGLVersion===2 ?"msaa":"smaa",
+            antialiasing: game.canvas.app.renderer.context.webGLVersion === 2 ? "msaa" : "smaa",
             glow: true,
             showOthersSFX: true,
             immersiveDarkness: true,
-            muteSoundSecretRolls:false,
-            enableFlavorColorset:true,
+            muteSoundSecretRolls: false,
+            enableFlavorColorset: true,
             rollingArea: false
         };
     }
@@ -44,10 +45,10 @@ import { TextureLoader } from 'three';
     static DEFAULT_APPEARANCE(user = game.user) {
         return {
             global: {
-                labelColor: Utils.contrastOf(user.data.color),
-                diceColor: user.data.color,
-                outlineColor: user.data.color,
-                edgeColor: user.data.color,
+                labelColor: Utils.contrastOf(user.color),
+                diceColor: user.color,
+                outlineColor: user.color,
+                edgeColor: user.color,
                 texture: "none",
                 material: "auto",
                 font: "auto",
@@ -58,7 +59,7 @@ import { TextureLoader } from 'three';
     }
 
     static ALL_DEFAULT_OPTIONS(user = game.user) {
-        let options = mergeObject(Dice3D.DEFAULT_OPTIONS, { appearance: Dice3D.DEFAULT_APPEARANCE(user) });
+        let options = mergeObject(Dice3D.DEFAULT_OPTIONS, { appearance: Dice3D.DEFAULT_APPEARANCE(user) }, { performDeletions: true });
         options.appearance.global.system = game.dice3d.DiceFactory.preferredSystem;
         options.appearance.global.colorset = game.dice3d.DiceFactory.preferredColorset;
         return options;
@@ -66,15 +67,15 @@ import { TextureLoader } from 'three';
 
     static CONFIG(user = game.user) {
         let userSettings = user.getFlag("dice-so-nice", "settings") ? duplicate(user.getFlag("dice-so-nice", "settings")) : null;
-        let config = mergeObject(Dice3D.DEFAULT_OPTIONS, userSettings);
-        mergeObject(config, { "-=appearance": null, "-=sfxLine": null });
+        let config = mergeObject(Dice3D.DEFAULT_OPTIONS, userSettings, { performDeletions: true });
+        mergeObject(config, { "-=appearance": null, "-=sfxLine": null }, { performDeletions: true });
         return config;
     }
 
     static APPEARANCE(user = game.user) {
         let userAppearance = user.getFlag("dice-so-nice", "appearance") ? duplicate(user.getFlag("dice-so-nice", "appearance")) : null;
-        let appearance = mergeObject(Dice3D.DEFAULT_APPEARANCE(user), userAppearance);
-        return mergeObject(appearance, { "-=dimensions": null });
+        let appearance = mergeObject(Dice3D.DEFAULT_APPEARANCE(user), userAppearance, { performDeletions: true });
+        return mergeObject(appearance, { "-=dimensions": null }, { performDeletions: true });
     }
 
     static SFX(user = game.user) {
@@ -83,7 +84,7 @@ import { TextureLoader } from 'three';
             sfxArray = user.getFlag("dice-so-nice", "sfxList") ? duplicate(user.getFlag("dice-so-nice", "sfxList")) : [];
         else
             sfxArray = [];
-        if(!Array.isArray(sfxArray)){
+        if (!Array.isArray(sfxArray)) {
             sfxArray = [];
         }
         return sfxArray;
@@ -95,26 +96,26 @@ import { TextureLoader } from 'three';
     static ALL_CUSTOMIZATION(user = game.user, dicefactory = null) {
         let specialEffects = Dice3D.SFX(user) || [];
         game.users.forEach((other) => {
-            if(other.isGM && other.id != user.id){
+            if (other.isGM && other.id != user.id) {
                 let GMSFX = Dice3D.SFX(other);
-                if(Array.isArray(GMSFX)){
+                if (Array.isArray(GMSFX)) {
                     GMSFX = GMSFX.filter(sfx => sfx.options && sfx.options.isGlobal);
                     specialEffects = specialEffects.concat(GMSFX);
                 }
             }
         });
-        let config = mergeObject({ appearance: Dice3D.APPEARANCE(user) }, { specialEffects: specialEffects });
+        let config = mergeObject({ appearance: Dice3D.APPEARANCE(user) }, { specialEffects: specialEffects }, { performDeletions: true });
         if (dicefactory && !game.user.getFlag("dice-so-nice", "appearance")) {
-            if(dicefactory.preferredSystem != "standard" )
+            if (dicefactory.preferredSystem != "standard")
                 config.appearance.global.system = dicefactory.preferredSystem;
-            if(dicefactory.preferredColorset != "custom")
+            if (dicefactory.preferredColorset != "custom")
                 config.appearance.global.colorset = dicefactory.preferredColorset;
         }
         return config;
     }
 
     static ALL_CONFIG(user = game.user) {
-        let ret = mergeObject(Dice3D.CONFIG(user), { appearance: Dice3D.APPEARANCE(user) });
+        let ret = mergeObject(Dice3D.CONFIG(user), { appearance: Dice3D.APPEARANCE(user) }, { performDeletions: true });
         ret.specialEffects = Dice3D.SFX(user);
         return ret;
     }
@@ -182,15 +183,14 @@ import { TextureLoader } from 'three';
             font: "custom",
             visibility: "visible"
         }
-        colorset = mergeObject(defaultValues, colorset);
+        colorset = mergeObject(defaultValues, colorset, { performDeletions: true });
         COLORSETS[colorset.name] = colorset;
         DiceColors.initColorSets(colorset);
 
-        if (colorset.font && !this.DiceFactory.fontFamilies.includes(colorset.font)) {
-            this.DiceFactory.fontFamilies.push(colorset.font);
-            await this.DiceFactory.loadFonts();
+        if (colorset.font && !FontConfig.getAvailableFonts().includes(colorset.font)) {
+            await FontConfig.loadFont(colorset.font, { editor: false, fonts: [] });
         }
-        if(mode=="preferred")
+        if (mode == "preferred")
             this.DiceFactory.preferredColorset = colorset.name;
     }
 
@@ -201,13 +201,13 @@ import { TextureLoader } from 'three';
      * @param {String} name : Localized name of the trigger, ex: Fate Roll
      * @param {Array(String)} results : Array of possible results for this trigger, ex: ["-3","3","0"]
      */
-    addSFXTrigger(id, name, results){
-        if(DiceSFXManager.EXTRA_TRIGGER_RESULTS[id])
+    addSFXTrigger(id, name, results) {
+        if (DiceSFXManager.EXTRA_TRIGGER_RESULTS[id])
             return;
-        DiceSFXManager.EXTRA_TRIGGER_TYPE.push({id:id, name:name});
+        DiceSFXManager.EXTRA_TRIGGER_TYPE.push({ id: id, name: name });
         DiceSFXManager.EXTRA_TRIGGER_RESULTS[id] = [];
         results.forEach((res) => {
-            DiceSFXManager.EXTRA_TRIGGER_RESULTS[id].push({id:res,name:res});
+            DiceSFXManager.EXTRA_TRIGGER_RESULTS[id].push({ id: res, name: res });
         });
     }
 
@@ -216,8 +216,8 @@ import { TextureLoader } from 'three';
      * @param {String} name 
      * @returns {Promise}
      */
-    async loadSaveFile(name){
-        if(game.user.getFlag("dice-so-nice", "saves").hasOwnProperty(name))
+    async loadSaveFile(name) {
+        if (game.user.getFlag("dice-so-nice", "saves").hasOwnProperty(name))
             await Utils.actionLoadSave(name);
     }
 
@@ -244,8 +244,8 @@ import { TextureLoader } from 'three';
             bloomStrength: { value: 2.5 },
             bloomRadius: { value: 0.5 },
             bloomThreshold: { value: 0.03 },
-            iridescenceLookUp: { value: new ThinFilmFresnelMap()},
-            iridescenceNoise: { value: new TextureLoader().load( "modules/dice-so-nice/textures/noise-thin-film.webp" )},
+            iridescenceLookUp: { value: new ThinFilmFresnelMap() },
+            iridescenceNoise: { value: new TextureLoader().load("modules/dice-so-nice/textures/noise-thin-film.webp") },
             boost: { value: 1.5 }
         };
 
@@ -256,15 +256,16 @@ import { TextureLoader } from 'three';
         this._buildDiceBox();
         DiceColors.loadTextures(TEXTURELIST, async (images) => {
             DiceColors.initColorSets();
-            
+
             Hooks.call("diceSoNiceReady", this);
-            await this.DiceFactory.loadFonts();
+            await this.DiceFactory._loadFonts();
             await this.DiceFactory.preloadPresets();
         });
         DiceSFXManager.init();
         this._startQueueHandler();
         this._nextAnimationHandler();
         this._welcomeMessage();
+        this._registerTours();
     }
 
     get canInteract() {
@@ -286,6 +287,7 @@ import { TextureLoader } from 'three';
             width: window.innerWidth - sidebarOffset,
             height: window.innerHeight - 1
         };
+
         this.canvas = $(`<div id="dice-box-canvas" style="position: absolute; left: ${area.left}px; top: ${area.top}px; pointer-events: none;"></div>`);
         if (config.canvasZIndex === "over") {
             this.canvas.css("z-index", 1000);
@@ -332,6 +334,11 @@ import { TextureLoader } from 'three';
             const menu = game.settings.menus.get(ev.currentTarget.dataset.key);
             const app = new menu.type();
             return app.render(true);
+        });
+
+        $(document).on("click", ".dice-so-nice-btn-tour", (ev) => {
+            ev.preventDefault();
+            game.tours.get("dice-so-nice.dice-so-nice-tour").start();
         });
 
         game.socket.on('module.dice-so-nice', (request) => {
@@ -441,16 +448,46 @@ import { TextureLoader } from 'three';
     _welcomeMessage() {
         if (!game.user.getFlag("dice-so-nice", "welcomeMessageShown")) {
             if (!game.user.getFlag("dice-so-nice", "appearance")) {
-                renderTemplate("modules/dice-so-nice/templates/welcomeMessage.html", {}).then((html) => {
-                    let options = {
+                const content = [`
+                <div class="dice-so-nice">
+                    <h3 class="nue">Dice So Nice - Your 3D dice</h3>
+                    <p class="nue">${game.i18n.localize("DICESONICE.WelcomeMessage1")}</p>
+                    <p class="nue">${game.i18n.localize("DICESONICE.WelcomeMessage2")}</p>
+                    <p>
+                        <button type="button" class="dice-so-nice-btn-settings" data-key="dice-so-nice.dice-so-nice">
+                            <i class="fas fa-dice-d20"></i> ${game.i18n.localize("DICESONICE.configTitle")}
+                        </button>
+                    </p>
+                    <p class="nue">${game.i18n.localize("DICESONICE.WelcomeMessage3")}</p>
+                    <p class="nue">${game.i18n.localize("DICESONICE.WelcomeMessageTour")}</p>
+                    <p>
+                        <button type="button" class="dice-so-nice-btn-tour" data-tour="dice-so-nice-tour">
+                            <i class="fas fa-hiking"></i> ${game.i18n.localize("DICESONICE.WelcomeMessageTourBtn")}
+                        </button>
+                    </p>
+                    <p class="nue">${game.i18n.localize("DICESONICE.WelcomeMessage4")}</p>
+                    <footer class="nue">${game.i18n.localize("NUE.FirstLaunchHint")}</footer>
+                </div>
+                `];
+                const chatData = content.map(c => {
+                    return {
                         whisper: [game.user.id],
-                        content: html
+                        speaker: { alias: "Dice So Nice!" },
+                        flags: { core: { canPopout: true } },
+                        content: c
                     };
-                    ChatMessage.create(options);
                 });
+                ChatMessage.implementation.createDocuments(chatData);
             }
             game.user.setFlag("dice-so-nice", "welcomeMessageShown", true);
         }
+    }
+
+    /**
+     * Register the tours to the Tour Manager
+     */
+    _registerTours() {
+        game.tours.register("dice-so-nice", "dice-so-nice-tour", new DiceTourMain());
     }
 
     /**
@@ -471,6 +508,73 @@ import { TextureLoader } from 'three';
     }
 
     /**
+     * Parse, sort and add the dice animation to the queue for a chat message and an array of Roll
+     * Used internally by the message Hooks. Not meant to be used outside of the module.
+     * Please use the showForRoll method instead.
+     * @param {ChatMessage} chatMessage 
+     * @param {Array<Roll>} rolls 
+     */
+    renderRolls(chatMessage, rolls) {
+        const showMessage = () => {
+            delete chatMessage._dice3danimating;
+
+            window.ui.chat.element.find(`.message[data-message-id="${chatMessage.id}"]`).show().find(".dice-roll").show();
+            if (window.ui.sidebar.popouts.chat)
+                window.ui.sidebar.popouts.chat.element.find(`.message[data-message-id="${chatMessage.id}"]`).show().find(".dice-roll").show();;
+
+            Hooks.callAll("diceSoNiceRollComplete", chatMessage.id);
+
+            window.ui.chat.scrollBottom({ popout: true });
+        }
+
+        if (game.view == "stream" && !game.modules.get("0streamutils")?.active) {
+            setTimeout(showMessage, 2500, chatMessage);
+        } else {
+            //1- We create a list of all 3D rolls, ordered ASC
+            //2- We create a Roll object with the correct formula and results
+            //3- We queue the showForRoll calls and then show the message
+            let orderedDiceList = [[]];
+            rolls.forEach(roll => {
+                roll.dice.forEach(diceTerm => {
+                    let index = 0;
+                    if (!game.settings.get("dice-so-nice", "enabledSimultaneousRollForMessage") && diceTerm.options.hasOwnProperty("rollOrder")) {
+                        index = diceTerm.options.rollOrder;
+                        if (orderedDiceList[index] == null) {
+                            orderedDiceList[index] = [];
+                        }
+                    }
+                    orderedDiceList[index].push(diceTerm);
+                });
+            });
+            orderedDiceList = orderedDiceList.filter(el => el != null);
+
+            let rollList = [];
+            const plus = new OperatorTerm({ operator: "+" }).evaluate();
+            orderedDiceList.forEach(dice => {
+                //add a "plus" between each term
+                if (Array.isArray(dice) && dice.length) {
+                    let termList = [...dice].map((e, i) => i < dice.length - 1 ? [e, plus] : [e]).reduce((a, b) => a.concat(b));
+                    //We use the Roll class registered in the CONFIG constant in case the system overwrites it (eg: HeXXen)
+                    rollList.push(CONFIG.Dice.rolls[0].fromTerms(termList));
+                }
+            });
+
+            //call each promise one after the other, then call the showMessage function
+            const recursShowForRoll = (rollList, index) => {
+                this.showForRoll(rollList[index], chatMessage.user, false, null, false, chatMessage.id, chatMessage.speaker).then(() => {
+                    index++;
+                    if (rollList[index] != null)
+                        recursShowForRoll(rollList, index);
+                    else
+                        showMessage();
+                });
+            };
+
+            recursShowForRoll(rollList, 0);
+        }
+    }
+
+    /**
      * Show the 3D Dice animation for the Roll made by the User.
      *
      * @param roll an instance of Roll class to show 3D dice animation.
@@ -483,32 +587,27 @@ import { TextureLoader } from 'three';
      * @returns {Promise<boolean>} when resolved true if the animation was displayed, false if not.
      */
     showForRoll(roll, user = game.user, synchronize, users = null, blind, messageID = null, speaker = null) {
-        //Compatibility with both roll sync and async
-        //TODO: make it work with _dice3danimating
-        /*if(roll instanceof Promise)
-            roll = await roll;*/
-        
         let context = {
             roll: roll,
             user: user,
             users: users,
             blind: blind
         };
-        if(speaker){
+        if (speaker) {
             let actor = game.actors.get(speaker.actor);
-            const isNpc = actor ? actor.data.type === 'npc' : false;
+            const isNpc = actor ? actor.type === 'npc' : false;
             if (isNpc && game.settings.get("dice-so-nice", "hideNpcRolls")) {
                 return Promise.resolve(false);
             }
         }
         let chatMessage = game.messages.get(messageID);
-        if(chatMessage){
-            if(chatMessage.data.whisper.length > 0)
+        if (chatMessage) {
+            if (chatMessage.whisper.length > 0)
                 context.roll.secret = true;
-            if(!chatMessage.isContentVisible)
+            if (!chatMessage.isContentVisible)
                 context.roll.ghost = true;
         }
-        
+
 
         Hooks.callAll("diceSoNiceRollStart", messageID, context);
         let notation = new DiceNotation(context.roll, Dice3D.ALL_CONFIG(user));
@@ -566,9 +665,33 @@ import { TextureLoader } from 'three';
      * Change the default value of the showExtraDice settings
      * @param {Boolean} show 
      */
-    showExtraDiceByDefault(show=true){
+    showExtraDiceByDefault(show = true) {
         this.defaultShowExtraDice = show;
     }
+
+    /**
+     * Helper function to detect the end of a 3D animation for a message
+     * @param {ChatMessage.ID} targetMessageId 
+     * @returns Promise<boolean>
+     */
+    waitFor3DAnimationByMessageID(targetMessageId) {
+        function buildHook(resolve) {
+            Hooks.once('diceSoNiceRollComplete', (messageId) => {
+                if (targetMessageId === messageId)
+                    resolve(true);
+                else
+                    buildHook(resolve)
+            });
+        }
+        return new Promise((resolve, reject) => {
+            if (game.dice3d && game.user.getFlag("dice-so-nice", "settings").enabled) {
+                buildHook(resolve);
+            } else {
+                resolve(true);
+            }
+        });
+    }
+
 
     /**
      *
