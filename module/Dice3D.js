@@ -470,12 +470,12 @@ export class Dice3D {
                 </div>
                 `];
                 const chatData = content.map(c => {
-                return {
-                    whisper: [game.user.id],
-                    speaker: {alias: "Dice So Nice!"},
-                    flags: {core: {canPopout: true}},
-                    content: c
-                };
+                    return {
+                        whisper: [game.user.id],
+                        speaker: { alias: "Dice So Nice!" },
+                        flags: { core: { canPopout: true } },
+                        content: c
+                    };
                 });
                 ChatMessage.implementation.createDocuments(chatData);
             }
