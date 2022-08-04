@@ -519,6 +519,69 @@ export const COLORSETS = {
 		outline: '#FFFFFF',
 		texture: 'none'
 	},
+	'grey': {
+		name: 'grey',
+		description: 'DICESONICE.ColorGrey',
+		category: 'DICESONICE.Colors',
+		foreground: '#FFFFFF',
+		background: '#888888',
+		outline: '#000000',
+		texture: 'none'
+	},
+	'red': {
+		name: 'red',
+		description: 'DICESONICE.ColorRed',
+		category: 'DICESONICE.Colors',
+		foreground: '#FFFFFF',
+		background: '#FF0000',
+		outline: 'none',
+		texture: 'none'
+	},
+	'blue': {
+		name: 'blue',
+		description: 'DICESONICE.ColorBlue',
+		category: 'DICESONICE.Colors',
+		foreground: '#FFFFFF',
+		background: '#0000FF',
+		outline: 'none',
+		texture: 'none'
+	},
+	'green': {
+		name: 'green',
+		description: 'DICESONICE.ColorGreen',
+		category: 'DICESONICE.Colors',
+		foreground: '#FFFFFF',
+		background: '#00FF00',
+		outline: 'none',
+		texture: 'none'
+	},
+	'yellow': {
+		name: 'yellow',
+		description: 'DICESONICE.ColorYellow',
+		category: 'DICESONICE.Colors',
+		foreground: '#000000',
+		background: '#FFFF00',
+		outline: 'none',
+		texture: 'none'
+	},
+	'pink': {
+		name: 'pink',
+		description: 'DICESONICE.ColorPink',
+		category: 'DICESONICE.Colors',
+		foreground: '#FFFFFF',
+		background: '#FF00FF',
+		outline: 'none',
+		texture: 'none'
+	},
+	'cyan': {
+		name: 'cyan',
+		description: 'DICESONICE.ColorCyan',
+		category: 'DICESONICE.Colors',
+		foreground: '#000000',
+		background: '#00FFFF',
+		outline: 'none',
+		texture: 'none'
+	},
 	'prism': {
 		name: 'prism',
 		description: 'DICESONICE.ColorPrism',
