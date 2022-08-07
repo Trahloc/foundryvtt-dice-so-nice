@@ -224,6 +224,7 @@
     "DICESONICE.ThrowingForceMedium" : "Moyen",
     "DICESONICE.ThrowingForceStrong" : "Fort",
 
+    "DICESONICE.WelcomeTitle" : "Dice So Nice - vos dés 3D",
     "DICESONICE.WelcomeMessage1" : "Il semble que vous utilisez les dés 3D pour la première fois dans ce Monde.",
     "DICESONICE.WelcomeMessage2" : "Vous pouvez modifier (ou désactiver) vos dés 3D en cliquant sur ce bouton:",
     "DICESONICE.WelcomeMessage3" : "Vous pourrez par la suite le retrouver dans le menu 'Configurer les options > Modules > Dice So Nice!'",
