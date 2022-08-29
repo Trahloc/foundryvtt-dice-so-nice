@@ -450,7 +450,7 @@ export class Dice3D {
             if (!game.user.getFlag("dice-so-nice", "appearance")) {
                 const content = [`
                 <div class="dice-so-nice">
-                    <h3 class="nue">Dice So Nice - Your 3D dice</h3>
+                    <h3 class="nue">${game.i18n.localize("DICESONICE.WelcomeTitle")}</h3>
                     <p class="nue">${game.i18n.localize("DICESONICE.WelcomeMessage1")}</p>
                     <p class="nue">${game.i18n.localize("DICESONICE.WelcomeMessage2")}</p>
                     <p>

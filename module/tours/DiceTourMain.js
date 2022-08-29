@@ -25,16 +25,15 @@ export class DiceTourMain extends DiceTour {
                 {
                     id: "goto-modulessettings",
                     title: game.i18n.localize("DICESONICE.TourMainTitleGotoModulesSettings"),
-                    selector: "[data-tab=\"modules\"]",
+                    selector: ".category-filter [data-category=\"dice-so-nice\"]",
                     content: game.i18n.localize("DICESONICE.TourMainContentGotoModulesSettings"),
                     action: "click"
                 },
                 {
                     id: "goto-dicesonice",
                     title: game.i18n.localize("DICESONICE.TourMainTitleGotoDiceSoNice"),
-                    selector: "[data-tab=\"modules\"] h2.dice-tour",
+                    selector: "#client-settings form.categories div.scrollable",
                     content: game.i18n.localize("DICESONICE.TourMainContentGotoDiceSoNice"),
-                    action: "scrollTo"
                 },
                 {
                     id: "goto-dicesonice-settings",

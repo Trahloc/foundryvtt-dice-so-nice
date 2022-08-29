@@ -243,8 +243,6 @@
     "DICESONICE.TourMainContentGotoSettings": "Allez dans l'onglet Paramètre",
     "DICESONICE.TourMainTitleGotoConfigure": "Configurer les options",
     "DICESONICE.TourMainContentGotoConfigure": "Cliquez sur 'Configurer les options'",
-    "DICESONICE.TourMainTitleGotoModulesSettings": "Modules",
-    "DICESONICE.TourMainContentGotoModulesSettings": "Ouvrez l'onglet des modules",
     "DICESONICE.TourMainTitleGotoDiceSoNice": "Paramètres de Dice So Nice",
     "DICESONICE.TourMainContentGotoDiceSoNice": "C'est ici que le MJ et les joueurs peuvent configurer les paramètres de Dice So Nice! Les paramètres disponibles en dehors du panneau des dés 3D affectent l'ensemble des joueurs.",
     "DICESONICE.TourMainTitleGotoDiceSoNiceSettings": "Paramètres des dés 3D",
@@ -266,4 +264,6 @@
     "DICESONICE.settingsPreferences": "Préférences",
     "DICESONICE.MSAA": "MSAA (Matériel, Recommandé)",
     "DICESONICE.glow": "Lueur diffuse (glow)"
+    "DICESONICE.TourMainTitleGotoModulesSettings" : "Paramètres Dice So Nice",
+    "DICESONICE.TourMainContentGotoModulesSettings" : "Cliquez sur le filtre 'Dice So Nice'",
 }
