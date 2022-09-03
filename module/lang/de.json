@@ -215,5 +215,6 @@
 	"DICESONICE.disabledForInitiativeHint": "Deaktivieren Sie den 3D-Würfelwurf beim Würfeln der Initiative auf dem Kampftracker.",
 	"DICESONICE.showGhostDice": "Geisterwürfel für versteckte Würfe anzeigen",
 	"DICESONICE.TextureStone": "Beton",
-	"DICESONICE.ColorPrism": "Prisma"
+	"DICESONICE.ColorPrism": "Prisma",
+	"DICESONICE.WelcomeMessageTour": "Um eine kurze Tour durch die Funktionen von \"Dice so Nice\" zu erhalten, rufe dein Tour Management Fenster auf oder drücke auf diesen Knopf."
 }
