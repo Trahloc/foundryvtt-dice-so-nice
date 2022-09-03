@@ -1,7 +1,6 @@
 {
 	"DICESONICE.autoSize": "Scalare Automata?",
 	"DICESONICE.config": "Setări pentru zaruri 3D",
-	"DICESONICE.fps": "FPS Maxime",
 	"DICESONICE.Cancel": "Anulare",
 	"DICESONICE.configHint": "Aici, fiecare jucător poate să-și configureze propriile sale setări pentru zarurile 3D (activare/dezactivare, culori, dimensiuni, efecte...)",
 	"DICESONICE.configTitle": "Setările zarurilor mele",
