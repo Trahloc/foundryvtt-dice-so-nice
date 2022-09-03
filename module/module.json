@@ -105,6 +105,11 @@
             "lang": "ro",
             "name": "Română",
             "path": "./lang/ro.json"
+        },
+        {
+            "lang": "ru",
+            "name": "Русский",
+            "path": "./lang/ru.json"
         }
     ],
     "media": [
