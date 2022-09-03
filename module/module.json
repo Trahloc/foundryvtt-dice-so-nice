@@ -95,6 +95,11 @@
             "lang": "fi",
             "name": "Suomi",
             "path": "./lang/fi.json"
+        },
+        {
+            "lang": "sv",
+            "name": "Svenska",
+            "path": "./lang/sv.json"
         }
     ],
     "media": [
