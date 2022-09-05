@@ -115,8 +115,8 @@ Translations are done on the Foundry Hub Weblate directly. Check the [Weblate](h
 
 # Compatibility
 
-Compatible with Foundry VTT v0.8.5 and later.
-Tested with Foundry VTT v9.
+Compatible with Foundry VTT v10 and later.
+Tested with Foundry VTT v10.
 If you need to use an older Foundry version, please [download a compatible older version](https://foundryvtt.com/packages/dice-so-nice/)
 
 # Acknowledgment
