@@ -1,5 +1,12 @@
 image: node:latest
 
+cache:
+  key:
+    files:
+      - package-lock.json
+  paths:
+    - .npm/
+
 before_script:
   - apt-get update
   - apt-get install zip

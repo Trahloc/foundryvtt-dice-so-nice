@@ -2,6 +2,7 @@
 [![Forge Installs](https://img.shields.io/badge/dynamic/json?label=Forge%20Installs&query=package.installs&suffix=%25&url=https%3A%2F%2Fforge-vtt.com%2Fapi%2Fbazaar%2Fpackage%2Fdice-so-nice&colorB=4aa94a)](https://forge-vtt.com/bazaar#package=dice-so-nice)
 [![Foundry Hub Endorsements](https://img.shields.io/endpoint?logoColor=white&url=https%3A%2F%2Fwww.foundryvtt-hub.com%2Fwp-json%2Fhubapi%2Fv1%2Fpackage%2Fdice-so-nice%2Fshield%2Fendorsements)](https://www.foundryvtt-hub.com/package/dice-so-nice/)
 [![Foundry Hub Comments](https://img.shields.io/endpoint?logoColor=white&url=https%3A%2F%2Fwww.foundryvtt-hub.com%2Fwp-json%2Fhubapi%2Fv1%2Fpackage%2Fdice-so-nice%2Fshield%2Fcomments)](https://www.foundryvtt-hub.com/package/dice-so-nice/)
+[![Translation status](https://weblate.foundryvtt-hub.com/widgets/dice-so-nice/-/main/svg-badge.svg)](https://weblate.foundryvtt-hub.com/engage/dice-so-nice/)
 
 This module for Foundry VTT adds the ability to show a 3D dice simulation when a roll is made.
 
@@ -104,6 +105,7 @@ A complete API and documentation for developers and artists alike is available i
 
 # Development and Contributing
 Dice So Nice! is a free and open source project. You can contribute to the project by making a merge request or by creating a [Gitlab issue](https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/issues).  
+Translations are done on the Foundry Hub Weblate directly. Check the [Weblate](https://weblate.foundryvtt-hub.com/engage/dice-so-nice/) page for contributing.  
 
 ## Build instructions
     npm install
