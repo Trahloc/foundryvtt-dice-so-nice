@@ -107,6 +107,8 @@ A complete API and documentation for developers and artists alike is available i
 Dice So Nice! is a free and open source project. You can contribute to the project by making a merge request or by creating a [Gitlab issue](https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/issues).  
 Translations are done on the Foundry Hub Weblate directly. Check the [Weblate](https://weblate.foundryvtt-hub.com/engage/dice-so-nice/) page for contributing.  
 
+[![Translation status](https://weblate.foundryvtt-hub.com/widgets/dice-so-nice/-/multi-auto.svg)](https://weblate.foundryvtt-hub.com/engage/dice-so-nice/)
+
 ## Build instructions
     npm install
     npx rollup -c -w
