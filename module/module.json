@@ -19,8 +19,8 @@
         {
             "name": "JDW",
             "discord": "JDW#6422",
-            "reddit":"u/jidewe",
-            "ko-fi":"jdwfvtt"
+            "reddit": "u/jidewe",
+            "ko-fi": "jdwfvtt"
         }
     ],
     "esmodules": [
@@ -35,82 +35,112 @@
         "./css/style.css",
         "./css/select2.css"
     ],
-    "languages": [{
-        "lang": "en",
-        "name": "English",
-        "path": "./lang/en.json"
-    }, {
-        "lang": "it",
-        "name": "Italian",
-        "path": "./lang/it.json"
-    }, {
-        "lang": "es",
-        "name": "Español",
-        "path": "./lang/es.json"
-    },
-    {
-        "lang" : "ca",
-        "name" : "Català",
-        "path" : "./lang/ca.json"
-    },
-    {
-        "lang": "zh-tw",
-        "name": "正體中文",
-        "path": "./lang/zh-tw.json"
-    }, {
-        "lang": "ko",
-        "name": "Korean",
-        "path": "./lang/ko.json"
-    }, {
-        "lang": "pt-BR",
-        "name": "Português (Brasil)",
-        "path": "./lang/pt-BR.json"
-    }, {
-        "lang": "fr",
-        "name": "Français",
-        "path": "./lang/fr.json"
-    }, {
-        "lang": "ja",
-        "name": "日本語",
-        "path": "./lang/ja.json"
-    }, {
-        "lang": "de",
-        "name": "Deutsch",
-        "path": "./lang/de.json"
-    }, {
-        "lang": "cs",
-        "name": "Česky",
-        "path": "./lang/cs.json"
-    }],
-    "media":[
+    "languages": [
         {
-            "type":"cover",
-            "link":"https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/raw/master/cover.jpg"
+            "lang": "en",
+            "name": "English",
+            "path": "./lang/en.json"
         },
         {
-            "type":"video",
-            "link":"https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/raw/master/dsnloop-360.webm",
+            "lang": "it",
+            "name": "Italian",
+            "path": "./lang/it.json"
+        },
+        {
+            "lang": "es",
+            "name": "Español",
+            "path": "./lang/es.json"
+        },
+        {
+            "lang": "ca",
+            "name": "Català",
+            "path": "./lang/ca.json"
+        },
+        {
+            "lang": "zh-tw",
+            "name": "正體中文",
+            "path": "./lang/zh-tw.json"
+        },
+        {
+            "lang": "ko",
+            "name": "Korean",
+            "path": "./lang/ko.json"
+        },
+        {
+            "lang": "pt-BR",
+            "name": "Português (Brasil)",
+            "path": "./lang/pt-BR.json"
+        },
+        {
+            "lang": "fr",
+            "name": "Français",
+            "path": "./lang/fr.json"
+        },
+        {
+            "lang": "ja",
+            "name": "日本語",
+            "path": "./lang/ja.json"
+        },
+        {
+            "lang": "de",
+            "name": "Deutsch",
+            "path": "./lang/de.json"
+        },
+        {
+            "lang": "cs",
+            "name": "Česky",
+            "path": "./lang/cs.json"
+        },
+        {
+            "lang": "fi",
+            "name": "Suomi",
+            "path": "./lang/fi.json"
+        },
+        {
+            "lang": "sv",
+            "name": "Svenska",
+            "path": "./lang/sv.json"
+        },
+        {
+            "lang": "ro",
+            "name": "Română",
+            "path": "./lang/ro.json"
+        },
+        {
+            "lang": "ru",
+            "name": "Русский",
+            "path": "./lang/ru.json"
+        }
+    ],
+    "media": [
+        {
+            "type": "cover",
+            "link": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/raw/master/cover.jpg"
+        },
+        {
+            "type": "video",
+            "link": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/raw/master/dsnloop-360.webm",
             "loop": true
         },
         {
-            "type":"video",
-            "link":"https://www.youtube.com/watch?v=86lfgkMjGDs"
+            "type": "video",
+            "link": "https://www.youtube.com/watch?v=4b_C5R3t6iw"
         },
         {
-            "type":"screenshot",
-            "link":"https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/raw/master/screenshot1.jpg"
+            "type": "screenshot",
+            "link": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/raw/master/screenshot1.jpg"
         },
         {
-            "type":"screenshot",
-            "link":"https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/raw/master/screenshot2.jpg"
+            "type": "screenshot",
+            "link": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/raw/master/screenshot2.jpg"
         },
         {
-            "type":"screenshot",
-            "link":"https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/raw/master/screenshot3.jpg"
+            "type": "screenshot",
+            "link": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/raw/master/screenshot3.jpg"
         },
         {
-            "type":"screenshot",
-            "link":"https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/raw/master/screenshot4.jpg"
+            "type": "screenshot",
+            "link": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/raw/master/screenshot4.jpg"
         }
     ],
     "url": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice",
