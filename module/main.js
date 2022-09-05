@@ -204,7 +204,7 @@ Hooks.on('createChatMessage', (chatMessage) => {
     }
 
     let rolls = chatMessage.isRoll ? chatMessage.rolls : null;
-    let maxRollOrder = rolls ? 0:-1;
+    let maxRollOrder = rolls ? 0 : -1;
     if (hasInlineRoll) {
         let JqInlineRolls = $($.parseHTML(`<div>${chatMessage.content}</div>`)).find(".inline-roll.inline-result:not(.inline-dsn-hidden)");
         if (JqInlineRolls.length == 0 && !chatMessage.isRoll) //it was a false positive
@@ -215,7 +215,7 @@ Hooks.on('createChatMessage', (chatMessage) => {
             let roll = CONFIG.Dice.rolls[0].fromJSON(unescape(el.dataset.roll));
             maxRollOrder++;
             roll.dice.forEach(diceterm => {
-                if(!diceterm.options.hasOwnProperty("rollOrder"))
+                if (!diceterm.options.hasOwnProperty("rollOrder"))
                     diceterm.options.rollOrder = maxRollOrder;
             });
             inlineRollList.push(roll);
@@ -223,7 +223,7 @@ Hooks.on('createChatMessage', (chatMessage) => {
         if (inlineRollList.length) {
             if (chatMessage.isRoll)
                 inlineRollList = [...chatMessage.rolls, ...inlineRollList];
-            
+
             let pool = PoolTerm.fromRolls(inlineRollList);
             //We use the Roll class registered in the CONFIG constant in case the system overwrites it (eg: HeXXen)
             rolls = [CONFIG.Dice.rolls[0].fromTerms([pool])];
@@ -233,16 +233,16 @@ Hooks.on('createChatMessage', (chatMessage) => {
     }
 
     //Because Better Roll 5e sends an empty roll object sometime
-    if(!rolls.length || !rolls[0].dice.length)
+    if (!rolls.length || !rolls[0].dice.length)
         return;
 
-    const isInitiativeRoll = chatMessage.getFlag("core","initiativeRoll");
-    if(isInitiativeRoll && game.settings.get("dice-so-nice", "disabledForInitiative"))
+    const isInitiativeRoll = chatMessage.getFlag("core", "initiativeRoll");
+    if (isInitiativeRoll && game.settings.get("dice-so-nice", "disabledForInitiative"))
         return;
 
     //Remove the chatmessage sound if it is the core dice sound.
     if (Dice3D.CONFIG().enabled && chatMessage.sound == "sounds/dice.wav") {
-        mergeObject(chatMessage, { "-=sound": null },{performDeletions: true});
+        mergeObject(chatMessage, { "-=sound": null }, { performDeletions: true });
     }
     chatMessage._dice3danimating = true;
 
@@ -257,8 +257,8 @@ Hooks.on("renderChatMessage", (message, html, data) => {
         return;
     }
     if (message._dice3danimating && !game.settings.get("dice-so-nice", "immediatelyDisplayChatMessages")) {
-        
-        if(message._countNewRolls)
+
+        if (message._countNewRolls)
             html.find(`.dice-roll:nth-last-child(-n+${message._countNewRolls})`).hide();
         else
             html.hide();
@@ -266,19 +266,28 @@ Hooks.on("renderChatMessage", (message, html, data) => {
 });
 
 /**
+ * Save the number of new rolls in the message before it is updated.
+ */
+Hooks.on("preUpdateChatMessage", (message, updateData, options) => {
+    if (!("rolls" in updateData)) return;
+    // We test against the source data in case the system/macro/module has modified the scoped message variable
+    options.dsnCountAddedRoll = updateData.rolls.length - message.toObject().rolls.length;
+});
+
+/**
  * Hide and roll new rolls added in a chat message in a update
  */
- Hooks.on("updateChatMessage", (message, updated, mergeObject) => {
-    if (!updated.rolls || !message.isRoll || (!message.isContentVisible && !game.settings.get("dice-so-nice", "showGhostDice")) ||
+Hooks.on("updateChatMessage", (message, updateData, options) => {
+    //Todo: refactor this check into a function
+    if (!message.rolls || !message.isRoll || (!message.isContentVisible && !game.settings.get("dice-so-nice", "showGhostDice")) ||
         (game.view != "stream" && (!game.dice3d || game.dice3d.messageHookDisabled)) ||
         (message.getFlag("core", "RollTable") && !game.settings.get("dice-so-nice", "animateRollTable"))) {
         return;
     }
-    const countNewRolls =  mergeObject._diff.rolls.length - mergeObject._backup.rolls.length;
-    if(countNewRolls > 0){
+    if (options.dsnCountAddedRoll > 0) {
         message._dice3danimating = true;
-        message._countNewRolls = countNewRolls;
-        game.dice3d.renderRolls(message, message.rolls.slice(-countNewRolls));
+        message._countNewRolls = options.dsnCountAddedRoll;
+        game.dice3d.renderRolls(message, message.rolls.slice(-options.dsnCountAddedRoll));
     }
 });
 
