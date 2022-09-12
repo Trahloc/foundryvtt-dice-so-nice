@@ -13,7 +13,7 @@
     "DICESONICE.2xSpeed": "2x",
     "DICESONICE.3xSpeed": "3x",
     "DICESONICE.Save": "Spara",
-    "DICESONICE.timeBeforeHide": "Göm Efter Millisekunder",
+    "DICESONICE.timeBeforeHide": "Millisekunder Innan Gömning",
     "DICESONICE.FadeOut": "Tona ut",
     "DICESONICE.SaveAs": "Spara som…",
     "DICESONICE.Load": "Ladda…",
@@ -136,7 +136,7 @@
     "DICESONICE.Overwrite": "Skriv över",
     "DICESONICE.AddNew": "Lägg till ny",
     "DICESONICE.SaveAsErrorName": "Skriv in ett namn för din sparfil",
-    "DICESONICE.configTitle": "Mina Tärningsinställningar",
+    "DICESONICE.configTitle": "3D Tärningsinställningar",
     "DICESONICE.configHint": "Här kan varje spelare konfigurera deras egna individuella 3D tärningsinställningar (aktivera/avaktivera, färger, storlek, prestanda...)",
     "DICESONICE.settingsPerformance": "Prestanda",
     "DICESONICE.settingsSpecialEffects": "Specialeffekter",
@@ -202,5 +202,6 @@
     "DICESONICE.WelcomeMessage3": "Du kan alltid ändra dessa inställningar senare under 'Konfigurera Inställningar > Modulinställningar > Dice So Nice!'",
     "DICESONICE.BackupHint": "Du kan spara eller ladda flera tärningsinställningar. Dom sparas i dina användarinställningar endast i denna värld. Om du vill använda dom i en annan värld, använd Import/Export knapparna istället.",
     "DICESONICE.migrateMessage": "'Dice So Nice' inställningarna lyckades migrera till version 4.0!",
-    "DICESONICE.hideNpcRollsHint": "Visa inte 3D-tärningar för slag från NPC."
+    "DICESONICE.hideNpcRollsHint": "Visa inte 3D-tärningar för slag från NPC.",
+    "DICESONICE.saveMessage": "Uppdaterade Konfiguration av 3D Tärningsinställningar"
 }
