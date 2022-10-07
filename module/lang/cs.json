@@ -1,7 +1,7 @@
 {
     "DICESONICE.config": "Nastavení 3D Kostek",
-    "DICESONICE.configTitle": "Mé Nastavení Kostek",
-    "DICESONICE.configHint": "Zde si může každý hráč nastavit své individuální nastavení 3D kostek (zapnout/vypnout, barvy, velikost, enable/disable, colors, size, výkon...)",
+    "DICESONICE.configTitle": "Nastavení 3D Kostek",
+    "DICESONICE.configHint": "Zde si může každý hráč nastavit své individuální nastavení 3D kostek (zapnout/vypnout, barvy, velikost, výkon…)",
     "DICESONICE.settingsAppearance": "Vzhled",
     "DICESONICE.settingsPreferences": "Předvolby",
     "DICESONICE.settingsPerformance": "Výkon",

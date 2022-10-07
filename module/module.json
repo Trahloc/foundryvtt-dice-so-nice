@@ -110,6 +110,11 @@
             "lang": "ru",
             "name": "Русский",
             "path": "./lang/ru.json"
+        },
+        {
+            "lang": "pl",
+            "name": "polski",
+            "path": "./lang/pl.json"
         }
     ],
     "media": [

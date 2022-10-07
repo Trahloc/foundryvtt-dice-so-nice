@@ -57,7 +57,7 @@
     "DICESONICE.soundsSurface": "Superficie de la mesa a efectos de sonido",
     "DICESONICE.soundsVolume": "Volumen del sonido",
     "DICESONICE.muteSoundSecretRolls": "Silenciar todos los sonidos para tiradas del GM/ocultas/personales",
-    "DICESONICE.enableFlavorColorset": "Cambia la apariencia de los dados cuando se pasa un tema como parámetro (Flavor) (p.ej.: 1d20[acid])",
+    "DICESONICE.enableFlavorColorset": "Cambia la apariencia de los dados cuando se utiliza un tema para describirlos (p.ej.: 2d10[acid])",
     "DICESONICE.immersiveDarkness": "Habilitar modo de inmersión en la oscuridad (los dados reaccionan a la iluminación de la escena)",
     "DICESONICE.system": "Preajustes de dados (caras)",
     "DICESONICE.maxDiceNumber": "Dados máximos",
@@ -140,8 +140,8 @@
     "DICESONICE.TextureBronze1": "Bronce - 1",
     "DICESONICE.TextureBronze2": "Bronce - 2",
     "DICESONICE.TextureBronze3": "Bronce - 3",
-    "DICESONICE.TextureBronze3a": "Bronce - 3 b",
-    "DICESONICE.TextureBronze3b": "Bronce - 3 c",
+    "DICESONICE.TextureBronze3a": "Bronce - 3a",
+    "DICESONICE.TextureBronze3b": "Bronce - 3b",
     "DICESONICE.TextureBronze4": "Bronce - 4",
     "DICESONICE.TextureStone": "Cemento",
     "DICESONICE.ColorRadiant": "Radiante",
@@ -227,7 +227,7 @@
     "DICESONICE.RollableAreaConfigTitle": "Ajustes del área de lanzamiento",
     "DICESONICE.RollableAreaConfigHint": "Define una región de la pantalla en la que se muestra la animación 3D. Esto no afectará al resto de jugadores.",
     "DICESONICE.RollableAreaText": "Área de lanzamiento",
-    "DICESONICE.RollableAreaConfigDescription1": "Cambie el tamaño y/o mueva el área para definir el \"área de lanzamiento\" donde se mostrará la animación 3D del dado.",
+    "DICESONICE.RollableAreaConfigDescription1": "Cambia el tamaño y/o mueve el \"área de lanzamiento\" donde se mostrará la animación de los dados 3D.",
     "DICESONICE.RollableAreaConfigDescription3": "Mientras tenga un área de lanzamiento personalizada, cambiar el tamaño de la ventana no redimensionará automáticamente el área de lanzamiento. Deberá restaurar o volver a definir el área personalizada manualmente.",
     "DICESONICE.RollableAreaConfigDescription2": "Haga clic en \"Aplicar\" para guardar los cambios o \"Restaurar\" para volver a los ajustes automáticos.",
     "DICESONICE.Restore": "Restaurar",
@@ -263,5 +263,6 @@
     "DICESONICE.TourMainTitleShowBackup": "Copia de Seguridad y Restauración",
     "DICESONICE.TourMainContentShowBackup": "Puedes salvar tu configuracion guardando multiples archivos. Esto es muy util para cambiar entre multiples apariencias configuradas que hayas creado.",
     "DICESONICE.TourMainTitleEndTour": "Fin del tour",
-    "DICESONICE.TourMainContentEndTour": "Si quieres mas informacion, revisa nuestra pagina de ayuda en tu ventana de Administrador de Modulos. ¡Buenos tiros!"
+    "DICESONICE.TourMainContentEndTour": "Si quieres mas informacion, revisa nuestra pagina de ayuda en tu ventana de Administrador de Modulos. ¡Buenos tiros!",
+    "DICESONICE.WelcomeTitle": "Dice So Nice - Tus dados 3D"
 }

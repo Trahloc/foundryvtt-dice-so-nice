@@ -264,5 +264,6 @@
     "DICESONICE.MSAA": "MSAA (Matériel, Recommandé)",
     "DICESONICE.glow": "Lueur diffuse (glow)",
     "DICESONICE.TourMainTitleGotoModulesSettings": "Paramètres Dice So Nice",
-    "DICESONICE.TourMainContentGotoModulesSettings": "Cliquez sur le filtre 'Dice So Nice'"
+    "DICESONICE.TourMainContentGotoModulesSettings": "Cliquez sur le filtre 'Dice So Nice'",
+    "DICESONICE.WelcomeTitle": "Dice So Nice - Vos dés 3D"
 }
