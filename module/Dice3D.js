@@ -518,9 +518,9 @@ export class Dice3D {
         const showMessage = () => {
             delete chatMessage._dice3danimating;
 
-            window.ui.chat.element.find(`.message[data-message-id="${chatMessage.id}"]`).show().find(".dice-roll").show();
+            window.ui.chat.element.find(`.message[data-message-id="${chatMessage.id}"]`).removeClass("dsn-hide").find(".dice-roll").removeClass("dsn-hide");
             if (window.ui.sidebar.popouts.chat)
-                window.ui.sidebar.popouts.chat.element.find(`.message[data-message-id="${chatMessage.id}"]`).show().find(".dice-roll").show();;
+                window.ui.sidebar.popouts.chat.element.find(`.message[data-message-id="${chatMessage.id}"]`).removeClass("dsn-hide").find(".dice-roll").removeClass("dsn-hide");
 
             Hooks.callAll("diceSoNiceRollComplete", chatMessage.id);
 
