@@ -259,9 +259,9 @@ Hooks.on("renderChatMessage", (message, html, data) => {
     if (message._dice3danimating && !game.settings.get("dice-so-nice", "immediatelyDisplayChatMessages")) {
 
         if (message._countNewRolls)
-            html.find(`.dice-roll:nth-last-child(-n+${message._countNewRolls})`).hide();
+            html.find(`.dice-roll:nth-last-child(-n+${message._countNewRolls})`).addClass("dsn-hide");
         else
-            html.hide();
+            html.addClass("dsn-hide");
     }
 });
 
