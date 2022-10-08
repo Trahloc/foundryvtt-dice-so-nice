@@ -684,7 +684,7 @@ export class Dice3D {
             });
         }
         return new Promise((resolve, reject) => {
-            if (game.dice3d && game.user.getFlag("dice-so-nice", "settings").enabled) {
+            if (game.dice3d && Dice3D.CONFIG().enabled) {
                 buildHook(resolve);
             } else {
                 resolve(true);
