@@ -230,7 +230,7 @@ export class DicePreset {
 					});
 					this.model = gltf;
 					this.modelLoaded = true;
-					Hooks.callAll("diceSoNiceModelLoaded", this);
+					//Hooks.callAll("diceSoNiceModelLoaded", this);
 					resolve(gltf);
 				});
 			});

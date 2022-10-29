@@ -396,6 +396,9 @@ export class DiceFactory {
 			preset.values = model.values;
 			preset.valueMap = model.valueMap;
 		}
+		if(dice.valueMap){
+			preset.valueMap = dice.valueMap;
+		}
 		preset.mass = model.mass;
 		preset.scale = model.scale;
 		preset.inertia = model.inertia;
@@ -668,7 +671,7 @@ export class DiceFactory {
 		let contextEmissive = canvasEmissive.getContext("2d");
 		
 		let labelsTotal = labels.length;
-		let isHeritedFromShape = ["d3","d5","d7"].includes(diceobj.type) || (diceobj.type == "df"&&diceobj.shape == "d6");
+		let isHeritedFromShape = ["d3","d5","d7","dm"].includes(diceobj.type) || (diceobj.type == "df"&&diceobj.shape == "d6");
 		if(isHeritedFromShape){
 			labelsTotal = labelsTotal*2 -2;
 			if(diceobj.shape == "d2" || diceobj.shape == "d10")
