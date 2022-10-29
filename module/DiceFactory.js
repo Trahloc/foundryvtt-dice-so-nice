@@ -418,6 +418,10 @@ export class DiceFactory {
 
 		if(dice.emissive)
 			preset.emissive = dice.emissive;
+
+		if(dice.emissiveIntensity)
+			preset.emissiveIntensity = dice.emissiveIntensity;
+
 		this.register(preset);
 
 		if(dice.font && !FontConfig.getAvailableFonts().includes(dice.font)){
@@ -538,12 +542,14 @@ export class DiceFactory {
 			
 			dicemesh = new THREE.Mesh(geom, materials);
 
+			//TODO: Find if this entire block is still needed
+			//I think not
 			if (diceobj.color) {
 				dicemesh.material[0].color = new THREE.Color(diceobj.color);
 				if(this.realisticLighting)
 					dicemesh.material[0].color.convertLinearToSRGB();
 				//dicemesh.material[0].emissive = new THREE.Color(diceobj.color);
-				dicemesh.material[0].emissiveIntensity = 1;
+				dicemesh.material[0].emissiveIntensity = diceobj.emissiveIntensity ? diceobj.emissiveIntensity : 1;
 				dicemesh.material[0].needsUpdate = true;
 			}
 		}
@@ -750,7 +756,7 @@ export class DiceFactory {
 					emissiveMap.encoding = THREE.sRGBEncoding;
 				emissiveMap.flipY = false;
 				mat.emissiveMap = emissiveMap;
-				mat.emissiveIntensity = 1;
+				mat.emissiveIntensity = diceobj.emissiveIntensity ? diceobj.emissiveIntensity:1;
 				mat.emissive = new THREE.Color(diceobj.emissive);
 				if(this.realisticLighting)
 					mat.emissive.convertLinearToSRGB();
