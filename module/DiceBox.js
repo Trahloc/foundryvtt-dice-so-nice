@@ -416,7 +416,8 @@ export class DiceBox {
 			let options = {
 				type: THREE.FloatType,
 				samples: this.dicefactory.aa == "msaa" ? 4 : 0,
-				anisotropy: 4
+				anisotropy: 4,
+				stencilBuffer: true
 			};
 			this.composerTarget = new THREE.WebGLRenderTarget(size.x, size.y, options);
 
