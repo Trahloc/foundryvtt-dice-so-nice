@@ -410,9 +410,12 @@ export class DiceBox {
 			let options = {
 				type: THREE.FloatType,
 				samples: this.dicefactory.aa == "msaa" ? 4 : 0,
-				anisotropy: 4,
-				stencilBuffer: true
+				anisotropy: 4
 			};
+			//Workaround for a bug on Chrome on OSX
+			if (navigator.userAgent.indexOf('Mac OS X') != -1 && navigator.userAgent.indexOf('Chrome') != -1) {
+				options.stencilBuffer = true;
+			}
 			this.composerTarget = new THREE.WebGLRenderTarget(size.x, size.y, options);
 
 			// This EffectComposer is in charge of rendering the Bloom/Glow effect
