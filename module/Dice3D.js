@@ -610,7 +610,10 @@ export class Dice3D {
 
 
         Hooks.callAll("diceSoNiceRollStart", messageID, context);
-        let notation = new DiceNotation(context.roll, Dice3D.ALL_CONFIG(user));
+        //We allow the hook to modify the roll to be shown without altering the original roll reference
+        //This is useful for example to show a different roll than the one made by the user without relying on the manual showForRoll method
+        let hookedRoll = context.dsnRoll || context.roll;
+        let notation = new DiceNotation(hookedRoll, Dice3D.ALL_CONFIG(user));
         return this.show(notation, context.user, synchronize, context.users, context.blind);
     }
 

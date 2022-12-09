@@ -671,7 +671,7 @@ export class DiceFactory {
 		let contextEmissive = canvasEmissive.getContext("2d");
 		
 		let labelsTotal = labels.length;
-		let isHeritedFromShape = ["d3","d5","d7","dm"].includes(diceobj.type) || (diceobj.type == "df"&&diceobj.shape == "d6");
+		let isHeritedFromShape = ["d3","d5","d7"].includes(diceobj.type) || (diceobj.type == "df"&&diceobj.shape == "d6");
 		if(isHeritedFromShape){
 			labelsTotal = labelsTotal*2 -2;
 			if(diceobj.shape == "d2" || diceobj.shape == "d10")
@@ -728,8 +728,8 @@ export class DiceFactory {
 		}
 
 
-		//var img    = canvasEmissive.toDataURL("image/png");
-		//document.write('<img src="'+img+'"/>');
+		var img    = canvas.toDataURL("image/png");
+		document.write('<img src="'+img+'"/>');
 		//generate basetexture for caching
 		if(!this.baseTextureCache[baseTextureCacheString]){
 			let texture = new THREE.CanvasTexture(canvas);
