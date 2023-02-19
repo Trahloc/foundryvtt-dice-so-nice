@@ -246,5 +246,21 @@
     "DICESONICE.TourMainContentShow3DDice": "这是 3D 骰子的预览，你可以在这里看到你自己的骰子。每个玩家都有自己的骰子，你也可以点击一个骰子来自定义它。",
     "DICESONICE.TourMainTitleShowAppearance": "外观",
     "DICESONICE.TourMainTitleEndTour": "展示结束",
-    "DICESONICE.TourMainContentEndTour": "如果你想获得更多信息，在模组管理窗口查看我们的帮助页面。骰得开心！"
+    "DICESONICE.TourMainContentEndTour": "如果你想获得更多信息，在模组管理窗口查看我们的帮助页面。骰得开心！",
+    "DICESONICE.WelcomeMessageTourBtn": "开始教程（45秒）",
+    "DICESONICE.WelcomeTitle": "Dice So Nice - 您的3D骰子",
+    "DICESONICE.TourMainContentGotoModulesSettings": "点击Dice So Nice的设置选项",
+    "DICESONICE.TourMainContentGotoSettings": "到您的设置选项卡中",
+    "DICESONICE.TourMainContentGotoConfigure": "点击配置设定按钮",
+    "DICESONICE.TourMainTitleGotoDiceSoNice": "Dice So Nice设置",
+    "DICESONICE.TourMainContentGotoDiceSoNice": "在这里，GM和用户可为Dice So Nice进行设置。3D骰子以外的设置会影响所有玩家。",
+    "DICESONICE.TourMainContentShowAppearance": "在预览下方，你可以改变骰子外观。浏览可用的主题，或创建你自己的。",
+    "DICESONICE.TourMainTitleShowPreferences": "偏好",
+    "DICESONICE.TourMainContentShowPreferences": "按喜好改变偏好设置。声音、动画速度、骰子大小等。",
+    "DICESONICE.TourMainTitleShowSFX": "特殊效果",
+    "DICESONICE.TourMainContentShowSFX": "你可以为掷骰添加特殊效果。例如，掷出20时添加音效！",
+    "DICESONICE.TourMainTitleShowPerformance": "性能",
+    "DICESONICE.TourMainContentShowPerformance": "如果你的电脑性能不佳，可以在这里改变设置来改进3D动画的表现。",
+    "DICESONICE.TourMainTitleShowBackup": "备份 & 恢复",
+    "DICESONICE.TourMainContentShowBackup": "你可以分别存储多个设置文件。如果你想在多个自定义骰子外观中快速切换，这会很有用。"
 }
