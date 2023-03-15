@@ -9,7 +9,6 @@ import {
 	UniformsUtils,
 	Vector2,
 	Vector3,
-	WebGLMultisampleRenderTarget,
 	WebGLRenderTarget
 } from 'three';
 import { Pass, FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass.js';

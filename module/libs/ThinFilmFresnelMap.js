@@ -45,7 +45,7 @@ import { DataTexture, LinearFilter, LinearMipMapLinearFilter, MathUtils, RepeatW
  */
 class ThinFilmFresnelMap extends DataTexture {
 
-    constructor(filmThickness = 380, refractiveIndexFilm = 1.5, refractiveIndexBase = 3, size = 64) {
+    constructor(filmThickness = 480, refractiveIndexFilm = 1.3, refractiveIndexBase = 3, size = 64) {
 
         const data = new Uint8Array(size * size * 4);
         super(data, size, size, RGBAFormat, UnsignedByteType, UVMapping, RepeatWrapping, RepeatWrapping, LinearFilter, LinearMipMapLinearFilter);

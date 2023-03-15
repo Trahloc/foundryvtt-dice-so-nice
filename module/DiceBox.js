@@ -88,6 +88,7 @@ export class DiceBox {
 		this.animstate = '';
 		this.throwingForce = "medium";
 		this.immersiveDarkness = true;
+		this.toneMappingExposureDefault = 1.0;
 
 		this.selector = {
 			animate: true,
@@ -99,9 +100,9 @@ export class DiceBox {
 		this.muteSoundSecretRolls = false;
 
 		this.colors = {
-			ambient: 0xffffff,
-			spotlight: 0x333333,
-			ground: 0x242644
+			ambient: 0xffeeb1,
+			spotlight: 0x000000,
+			ground: 0x080820
 		};
 
 		this.rethrowFunctions = {};
@@ -181,15 +182,16 @@ export class DiceBox {
 				});
 			}
 			else {
-				this.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: "high-performance" });
+				const preserveDrawingBuffer = game.user.getFlag("dice-so-nice", "preserveDrawingBuffer") || false;
+				this.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: "high-performance", preserveDrawingBuffer:  preserveDrawingBuffer});
 				if (this.dicefactory.useHighDPI)
 					this.renderer.setPixelRatio(window.devicePixelRatio);
 				if (this.dicefactory.realisticLighting) {
-					this.renderer.physicallyCorrectLights = true;
 					this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-					this.renderer.toneMappingExposure = 1;
-					//this.renderer.outputEncoding = THREE.sRGBEncoding;
+					this.renderer.toneMappingExposure = this.toneMappingExposureDefault;
 				}
+				const capabilities = this.renderer.capabilities;
+				this.anisotropy = capabilities.getMaxAnisotropy() < 16 ? capabilities.getMaxAnisotropy() : 16;
 				await this.loadContextScopedTextures(this.config.boxType);
 				this.dicefactory.initializeMaterials();
 				game.dice3d.dice3dRenderers[this.config.boxType] = this.renderer;
@@ -268,13 +270,19 @@ export class DiceBox {
 				this.renderer.scopedTextureCache.roughnessMap_metal = textureLoader.load('modules/dice-so-nice/textures/roughnessMap_metal.webp');
 				this.renderer.scopedTextureCache.roughnessMap_stone = textureLoader.load('modules/dice-so-nice/textures/roughnessMap_stone.webp');
 
+				//set anisotropy
+				this.renderer.scopedTextureCache.roughnessMap_fingerprint.anisotropy = this.anisotropy;
+				this.renderer.scopedTextureCache.roughnessMap_wood.anisotropy = this.anisotropy;
+				this.renderer.scopedTextureCache.roughnessMap_metal.anisotropy = this.anisotropy;
+				this.renderer.scopedTextureCache.roughnessMap_stone.anisotropy = this.anisotropy;
+
 				this.pmremGenerator = new THREE.PMREMGenerator(this.renderer);
 				this.pmremGenerator.compileEquirectangularShader();
 
 				new RGBELoader()
 					.setDataType(THREE.HalfFloatType)
 					.setPath('modules/dice-so-nice/textures/equirectangular/')
-					.load('footprint_court.hdr', function (texture) {
+					.load('blouberg_sunrise_2_1k.hdr', function (texture) {
 						this.renderer.scopedTextureCache.textureCube = this.pmremGenerator.fromEquirectangular(texture).texture;
 						this.renderer.scopedTextureCache.textureCube.encoding = THREE.sRGBEncoding;
 						this.scene.environment = this.renderer.scopedTextureCache.textureCube;
@@ -354,18 +362,19 @@ export class DiceBox {
 
 		let intensity, intensity_amb;
 		if (this.dicefactory.realisticLighting) { //advanced lighting
-			intensity = 1.0;
+			intensity = 1.5;
 			intensity_amb = 1.0;
 		} else {
 			if(this.config.boxType == "board") {
 				intensity = 1.2;
-				intensity_amb = 2.2;
+				intensity_amb = 1.0;
 			} else {
 				intensity = 1.5;
 				intensity_amb = 3;
 			}
 		}
 
+		
 		this.light_amb = new THREE.HemisphereLight(this.colors.ambient, this.colors.ground, intensity_amb);
 		this.scene.add(this.light_amb);
 
@@ -410,7 +419,7 @@ export class DiceBox {
 			let options = {
 				type: THREE.FloatType,
 				samples: this.dicefactory.aa == "msaa" ? 4 : 0,
-				anisotropy: 4
+				anisotropy: this.anisotropy
 			};
 			//Workaround for a bug on Chrome on OSX
 			if (navigator.userAgent.indexOf('Mac OS X') != -1 && navigator.userAgent.indexOf('Chrome') != -1) {
@@ -740,6 +749,18 @@ export class DiceBox {
 		dicemesh.body_sim.diceMaterial = appearance.material;
 		dicemesh.body_sim.secretRoll = dicedata.options?.secret;
 
+		if(dicemesh.userData.glowingInDarkness){
+			if(canvas.darknessLevel > 0.5){
+				//If the darkness level is less than 0.5, we activate the "glowing in the dark" mode
+				//This mode is activated by setting the userData.glowingInDarkness to true on the mesh of the dice
+				dicemesh.material.emissiveIntensity = 0.3;
+				dicemesh.material.emissive = new THREE.Color(0xffffff);
+			} else {
+				dicemesh.material.emissiveIntensity = 0;
+				dicemesh.material.emissive = new THREE.Color(0x000000);
+			}
+		}
+
 		//dicemesh.meshCannon = this.body2mesh(dicemesh.body_sim,true);
 
 		/*var gltfExporter = new GLTFExporter();
@@ -1005,8 +1026,8 @@ export class DiceBox {
 			//use darknessLevel to change toneMapping
 			if (this.dicefactory.realisticLighting && this.immersiveDarkness) {
 				//If the darkness level is not defined, we set it to 0
-				let darknessLevel = this.darknessLevel || 0;
-				this.renderer.toneMappingExposure = 0.4 + (0.6 - darknessLevel * 0.6);
+				let darknessLevel = canvas.darknessLevel || 0;
+				this.renderer.toneMappingExposure = this.toneMappingExposureDefault * 0.4 + (this.toneMappingExposureDefault * 0.6 - darknessLevel * 0.6);
 			}
 			this.renderScene();
 		}

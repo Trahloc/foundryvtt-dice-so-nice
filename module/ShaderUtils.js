@@ -11,12 +11,17 @@ export class ShaderUtils {
 			ShaderUtils.selectiveBloomShaderFragment(shader);
 		}
 
+		// This is the old iridescent shader, which is now deprecated.
 		if (this.userData.iridescent) {
 			ShaderUtils.iridescentShaderFragment(shader);
 		}
 
 		if (shader.shaderName == "MeshPhysicalMaterial" && shader.transmission) {
 			ShaderUtils.transmissionAlphaShaderFragment(shader);
+		}
+
+		if (shader.shaderName == "MeshPhysicalMaterial" && shader.iridescence) {
+			ShaderUtils.iridescenceShaderFragment(shader);
 		}
 	}
 
@@ -47,6 +52,19 @@ export class ShaderUtils {
 		);
 	}
 
+	static iridescenceShaderFragment(shader) {
+		// We only need to change the color channel used by the ThreeJS shader for the iridescenceMap from red to blue.
+		// This is because we want to use the metallic channel for the iridescenceMap.
+		shader.fragmentShader = shader.fragmentShader.replace(`#include <lights_physical_fragment>`,
+			`#include <lights_physical_fragment>
+				#ifdef USE_IRIDESCENCE
+					material.iridescence = iridescence;
+					#ifdef USE_IRIDESCENCEMAP
+						material.iridescence *= texture2D( iridescenceMap, vUv ).b;
+					#endif
+				#endif`);
+	}
+	// This is the old iridescent shader, which is now deprecated.
 	static iridescentShaderFragment(shader) {
 		shader.uniforms.iridescenceLookUp = game.dice3d.uniforms.iridescenceLookUp;
 		shader.uniforms.iridescenceNoise = game.dice3d.uniforms.iridescenceNoise;
@@ -80,7 +98,10 @@ export class ShaderUtils {
 			float fresnelFactor = pow(1.0 - NdotV, 5.0);
 			float noise = texture2D(iridescenceNoise, vUv/2.0).r;
 			vec3 airy = texture2D(iridescenceLookUp, vec2(NdotV * .99, noise)).xyz;
-			totalSpecular = totalSpecular  * airy * boost;
+			
+			if(metalnessFactor >= 1.0) {
+				totalSpecular = totalSpecular  * airy * boost;
+			}
 
 			#include <transmission_fragment>`
 		);

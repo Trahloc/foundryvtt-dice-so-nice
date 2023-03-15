@@ -288,6 +288,11 @@ export class Dice3D {
             height: window.innerHeight - 1
         };
 
+        if(!config.enabled){
+            area.width = 1;
+            area.height = 1;
+        }
+
         this.canvas = $(`<div id="dice-box-canvas" style="position: absolute; left: ${area.left}px; top: ${area.top}px; pointer-events: none;"></div>`);
         if (config.canvasZIndex === "over") {
             this.canvas.css("z-index", 1000);
