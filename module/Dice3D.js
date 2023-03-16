@@ -14,6 +14,34 @@ import { DiceTourMain } from './tours/DiceTourMain.js';
 export class Dice3D {
 
     static get DEFAULT_OPTIONS() {
+        const quality = {};
+        switch(game.settings.get("core", "performanceMode")) {
+            case 0:
+                quality.bumpMapping = false;
+                quality.shadowQuality = "low";
+                quality.glow = false;
+                quality.antialiasing = "none";
+                quality.useHighDPI = false;
+                quality.imageQuality = "low";
+                break;
+            case 1:
+                quality.bumpMapping = true;
+                quality.shadowQuality = "low";
+                quality.glow = false;
+                quality.antialiasing = "none";
+                quality.useHighDPI = false;
+                quality.imageQuality = "medium";
+                break;
+            case 2:
+            case 3:
+                quality.bumpMapping = true;
+                quality.shadowQuality = "high";
+                quality.glow = true;
+                quality.antialiasing = game.canvas.app.renderer.context.webGLVersion===2 ?"msaa":"smaa";
+                quality.useHighDPI = true;
+                quality.imageQuality = "high";
+                break;
+        }
         return {
             enabled: true,
             showExtraDice: game.dice3d && game.dice3d.hasOwnProperty("defaultShowExtraDice") ? game.dice3d.defaultShowExtraDice : false,
@@ -23,17 +51,17 @@ export class Dice3D {
             autoscale: true,
             scale: 75,
             speed: 1,
-            imageQuality: "high",
-            shadowQuality: 'high',
-            bumpMapping: true,
+            imageQuality: quality.imageQuality,
+            shadowQuality: quality.shadowQuality,
+            bumpMapping: quality.bumpMapping,
             sounds: true,
             soundsSurface: 'felt',
             soundsVolume: 0.5,
             canvasZIndex: 'over',
             throwingForce: 'medium',
-            useHighDPI: true,
-            antialiasing: game.canvas.app.renderer.context.webGLVersion === 2 ? "msaa" : "smaa",
-            glow: true,
+            useHighDPI: quality.useHighDPI,
+            antialiasing: quality.antialiasing,
+            glow: quality.glow,
             showOthersSFX: true,
             immersiveDarkness: true,
             muteSoundSecretRolls: false,
