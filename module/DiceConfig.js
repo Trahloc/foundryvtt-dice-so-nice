@@ -1054,7 +1054,7 @@ export class DiceConfig extends FormApplication {
         DiceSFXManager.init();
         ui.notifications.info(game.i18n.localize("DICESONICE.saveMessage"));
 
-        let reloadRequiredIfChanged = ["canvasZIndex", "bumpMapping", "useHighDPI", "glow", "antialiasing"];
+        let reloadRequiredIfChanged = ["canvasZIndex", "bumpMapping", "useHighDPI", "glow", "antialiasing", "enabled"];
         let reloadRequired = reloadRequiredIfChanged.some(setting => settings[setting] != currentSettings[setting]);
 
         if (reloadRequired) {

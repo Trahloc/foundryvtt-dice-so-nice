@@ -1,5 +1,3 @@
-
-import { ThinFilmFresnelMap } from './libs/ThinFilmFresnelMap.js';
 import { ShaderUtils } from './ShaderUtils';
 export class DicePreset {
 
@@ -211,21 +209,22 @@ export class DicePreset {
 						if (node.isMesh) {
 							node.castShadow = true; 
 							node.material.onBeforeCompile = ShaderUtils.applyDiceSoNiceShader;
-							
+							const anisotropy = game.dice3d.box.anisotropy;
 							if(node.material.map !== null)
-								node.material.map.anisotropy = 8;
+								node.material.map.anisotropy = anisotropy;
 							
 							if(node.material.normalMap !== null)
-								node.material.normalMap.anisotropy = 8;
+								node.material.normalMap.anisotropy = anisotropy;
 							
 							if(node.material.emissiveMap !== null)
-								node.material.emissiveMap.anisotropy = 8;
+								node.material.emissiveMap.anisotropy = anisotropy;
 
 							if(node.material.roughnessMap !== null)
-								node.material.roughnessMap.anisotropy = 8;
+								node.material.roughnessMap.anisotropy = anisotropy;
 
 							if(node.material.metalnessMap !== null)
-								node.material.metalnessMap.anisotropy = 8;
+								node.material.metalnessMap.anisotropy = anisotropy;
+
 						}
 					});
 					this.model = gltf;

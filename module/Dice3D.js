@@ -14,6 +14,34 @@ import { DiceTourMain } from './tours/DiceTourMain.js';
 export class Dice3D {
 
     static get DEFAULT_OPTIONS() {
+        const quality = {};
+        switch(game.settings.get("core", "performanceMode")) {
+            case 0:
+                quality.bumpMapping = false;
+                quality.shadowQuality = "low";
+                quality.glow = false;
+                quality.antialiasing = "none";
+                quality.useHighDPI = false;
+                quality.imageQuality = "low";
+                break;
+            case 1:
+                quality.bumpMapping = true;
+                quality.shadowQuality = "low";
+                quality.glow = false;
+                quality.antialiasing = "none";
+                quality.useHighDPI = false;
+                quality.imageQuality = "medium";
+                break;
+            case 2:
+            case 3:
+                quality.bumpMapping = true;
+                quality.shadowQuality = "high";
+                quality.glow = true;
+                quality.antialiasing = game.canvas.app.renderer.context.webGLVersion===2 ?"msaa":"smaa";
+                quality.useHighDPI = true;
+                quality.imageQuality = "high";
+                break;
+        }
         return {
             enabled: true,
             showExtraDice: game.dice3d && game.dice3d.hasOwnProperty("defaultShowExtraDice") ? game.dice3d.defaultShowExtraDice : false,
@@ -23,17 +51,17 @@ export class Dice3D {
             autoscale: true,
             scale: 75,
             speed: 1,
-            imageQuality: "high",
-            shadowQuality: 'high',
-            bumpMapping: true,
+            imageQuality: quality.imageQuality,
+            shadowQuality: quality.shadowQuality,
+            bumpMapping: quality.bumpMapping,
             sounds: true,
             soundsSurface: 'felt',
             soundsVolume: 0.5,
             canvasZIndex: 'over',
             throwingForce: 'medium',
-            useHighDPI: true,
-            antialiasing: game.canvas.app.renderer.context.webGLVersion === 2 ? "msaa" : "smaa",
-            glow: true,
+            useHighDPI: quality.useHighDPI,
+            antialiasing: quality.antialiasing,
+            glow: quality.glow,
             showOthersSFX: true,
             immersiveDarkness: true,
             muteSoundSecretRolls: false,
@@ -287,6 +315,11 @@ export class Dice3D {
             width: window.innerWidth - sidebarOffset,
             height: window.innerHeight - 1
         };
+
+        if(!config.enabled){
+            area.width = 1;
+            area.height = 1;
+        }
 
         this.canvas = $(`<div id="dice-box-canvas" style="position: absolute; left: ${area.left}px; top: ${area.top}px; pointer-events: none;"></div>`);
         if (config.canvasZIndex === "over") {
@@ -610,7 +643,10 @@ export class Dice3D {
 
 
         Hooks.callAll("diceSoNiceRollStart", messageID, context);
-        let notation = new DiceNotation(context.roll, Dice3D.ALL_CONFIG(user));
+        //We allow the hook to modify the roll to be shown without altering the original roll reference
+        //This is useful for example to show a different roll than the one made by the user without relying on the manual showForRoll method
+        let hookedRoll = context.dsnRoll || context.roll;
+        let notation = new DiceNotation(hookedRoll, Dice3D.ALL_CONFIG(user));
         return this.show(notation, context.user, synchronize, context.users, context.blind);
     }
 

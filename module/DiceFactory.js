@@ -25,13 +25,6 @@ export class DiceFactory {
 
 		this.baseTextureCache = {};
 
-		// fixes texture rotations on specific dice models
-		this.rotate = {
-			d8: {even: 7.5, odd: 127.5},
-			d12: {all: -5},
-			d20: {all: 8.5},
-		};
-
 		this.systems = {
 			'standard': {id: 'standard', name: game.i18n.localize("DICESONICE.System.Standard"), dice:[], mode:"default"},
 			'spectrum': {id: 'spectrum', name: game.i18n.localize("DICESONICE.System.SpectrumDice"), dice:[], mode:"default"},
@@ -133,13 +126,13 @@ export class DiceFactory {
 					}
 				},
 				'iridescent': {
-					'type':'standard',
+					'type':'physical',
 					'options': {
 						metalness: 1,
 						roughness: 0.2,
-						userData:{
-							iridescent:true
-						}
+						iridescence: 1,
+						iridescenceIOR: 1.8,
+						iridescenceThicknessRange: [485,515]
 					},
 					'scopedOptions':{
 						envMap : true
@@ -671,7 +664,7 @@ export class DiceFactory {
 		let contextEmissive = canvasEmissive.getContext("2d");
 		
 		let labelsTotal = labels.length;
-		let isHeritedFromShape = ["d3","d5","d7","dm"].includes(diceobj.type) || (diceobj.type == "df"&&diceobj.shape == "d6");
+		let isHeritedFromShape = ["d3","d5","d7"].includes(diceobj.type) || (diceobj.type == "df"&&diceobj.shape == "d6");
 		if(isHeritedFromShape){
 			labelsTotal = labelsTotal*2 -2;
 			if(diceobj.shape == "d2" || diceobj.shape == "d10")
@@ -728,7 +721,7 @@ export class DiceFactory {
 		}
 
 
-		//var img    = canvasEmissive.toDataURL("image/png");
+		//var img    = canvas.toDataURL("image/png");
 		//document.write('<img src="'+img+'"/>');
 		//generate basetexture for caching
 		if(!this.baseTextureCache[baseTextureCacheString]){
@@ -737,13 +730,12 @@ export class DiceFactory {
 				texture.encoding = THREE.sRGBEncoding;
 			texture.flipY = false;
 			mat.map = texture;
-			mat.map.anisotropy = 4;
+			mat.map.anisotropy = game.dice3d.box.anisotropy;
 
 			if(this.realisticLighting){
 				let bumpMap = new THREE.CanvasTexture(canvasBump);
 				bumpMap.flipY = false;
 				mat.bumpMap = bumpMap;
-				mat.bumpMap.anisotropy = 4;
 
 				let emissiveMap = new THREE.CanvasTexture(canvasEmissive);
 				if(this.realisticLighting)
