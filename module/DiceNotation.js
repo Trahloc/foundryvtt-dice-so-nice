@@ -41,26 +41,37 @@ export class DiceNotation {
 		rolls.dice.some(die => {
 			//We only are able to handle this list of number of face in 3D for now
 			if([2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 20, 24, 30, 100].includes(die.faces)) {
+				let options = {};
 				for(let i =0; i< die.results.length; i++){
 					if(++diceNumber >= maxDiceNumber)
 						return true;
 					if(!die.results[i].hidden){
 						//ghost can't be secret
 						if(rolls.ghost)
-							die.options.ghost = true;
+							options.ghost = true;
 						else if(rolls.secret)
-							die.options.secret = true;
-						
-						this.addDie(die, i);
+							options.secret = true;
+
+						if(die.modifiers.length)
+							options.modifiers = die.modifiers;
+
+						this.addDie({fvttDie: die, index:i, options:options});
 						if(die.faces == 100){
-							this.addDie(die, i, true);
+							this.addDie({fvttDie: die, index:i, isd10of100:true, options:options});
 						}
 					}
 				}
 			}
 		});
 	}
-	addDie(fvttDie, index, isd10of100 = false){
+	/**
+	 * 
+	 * @param {DiceTerm} fvttDie Die object from Foundry VTT
+	 * @param {Integer} index Position in the dice array
+	 * @param {Boolean} isd10of100 In DsN, we use two d10 for a d100. Set to true if this die should be the unit dice of a d100
+	 * @param {Object} options Options related to the fvtt roll that should be attached to the dsn die
+	 */
+	addDie({fvttDie, index, isd10of100 = false, options = {}}){
 		let dsnDie = {};
 		let dieValue = fvttDie.results[index].result;
 		if(fvttDie.faces == 100) {
@@ -85,6 +96,7 @@ export class DiceNotation {
 		if(fvttDie.results[index].discarded)
 			dsnDie.discarded = true;
 
+
 		//If it is not a standard die ("d"), we need to prepend "d" to the denominator. If it is, we append the number of face
 		dsnDie.type = fvttDie.constructor.DENOMINATION;
 		if(fvttDie.constructor.name == CONFIG.Dice.terms["d"].name)
@@ -95,8 +107,10 @@ export class DiceNotation {
 		dsnDie.vectors = [];
 		//Contains optionals flavor (core) and colorset (dsn) infos.
 		dsnDie.options = duplicate(fvttDie.options);
+		mergeObject(dsnDie.options, options);
 		if(this.userConfig && !this.userConfig.enableFlavorColorset && dsnDie.options.flavor)
 			delete dsnDie.options.flavor;
+
 		this.throws[fvttDie.results[index].indexThrow].dice.push(dsnDie);
 	}
 
@@ -110,27 +124,61 @@ export class DiceNotation {
 				mergedRollCommands[i].push(command.params.throws[i]);
 			}
 		});
-		//commands
+		//First we loop on the command list
 		for(let i=0;i<mergedRollCommands.length;i++){
-			//throw
+			//Then we loop on throws
 			for(let j=0;j<mergedRollCommands[i].length;j++){
+
+				//Retrieve the sfx list (unfiltered) for this throw. We do not know yet if these sfx should be visible or not
 				let sfxList = mergedRollCommands[i][j].dsnConfig.specialEffects;
 				if(!sfxList || !sfxList["0"])
 					continue;
-				//dice
+
+				//Finally we loop over each dice in this throw
 				for(let k=0;k<mergedRollCommands[i][j].dice.length;k++){
+					const dsnDie = mergedRollCommands[i][j].dice[k];
+					//attach SFX that should trigger for this roll
+					//For each sfx configured
 					let specialEffects = Object.values(sfxList).filter(sfx => {
-						return !mergedRollCommands[i][j].dice[k].discarded && !mergedRollCommands[i][j].dice[k].options.ghost &&
-						(((sfx.diceType != "d100" && sfx.diceType == mergedRollCommands[i][j].dice[k].type && sfx.onResult.includes(mergedRollCommands[i][j].dice[k].result.toString()))
-							|| 
-						(sfx.diceType == "d100" && mergedRollCommands[i][j].dice[k].d100Result && sfx.onResult.includes(mergedRollCommands[i][j].dice[k].d100Result.toString())))
-							||
-						(mergedRollCommands[i][j].dice[k].options.sfx && mergedRollCommands[i][j].dice[k].options.sfx.id == sfx.diceType && sfx.onResult.includes(mergedRollCommands[i][j].dice[k].options.sfx.result.toString())))
+						//if the dice is discarded, it should not trigger a special fx
+						if(dsnDie.discarded)
+							return false;
+						
+						//if the dice is a ghost dice, it should not trigger a special fx
+						if(dsnDie.options.ghost)
+							return false;
+
+						//if the special effect "onResult" list contains non-numeric value, we manually deal with them here
+						let manualResultTrigger = false;
+						//Keep Highest. Discarded dice are already filtered out
+						if(sfx.onResult.includes("kh"))
+							manualResultTrigger = dsnDie.options?.modifiers?.includes("kh");
+						//Keep Lowest. Discarded dice are already filtered out
+						if(sfx.onResult.includes("kl"))
+							manualResultTrigger = dsnDie.options?.modifiers?.includes("kl");
+
+						if(manualResultTrigger)
+							return true;
+
+						//if the result is in the triggers value, we keep the fx. Special case: double d10 for a d100 roll
+						if(sfx.diceType == "d100"){
+							if(dsnDie.d100Result && sfx.onResult.includes(dsnDie.d100Result.toString()))
+								return true;
+						}
+						if(sfx.diceType == dsnDie.type && sfx.onResult.includes(dsnDie.result.toString()))
+							return true;
+							
+						//if a special effect was manually triggered for this dice, we also include it
+						if(dsnDie.options.sfx && dsnDie.options.sfx.id == sfx.diceType && sfx.onResult.includes(dsnDie.options.sfx.result.toString()))
+							return true;
+
+						return false;
 					});
-					if(mergedRollCommands[i][j].dice[k].options.sfx && mergedRollCommands[i][j].dice[k].options.sfx.specialEffect)
+					//Now that we have a filtered list of sfx to play, we make a final list of all sfx for this die and we remove the duplicates
+					if(dsnDie.options.sfx && dsnDie.options.sfx.specialEffect)
 						specialEffects.push({
-							specialEffect:mergedRollCommands[i][j].dice[k].options.sfx.specialEffect,
-							options:mergedRollCommands[i][j].dice[k].options.sfx.options
+							specialEffect:dsnDie.options.sfx.specialEffect,
+							options:dsnDie.options.sfx.options
 						});
 					if(specialEffects.length){
 						//remove duplicate
@@ -140,7 +188,7 @@ export class DiceNotation {
 				}
 			}
 		}
-
+		console.log(mergedRollCommands);
 		return mergedRollCommands;
 	}
 }

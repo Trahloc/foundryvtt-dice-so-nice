@@ -6,6 +6,7 @@ import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
 import { SMAAPass } from './libs/SMAAPass.js';
 import { GammaCorrectionShader } from 'three/examples/jsm/shaders/GammaCorrectionShader.js';
 import { TransparentUnrealBloomPass } from './libs/TransparentUnrealBloomPass.js';
@@ -414,6 +415,11 @@ export class DiceBox {
 			const canvasSize = new THREE.Vector2(this.display.currentWidth * 2, this.display.currentHeight * 2);
 			this.bloomPass = new TransparentUnrealBloomPass(canvasSize, game.dice3d.uniforms.bloomStrength.value, game.dice3d.uniforms.bloomRadius.value, game.dice3d.uniforms.bloomThreshold.value);
 			this.gammaPass = new ShaderPass(GammaCorrectionShader);
+
+			// Add an outline pass for the outline sfx
+			this.outlinePass = new OutlinePass(canvasSize, this.scene, this.camera);
+			this.outlinePass.pulsePeriod = 1.5;
+
 			let size = canvasSize.multiplyScalar(this.renderer.getPixelRatio());
 			//Create a RenderTarget with high precision
 			let options = {
@@ -466,6 +472,7 @@ export class DiceBox {
 			// The blendingPass won't be rendered if no emissive textures are found during the render loop
 			this.finalComposer = new EffectComposer(this.renderer, this.composerTarget);
 			this.finalComposer.addPass(renderScene);
+			this.finalComposer.addPass(this.outlinePass);
 			this.finalComposer.addPass(this.blendingPass);
 
 			//Software Anti-aliasing pass. Should be rendered in a linear space.
