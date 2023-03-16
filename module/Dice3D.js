@@ -720,7 +720,7 @@ export class Dice3D {
             });
         }
         return new Promise((resolve, reject) => {
-            if (game.dice3d && Dice3D.CONFIG().enabled) {
+            if (game.dice3d && Dice3D.CONFIG().enabled && !game.settings.get("dice-so-nice", "immediatelyDisplayChatMessages")) {
                 buildHook(resolve);
             } else {
                 resolve(true);
