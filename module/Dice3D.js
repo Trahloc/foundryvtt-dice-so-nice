@@ -391,11 +391,17 @@ export class Dice3D {
         });
 
         if (game.settings.get("dice-so-nice", "allowInteractivity")) {
-            $(document).on("mousemove.dicesonice", "body", this._onMouseMove.bind(this));
+            $(document).on("mousemove.dicesonice", "body", async (event) => {
+                await this._onMouseMove(event);
+            });
 
-            $(document).on("mousedown.dicesonice", "body", this._onMouseDown.bind(this));
+            $(document).on("mousedown.dicesonice", "body", async (event) => {
+                await this._onMouseDown(event);
+            });
 
-            $(document).on("mouseup.dicesonice", "body", this._onMouseUp.bind(this));
+            $(document).on("mouseup.dicesonice", "body", async (event) => {
+                await this._onMouseUp(event);
+            });
         }
     }
 
@@ -408,16 +414,17 @@ export class Dice3D {
         return { x: x, y: y };
     }
 
-    _onMouseMove(event) {
+    async _onMouseMove(event) {
         if (!this.canInteract)
             return;
-        this.box.onMouseMove(event, this._mouseNDC(event));
+        await this.box.onMouseMove(event, this._mouseNDC(event));
     }
 
-    _onMouseDown(event) {
+    async _onMouseDown(event) {
         if (!this.canInteract)
             return;
-        let hit = this.box.onMouseDown(event, this._mouseNDC(event));
+        let hit = await this.box.onMouseDown(event, this._mouseNDC(event));
+        console.log("hit", hit);
         if (hit)
             this._beforeShow();
         else {
@@ -430,10 +437,10 @@ export class Dice3D {
 
     }
 
-    _onMouseUp(event) {
+    async _onMouseUp(event) {
         if (!this.canInteract)
             return;
-        let hit = this.box.onMouseUp(event);
+        let hit = await this.box.onMouseUp(event);
         if (hit)
             this._afterShow();
     }
@@ -747,31 +754,31 @@ export class Dice3D {
         });
     }
 
-    _nextAnimationHandler() {
+    async _nextAnimationHandler() {
         let timing = game.settings.get("dice-so-nice", "enabledSimultaneousRolls") ? 400 : 0;
-        this.nextAnimation = new Accumulator(timing, (items) => {
+        this.nextAnimation = new Accumulator(timing, async (items) => {
             let commands = DiceNotation.mergeQueuedRollCommands(items);
             if (this.isEnabled() && this.queue.length < 10) {
                 let count = commands.length;
-                commands.forEach(aThrow => {
-                    this.queue.push(() => {
+                for (const aThrow of commands) {
+                    this.queue.push(async () => {
                         this._beforeShow();
-                        this.box.start_throw(aThrow, () => {
+                        await this.box.start_throw(aThrow, () => {
                             if (!--count) {
                                 for (let item of items)
                                     item.resolve(true);
                                 this._afterShow();
                             }
-                        }
-                        );
+                        });
                     });
-                });
+                }
             } else {
                 for (let item of items)
                     item.resolve(false);
             }
         });
     }
+    
 
     /**
      *

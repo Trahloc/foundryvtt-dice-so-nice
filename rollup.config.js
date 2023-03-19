@@ -3,13 +3,14 @@ import { terser } from "rollup-plugin-terser";
 import copy from "rollup-plugin-copy";
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import del from 'rollup-plugin-delete';
+import webWorkerLoader from 'rollup-plugin-web-worker-loader';
+import commonjs from '@rollup/plugin-commonjs';
 
 const staticFiles = [
   { name: "css" },
   { name: "fonts" },
   { name: "images" },
   { name: "lang" },
-  { name: "cannon.min.js", folder: "libs" },
   { name: "select2.min.js", folder: "libs" },
   { name: "models", folder: "sfx" },
   { name: "sounds", folder: "sfx" },
@@ -38,6 +39,10 @@ const config = {
     }
   },
   plugins: [
+    commonjs({
+      include: "node_modules/webworker-promise/**",
+      extensions: ['.js']
+    }),
     del({
       targets: 'dist/*',
       runOnce: true
@@ -51,6 +56,10 @@ const config = {
         dest: `dist${file.folder ? `/${file.folder}` : ""}`,
       })),
     }),
+    webWorkerLoader({
+      targetPlatform: 'browser',
+      preserveSource: true
+    })
   ]
 };
 

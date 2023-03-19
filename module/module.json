@@ -27,7 +27,6 @@
         "./main.js"
     ],
     "scripts": [
-        "./libs/cannon.min.js",
         "./libs/select2.min.js"
     ],
     "socket": true,

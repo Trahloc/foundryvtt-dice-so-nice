@@ -113,7 +113,7 @@ export class DiceConfig extends FormApplication {
             if (this.box.dicefactory.preferredColorset != "standard")
                 config.appearance.global.colorset = this.box.dicefactory.preferredColorset;
         }
-        this.box.showcase(config);
+        await this.box.showcase(config);
 
         this.navOrder = {};
         let triggerTypeList = [{ id: "", name: "" }];

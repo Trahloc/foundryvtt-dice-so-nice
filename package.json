@@ -18,11 +18,18 @@
   "homepage": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice#readme",
   "dependencies": {
     "@rollup/plugin-node-resolve": "^13.1.2",
+    "cannon-es": "^0.20.0",
+    "cannon-es-debugger": "^1.0.0",
     "rollup": "^2.58.3",
     "rollup-plugin-copy": "^3.4.0",
     "rollup-plugin-delete": "^2.0.0",
     "rollup-plugin-sourcemaps": "^0.6.3",
     "rollup-plugin-terser": "^7.0.2",
-    "three": "github:JiDW/three.js#master"
+    "rollup-plugin-web-worker-loader": "^1.6.1",
+    "three": "github:JiDW/three.js#master",
+    "webworker-promise": "^0.5.1"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^24.0.1"
   }
 }

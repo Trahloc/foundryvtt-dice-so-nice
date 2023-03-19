@@ -5,10 +5,14 @@ import {DICE_MODELS} from './DiceModels.js';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { ShaderUtils } from './ShaderUtils';
+import PhysicsWorker from 'web-worker:./web-workers/PhysicsWorker.js';
+import WebworkerPromise from 'webworker-promise';
 export class DiceFactory {
 
 	constructor() {
 		this.geometries = {};
+
+		this.physicsWorker = new WebworkerPromise(new PhysicsWorker());
 
 		this.baseScale = 50;
 
@@ -494,8 +498,7 @@ export class DiceFactory {
 		return diceobj;
 	}
 
-	// returns a dicemesh (THREE.Mesh) object
-	create(scopedTextureCache, type, appearance) {
+	async create(scopedTextureCache, type, appearance) {
 		let diceobj = this.getPresetBySystem(type, appearance.system);
 		if(diceobj.model && appearance.isGhost){
 			diceobj = this.getPresetBySystem(type, "standard");
@@ -506,7 +509,7 @@ export class DiceFactory {
 
 		let geom = this.geometries[type+scopedScale];
 		if(!geom) {
-			geom = this.createGeometry(diceobj.shape, diceobj.scale, scopedScale);
+			geom = await this.createGeometry(diceobj.shape, diceobj.scale, scopedScale);
 			this.geometries[type+scopedScale] = geom;
 		}
 		if (!geom) return null;
@@ -518,7 +521,6 @@ export class DiceFactory {
 			dicemesh.scale.set(scale,scale,scale);
 			if(!dicemesh.geometry)
 				dicemesh.geometry = {};
-			dicemesh.geometry.cannon_shape = geom.cannon_shape;
 			if(diceobj.model.animations.length>0){
 				dicemesh.mixer = new THREE.AnimationMixer(dicemesh);
 				dicemesh.mixer.clipAction(diceobj.model.animations[0]).play();
@@ -546,59 +548,18 @@ export class DiceFactory {
 				dicemesh.material[0].needsUpdate = true;
 			}
 		}
+
+		//Because of an orientation change in cannon-es for the Cylinder shape, we need to rotate the mesh for the d2
+		//https://github.com/pmndrs/cannon-es/pull/30
+		if(diceobj.shape == "d2")
+			dicemesh.lookAt(new THREE.Vector3(0,-1,0));
 		
-		dicemesh.result = [];
+		dicemesh.result = null;
 		dicemesh.shape = diceobj.shape;
-		dicemesh.rerolls = 0;
-		dicemesh.resultReason = 'natural';
-
-		let factory = this;
-		dicemesh.getFaceValue = function() {
-			let reason = this.resultReason;
-			let vector = new THREE.Vector3(0, 0, this.shape == 'd4' ? -1 : 1);
-			let faceCannon = new THREE.Vector3();
-			let closest_face, closest_angle = Math.PI * 2;
-			for (let i = 0, l = this.body_sim.shapes[0].faceNormals.length; i < l; ++i) {
-				if(DICE_MODELS[this.shape].faceValues[i] == 0)
-					continue;
-				faceCannon.copy(this.body_sim.shapes[0].faceNormals[i]);
-				
-				let angle = faceCannon.applyQuaternion(this.body_sim.quaternion).angleTo(vector);
-				if (angle < closest_angle) {
-					closest_angle = angle;
-					closest_face = i;
-				}
-			}
-			const diceobj = factory.get(this.notation.type);
-			let dieValue = DICE_MODELS[this.shape].faceValues[closest_face];
-
-			if (this.shape == 'd4') {
-				return {value: dieValue, label: diceobj.labels[dieValue-1], reason: reason};
-			}
-			let labelIndex = dieValue;
-			if (['d10','d2'].includes(this.shape)) labelIndex += 1;
-			let label = diceobj.labels[labelIndex+1];
-
-			//console.log('Face Value', closest_face, dieValue, label)
-
-			return {value: dieValue, label: label, reason: reason};
-		};
-
-		dicemesh.storeRolledValue = function() {
-			this.result.push(this.getFaceValue());
-		};
-
-		dicemesh.getLastValue = function() {
-			if (!this.result || this.result.length < 1) return {value: undefined, label: '', reason: ''};
-
-			return this.result[this.result.length-1];
-		};
-
-		dicemesh.setLastValue = function(result) {
-			if (!this.result || this.result.length < 1) return;
-			if (!result || result.length < 1) return;
-
-			return this.result[this.result.length-1] = result;
+		const that=dicemesh;
+		dicemesh.getValue = async () => {
+			const result = await this.physicsWorker.exec('getDiceValue', that.id);
+			return result;
 		};
 
 		return dicemesh;
@@ -1272,222 +1233,27 @@ export class DiceFactory {
 		return size;
 	}
 
-	createGeometry(type, typeScale, scopedScale) {
-		let radius = typeScale * scopedScale;
-		let geom = null;
-		switch (type) {
-			case 'd2':
-				geom = this.create_d2_geometry(radius, scopedScale);
-				break;
-			case 'd4':
-				geom = this.create_d4_geometry(radius, scopedScale);
-				break;
-			case 'd6':
-				geom = this.create_d6_geometry(radius, scopedScale);
-				break;
-			case 'd8':
-				geom = this.create_d8_geometry(radius, scopedScale);
-				break;
-			case 'd10':
-				geom = this.create_d10_geometry(radius, scopedScale);
-				break;
-			case 'd12':
-				geom = this.create_d12_geometry(radius, scopedScale);
-				break;
-			case 'd14':
-				geom = this.create_d14_geometry(radius, scopedScale);
-				break;
-			case 'd16':
-				geom = this.create_d16_geometry(radius, scopedScale);
-				break;
-			case 'd20':
-				geom = this.create_d20_geometry(radius, scopedScale);
-				break;
-			case 'd24':
-				geom = this.create_d24_geometry(radius, scopedScale);
-				break;
-			case 'd30':
-				geom = this.create_d30_geometry(radius, scopedScale);
-				break;
+	async createGeometry(type, typeScale, scopedScale) {
+		const radius = typeScale * scopedScale;
+		const geometryTypes = [
+			'd2', 'd4', 'd6', 'd8', 'd10', 'd12', 'd14', 'd16', 'd20', 'd24', 'd30'
+		];
+	
+		if (!geometryTypes.includes(type)) {
+			throw new Error(`Invalid geometry type: ${type}`);
 		}
-		return geom;
-	}
-
-	load_geometry(type, scopedScale){
-		var loader = new THREE.BufferGeometryLoader();
-		let bufferGeometry = loader.parse(DICE_MODELS[type]);
-		bufferGeometry.scale(scopedScale/100,scopedScale/100,scopedScale/100);
+	
+		const bufferGeometry = this.loadGeometry(type, scopedScale);
+		await this.physicsWorker.exec("createShape", { type, radius });
+	
 		return bufferGeometry;
 	}
-
-	create_d2_geometry(radius, scopedScale){
-		let geom = this.load_geometry("d2",scopedScale);
-		geom.cannon_shape = new CANNON.Cylinder(1*radius,1*radius,0.1*radius,8);
-		return geom;
-	}
-
-	create_d4_geometry(radius, scopedScale) {
-		let geom = this.load_geometry("d4",scopedScale);
-		var vertices = [[1, 1, 1], [-1, -1, 1], [-1, 1, -1], [1, -1, -1]];
-		var faces = [[1, 0, 2, 1], [0, 1, 3, 2], [0, 3, 2, 3], [1, 2, 3, 4]];
-		geom.cannon_shape = this.create_geom(vertices, faces, radius);
-		return geom;
-	}
-
-	create_d6_geometry(radius, scopedScale) {
-		let geom = this.load_geometry("d6",scopedScale);
-		var vertices = [[-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1],
-				[-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]];
-		var faces = [[0, 3, 2, 1, 1], [1, 2, 6, 5, 2], [0, 1, 5, 4, 3],
-				[3, 7, 6, 2, 4], [0, 4, 7, 3, 5], [4, 5, 6, 7, 6]];
-		geom.cannon_shape = this.create_geom(vertices, faces, radius);
-		return geom;
-	}
-
-	create_d8_geometry(radius, scopedScale) {
-		let geometry = this.load_geometry("d8",scopedScale);
-		
-		var vertices = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
-		var faces = [[0, 2, 4, 1], [0, 4, 3, 2], [0, 3, 5, 3], [0, 5, 2, 4], [1, 3, 4, 5],
-				[1, 4, 2, 6], [1, 2, 5, 7], [1, 5, 3, 8]];
-		geometry.cannon_shape = this.create_geom(vertices, faces, radius);
-		return geometry;
-	}
-
-	create_d10_geometry(radius, scopedScale) {
-		let geom = this.load_geometry("d10",scopedScale);
-		//geom.scale(1.38,1.38,1.38);
-		
-		var a = Math.PI * 2 / 10, h = 0.105, v = -1;
-		var vertices = [];
-		for (var i = 0, b = 0; i < 10; ++i, b += a) {
-			vertices.push([Math.cos(b), Math.sin(b), h * (i % 2 ? 1 : -1)]);
-		}
-		vertices.push([0, 0, -1]);
-		vertices.push([0, 0, 1]);
-
-		var faces = [
-            [5, 6, 7, 11, 0],
-            [4, 3, 2, 10, 1],
-            [1, 2, 3, 11, 2],
-            [0, 9, 8, 10, 3],
-            [7, 8, 9, 11, 4],
-            [8, 7, 6, 10, 5],
-            [9, 0, 1, 11, 6],
-            [2, 1, 0, 10, 7],
-            [3, 4, 5, 11, 8],
-            [6, 5, 4, 10, 9]
-        ];
-		geom.cannon_shape = this.create_geom(vertices, faces, radius);
-		//geom = this.scaleGeometryToShape(geom);
-		return geom;
-	}
-
-	create_d12_geometry(radius, scopedScale) {
-		let geom = this.load_geometry("d12",scopedScale);
-		var p = (1 + Math.sqrt(5)) / 2, q = 1 / p;
-		var vertices = [[0, q, p], [0, q, -p], [0, -q, p], [0, -q, -p], [p, 0, q],
-				[p, 0, -q], [-p, 0, q], [-p, 0, -q], [q, p, 0], [q, -p, 0], [-q, p, 0],
-				[-q, -p, 0], [1, 1, 1], [1, 1, -1], [1, -1, 1], [1, -1, -1], [-1, 1, 1],
-				[-1, 1, -1], [-1, -1, 1], [-1, -1, -1]];
-		var faces = [[2, 14, 4, 12, 0, 1], [15, 9, 11, 19, 3, 2], [16, 10, 17, 7, 6, 3], [6, 7, 19, 11, 18, 4],
-				[6, 18, 2, 0, 16, 5], [18, 11, 9, 14, 2, 6], [1, 17, 10, 8, 13, 7], [1, 13, 5, 15, 3, 8],
-				[13, 8, 12, 4, 5, 9], [5, 4, 14, 9, 15, 10], [0, 12, 8, 10, 16, 11], [3, 19, 7, 17, 1, 12]];
-
-		geom.cannon_shape = this.create_geom(vertices, faces, radius);
-		return geom;
-	}
-
-	create_d14_geometry(radius, scopedScale) {
-		let geom = this.load_geometry("d14",scopedScale);
-
-		var vertices = [[-0.005093127489089966, 1.177548885345459, 0.002782404189929366], [-0.9908595681190491, 0.061759304255247116, 0.22585006058216095], [-0.9924551844596863, -0.06095181778073311, -0.23028047382831573], [-0.7984917163848877, 0.061637163162231445, -0.6402497291564941], [-0.4453684985637665, -0.06121010705828667, -0.9239609241485596], [-0.00504341721534729, 0.06129471957683563, -1.0241185426712036], [0.437289297580719, -0.06156954541802406, -0.9219886660575867], [0.7920035719871521, 0.06098949536681175, -0.6366959810256958], [0.9908595681190491, -0.06175928935408592, -0.22585000097751617], [0.9924551844596863, 0.0609518401324749, 0.23028059303760529], [0.7984917163848877, -0.061637137085199356, 0.6402497291564941], [0.4453684985637665, 0.061210136860609055, 0.9239609241485596], [0.00504341721534729, -0.06129469349980354, 1.0241185426712036], [-0.4372892379760742, 0.061569564044475555, 0.9219887852668762], [-0.7920035719871521, -0.060989461839199066, 0.6366960406303406], [0.005093127489089966, -1.177548885345459, -0.002782404189929366]];
-		var faces = [[0, 3, 2, 1], [1, 14, 13, 0], [12, 11, 0, 13], [10, 9, 0, 11], [8, 7, 0, 9], [6, 5, 0, 7], [4, 3, 0, 5], [10, 11, 12, 15], [14, 15, 12, 13], [2, 15, 14, 1], [2, 3, 4, 15], [4, 5, 6, 15], [6, 7, 8, 15], [8, 9, 10, 15]];
-		geom.cannon_shape = this.create_geom_dcc(vertices, faces, radius * 0.85);
-		return geom;
-	}
-
-	create_d16_geometry(radius, scopedScale) {
-		let geom = this.load_geometry("d16",scopedScale);
-
-		var vertices = [[-1.0301814079284668, 0.002833150327205658, 1.0244150161743164], [-0.0018179342150688171, -0.006610371172428131, -1.4427297115325928], [1.4587815999984741, 0.0028328225016593933, -0.006545569747686386], [1.031739592552185, 0.0028328821063041687, -1.0375059843063354], [-1.4572231769561768, 0.0028332099318504333, -0.006545361131429672], [-1.0301814079284668, 0.002833150327205658, -1.0375059843063354], [1.031739592552185, 0.0028328821063041687, 1.0244150161743164], [-0.0018179342150688171, -0.006610371172428131, 1.4732751846313477], [0.0007793977856636047, 1.4608354568481445, -0.006545450538396835], [-0.0018181726336479187, -1.4646127223968506, 0.015272742137312889]];
-		var faces = [[5, 8, 1], [5, 4, 8], [4, 0, 8], [0, 7, 8], [8, 7, 6], [8, 6, 2], [2, 3, 8], [3, 1, 8], [3, 9, 1], [2, 9, 3], [6, 9, 2], [6, 7, 9], [0, 9, 7], [4, 9, 0], [5, 9, 4], [5, 1, 9]];
-		geom.cannon_shape = this.create_geom_dcc(vertices, faces, radius * 0.83);
-		return geom;
-	}
-
-	create_d20_geometry(radius, scopedScale) {
-		let geom = this.load_geometry("d20",scopedScale);
-
-		var t = (1 + Math.sqrt(5)) / 2;
-		var vertices = [[-1, t, 0], [1, t, 0 ], [-1, -t, 0], [1, -t, 0],
-				[0, -1, t], [0, 1, t], [0, -1, -t], [0, 1, -t],
-				[t, 0, -1], [t, 0, 1], [-t, 0, -1], [-t, 0, 1]];
-		var faces = [[0, 11, 5, 1], [0, 5, 1, 2], [0, 1, 7, 3], [0, 7, 10, 4], [0, 10, 11, 5],
-				[1, 5, 9, 6], [5, 11, 4, 7], [11, 10, 2, 8], [10, 7, 6, 9], [7, 1, 8, 10],
-				[3, 9, 4, 11], [3, 4, 2, 12], [3, 2, 6, 13], [3, 6, 8, 14], [3, 8, 9, 15],
-				[4, 9, 5, 16], [2, 4, 11, 17], [6, 2, 10, 18], [8, 6, 7, 19], [9, 8, 1, 20]];
-		geom.cannon_shape = this.create_geom(vertices, faces, radius);
-		return geom;
-	}
-
-	create_d24_geometry(radius, scopedScale) {
-		let geom = this.load_geometry("d24",scopedScale);
-
-		var vertices = [[0.7070000171661377, -0.0, -0.7070000171661377], [0.7070000171661377, 0.7070000171661377, -0.0], [0.5468999743461609, 0.5468999743461609, -0.5468999743461609], [-0.0, -0.7070000171661377, -0.7070000171661377], [-0.0, 0.7070000171661377, -0.7070000171661377], [-0.5468999743461609, 0.5468999743461609, -0.5468999743461609], [-0.5468999743461609, -0.5468999743461609, -0.5468999743461609], [0.5468999743461609, 0.5468999743461609, 0.5468999743461609], [-0.0, -0.0, -1.0], [1.0, -0.0, -0.0], [0.5468999743461609, -0.5468999743461609, -0.5468999743461609], [-0.5468999743461609, 0.5468999743461609, 0.5468999743461609], [-0.0, -0.0, 1.0], [-0.0, 0.7070000171661377, 0.7070000171661377], [-0.0, 1.0, -0.0], [-0.7070000171661377, 0.7070000171661377, -0.0], [-0.7070000171661377, -0.0, -0.7070000171661377], [-0.7070000171661377, -0.7070000171661377, -0.0], [-0.0, -0.7070000171661377, 0.7070000171661377], [-0.5468999743461609, -0.5468999743461609, 0.5468999743461609], [-1.0, 0.0, -0.0], [0.5468999743461609, -0.5468999743461609, 0.5468999743461609], [0.7070000171661377, -0.0, 0.7070000171661377], [-0.0, -1.0, -0.0], [0.7070000171661377, -0.7070000171661377, -0.0], [-0.7070000171661377, -0.0, 0.7070000171661377]];
-		var faces = [[4, 5, 15, 14], [3, 10, 24, 23], [11, 15, 20, 25], [10, 3, 8, 0], [19, 18, 12, 25], [7, 22, 9, 1], [22, 21, 24, 9], [7, 13, 12, 22], [5, 4, 8, 16], [20, 17, 19, 25], [6, 3, 23, 17], [2, 4, 14, 1], [18, 19, 17, 23], [13, 7, 1, 14], [0, 2, 1, 9], [18, 21, 22, 12], [3, 6, 16, 8], [15, 5, 16, 20], [6, 17, 20, 16], [4, 2, 0, 8], [13, 11, 25, 12], [24, 10, 0, 9], [11, 13, 14, 15], [21, 18, 23, 24]];
-		geom.cannon_shape = this.create_geom(vertices, faces, radius);
-		return geom;
-	}
-
-	create_d30_geometry(radius, scopedScale) {
-		let geom = this.load_geometry("d30",scopedScale);
-
-		var vertices = [[-1.6180000305175781, 0.0, 1.0], [-1.6180000305175781, 0.6179999709129333, -0.0], [-0.0, 1.6180000305175781, 0.6179999709129333], [0.6179999709129333, 0.0, 1.6180000305175781], [-1.0, -1.6180000305175781, -0.0], [1.6180000305175781, 0.0, 1.0], [-1.6180000305175781, -0.6179999709129333, -0.0], [-0.6179999709129333, 0.0, 1.6180000305175781], [-0.0, 1.0, -1.6180000305175781], [-1.0, 1.0, -1.0], [1.6180000305175781, 0.6179999709129333, -0.0], [1.0, -1.6180000305175781, -0.0], [-1.0, -1.0, -1.0], [1.6180000305175781, -0.6179999709129333, -0.0], [-1.0, 1.6180000305175781, -0.0], [1.0, 1.0, -1.0], [1.0, 1.6180000305175781, -0.0], [-0.0, 1.0, 1.6180000305175781], [1.0, -1.0, -1.0], [-0.6179999709129333, 0.0, -1.6180000305175781], [-0.0, -1.0, -1.6180000305175781], [-1.0, 1.0, 1.0], [0.6179999709129333, 0.0, -1.6180000305175781], [-0.0, -1.0, 1.6180000305175781], [-1.0, -1.0, 1.0], [-0.0, 1.6180000305175781, 0.6179999709129333], [-1.6180000305175781, 0.0, -1.0], [1.0, 1.0, 1.0], [-0.0, -1.6180000305175781, -0.6179999709129333], [1.6180000305175781, 0.0, -1.0], [1.0, -1.0, 1.0], [-0.0, 1.6180000305175781, -0.6179999709129333], [-0.0, -1.6180000305175781, 0.6179999709129333]];
-		var faces = [[25, 16, 31, 14], [7, 0, 24, 23], [19, 20, 12, 26], [13, 5, 30, 11], [1, 0, 21, 14], [10, 29, 15, 16], [6, 0, 1, 26], [22, 29, 18, 20], [9, 14, 31, 8], [28, 4, 12, 20], [30, 5, 3, 23], [12, 4, 6, 26], [31, 16, 15, 8], [21, 17, 25, 14], [22, 20, 19, 8], [3, 17, 7, 23], [18, 11, 28, 20], [32, 23, 24, 4], [27, 5, 10, 16], [9, 8, 19, 26], [25, 17, 27, 16], [30, 23, 32, 11], [7, 17, 21, 0], [10, 5, 13, 29], [24, 0, 6, 4], [13, 11, 18, 29], [9, 26, 1, 14], [3, 5, 27, 17], [15, 29, 22, 8], [28, 11, 32, 4]];
-		geom.cannon_shape = this.create_geom_dcc(vertices, faces, radius);
-		return geom;
-	}
-
-	create_shape(vertices, faces, radius) {
-		var cv = new Array(vertices.length), cf = new Array(faces.length);
-		for (var i = 0; i < vertices.length; ++i) {
-			var v = vertices[i];
-			cv[i] = new CANNON.Vec3(v.x * radius, v.y * radius, v.z * radius);
-		}
-		for (var i = 0; i < faces.length; ++i) {
-			cf[i] = faces[i].slice(0, faces[i].length - 1);
-		}
-		return new CANNON.ConvexPolyhedron(cv, cf);
-	}
-
-	create_geom(vertices, faces, radius) {
-		var vectors = new Array(vertices.length);
-		for (var i = 0; i < vertices.length; ++i) {
-			vectors[i] = (new THREE.Vector3).fromArray(vertices[i]).normalize();
-		}
-		let cannon_shape = this.create_shape(vectors, faces, radius);
-		return cannon_shape;
-	}
-
-	create_shape_dcc(vertices, faces, radius) {
-		var cv = new Array(vertices.length), cf = new Array(faces.length);
-		for (var i = 0; i < vertices.length; ++i) {
-			var v = vertices[i];
-			cv[i] = new CANNON.Vec3(v.x * radius, v.y * radius, v.z * radius);
-		}
-		for (var i = 0; i < faces.length; ++i) {
-			cf[i] = faces[i];//.slice(0, faces[i].length - 1);
-		}
-		return new CANNON.ConvexPolyhedron(cv, cf);
-	}
-
-	create_geom_dcc(vertices, faces, radius) {
-		var vectors = new Array(vertices.length);
-		for (var i = 0; i < vertices.length; ++i) {
-			vectors[i] = (new THREE.Vector3).fromArray(vertices[i]).normalize();
-		}
-		let cannon_shape = this.create_shape_dcc(vectors, faces, radius);
-		return cannon_shape;
-	}
+	
+	loadGeometry(type, scopedScale) {
+		const loader = new THREE.BufferGeometryLoader();
+		const bufferGeometry = loader.parse(DICE_MODELS[type]);
+		bufferGeometry.scale(scopedScale / 100, scopedScale / 100, scopedScale / 100);
+	
+		return bufferGeometry;
+	}	
 }

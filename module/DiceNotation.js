@@ -188,7 +188,6 @@ export class DiceNotation {
 				}
 			}
 		}
-		console.log(mergedRollCommands);
 		return mergedRollCommands;
 	}
 }
