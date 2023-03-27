@@ -1,5 +1,6 @@
 import { DICE_MODELS } from './DiceModels.js';
 import { DiceSFXManager } from './DiceSFXManager.js';
+import { SoundManager } from './SoundManager.js';
 import { RendererStats } from './libs/threex.rendererstats.js';
 //import {GLTFExporter} from 'three/examples/jsm/loaders/exporters/GLTFExporter.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
@@ -56,11 +57,7 @@ export class DiceBox {
 			far: null
 		};
 
-
 		this.clock = new THREE.Clock();
-		this.sounds_table = {};
-		this.sounds_dice = {};
-		this.sounds_coins = [];
 
 		this.iteration;
 		this.renderer;
@@ -76,11 +73,7 @@ export class DiceBox {
 		this.diceList = []; //'private' variable
 		this.deadDiceList = [];
 		this.framerate = (1 / 60);
-		this.sounds = true;
-		this.volume = 1;
 
-		this.soundsSurface = "felt";
-		this.animstate = '';
 		this.throwingForce = "medium";
 		this.immersiveDarkness = true;
 		this.toneMappingExposureDefault = 1.0;
@@ -92,7 +85,6 @@ export class DiceBox {
 			dice: []
 		};
 		this.showExtraDice = false;
-		this.muteSoundSecretRolls = false;
 
 		this.colors = {
 			ambient: 0xffeeb1,
@@ -103,61 +95,21 @@ export class DiceBox {
 		this.rethrowFunctions = {};
 		this.afterThrowFunctions = {};
 
-	}
-
-	preloadSounds() {
-		//Surfaces
-		fetch(`modules/dice-so-nice/sounds/surfaces.json`).then(res => {
-			res.json().then(json => {
-				AudioHelper.preloadSound(`modules/dice-so-nice/sounds/${json.resources[0]}`).then(src => this.sounds_table.source = src);
-				Object.entries(json.spritemap).forEach(sound => {
-					let type = sound[0].match(/surface\_([a-z\_]*)/)[1];
-					if (!this.sounds_table[type])
-						this.sounds_table[type] = [];
-					this.sounds_table[type].push(sound[1]);
-				});
-			});
-		});
-
-		//Hits
-		fetch(`modules/dice-so-nice/sounds/dicehit.json`).then(res => {
-			res.json().then(json => {
-				this.sounds_dice.source = AudioHelper.preloadSound(`modules/dice-so-nice/sounds/${json.resources[0]}`).then(src => this.sounds_dice.source = src);
-				Object.entries(json.spritemap).forEach(sound => {
-					let type = sound[0].match(/dicehit\_([a-z\_]*)/)[1];
-					if (!this.sounds_dice[type])
-						this.sounds_dice[type] = [];
-					this.sounds_dice[type].push(sound[1]);
-				});
-			});
-		});
-	}
-
-	playAudioSprite(source, sprite, selfVolume) {
-		if (!source || !source.context)
-			return false;
-		let gainNode = source.context.createGain();
-		gainNode.gain.value = selfVolume * this.volume * game.settings.get("core", "globalInterfaceVolume");
-		const startTime = sprite.start;
-		const duration = sprite.end - sprite.start;
-		const sampleSource = source.context.createBufferSource();
-		sampleSource.buffer = source.container.buffer;
-		sampleSource.connect(gainNode).connect(source.context.destination);
-		sampleSource.start(source.context.currentTime, startTime, duration);
+		this.soundManager = new SoundManager();
 	}
 
 	initialize() {
 		return new Promise(async resolve => {
-			game.audio.pending.push(this.preloadSounds.bind(this));
-
 			await this.dicefactory.preloadPresets();
 
-			this.sounds = this.config.sounds == '1';
-			this.volume = this.config.soundsVolume;
-			this.soundsSurface = this.config.soundsSurface;
-			this.showExtraDice = this.config.showExtraDice;
-			this.muteSoundSecretRolls = this.config.muteSoundSecretRolls;
+			this.soundManager.update({
+				sounds: this.config.sounds,
+				volume: this.config.soundsVolume,
+				soundsSurface: this.config.soundsSurface,
+				muteSoundSecretRolls: this.config.muteSoundSecretRolls
+			});
 
+			this.showExtraDice = this.config.showExtraDice;
 			this.allowInteractivity = this.config.boxType == "board" && game.settings.get("dice-so-nice", "allowInteractivity");
 
 			this.dicefactory.setQualitySettings(this.config);
@@ -220,11 +172,9 @@ export class DiceBox {
 
 				this.physicsWorker.off('collide');
 				this.physicsWorker.on('collide', (data) => {
-					this.eventCollide(data);
+					this.soundManager.eventCollide(data);
 				});
 			}
-
-			//this.renderer.render(this.scene, this.camera);
 			resolve();
 		});
 	}
@@ -458,7 +408,14 @@ export class DiceBox {
 
 	async update(config) {
 		this.showExtraDice = config.showExtraDice;
-		this.muteSoundSecretRolls = config.muteSoundSecretRolls;
+
+		this.soundManager.update({
+			muteSoundSecretRolls: config.muteSoundSecretRolls,
+			sounds: config.sounds,
+			volume: config.volume,
+			soundsSurface: config.soundsSurface
+		});
+
 		if (this.config.boxType == "board") {
 			if (config.autoscale) {
 				this.display.scale = Math.sqrt(this.display.containerWidth * this.display.containerWidth + this.display.containerHeight * this.display.containerHeight) / 13;
@@ -479,9 +436,6 @@ export class DiceBox {
 		this.desk.receiveShadow = this.dicefactory.shadows;
 		this.renderer.shadowMap.enabled = this.dicefactory.shadows;
 		this.renderer.shadowMap.type = this.dicefactory.shadowQuality == "high" ? THREE.PCFSoftShadowMap : THREE.PCFShadowMap;
-		this.sounds = config.sounds;
-		this.volume = config.soundsVolume;
-		this.soundsSurface = config.soundsSurface;
 
 		await this.dicefactory.preloadPresets(true, null, config.appearance);
 
@@ -704,6 +658,7 @@ export class DiceBox {
 		dicemesh.castShadow = this.dicefactory.shadows;
 		dicemesh.receiveShadow = this.dicefactory.shadows;
 		dicemesh.specialEffects = dicedata.specialEffects;
+		dicemesh.options = dicedata.options;
 
 		// Add the dice to the physics world
 		await this.physicsWorker.exec('createDice', {
@@ -740,72 +695,26 @@ export class DiceBox {
 		}
 	}
 
-	eventCollide({ source, diceType, diceMaterial, strength }) {
-		if (!this.sounds || !this.sounds_dice.source) return;
-
-		const sound = this.selectSound(source, diceType, diceMaterial);
-		const audioSource = source === "dice" ? this.sounds_dice.source : this.sounds_table.source;
-		this.playAudioSprite(audioSource, sound, strength);
-	}
-
-	generateCollisionSounds(workerCollides) {
-		const detectedCollides = new Array(1000);
-		if (!this.sounds || !this.sounds_dice.source) return detectedCollides;
-
-		for (let i = 0; i < workerCollides.length; i++) {
-			const collide = workerCollides[i];
-			if (!collide) continue;
-
-			const [source, diceType, diceMaterial, strength] = collide;
-			const sound = this.selectSound(source, diceType, diceMaterial);
-			detectedCollides[i] = [source, sound, strength];
-		}
-
-		return detectedCollides;
-	}
-
-	selectSound(source, diceType, diceMaterial) {
-		let sound;
-
-		if (source === "dice") {
-			if (diceType !== "dc") {
-				let sounds_dice = this.sounds_dice['plastic'];
-				if (this.sounds_dice[diceMaterial]) {
-					sounds_dice = this.sounds_dice[diceMaterial];
-				}
-				sound = sounds_dice[Math.floor(Math.random() * sounds_dice.length)];
-			} else {
-				sound = this.sounds_dice['coin'][Math.floor(Math.random() * this.sounds_dice['coin'].length)];
-			}
-		} else {
-			const surface = this.soundsSurface;
-			const soundlist = this.sounds_table[surface];
-			sound = soundlist[Math.floor(Math.random() * soundlist.length)];
-		}
-
-		return sound;
-	}
-
-
 	throwFinished() {
 		let stopped = true;
 		if (this.iteration <= this.minIterations) return false;
 		stopped = this.iteration >= this.iterationsNeeded;
-		if (stopped) {
+		if (stopped && this.rolling) {
 			//Can't await here because of the PIXI ticker. Hopefully it's not needed.
-			this.physicsWorker.exec('cleanAfterThrow');
-			if(!game.settings.get("dice-so-nice", "diceCanBeFlipped")){
-				for(const dice of this.diceList) {
-					dice.sim.mass = 0;
-					dice.sim.dead = true;
-				}
+			this.rolling = false;
+			for (let i = 0, len = this.diceList.length; i < len; ++i) {
+				if(!this.diceList[i].sim)
+					continue;
+				this.diceList[i].sim.stepPositions = new Float32Array(1001 * 3);
+				this.diceList[i].sim.stepQuaternions = new Float32Array(1001 * 4);
+				if(this.diceList[i].dead > 0)
+					this.diceList[i].static = true;
 			}
 		}
 		return stopped;
 	}
 
 	async simulateThrow() {
-		this.animstate = 'simulate';
 		this.rolling = true;
 
 		const workerData = {
@@ -828,7 +737,9 @@ export class DiceBox {
 			idToIndex.set(id, index);
 		});
 
-		this.diceList.forEach(dice => {
+		const combinedDiceList = [...this.diceList, ...this.deadDiceList];
+
+		combinedDiceList.forEach(dice => {
 			const index = idToIndex.get(dice.id);
 			if (index !== undefined) {
 				dice.sim = {
@@ -839,7 +750,7 @@ export class DiceBox {
 			}
 		});
 
-		this.detectedCollides = this.generateCollisionSounds(detectedCollides);
+		this.detectedCollides = this.soundManager.generateCollisionSounds(detectedCollides);
 	}
 
 
@@ -864,6 +775,9 @@ export class DiceBox {
 			}
 		}
 
+		const iterationPos = this.iteration * 3;
+		const iterationQuat = this.iteration * 4;
+
 		if (neededSteps && this.rolling) {
 			for (let i = 0; i < neededSteps * this.speed; i++) {
 				++this.iteration;
@@ -880,7 +794,7 @@ export class DiceBox {
 
 			for (const child of this.scene.children) {
 				let dicemesh = child.children && child.children.length && child.children[0].sim != undefined && !child.children[0].sim.dead ? child.children[0] : null;
-
+				
 				if (dicemesh && dicemesh.sim.stepPositions[this.iteration * 3]) {
 					child.position.fromArray(dicemesh.sim.stepPositions, this.iteration * 3);
 					child.quaternion.fromArray(dicemesh.sim.stepQuaternions, this.iteration * 4);
@@ -893,12 +807,16 @@ export class DiceBox {
 			}
 
 			if (this.detectedCollides[this.iteration]) {
-				this.playAudioSprite(...this.detectedCollides[this.iteration]);
+				this.soundManager.playAudioSprite(...this.detectedCollides[this.iteration]);
 			}
 		} else if (!this.rolling) {
 			this.physicsWorker.exec('playStep', {
 				time_diff: time_diff
 			}).then(({ ids, quaternionsBuffers, positionsBuffers, worldAsleep}) => {
+				//If nothing is returned, skip the rest of the function
+				if(!ids)
+					return;
+
 				if(worldAsleep)
 					return;
 				// Create a mapping of IDs to their index in the 'ids' array
@@ -941,7 +859,6 @@ export class DiceBox {
 		// roll finished
 		if (this.throwFinished()) {
 			//if animated dice still on the table, keep animating
-			this.rolling = false;
 			if (this.running) {
 				this.handleSpecialEffectsInit().then(() => {
 					this.callback(this.throws);
@@ -999,11 +916,10 @@ export class DiceBox {
 			diceToRemove.push(dice.id);
 		}
 
-		await this.physicsWorker.exec("removeDice", diceToRemove);
-
 		if (this.pane) this.scene.remove(this.pane);
 
 		if (this.config.boxType == "board") {
+			await this.physicsWorker.exec("removeDice", diceToRemove);
 			DiceSFXManager.clearQueue();
 			this.removeTicker(this.animateThrow);
 		} else {

@@ -16,9 +16,9 @@ class PhysicsWorker {
             .operation('createDice', this.createDice.bind(this))
             .operation('removeDice', this.removeDice.bind(this))
             .operation('addDice', this.addDice.bind(this))
-            .operation('cleanAfterThrow', this.cleanAfterThrow.bind(this))
             .operation('playStep', this.playStep.bind(this))
-            .operation('simulateThrow', this.simulateThrow.bind(this));
+            .operation('simulateThrow', this.simulateThrow.bind(this))
+            .operation('getWorldInfo', this.getWorldInfo.bind(this));
     }
 
     /**
@@ -30,10 +30,6 @@ class PhysicsWorker {
         this.desk_body_material = new Material();
         this.barrier_body_material = new Material();
 
-        this.lastSoundType = '';
-        this.lastSoundStep = 0;
-        this.lastSound = 0;
-        this.detectedCollides = new Array(1000);
         this.soundDelay = 1; // time between sound effects in worldstep
         this.animstate = 'throw';
 
@@ -52,6 +48,7 @@ class PhysicsWorker {
         this.addDesk();
         this.addBarriers(data.height, data.width);
         this.addJointBody();
+        this.reset();
     }
 
     /**
@@ -152,17 +149,11 @@ class PhysicsWorker {
     }
 
     cleanAfterThrow() {
-        //Reset positions and quaternions of all the dice, set their mass to 0 and flag them as dead
+        //Reset positions and quaternions of all the dice
         for(const [id, body] of this.diceList) {
             //We need to create new arrays for the stepQuaternions and stepPositions because they were transfered to the main thread
             body.stepPositions = new Float32Array(1001 * 3);
             body.stepQuaternions = new Float32Array(1001 * 4);
-
-            if(!this.canBeFlipped){
-                body.mass = 0;
-                body.dead = true;
-            }
-
             this.diceList.set(id, body);
         }
     }
@@ -220,7 +211,7 @@ class PhysicsWorker {
         if (this.animstate === "simulate") {
             this.detectedCollides[this.iteration] = ["dice", body.diceType, body.diceMaterial, finalStrength];
         } else {
-            this.host.emit("eventCollide", { source: "dice", type: body.diceType, material: body.diceMaterial, strength: finalStrength });
+            this.host.emit("collide", { source: "dice", type: body.diceType, material: body.diceMaterial, strength: finalStrength });
         }
         this.lastSoundType = 'dice';
     }
@@ -241,7 +232,7 @@ class PhysicsWorker {
         if (this.animstate === "simulate") {
             this.detectedCollides[this.iteration] = ["table", null, null, finalStrength];
         } else {
-            this.host.emit("eventCollide", { source: "table", type: null, material: null, strength: finalStrength });
+            this.host.emit("collide", { source: "table", type: null, material: null, strength: finalStrength });
         }
 
         this.lastSoundType = 'table';
@@ -365,14 +356,21 @@ class PhysicsWorker {
         dice.result = dieValue;
         this.diceList.set(id, dice);
 
-        //console.log('Face Value', closest_face, dieValue, label)
         return dieValue;
     }
 
-    simulateThrow({minIterations, nbIterationsBetweenRolls, framerate, canBeFlipped}) {
+    reset(){
+        this.lastSoundType = '';
+        this.lastSoundStep = 0;
+        this.lastSound = 0;
+        this.detectedCollides = new Array(1000);
         this.iterationsNeeded = 0;
         this.animstate = 'simulate';
         this.iteration = 0;
+    }
+
+    simulateThrow({minIterations, nbIterationsBetweenRolls, framerate, canBeFlipped}) {
+        this.reset();
 
         this.minIterations = minIterations;
         this.nbIterationsBetweenRolls = nbIterationsBetweenRolls;
@@ -397,6 +395,10 @@ class PhysicsWorker {
         // Get the buffers from the typed arrays
         const quaternionsBuffers = quaternions.map(quat => quat.buffer);
         const positionsBuffers = positions.map(pos => pos.buffer);
+
+        this.animstate = 'throw';
+
+        this.cleanAfterThrow();
 
         return new RegisterPromise.TransferableResponse({
             ids: ids, 
@@ -439,8 +441,8 @@ class PhysicsWorker {
             if (dice.sleepState < 2) {
                 stopped = false;
                 break;
-            } else if (dice.result === null) {
-                dice.result = this.getDiceValue(id);
+            } else {
+                dice.asleepAtIteration = this.iteration;
             }
         }
 
@@ -449,20 +451,24 @@ class PhysicsWorker {
         //Throw is actually finished
         if (stopped) {
             this.iterationsNeeded = this.iteration;
-            if (!this.canBeFlipped) {
-                //make the current dice on the board STATIC object so they can't be knocked
-                for(const [id, dice] of this.diceList){
+            for(const [id, dice] of this.diceList){
+                dice.result = this.getDiceValue(id);
+                if(!this.canBeFlipped){
+                    //make the current dice on the board STATIC object so they can't be knocked
                     dice.mass = 0;
+                    dice.dead = dice.asleepAtIteration || false;
                     dice.updateMassProperties();
-
-                    this.diceList.set(id, dice);
                 }
+                this.diceList.set(id, dice);
             }
         }
         return stopped;
     }
 
     playStep({time_diff}) {
+        if(this.animstate == 'simulate')
+            return;
+        console.log('playStep', time_diff);
         const ids = [];
         const quaternions = new Float32Array(this.diceList.size * 4);
         const positions = new Float32Array(this.diceList.size * 3);
@@ -484,6 +490,23 @@ class PhysicsWorker {
             }
         }
         return new RegisterPromise.TransferableResponse({ids: ids, quaternionsBuffers: quaternions.buffer, positionsBuffers: positions.buffer, worldAsleep: worldAsleep}, [quaternions.buffer, positions.buffer]);
+    }
+
+    //debug function to get the state of the CANNON world
+    getWorldInfo() {
+        console.log(`World iteration: ${this.world.stepnumber}`);
+
+        console.log(`World has ${this.world.bodies.length} bodies:`);
+        for (let i = 0; i < this.world.bodies.length; i++) {
+            console.log(`body ${i}:`);
+            console.log(this.world.bodies[i]);
+        }
+
+        console.log(`World has ${this.world.constraints.length} constraints:`);
+        for (let i = 0; i < this.world.constraints.length; i++) {
+            console.log(`constraint ${i}:`);
+            console.log(this.world.constraints[i]);
+        }
     }
 }
 

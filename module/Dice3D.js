@@ -15,7 +15,7 @@ export class Dice3D {
 
     static get DEFAULT_OPTIONS() {
         const quality = {};
-        switch(game.settings.get("core", "performanceMode")) {
+        switch (game.settings.get("core", "performanceMode")) {
             case 0:
                 quality.bumpMapping = false;
                 quality.shadowQuality = "low";
@@ -37,7 +37,7 @@ export class Dice3D {
                 quality.bumpMapping = true;
                 quality.shadowQuality = "high";
                 quality.glow = true;
-                quality.antialiasing = game.canvas.app.renderer.context.webGLVersion===2 ?"msaa":"smaa";
+                quality.antialiasing = game.canvas.app.renderer.context.webGLVersion === 2 ? "msaa" : "smaa";
                 quality.useHighDPI = true;
                 quality.imageQuality = "high";
                 break;
@@ -316,7 +316,7 @@ export class Dice3D {
             height: window.innerHeight - 1
         };
 
-        if(!config.enabled){
+        if (!config.enabled) {
             area.width = 1;
             area.height = 1;
         }
@@ -358,9 +358,30 @@ export class Dice3D {
             this._rtime = new Date();
             if (this._timeout === false) {
                 this._timeout = true;
-                setTimeout(this._resizeEnd.bind(this), 1000);
+                setTimeout(resizeEnd.bind(this), 1000);
             }
         });
+
+        const resizeEnd = () => {
+            if (new Date() - this._rtime < 1000) {
+                setTimeout(resizeEnd.bind(this), 1000);
+            } else {
+                this._timeout = false;
+                //resize ended probably, lets remake the canvas
+                resizeAndRebuild();
+            }
+        };
+    
+        const resizeAndRebuild = () => {
+            this.canvas[0].remove();
+            this.box.clearScene();
+            this._buildCanvas();
+            let config = Dice3D.ALL_CONFIG();
+            config.boxType = "board";
+            this.box = new DiceBox(this.canvas[0], this.DiceFactory, config);
+            this.box.initialize();
+            this.box.soundManager.preloadSounds();
+        };
 
         $(document).on("click", ".dice-so-nice-btn-settings", (ev) => {
             ev.preventDefault();
@@ -390,44 +411,7 @@ export class Dice3D {
             }
         });
 
-        if (game.settings.get("dice-so-nice", "allowInteractivity")) {
-            $(document).on("mousemove.dicesonice", "body", async (event) => {
-                await this._onMouseMove(event);
-            });
-
-            $(document).on("mousedown.dicesonice", "body", async (event) => {
-                await this._onMouseDown(event);
-            });
-
-            $(document).on("mouseup.dicesonice", "body", async (event) => {
-                await this._onMouseUp(event);
-            });
-        }
-    }
-
-    _mouseNDC(event) {
-        let rect = this.canvas[0].getBoundingClientRect();
-        let x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-        if (x > 1)
-            x = 1;
-        let y = - ((event.clientY - rect.top) / rect.height) * 2 + 1;
-        return { x: x, y: y };
-    }
-
-    async _onMouseMove(event) {
-        if (!this.canInteract)
-            return;
-        await this.box.onMouseMove(event, this._mouseNDC(event));
-    }
-
-    async _onMouseDown(event) {
-        if (!this.canInteract)
-            return;
-        let hit = await this.box.onMouseDown(event, this._mouseNDC(event));
-        console.log("hit", hit);
-        if (hit)
-            this._beforeShow();
-        else {
+        const hideCanvasAndClear = () => {
             const config = Dice3D.CONFIG();
             if (!config.hideAfterRoll && this.canvas.is(":visible") && !this.box.rolling) {
                 this.canvas.hide();
@@ -435,51 +419,45 @@ export class Dice3D {
             }
         }
 
-    }
-
-    async _onMouseUp(event) {
-        if (!this.canInteract)
-            return;
-        let hit = await this.box.onMouseUp(event);
-        if (hit)
-            this._afterShow();
-    }
-
-    _resizeEnd() {
-        if (new Date() - this._rtime < 1000) {
-            setTimeout(this._resizeEnd.bind(this), 1000);
-        } else {
-            this._timeout = false;
-            //resize ended probably, lets remake the canvas
-            this.resizeAndRebuild();
+        const mouseNDC = (event) => {
+            let rect = this.canvas[0].getBoundingClientRect();
+            let x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            if (x > 1)
+                x = 1;
+            let y = - ((event.clientY - rect.top) / rect.height) * 2 + 1;
+            return { x: x, y: y };
         }
-    }
 
-    resizeAndRebuild() {
-        this.canvas[0].remove();
-        this.box.clearScene();
-        this._buildCanvas();
-        let config = Dice3D.ALL_CONFIG();
-        config.boxType = "board";
-        this.box = new DiceBox(this.canvas[0], this.DiceFactory, config);
-        this.box.initialize();
-        this.box.preloadSounds();
-    }
+        if (game.settings.get("dice-so-nice", "allowInteractivity")) {
+            $(document).on("mousemove.dicesonice", "body", async (event) => {
+                if (!this.canInteract)
+                    return;
+                await this.box.onMouseMove(event, mouseNDC(event));
+            });
 
-    /**
-     * Start polling and watching te queue for animation requests.
-     * Each request is resolved in sequence.
-     *
-     * @private
-     */
-    _startQueueHandler() {
-        this.queue = [];
-        setInterval(() => {
-            if (this.queue.length > 0 && !this.box.rolling) {
-                let animate = this.queue.shift();
-                animate();
-            }
-        }, 100);
+            $(document).on("mousedown.dicesonice", "body", async (event) => {
+                if (!this.canInteract)
+                    return;
+                let hit = await this.box.onMouseDown(event, mouseNDC(event));
+                if (hit)
+                    this._beforeShow();
+                else {
+                    hideCanvasAndClear();
+                }
+            });
+
+            $(document).on("mouseup.dicesonice", "body", async (event) => {
+                if (!this.canInteract)
+                    return;
+                let hit = await this.box.onMouseUp(event);
+                if (hit)
+                    this._afterShow();
+            });
+        } else {
+            $(document).on("mousedown.dicesonice", "body", async (event) => {
+                hideCanvasAndClear();
+            });
+        }
     }
 
     /**
@@ -754,6 +732,26 @@ export class Dice3D {
         });
     }
 
+    /**
+     * Start polling and watching the queue for animation requests.
+     * Each request is resolved in sequence.
+     *
+     * @private
+     */
+    _startQueueHandler() {
+        this.queue = [];
+        setInterval(() => {
+            this._processQueue();
+        }, 100);
+    }
+
+    _processQueue() {
+        if (this.queue.length > 0 && !this.box.rolling) {
+            let animate = this.queue.shift();
+            animate();
+        }
+    }
+
     async _nextAnimationHandler() {
         let timing = game.settings.get("dice-so-nice", "enabledSimultaneousRolls") ? 400 : 0;
         this.nextAnimation = new Accumulator(timing, async (items) => {
@@ -769,6 +767,8 @@ export class Dice3D {
                                     item.resolve(true);
                                 this._afterShow();
                             }
+                            // Immediately process the next animation if there is one
+                            this._processQueue();
                         });
                     });
                 }
@@ -778,7 +778,7 @@ export class Dice3D {
             }
         });
     }
-    
+
 
     /**
      *
