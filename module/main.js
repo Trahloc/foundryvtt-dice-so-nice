@@ -197,9 +197,12 @@ Hooks.once('ready', () => {
 Hooks.on('createChatMessage', (chatMessage) => {
     //precheck for better perf
     let hasInlineRoll = game.settings.get("dice-so-nice", "animateInlineRoll") && chatMessage.content.indexOf('inline-roll') !== -1;
+    //Don't show manual rolls from https://github.com/flamewave000/dragonflagon-fvtt/tree/master/df-manual-rolls, since the dice don't match
+    let isManualRoll = e.roll.dice.some((element) => element.options.isManualRoll === true);
     if ((!chatMessage.isRoll && !hasInlineRoll) || (!chatMessage.isContentVisible && !game.settings.get("dice-so-nice", "showGhostDice")) ||
         (game.view != "stream" && (!game.dice3d || game.dice3d.messageHookDisabled)) ||
-        (chatMessage.getFlag("core", "RollTable") && !game.settings.get("dice-so-nice", "animateRollTable"))) {
+        (chatMessage.getFlag("core", "RollTable") && !game.settings.get("dice-so-nice", "animateRollTable")) ||
+        isManualRoll) {
         return;
     }
 
@@ -279,9 +282,12 @@ Hooks.on("preUpdateChatMessage", (message, updateData, options) => {
  */
 Hooks.on("updateChatMessage", (message, updateData, options) => {
     //Todo: refactor this check into a function
+    //Don't show manual rolls from https://github.com/flamewave000/dragonflagon-fvtt/tree/master/df-manual-rolls, since the dice don't match
+    let isManualRoll = e.roll.dice.some((element) => element.options.isManualRoll === true);
     if (!message.rolls || !message.isRoll || (!message.isContentVisible && !game.settings.get("dice-so-nice", "showGhostDice")) ||
         (game.view != "stream" && (!game.dice3d || game.dice3d.messageHookDisabled)) ||
-        (message.getFlag("core", "RollTable") && !game.settings.get("dice-so-nice", "animateRollTable"))) {
+        (message.getFlag("core", "RollTable") && !game.settings.get("dice-so-nice", "animateRollTable")) ||
+        isManualRoll) {
         return;
     }
     if (options.dsnCountAddedRoll > 0) {
