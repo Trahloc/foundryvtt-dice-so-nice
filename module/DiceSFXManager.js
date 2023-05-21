@@ -93,7 +93,7 @@ export const DiceSFXManager = {
                 }
             }
                 
-            let sfxInstance = new DiceSFXManager.SFX_CLASS[id](box, dicemesh);
+            let sfxInstance = new DiceSFXManager.SFX_CLASS[id](box, dicemesh, sfx.options);
 
             sfxInstance.play(sfx.options).then(result => {
                 if(result !== false){
