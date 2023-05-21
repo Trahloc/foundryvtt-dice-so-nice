@@ -15,6 +15,7 @@ import { PlayAnimationDark } from './sfx/PlayAnimationDark.js';
 import { PlayAnimationThormund } from './sfx/PlayAnimationThormund.js';
 import { PlayAnimationImpact } from './sfx/PlayAnimationImpact.js';
 import { PlayMacro } from './sfx/PlayMacro.js';
+import { PlayAnimationOutline } from './sfx/PlayAnimationOutline.js';
 
 export const DiceSFXManager = {
     SFX_MODE_CLASS : {
@@ -31,7 +32,8 @@ export const DiceSFXManager = {
         "PlaySoundEpicWin": PlaySoundEpicWin,
         "PlaySoundEpicFail": PlaySoundEpicFail,
         "PlaySoundCustom": PlaySoundCustom,
-        "PlayMacro": PlayMacro
+        "PlayMacro": PlayMacro,
+        "PlayAnimationOutline": PlayAnimationOutline
     },
     SFX_MODE_LIST : null,
     SFX_CLASS : {},
