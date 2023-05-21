@@ -115,8 +115,8 @@ export class DiceNotation {
 			//throw
 			for(let j=0;j<mergedRollCommands[i].length;j++){
 				let sfxList = mergedRollCommands[i][j].dsnConfig.specialEffects;
-				if(!sfxList || !sfxList["0"])
-					continue;
+				/*if(!sfxList || !sfxList["0"])
+					continue;*/
 				//dice
 				for(let k=0;k<mergedRollCommands[i][j].dice.length;k++){
 					let specialEffects = Object.values(sfxList).filter(sfx => {
