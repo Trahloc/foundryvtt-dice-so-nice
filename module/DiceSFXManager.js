@@ -21,6 +21,7 @@ export const DiceSFXManager = {
     SFX_MODE_CLASS : {
         "PlayAnimationBright": PlayAnimationBright,
         "PlayAnimationDark": PlayAnimationDark,
+        "PlayAnimationOutline": PlayAnimationOutline,
         "PlayAnimationImpact": PlayAnimationImpact,
         "PlayConfettiStrength1": PlayConfettiStrength1,
         "PlayConfettiStrength2": PlayConfettiStrength2,
@@ -32,8 +33,7 @@ export const DiceSFXManager = {
         "PlaySoundEpicWin": PlaySoundEpicWin,
         "PlaySoundEpicFail": PlaySoundEpicFail,
         "PlaySoundCustom": PlaySoundCustom,
-        "PlayMacro": PlayMacro,
-        "PlayAnimationOutline": PlayAnimationOutline
+        "PlayMacro": PlayMacro
     },
     SFX_MODE_LIST : null,
     SFX_CLASS : {},

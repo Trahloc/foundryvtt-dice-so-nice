@@ -4,12 +4,19 @@ export class DiceSFX {
     }
     
     constructor(box, dicemesh, options){
+        const defaultOptions = {
+            isGlobal : false,
+            muteSound : false
+        };
+
+        this.options = mergeObject(defaultOptions, options);
+
         this.dicemesh = dicemesh;
         this.box = box;
         this.destroyed = false;
         this.enableGC = false;
         this.renderReady = false;
-        this.volume = (dicemesh.body_sim.secretRoll && box.muteSoundSecretRolls) || options.muteSound ? 0 : this.box.volume;
+        this.volume = (dicemesh.body_sim.secretRoll && box.muteSoundSecretRolls) || this.options.muteSound ? 0 : this.box.volume;
     }
 
     static async init(){
