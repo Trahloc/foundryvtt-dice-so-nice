@@ -15,11 +15,13 @@ import { PlayAnimationDark } from './sfx/PlayAnimationDark.js';
 import { PlayAnimationThormund } from './sfx/PlayAnimationThormund.js';
 import { PlayAnimationImpact } from './sfx/PlayAnimationImpact.js';
 import { PlayMacro } from './sfx/PlayMacro.js';
+import { PlayAnimationOutline } from './sfx/PlayAnimationOutline.js';
 
 export const DiceSFXManager = {
     SFX_MODE_CLASS : {
         "PlayAnimationBright": PlayAnimationBright,
         "PlayAnimationDark": PlayAnimationDark,
+        "PlayAnimationOutline": PlayAnimationOutline,
         "PlayAnimationImpact": PlayAnimationImpact,
         "PlayConfettiStrength1": PlayConfettiStrength1,
         "PlayConfettiStrength2": PlayConfettiStrength2,
@@ -93,7 +95,7 @@ export const DiceSFXManager = {
                 }
             }
                 
-            let sfxInstance = new DiceSFXManager.SFX_CLASS[id](box, dicemesh);
+            let sfxInstance = new DiceSFXManager.SFX_CLASS[id](box, dicemesh, sfx.options);
 
             sfxInstance.play(sfx.options).then(result => {
                 if(result !== false){

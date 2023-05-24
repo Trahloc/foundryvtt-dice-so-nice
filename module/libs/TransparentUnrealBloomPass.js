@@ -174,6 +174,20 @@ class TransparentUnrealBloomPass extends Pass {
 
 		this.renderTargetBright.dispose();
 
+		for ( let i = 0; i < this.separableBlurMaterials.length; i ++ ) {
+
+			this.separableBlurMaterials[ i ].dispose();
+
+		}
+
+		this.compositeMaterial.dispose();
+		this.materialCopy.dispose();
+		this.basic.dispose();
+
+		//
+
+		this.fsQuad.dispose();
+
 	}
 
 	setSize( width, height ) {

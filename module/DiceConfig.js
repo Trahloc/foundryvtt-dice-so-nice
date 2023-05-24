@@ -140,6 +140,10 @@ export class DiceConfig extends FormApplication {
                     this.possibleResultList[el.userData].push(option);
                 });
             }
+
+            //add special triggers, like "keep hihest" (kh)
+            this.possibleResultList[el.userData].push({id: "kh", name: "Keep Highest"});
+            this.possibleResultList[el.userData].push({id: "kl", name: "Keep Lowest"});
         });
 
         let specialEffectsList = [];
