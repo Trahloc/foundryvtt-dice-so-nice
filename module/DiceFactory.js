@@ -694,7 +694,7 @@ export class DiceFactory {
 		if(!this.baseTextureCache[baseTextureCacheString]){
 			let texture = new THREE.CanvasTexture(canvas);
 			if(this.realisticLighting)
-				texture.encoding = THREE.sRGBEncoding;
+				texture.colorSpace = THREE.SRGBColorSpace;
 			texture.flipY = false;
 			mat.map = texture;
 			mat.map.anisotropy = game.dice3d.box.anisotropy;
@@ -706,7 +706,7 @@ export class DiceFactory {
 
 				let emissiveMap = new THREE.CanvasTexture(canvasEmissive);
 				if(this.realisticLighting)
-					emissiveMap.encoding = THREE.sRGBEncoding;
+					emissiveMap.colorSpace = THREE.SRGBColorSpace;
 				emissiveMap.flipY = false;
 				mat.emissiveMap = emissiveMap;
 				mat.emissiveIntensity = diceobj.emissiveIntensity ? diceobj.emissiveIntensity:1;

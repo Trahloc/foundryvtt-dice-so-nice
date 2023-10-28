@@ -131,9 +131,8 @@ export class DiceNotation {
 
 				//Retrieve the sfx list (unfiltered) for this throw. We do not know yet if these sfx should be visible or not
 				let sfxList = mergedRollCommands[i][j].dsnConfig.specialEffects;
-				if(!sfxList || !sfxList["0"])
-					continue;
-
+				/*if(!sfxList || !sfxList["0"])
+					continue;*/
 				//Finally we loop over each dice in this throw
 				for(let k=0;k<mergedRollCommands[i][j].dice.length;k++){
 					const dsnDie = mergedRollCommands[i][j].dice[k];

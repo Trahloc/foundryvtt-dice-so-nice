@@ -203,7 +203,7 @@ export class DiceBox {
 					.setPath('modules/dice-so-nice/textures/equirectangular/')
 					.load('blouberg_sunrise_2_1k.hdr', function (texture) {
 						this.renderer.scopedTextureCache.textureCube = this.pmremGenerator.fromEquirectangular(texture).texture;
-						this.renderer.scopedTextureCache.textureCube.encoding = THREE.sRGBEncoding;
+						this.renderer.scopedTextureCache.textureCube.colorSpace = THREE.SRGBColorSpace;
 						this.scene.environment = this.renderer.scopedTextureCache.textureCube;
 						//this.scene.background = this.renderer.scopedTextureCache.textureCube;
 						texture.dispose();
