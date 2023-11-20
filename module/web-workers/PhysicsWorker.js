@@ -468,7 +468,7 @@ class PhysicsWorker {
     playStep({time_diff}) {
         if(this.animstate == 'simulate')
             return;
-        console.log('playStep', time_diff);
+        //console.log('playStep', time_diff);
         const ids = [];
         const quaternions = new Float32Array(this.diceList.size * 4);
         const positions = new Float32Array(this.diceList.size * 3);

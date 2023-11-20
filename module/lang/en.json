@@ -264,5 +264,9 @@
     "DICESONICE.TourMainContentShowBackup": "You can save your settings in multiple save files. This is useful if you wish to switch quickly between multiple custom appearances you've created.",
     "DICESONICE.TourMainTitleEndTour": "End of the tour",
     "DICESONICE.TourMainContentEndTour": "If you want more info, check our help page in your Module Management window. Happy rolling!",
-    "DICESONICE.PlayAnimationOutline": "Animation: Outline"
+    "DICESONICE.PlayAnimationOutline": "Animation: Outline",
+    "DICESONICE.resetWelcomeMessage": "Reset welcome message",
+    "DICESONICE.resetWelcomeMessageHint": "This will reset the welcome message for all players. They'll see the welcome message again the next time they join this world.",
+    "DICESONICE.openDiceEditorLabel": "Open the Dice Editor",
+    "DICESONICE.openDiceEditorButton": "Dice Editor"
 }

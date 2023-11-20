@@ -67,6 +67,24 @@ Hooks.once('init', () => {
         onChange: debouncedReload
     });
 
+    //add a button to reset the display of the welcome message for all users
+    game.settings.register("dice-so-nice", "resetWelcomeMessage", {
+        name: "DICESONICE.resetWelcomeMessage",
+        hint: "DICESONICE.resetWelcomeMessageHint",
+        scope: "world",
+        type: Boolean,
+        default: false,
+        config: true,
+        onChange: value => {
+            if (value) {
+                game.users.forEach(user => {
+                    user.setFlag("dice-so-nice", "welcomeMessageShown", false);
+                });
+                game.settings.set("dice-so-nice", "resetWelcomeMessage", false);
+            }
+        }
+    });
+
     game.settings.register("dice-so-nice", "enabledSimultaneousRolls", {
         name: "DICESONICE.enabledSimultaneousRolls",
         hint: "DICESONICE.enabledSimultaneousRollsHint",

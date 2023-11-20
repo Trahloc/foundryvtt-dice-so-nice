@@ -299,3 +299,8 @@
     font-weight: normal;
     font-style: normal;
 }
+
+/************** DICE EDITOR ************/
+.dice-so-nice .dsn-dice-editor-button {
+    flex:1;
+}

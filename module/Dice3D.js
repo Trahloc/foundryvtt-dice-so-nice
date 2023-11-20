@@ -465,38 +465,36 @@ export class Dice3D {
      */
     _welcomeMessage() {
         if (!game.user.getFlag("dice-so-nice", "welcomeMessageShown")) {
-            if (!game.user.getFlag("dice-so-nice", "appearance")) {
-                const content = [`
-                <div class="dice-so-nice">
-                    <h3 class="nue">${game.i18n.localize("DICESONICE.WelcomeTitle")}</h3>
-                    <p class="nue">${game.i18n.localize("DICESONICE.WelcomeMessage1")}</p>
-                    <p class="nue">${game.i18n.localize("DICESONICE.WelcomeMessage2")}</p>
-                    <p>
-                        <button type="button" class="dice-so-nice-btn-settings" data-key="dice-so-nice.dice-so-nice">
-                            <i class="fas fa-dice-d20"></i> ${game.i18n.localize("DICESONICE.configTitle")}
-                        </button>
-                    </p>
-                    <p class="nue">${game.i18n.localize("DICESONICE.WelcomeMessage3")}</p>
-                    <p class="nue">${game.i18n.localize("DICESONICE.WelcomeMessageTour")}</p>
-                    <p>
-                        <button type="button" class="dice-so-nice-btn-tour" data-tour="dice-so-nice-tour">
-                            <i class="fas fa-hiking"></i> ${game.i18n.localize("DICESONICE.WelcomeMessageTourBtn")}
-                        </button>
-                    </p>
-                    <p class="nue">${game.i18n.localize("DICESONICE.WelcomeMessage4")}</p>
-                    <footer class="nue">${game.i18n.localize("NUE.FirstLaunchHint")}</footer>
-                </div>
-                `];
-                const chatData = content.map(c => {
-                    return {
-                        whisper: [game.user.id],
-                        speaker: { alias: "Dice So Nice!" },
-                        flags: { core: { canPopout: true } },
-                        content: c
-                    };
-                });
-                ChatMessage.implementation.createDocuments(chatData);
-            }
+            const content = [`
+            <div class="dice-so-nice">
+                <h3 class="nue">${game.i18n.localize("DICESONICE.WelcomeTitle")}</h3>
+                <p class="nue">${game.i18n.localize("DICESONICE.WelcomeMessage1")}</p>
+                <p class="nue">${game.i18n.localize("DICESONICE.WelcomeMessage2")}</p>
+                <p>
+                    <button type="button" class="dice-so-nice-btn-settings" data-key="dice-so-nice.dice-so-nice">
+                        <i class="fas fa-dice-d20"></i> ${game.i18n.localize("DICESONICE.configTitle")}
+                    </button>
+                </p>
+                <p class="nue">${game.i18n.localize("DICESONICE.WelcomeMessage3")}</p>
+                <p class="nue">${game.i18n.localize("DICESONICE.WelcomeMessageTour")}</p>
+                <p>
+                    <button type="button" class="dice-so-nice-btn-tour" data-tour="dice-so-nice-tour">
+                        <i class="fas fa-hiking"></i> ${game.i18n.localize("DICESONICE.WelcomeMessageTourBtn")}
+                    </button>
+                </p>
+                <p class="nue">${game.i18n.localize("DICESONICE.WelcomeMessage4")}</p>
+                <footer class="nue">${game.i18n.localize("NUE.FirstLaunchHint")}</footer>
+            </div>
+            `];
+            const chatData = content.map(c => {
+                return {
+                    whisper: [game.user.id],
+                    speaker: { alias: "Dice So Nice!" },
+                    flags: { core: { canPopout: true } },
+                    content: c
+                };
+            });
+            ChatMessage.implementation.createDocuments(chatData);
             game.user.setFlag("dice-so-nice", "welcomeMessageShown", true);
         }
     }

@@ -26,6 +26,13 @@
         <p class="notes">{{localize "DICESONICE.colorsetDesc"}}</p>
     </div>
 
+    <div class="form-group" class="dsn-dice-editor-button">
+        <label>{{localize "DICESONICE.openDiceEditorLabel"}}</label>
+        <button type="button" data-openDiceEditor data-dicetype="{{dicetype}}">
+            <i class="fa-solid fa-screwdriver-wrench"></i> {{localize "DICESONICE.openDiceEditorButton"}}
+        </button>
+    </div>
+
     <div class="form-group">
         <label>{{localize "DICESONICE.texture"}}</label>
         <select data-texture data-dicetype="{{dicetype}}" name="appearance[{{dicetype}}][texture]">
