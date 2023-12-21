@@ -301,7 +301,7 @@ export class DiceFactory {
 	async preloadPresets(waitForLoad = true, userID = null, config = {}){
 		let activePresets = [];
 		const preloadPresetsByUser = (user) => {
-			let appearance = user.getFlag("dice-so-nice", "appearance") ? duplicate(user.getFlag("dice-so-nice", "appearance")) : null;
+			let appearance = user.getFlag("dice-so-nice", "appearance") ? foundry.utils.duplicate(user.getFlag("dice-so-nice", "appearance")) : null;
 			if(!appearance){
 				appearance = {global:{}};
 				if(this.preferredSystem != "standard")
@@ -313,8 +313,8 @@ export class DiceFactory {
 			this.systems["standard"].dice.forEach((obj) =>{
 				activePresets.push(obj);
 			});
-			mergeObject(appearance, config,{performDeletions:true});
-			if(!isEmpty(appearance)){
+			foundry.utils.mergeObject(appearance, config,{performDeletions:true});
+			if(!foundry.utils.isEmpty(appearance)){
 				for (let scope in appearance) {
 					if (appearance.hasOwnProperty(scope)) {
 						if(scope != "global")
@@ -1097,7 +1097,7 @@ export class DiceFactory {
 				if(opt[1] == "custom")
 					delete colorsetData[opt[0]];
 			});
-			mergeObject(appearance, colorsetData,{performDeletions:true});
+			foundry.utils.mergeObject(appearance, colorsetData,{performDeletions:true});
 			appearance.colorset = diceobj.colorset;
 		}
 		
@@ -1114,7 +1114,7 @@ export class DiceFactory {
 				appearance = colorsetData;
 			}
 			if(dicenotation.options.appearance){
-				mergeObject(appearance, dicenotation.options.appearance,{performDeletions:true});
+				foundry.utils.mergeObject(appearance, dicenotation.options.appearance,{performDeletions:true});
 			}
 			if(dicenotation.options.ghost){
 				appearance.isGhost = true;

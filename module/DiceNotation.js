@@ -106,8 +106,8 @@ export class DiceNotation {
 		}
 		dsnDie.vectors = [];
 		//Contains optionals flavor (core) and colorset (dsn) infos.
-		dsnDie.options = duplicate(fvttDie.options);
-		mergeObject(dsnDie.options, options);
+		dsnDie.options = foundry.utils.duplicate(fvttDie.options);
+		foundry.utils.mergeObject(dsnDie.options, options);
 		if(this.userConfig && !this.userConfig.enableFlavorColorset && dsnDie.options.flavor)
 			delete dsnDie.options.flavor;
 

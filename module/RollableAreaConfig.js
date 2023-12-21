@@ -3,7 +3,7 @@ import {Dice3D} from "./Dice3D.js";
 export class RollableAreaConfig extends FormApplication {
 
     static get defaultOptions() {
-        return foundry.utils.mergeObject(super.defaultOptions, {
+        return foundry.utils.foundry.utils.mergeObject(super.defaultOptions, {
             title: game.i18n.localize("DICESONICE.RollableAreaConfigTitle"),
             template: "modules/dice-so-nice/templates/rollable-area-config.html",
             width: 280,
@@ -137,7 +137,7 @@ export class RollableAreaConfig extends FormApplication {
     }
 
     async saveSettingsAndRebuild(rollingArea) {
-        let settings = mergeObject(Dice3D.CONFIG(), {
+        let settings = foundry.utils.mergeObject(Dice3D.CONFIG(), {
             rollingArea: rollingArea
         },{performDeletions:true});
         await game.user.setFlag('dice-so-nice', 'settings', settings);
