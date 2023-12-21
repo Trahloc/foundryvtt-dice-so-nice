@@ -1,6 +1,6 @@
 {
     "DICESONICE.config": "3D-nopan asetukset",
-    "DICESONICE.configTitle": "Noppani asetukset",
+    "DICESONICE.configTitle": "3D-noppien asetukset",
     "DICESONICE.settingsAppearance": "Ulkonäkö",
     "DICESONICE.settingsPreferences": "Asetukset",
     "DICESONICE.settingsPerformance": "Suorituskyky",
@@ -261,5 +261,8 @@
     "DICESONICE.TourMainTitleShowBackup": "Varmuuskopiointi & palautus",
     "DICESONICE.TourMainTitleEndTour": "Tutustumiskierroksen loppu",
     "DICESONICE.TourMainContentEndTour": "Jos haluat lisätietoja, tutustu Moduulinhallinta-ikkunan ohjesivuun. Hyviä heittoja!",
-    "DICESONICE.TourMainContentGotoModulesSettings": "Napsauta Dice So Nice -asetusten suodinta"
+    "DICESONICE.TourMainContentGotoModulesSettings": "Napsauta Dice So Nice -asetusten suodinta",
+    "DICESONICE.PlayAnimationOutline": "Animaatio: ääriviiva",
+    "DICESONICE.WelcomeTitle": "Dice So Nice - Sinun 3D-nopat",
+    "DICESONICE.sfxOptionsMuteSound": "Mykistä ääni"
 }

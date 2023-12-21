@@ -193,5 +193,6 @@
     "DICESONICE.showGhostDiceHint": "Quan sigui possible, mostra un dau sense números als jugadors quan tira un GM o una tirada oculta.",
     "DICESONICE.specialEffect": "Efecte especial",
     "DICESONICE.PlaySoundEpicWin": "So: victòria èpica",
-    "DICESONICE.PlayAnimationParticleSpiral": "Partícules: Doble espiral"
+    "DICESONICE.PlayAnimationParticleSpiral": "Partícules: Doble espiral",
+    "DICESONICE.enabledSimultaneousRollForMessage": "Les tirades amb el mateix missatge es fusionen"
 }

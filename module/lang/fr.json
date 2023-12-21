@@ -265,5 +265,7 @@
     "DICESONICE.glow": "Lueur diffuse (glow)",
     "DICESONICE.TourMainTitleGotoModulesSettings": "Paramètres Dice So Nice",
     "DICESONICE.TourMainContentGotoModulesSettings": "Cliquez sur le filtre 'Dice So Nice'",
-    "DICESONICE.WelcomeTitle": "Dice So Nice - Vos dés 3D"
+    "DICESONICE.WelcomeTitle": "Dice So Nice - Vos dés 3D",
+    "DICESONICE.sfxOptionsMuteSound": "Couper le son",
+    "DICESONICE.PlayAnimationOutline": "Animation : Aperçu"
 }
