@@ -654,8 +654,8 @@ export class DiceColors {
 			images[key].onload = function() {
 	
 				if (++loadedImages >= numImages) {
-					DiceColors.diceTextures = mergeObject(images, DiceColors.diceTextures || {},{performDeletions:true});
-					DiceColors.diceBumps = mergeObject(bumps, DiceColors.diceBumps || {},{performDeletions:true});
+					DiceColors.diceTextures = foundry.utils.mergeObject(images, DiceColors.diceTextures || {},{performDeletions:true});
+					DiceColors.diceBumps = foundry.utils.mergeObject(bumps, DiceColors.diceBumps || {},{performDeletions:true});
 					callback(images);
 				}
 			};
@@ -671,8 +671,8 @@ export class DiceColors {
 			bumps[key].onload = function() {
 	
 				if (++loadedImages >= numImages) {
-					DiceColors.diceTextures = mergeObject(images, DiceColors.diceTextures || {},{performDeletions:true});
-					DiceColors.diceBumps = mergeObject(bumps, DiceColors.diceBumps || {},{performDeletions:true});
+					DiceColors.diceTextures = foundry.utils.mergeObject(images, DiceColors.diceTextures || {},{performDeletions:true});
+					DiceColors.diceBumps = foundry.utils.mergeObject(bumps, DiceColors.diceBumps || {},{performDeletions:true});
 					callback(images);
 				}
 			};
@@ -761,7 +761,7 @@ export class DiceColors {
 			if(!COLORSETS[name].fontScale)
 				COLORSETS[name].fontScale = DICE_SCALE;
 			else
-				COLORSETS[name].fontScale = mergeObject(DICE_SCALE,COLORSETS[name].fontScale,{inplace:false,performDeletions:true});
+				COLORSETS[name].fontScale = foundry.utils.mergeObject(DICE_SCALE,COLORSETS[name].fontScale,{inplace:false,performDeletions:true});
 			if(!COLORSETS[name].visibility)
 				COLORSETS[name].visibility = "visible";
 		}
