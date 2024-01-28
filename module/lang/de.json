@@ -262,5 +262,7 @@
     "DICESONICE.TourMainContentShowBackup": "Du kannst deinen Einstellungen in mehreren Speicherständen sichern. Dies ist nützlich, falls du schnell zwischen verschiedenen, erstellten Erscheinungsbildern wechseln möchtest.",
     "DICESONICE.TourMainTitleEndTour": "Tourende",
     "DICESONICE.TourMainContentEndTour": "Falls du mehr Informationen benötigst, kannst du unsere Hilfeseite im Modulverwaltungsfenster besuchen. Frohes Würfeln!",
-    "DICESONICE.WelcomeTitle": "Dice So Nice - Deine 3D-Würfel"
+    "DICESONICE.WelcomeTitle": "Dice So Nice - Deine 3D-Würfel",
+    "DICESONICE.sfxOptionsMuteSound": "Audio stummschalten",
+    "DICESONICE.PlayAnimationOutline": "Animation: Umriss"
 }

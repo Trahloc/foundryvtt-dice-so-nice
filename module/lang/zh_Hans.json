@@ -262,5 +262,7 @@
     "DICESONICE.TourMainTitleShowPerformance": "性能",
     "DICESONICE.TourMainContentShowPerformance": "如果你的电脑性能不佳，可以在这里改变设置来改进3D动画的表现。",
     "DICESONICE.TourMainTitleShowBackup": "备份 & 恢复",
-    "DICESONICE.TourMainContentShowBackup": "你可以分别存储多个设置文件。如果你想在多个自定义骰子外观中快速切换，这会很有用。"
+    "DICESONICE.TourMainContentShowBackup": "你可以分别存储多个设置文件。如果你想在多个自定义骰子外观中快速切换，这会很有用。",
+    "DICESONICE.sfxOptionsMuteSound": "静音",
+    "DICESONICE.PlayAnimationOutline": "动画：越线"
 }

@@ -10,7 +10,7 @@ import { DiceColors, DICE_SCALE } from './DiceColors.js';
 export class DiceConfig extends FormApplication {
 
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             title: game.i18n.localize("DICESONICE.configTitle"),
             id: "dice-config",
             template: "modules/dice-so-nice/templates/dice-config.html",
@@ -25,7 +25,7 @@ export class DiceConfig extends FormApplication {
     }
 
     async getData(options) {
-        let data = mergeObject({
+        let data = foundry.utils.mergeObject({
             fxList: Utils.localize({
                 "none": "DICESONICE.None",
                 "fadeOut": "DICESONICE.FadeOut"
@@ -100,7 +100,7 @@ export class DiceConfig extends FormApplication {
         }
 
         this.canvas = $('<div id="dice-configuration-canvas"></div>')[0];
-        let config = mergeObject(
+        let config = foundry.utils.mergeObject(
             this.reset ? Dice3D.ALL_DEFAULT_OPTIONS() : Dice3D.ALL_CONFIG(),
             { dimensions: { w: 634, h: 245 }, autoscale: false, scale: 60, boxType: "showcase" }
         );
@@ -152,7 +152,7 @@ export class DiceConfig extends FormApplication {
         if (this.reset)
             specialEffects = [];
         this.triggerTypeList = [...triggerTypeList, ...DiceSFXManager.EXTRA_TRIGGER_TYPE];
-        mergeObject(this.possibleResultList, DiceSFXManager.EXTRA_TRIGGER_RESULTS,{performDeletions:true});
+        foundry.utils.mergeObject(this.possibleResultList, DiceSFXManager.EXTRA_TRIGGER_RESULTS,{performDeletions:true});
 
         //Filter out the SFX that are not registered
         if (specialEffects) {
@@ -325,7 +325,7 @@ export class DiceConfig extends FormApplication {
                     let data = new DiceNotation(roll);
 
                     let specialEffects = this.getShowcaseSFX();
-                    let customization = mergeObject({ appearance: config.appearance }, { specialEffects: specialEffects },{performDeletions:true});
+                    let customization = foundry.utils.mergeObject({ appearance: config.appearance }, { specialEffects: specialEffects },{performDeletions:true});
 
                     game.dice3d._showAnimation(data, customization);
                 });
@@ -781,7 +781,7 @@ export class DiceConfig extends FormApplication {
                 });
                 if (appearanceArray.length > 1) {
                     let diff = diffObject(appearanceArray[0], appearanceArray[1]);
-                    if (isEmpty(diff)) {
+                    if (foundry.utils.isEmpty(diff)) {
                         this.closeAppearanceTab(this.lastActiveAppearanceTab)
                     }
                 }
@@ -850,13 +850,13 @@ export class DiceConfig extends FormApplication {
                         }
                         customizationElements.each((index, el) => {
                             let colorsetForce = false;
-                            if ($(el).is("[data-colorset]") && !isEmpty(colorsetData))
+                            if ($(el).is("[data-colorset]") && !foundry.utils.isEmpty(colorsetData))
                                 colorsetForce = true;
-                            else if ($(el).is("[data-texture]") && !isEmpty(colorsetData) && colorsetData.texture != "custom")
+                            else if ($(el).is("[data-texture]") && !foundry.utils.isEmpty(colorsetData) && colorsetData.texture != "custom")
                                 colorsetForce = true;
-                            else if ($(el).is("[data-material]") && !isEmpty(colorsetData) && colorsetData.material != "custom")
+                            else if ($(el).is("[data-material]") && !foundry.utils.isEmpty(colorsetData) && colorsetData.material != "custom")
                                 colorsetForce = true;
-                            else if ($(el).is("[data-font]") && ((!isEmpty(colorsetData) && colorsetData.font != "custom") || diceobj.font))
+                            else if ($(el).is("[data-font]") && ((!foundry.utils.isEmpty(colorsetData) && colorsetData.font != "custom") || diceobj.font))
                                 colorsetForce = true;
                             $(el).prop("disabled", diceobj.modelFile || colorsetForce);
                         });
@@ -1043,9 +1043,9 @@ export class DiceConfig extends FormApplication {
         await game.user.unsetFlag("dice-so-nice", "settings");
 
 
-        let appearance = mergeObject(Dice3D.APPEARANCE(), formData.appearance, { insertKeys: true, insertValues: false, performDeletions:true});
+        let appearance = foundry.utils.mergeObject(Dice3D.APPEARANCE(), formData.appearance, { insertKeys: true, insertValues: false, performDeletions:true});
         delete formData.appearance;
-        let settings = mergeObject(Dice3D.CONFIG(), formData, { insertKeys: false, insertValues: false ,performDeletions:true});
+        let settings = foundry.utils.mergeObject(Dice3D.CONFIG(), formData, { insertKeys: false, insertValues: false ,performDeletions:true});
 
         // preserve rollingArea config
         settings.rollingArea = currentSettings.rollingArea;

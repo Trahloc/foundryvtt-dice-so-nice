@@ -27,7 +27,7 @@ import { TEXTURELIST, COLORSETS } from './DiceColors.js';
             //Fuck it, lets do this so I'm sure it it not because of DsN itself.
             if (game.user.isGM) {
                 await Promise.all(game.users.map(async (user) => {
-                    let appearance = user.getFlag("dice-so-nice", "appearance") ? duplicate(user.getFlag("dice-so-nice", "appearance")) : null;
+                    let appearance = user.getFlag("dice-so-nice", "appearance") ? foundry.utils.duplicate(user.getFlag("dice-so-nice", "appearance")) : null;
                     if (appearance && appearance.hasOwnProperty("labelColor")) {
                         let data = {
                             "-=colorset":null,
@@ -44,7 +44,7 @@ import { TEXTURELIST, COLORSETS } from './DiceColors.js';
                     }
                 }));
             } else {
-                let appearance = game.user.getFlag("dice-so-nice", "appearance") ? duplicate(game.user.getFlag("dice-so-nice", "appearance")) : null;
+                let appearance = game.user.getFlag("dice-so-nice", "appearance") ? foundry.utils.duplicate(game.user.getFlag("dice-so-nice", "appearance")) : null;
                 if (appearance && appearance.hasOwnProperty("labelColor")) {
                     let data = {
                         "-=colorset":null,
@@ -66,18 +66,18 @@ import { TEXTURELIST, COLORSETS } from './DiceColors.js';
         
         if(formatversion == ""){
             //v1 to v2
-            let settings = game.user.getFlag("dice-so-nice", "settings") ? duplicate(game.user.getFlag("dice-so-nice", "settings")):{};
+            let settings = game.user.getFlag("dice-so-nice", "settings") ? foundry.utils.duplicate(game.user.getFlag("dice-so-nice", "settings")):{};
             if (settings.diceColor || settings.labelColor) {
-                let newSettings = mergeObject(game.dice3d.constructor.DEFAULT_OPTIONS, settings, { insertKeys: false, insertValues: false,performDeletions:true });
-                let appearance = mergeObject(game.dice3d.constructor.DEFAULT_APPEARANCE(), settings, { insertKeys: false, insertValues: false,performDeletions:true});
-                await game.settings.set("dice-so-nice", "settings", mergeObject(newSettings, { "-=dimensions": null, "-=fxList": null },{performDeletions:true}));
+                let newSettings = foundry.utils.mergeObject(game.dice3d.constructor.DEFAULT_OPTIONS, settings, { insertKeys: false, insertValues: false,performDeletions:true });
+                let appearance = foundry.utils.mergeObject(game.dice3d.constructor.DEFAULT_APPEARANCE(), settings, { insertKeys: false, insertValues: false,performDeletions:true});
+                await game.settings.set("dice-so-nice", "settings", foundry.utils.mergeObject(newSettings, { "-=dimensions": null, "-=fxList": null },{performDeletions:true}));
                 await game.user.setFlag("dice-so-nice", "appearance", appearance);
                 migrated = true;
             }
 
             //v2 to v4
             await Promise.all(game.users.map(async (user) => {
-                let appearance = user.getFlag("dice-so-nice", "appearance") ? duplicate(user.getFlag("dice-so-nice", "appearance")) : null;
+                let appearance = user.getFlag("dice-so-nice", "appearance") ? foundry.utils.duplicate(user.getFlag("dice-so-nice", "appearance")) : null;
                 if (appearance && appearance.hasOwnProperty("labelColor")) {
                     let data = {
                         global: appearance
@@ -87,7 +87,7 @@ import { TEXTURELIST, COLORSETS } from './DiceColors.js';
                     migrated = true;
                 }
 
-                let sfxList = user.getFlag("dice-so-nice", "sfxList") ? duplicate(user.getFlag("dice-so-nice", "sfxList")) : null;
+                let sfxList = user.getFlag("dice-so-nice", "sfxList") ? foundry.utils.duplicate(user.getFlag("dice-so-nice", "sfxList")) : null;
             
                 if(sfxList){
                     if(!Array.isArray(sfxList))
@@ -104,7 +104,7 @@ import { TEXTURELIST, COLORSETS } from './DiceColors.js';
         //v4 to v4.1 (fix)
         //Remove the extra properties, no idea why tho
         await Promise.all(game.users.map(async (user) => {
-            let appearance = user.getFlag("dice-so-nice", "appearance") ? duplicate(user.getFlag("dice-so-nice", "appearance")) : null;
+            let appearance = user.getFlag("dice-so-nice", "appearance") ? foundry.utils.duplicate(user.getFlag("dice-so-nice", "appearance")) : null;
             if (appearance && appearance.hasOwnProperty("labelColor")) {
                 let data = {
                     "-=colorset":null,
@@ -179,7 +179,7 @@ import { TEXTURELIST, COLORSETS } from './DiceColors.js';
         let fontList = {
             "auto": game.i18n.localize("DICESONICE.FontAuto")
         };
-        return mergeObject(fontList,FontConfig.getAvailableFontChoices());
+        return foundry.utils.mergeObject(fontList,FontConfig.getAvailableFontChoices());
     };
 
     static prepareColorsetList() {

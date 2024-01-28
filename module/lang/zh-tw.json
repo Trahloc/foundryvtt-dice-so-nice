@@ -1,7 +1,7 @@
 {
     "DICESONICE.config": "3D骰子設置",
-    "DICESONICE.configTitle": "我的骰子設置",
-    "DICESONICE.configHint": "每個玩家都可以在這裡設置自己專用的3D骰子 (啟用/禁用，顏色，大小，性能等。)",
+    "DICESONICE.configTitle": "3D骰子設置",
+    "DICESONICE.configHint": "每個玩家都可以在這裡設置自己專用的3D骰子 (啟用/禁用，顏色，大小，性能等……)",
     "DICESONICE.settingsAppearance": "外觀",
     "DICESONICE.settingsPreferences": "偏好",
     "DICESONICE.settingsPerformance": "性能",
@@ -150,5 +150,6 @@
     "DICESONICE.antialiasing": "抗鋸齒",
     "DICESONICE.SMAA": "SMAA (軟件)",
     "DICESONICE.MSAA": "MSAA (硬件，推薦)",
-    "DICESONICE.Load": "讀取…"
+    "DICESONICE.Load": "讀取…",
+    "DICESONICE.Medium": "中等"
 }

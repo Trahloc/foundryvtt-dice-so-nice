@@ -231,7 +231,7 @@
     "DICESONICE.sfxOptionsIsGlobal": "(Csak JM) SFX bekapcsolása minden játékosnak",
     "DICESONICE.sfxOptionsCustomSound": "Válassz egy hangfájlt",
     "DICESONICE.sfxOptionsMacro": "Válassz egy makrót",
-    "DICESONICE.RollableAreaConfig": "Guríthatóv terület beállításai",
+    "DICESONICE.RollableAreaConfig": "Gurítható terület beállításai",
     "DICESONICE.RollableAreaConfigTitle": "Gurítható terület beállításai",
     "DICESONICE.RollableAreaConfigHint": "Határozd meg a képernyő azon részét, amely a 3D kocka animációt mutatja. Ez a beállítás nincs hatással a többi játékosra.",
     "DICESONICE.RollableAreaText": "Gurítható Terület",

@@ -9,7 +9,7 @@ export class DiceSFX {
             muteSound : false
         };
 
-        this.options = mergeObject(defaultOptions, options);
+        this.options = foundry.utils.mergeObject(defaultOptions, options);
 
         this.dicemesh = dicemesh;
         this.box = box;
