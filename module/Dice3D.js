@@ -557,9 +557,10 @@ export class Dice3D {
 
             Hooks.callAll("diceSoNiceRollComplete", chatMessage.id);
 
-            if (window.ui.chat.element.find('div[class="jump-to-bottom hidden"]').length || chatMessage.user.id === game.user.id)
+            console.log("isAtBottom Test");
+            if (window.ui.chat.isAtBottom || chatMessage.user.id === game.user.id)
                 window.ui.chat.scrollBottom({ popout: false });
-            if (window.ui.sidebar.popouts.chat && (window.ui.sidebar.popouts.chat.element.find('div[class="jump-to-bottom hidden"]').length || chatMessage.user.id === game.user.id))
+            if (window.ui.sidebar.popouts.chat && (window.ui.sidebar.popouts.chat.isAtBottom || chatMessage.user.id === game.user.id))
                 window.ui.sidebar.popouts.chat.scrollBottom();
         }
 
