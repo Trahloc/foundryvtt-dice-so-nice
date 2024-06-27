@@ -423,7 +423,7 @@ export class DiceBox {
 			let size = canvasSize.multiplyScalar(this.renderer.getPixelRatio());
 			//Create a RenderTarget with high precision
 			let options = {
-				type: THREE.FloatType,
+				type: game.canvas.app.renderer.context.extensions.floatTextureLinear ? THREE.FloatType : THREE.HalfFloatType,
 				samples: this.dicefactory.aa == "msaa" ? 4 : 0,
 				anisotropy: this.anisotropy
 			};
