@@ -183,22 +183,14 @@ import { TEXTURELIST, COLORSETS } from './DiceColors.js';
     };
 
     static prepareColorsetList() {
-        let groupedSetsList = Object.values(COLORSETS);
-        groupedSetsList.sort((set1, set2) => {
-            if (game.i18n.localize(set1.description) < game.i18n.localize(set2.description)) return -1;
-            if (game.i18n.localize(set1.description) > game.i18n.localize(set2.description)) return 1;
-        });
-        let preparedList = {};
-        for (let i = 0; i < groupedSetsList.length; i++) {
-            if (groupedSetsList[i].visibility == 'hidden')
-                continue;
-            let locCategory = game.i18n.localize(groupedSetsList[i].category);
-            if (!preparedList.hasOwnProperty(locCategory))
-                preparedList[locCategory] = {};
-            preparedList[locCategory][groupedSetsList[i].name] = game.i18n.localize(groupedSetsList[i].description);
-        }
+        let colorsetList = Object.entries(COLORSETS).reduce((colorsetObj, [key, colorset]) => {
+            if (colorset.visibility !== 'hidden') {
+                colorsetObj[key] = Object.assign({}, colorset, { label:game.i18n.localize(colorset.description), group: game.i18n.localize(colorset.category) });
+            }
+            return colorsetObj;
+        }, {});
 
-        return preparedList;
+        return Object.fromEntries(Object.entries(colorsetList).sort((a,b) => a[1].label.localeCompare(b[1].label)));
     };
 
     static prepareSystemList() {

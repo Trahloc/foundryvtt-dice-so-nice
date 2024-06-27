@@ -124,7 +124,7 @@ export class DiceConfig extends FormApplication {
             triggerTypeList.push({ id: el.userData, name: el.userData });
             this.possibleResultList[el.userData] = [];
             let preset = this.box.dicefactory.systems.standard.dice.find(dice => dice.type == el.userData);
-            let termClass = Object.values(CONFIG.Dice.terms).find(term => term.name == preset.term) || Die;
+            let termClass = Object.values(CONFIG.Dice.terms).find(term => term.name == preset.term) || foundry.dice.terms.Die;
             let term = new termClass({});
 
             if(el.userData == "d100"){
