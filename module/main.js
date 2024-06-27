@@ -214,10 +214,27 @@ Hooks.once('ready', () => {
  */
 Hooks.on('createChatMessage', (chatMessage) => {
     //precheck for better perf
-    let hasInlineRoll = game.settings.get("dice-so-nice", "animateInlineRoll") && chatMessage.content.indexOf('inline-roll') !== -1;
-    if ((!chatMessage.isRoll && !hasInlineRoll) || (!chatMessage.isContentVisible && !game.settings.get("dice-so-nice", "showGhostDice")) ||
-        (game.view != "stream" && (!game.dice3d || game.dice3d.messageHookDisabled)) ||
-        (chatMessage.getFlag("core", "RollTable") && !game.settings.get("dice-so-nice", "animateRollTable"))) {
+    const hasInlineRoll = game.settings.get("dice-so-nice", "animateInlineRoll") && chatMessage.content.includes('inline-roll');
+
+    const shouldShowGhostDice = game.settings.get("dice-so-nice", "showGhostDice");
+    const isContentVisible = chatMessage.isContentVisible;
+    const shouldAnimateRollTable = game.settings.get("dice-so-nice", "animateRollTable");
+    const hasRollTableFlag = chatMessage.getFlag("core", "RollTable");
+    const rollTableFormulaDisplayed = hasRollTableFlag && game.tables.get(hasRollTableFlag).displayRoll;
+
+    
+    const shouldInterceptMessage = (
+        //Is a roll
+        (chatMessage.isRoll || hasInlineRoll) &&
+        //If the content is not visible and ghost dice should not be shown
+        (isContentVisible || shouldShowGhostDice) &&
+        //If dsn is correctly enabled and the message hook is not disabled
+        game.dice3d && !game.dice3d.messageHookDisabled &&
+        //If it has a roll table, then check if the roll table should be animated and the roll table is displayed
+        (!hasRollTableFlag || (shouldAnimateRollTable && rollTableFormulaDisplayed))
+    );
+
+    if (!shouldInterceptMessage) {
         return;
     }
 
