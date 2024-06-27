@@ -41,7 +41,8 @@ export class SoundManager {
     }
 
     processSoundsData(target, jsonData, prefix) {
-        AudioHelper.preloadSound(`modules/dice-so-nice/sounds/${jsonData.resources[0]}`).then(src => target.source = src);
+        const sound = new foundry.audio.Sound(`modules/dice-so-nice/sounds/${jsonData.resources[0]}`);
+        sound.load().then(src => target.source = src);
         Object.entries(jsonData.spritemap).forEach(sound => {
             let type = sound[0].match(new RegExp(`${prefix}\\_([a-z\\_]*)`))[1];
             if (!target[type])
@@ -51,16 +52,9 @@ export class SoundManager {
     }
 
     playAudioSprite(source, sprite, selfVolume) {
-        if (!source || !source.context)
+        if (!source)
             return false;
-        let gainNode = source.context.createGain();
-        gainNode.gain.value = selfVolume * this.volume * game.settings.get("core", "globalInterfaceVolume");
-        const startTime = sprite.start;
-        const duration = sprite.end - sprite.start;
-        const sampleSource = source.context.createBufferSource();
-        sampleSource.buffer = source.container.buffer;
-        sampleSource.connect(gainNode).connect(source.context.destination);
-        sampleSource.start(source.context.currentTime, startTime, duration);
+        source.play({loop: sprite.loop, loopStart: sprite.start, loopEnd: sprite.end, volume: selfVolume * this.volume});
     }
 
     eventCollide({ source, diceType, diceMaterial, strength }) {
