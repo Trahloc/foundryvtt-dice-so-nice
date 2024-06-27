@@ -565,7 +565,7 @@ export class Dice3D {
             orderedDiceList = orderedDiceList.filter(el => el != null);
 
             let rollList = [];
-            const plus = new OperatorTerm({ operator: "+" }).evaluate();
+            const plus = new foundry.dice.terms.OperatorTerm({ operator: "+" }).evaluate();
             orderedDiceList.forEach(dice => {
                 //add a "plus" between each term
                 if (Array.isArray(dice) && dice.length) {
@@ -577,7 +577,7 @@ export class Dice3D {
 
             //call each promise one after the other, then call the showMessage function
             const recursShowForRoll = (rollList, index) => {
-                this.showForRoll(rollList[index], chatMessage.user, false, null, false, chatMessage.id, chatMessage.speaker).then(() => {
+                this.showForRoll(rollList[index], chatMessage.author, false, null, false, chatMessage.id, chatMessage.speaker).then(() => {
                     index++;
                     if (rollList[index] != null)
                         recursShowForRoll(rollList, index);
