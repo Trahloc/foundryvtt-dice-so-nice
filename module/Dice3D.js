@@ -557,7 +557,10 @@ export class Dice3D {
 
             Hooks.callAll("diceSoNiceRollComplete", chatMessage.id);
 
-            window.ui.chat.scrollBottom({ popout: true });
+            if (window.ui.chat.isAtBottom || chatMessage.user.id === game.user.id)
+                window.ui.chat.scrollBottom({ popout: false });
+            if (window.ui.sidebar.popouts.chat && (window.ui.sidebar.popouts.chat.isAtBottom || chatMessage.user.id === game.user.id))
+                window.ui.sidebar.popouts.chat.scrollBottom();
         }
 
         if (game.view == "stream" && !game.modules.get("0streamutils")?.active) {
