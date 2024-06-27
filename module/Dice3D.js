@@ -368,11 +368,11 @@ export class Dice3D {
             } else {
                 this._timeout = false;
                 //resize ended probably, lets remake the canvas
-                resizeAndRebuild();
+                this.resizeAndRebuild();
             }
         };
     
-        const resizeAndRebuild = () => {
+        this.resizeAndRebuild = () => {
             this.canvas[0].remove();
             this.box.clearScene();
             this._buildCanvas();
@@ -382,6 +382,7 @@ export class Dice3D {
             this.box.initialize();
             this.box.soundManager.preloadSounds();
         };
+
 
         $(document).on("click", ".dice-so-nice-btn-settings", (ev) => {
             ev.preventDefault();
