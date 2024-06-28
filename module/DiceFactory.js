@@ -506,7 +506,7 @@ export class DiceFactory {
 		let scopedScale = scopedTextureCache.type == "board" ? this.baseScale : 60;
 		if (!diceobj) return null;
 		let dicemesh;
-
+		
 		let geom = this.geometries[type+scopedScale];
 		if(!geom) {
 			geom = await this.createGeometry(diceobj.shape, diceobj.scale, scopedScale);
@@ -514,6 +514,10 @@ export class DiceFactory {
 		}
 		if (!geom) return null;
 
+		// If we're on the board, we also create the shape in the physics worker
+		if(scopedTextureCache.type == "board"){
+			await this.physicsWorker.exec("createShape", { type:diceobj.shape, radius:diceobj.scale * scopedScale });
+		}
 
 		if(diceobj.model){
 			dicemesh = diceobj.model.scene.children[0].clone();
@@ -1234,7 +1238,6 @@ export class DiceFactory {
 	}
 
 	async createGeometry(type, typeScale, scopedScale) {
-		const radius = typeScale * scopedScale;
 		const geometryTypes = [
 			'd2', 'd4', 'd6', 'd8', 'd10', 'd12', 'd14', 'd16', 'd20', 'd24', 'd30'
 		];
@@ -1243,10 +1246,7 @@ export class DiceFactory {
 			throw new Error(`Invalid geometry type: ${type}`);
 		}
 	
-		const bufferGeometry = this.loadGeometry(type, scopedScale);
-		await this.physicsWorker.exec("createShape", { type, radius });
-	
-		return bufferGeometry;
+		return this.loadGeometry(type, scopedScale);
 	}
 	
 	loadGeometry(type, scopedScale) {
