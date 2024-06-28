@@ -24,7 +24,7 @@ export class PlayAnimationParticleSpiral extends DiceSFX {
         });
         PlayAnimationParticleSpiral.sprite = new THREE.Sprite(material);
         game.audio.pending.push(function(){
-            AudioHelper.preloadSound(PlayAnimationParticleSpiral.sound);
+            foundry.audio.AudioHelper.preloadSound(PlayAnimationParticleSpiral.sound);
         }.bind(this));
     }
 
@@ -39,7 +39,7 @@ export class PlayAnimationParticleSpiral extends DiceSFX {
         this.proton.addEmitter(this.emitter2);
         this.proton.addRender(new Proton.SpriteRender(this.box.scene));
 
-        AudioHelper.play({
+        foundry.audio.AudioHelper.play({
             src: PlayAnimationParticleSpiral.sound,
             volume: this.volume
 		}, false);

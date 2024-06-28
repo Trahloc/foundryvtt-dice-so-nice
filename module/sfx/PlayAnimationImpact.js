@@ -16,7 +16,7 @@ export class PlayAnimationImpact extends DiceSFX {
     /**@override init */
     static async init() {
         game.audio.pending.push(function () {
-            AudioHelper.preloadSound(PlayAnimationImpact.sound);
+            foundry.audio.AudioHelper.preloadSound(PlayAnimationImpact.sound);
         }.bind(this));
             
         let data = await this.loadAsset(DiceSFXManager.TextureLoader, "modules/dice-so-nice/sfx/textures/glassimpact_color.webp");
@@ -63,7 +63,7 @@ export class PlayAnimationImpact extends DiceSFX {
         this.plane.position.y = this.dicemesh.parent.position.y;
         this.plane.rotation.z = Math.random() * Math.PI * 2;
         this.box.scene.add(this.plane);
-        AudioHelper.play({
+        foundry.audio.AudioHelper.play({
             src: PlayAnimationImpact.sound,
             volume: this.volume
         }, false);

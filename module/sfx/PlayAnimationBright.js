@@ -13,7 +13,7 @@ export class PlayAnimationBright extends DiceSFX {
         PlayAnimationBright.brightColor = new THREE.Color(0.3,0.3,0.3);
         this.glowingMesh=null;
         game.audio.pending.push(function(){
-            AudioHelper.preloadSound(PlayAnimationBright.sound);
+            foundry.audio.AudioHelper.preloadSound(PlayAnimationBright.sound);
         }.bind(this));
     }
 
@@ -37,7 +37,7 @@ export class PlayAnimationBright extends DiceSFX {
         this.baseMaterial = this.glowingMesh.material;
         this.glowingMesh.material = this.baseMaterial.clone();
         this.glowingMesh.material.onBeforeCompile = ShaderUtils.applyDiceSoNiceShader;
-        AudioHelper.play({
+        foundry.audio.AudioHelper.play({
             src: PlayAnimationBright.sound,
             volume: this.volume
 		}, false);

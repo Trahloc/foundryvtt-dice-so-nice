@@ -22,7 +22,7 @@ export class PlayAnimationParticleVortex extends DiceSFX {
         PlayAnimationParticleVortex.sprite = new THREE.Mesh(geometry,material);
         
         game.audio.pending.push(function(){
-            AudioHelper.preloadSound(PlayAnimationParticleVortex.sound);
+            foundry.audio.AudioHelper.preloadSound(PlayAnimationParticleVortex.sound);
         }.bind(this));
     }
 
@@ -73,7 +73,7 @@ export class PlayAnimationParticleVortex extends DiceSFX {
         this.proton.addEmitter(this.emitter);
         this.proton.addRender(new Proton.MeshRender(this.box.scene));
 
-        AudioHelper.play({
+        foundry.audio.AudioHelper.play({
             src: PlayAnimationParticleVortex.sound,
             volume: this.volume
 		}, false);

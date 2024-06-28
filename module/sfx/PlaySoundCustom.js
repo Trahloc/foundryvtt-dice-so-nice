@@ -10,7 +10,7 @@ export class PlaySoundCustom extends DiceSFX {
     /**@override play */
     async play(options){
         if(options && options.path){
-            AudioHelper.play({
+            foundry.audio.AudioHelper.play({
                 src: options.path,
                 volume: this.volume
             }, false);

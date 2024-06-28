@@ -17,7 +17,7 @@ export class PlayAnimationThormund extends DiceSFX {
     /**@override init */
     static async init() {
         game.audio.pending.push(function(){
-            AudioHelper.preloadSound(PlayAnimationThormund.sound);
+            foundry.audio.AudioHelper.preloadSound(PlayAnimationThormund.sound);
         }.bind(this));
 
         let gltf = await this.loadAsset(DiceSFXManager.GLTFLoader, PlayAnimationThormund.file);
@@ -74,7 +74,7 @@ export class PlayAnimationThormund extends DiceSFX {
 
         this.axis = new THREE.Vector3();
         this.box.scene.add(this.thormund);
-        AudioHelper.play({
+        foundry.audio.AudioHelper.play({
             src: PlayAnimationThormund.sound,
             volume: this.volume
 		}, false);

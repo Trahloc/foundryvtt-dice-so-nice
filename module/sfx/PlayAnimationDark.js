@@ -12,7 +12,7 @@ export class PlayAnimationDark extends DiceSFX {
     static async init() {
         PlayAnimationDark.darkColor = new THREE.Color(0.1,0.1,0.1);
         game.audio.pending.push(function(){
-            AudioHelper.preloadSound(PlayAnimationDark.sound);
+            foundry.audio.AudioHelper.preloadSound(PlayAnimationDark.sound);
         }.bind(this));
     }
 
@@ -33,7 +33,7 @@ export class PlayAnimationDark extends DiceSFX {
         this.baseMaterial = this.glowingMesh.material;
         this.glowingMesh.material = this.baseMaterial.clone();
         this.glowingMesh.material.onBeforeCompile = ShaderUtils.applyDiceSoNiceShader;
-        AudioHelper.play({
+        foundry.audio.AudioHelper.play({
 			src: PlayAnimationDark.sound,
             volume: this.volume
 		}, false);
