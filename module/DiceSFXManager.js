@@ -96,16 +96,18 @@ export const DiceSFXManager = {
             }
                 
             let sfxInstance = new DiceSFXManager.SFX_CLASS[id](box, dicemesh, sfx.options);
-
-            sfxInstance.play(sfx.options).then(result => {
-                if(result !== false){
-                    if(typeof sfxInstance.render === 'function')
-                        DiceSFXManager.renderQueue.push(sfxInstance);
-                    if(sfxInstance.enableGC)
-                        DiceSFXManager.garbageCollector.push(sfxInstance);
-                }
-                resolve();
-            });
+            //Add a timeout to prevent a visual glitch in v5 (probably linked to the async worker)
+            setTimeout(()=>{
+                sfxInstance.play(sfx.options).then(result => {
+                    if(result !== false){
+                        if(typeof sfxInstance.render === 'function')
+                            DiceSFXManager.renderQueue.push(sfxInstance);
+                        if(sfxInstance.enableGC)
+                            DiceSFXManager.garbageCollector.push(sfxInstance);
+                    }
+                    resolve();
+                });
+            }, 100);
         });
     },
     renderSFX : function(){
