@@ -1068,16 +1068,24 @@ export class DiceFactory {
 		
 		if(dicenotation){
 			let colorset = null;
+
+			//First we try to find a colorset
 			if (dicenotation.options.colorset)
 				colorset = dicenotation.options.colorset;
 			else if (dicenotation.options.flavor && COLORSETS[dicenotation.options.flavor]) {
 				colorset = dicenotation.options.flavor;
+			} else if(dicenotation.options.appearance && dicenotation.options.appearance.colorset){
+				colorset = dicenotation.options.appearance.colorset;
 			}
+
+			// If we do, we retrieve the colorset data
 			if(colorset){
 				let colorsetData = DiceColors.getColorSet(colorset);
 				colorsetData.edge = colorsetData.edge ? colorsetData.edge : "";
 				appearance = colorsetData;
 			}
+
+			// Then we overwrite the colorset data with the appearance to let players override the colorset default colors
 			if(dicenotation.options.appearance){
 				foundry.utils.mergeObject(appearance, dicenotation.options.appearance,{performDeletions:true});
 			}
