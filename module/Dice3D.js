@@ -601,15 +601,25 @@ export class Dice3D {
      * @param blind if the roll is blind for the current user
      * @param messageID ChatMessage related to this roll (default: null)
      * @param speaker Object based on the ChatSpeakerData data schema related to this roll. Useful to fully support DsN settings like "hide npc rolls". (Default: null)
+     * @param options Object with 2 booleans: ghost (default: false) and secret (default: false)
      * @returns {Promise<boolean>} when resolved true if the animation was displayed, false if not.
      */
-    showForRoll(roll, user = game.user, synchronize, users = null, blind, messageID = null, speaker = null) {
+    showForRoll(roll, user = game.user, synchronize, users = null, blind, messageID = null, speaker = null, options = {ghost:false, secret:false}) {
         let context = {
             roll: roll,
             user: user,
             users: users,
             blind: blind
         };
+
+        if (options.ghost) {
+            context.roll.ghost = true;
+        }
+
+        if (options.secret) {  
+            context.roll.secret = true;
+        }
+
         if (speaker) {
             let actor = game.actors.get(speaker.actor);
             const isNpc = actor ? actor.type === 'npc' : false;
