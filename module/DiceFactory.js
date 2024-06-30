@@ -419,6 +419,9 @@ export class DiceFactory {
 		if(dice.emissiveIntensity)
 			preset.emissiveIntensity = dice.emissiveIntensity;
 
+		if(dice.atlas)
+			preset.atlas = dice.atlas;
+
 		this.register(preset);
 
 		if(dice.font && !FontConfig.getAvailableFonts().includes(dice.font)){
@@ -779,11 +782,11 @@ export class DiceFactory {
 			context.rect(x,y,ts,ts);
 			context.clip();
 			context.globalCompositeOperation = texture.composite || 'source-over';
-			context.drawImage(texture.texture, x, y, ts, ts);
+			context.drawImage(texture.texture.source, texture.texture.frame.x, texture.texture.frame.y, texture.texture.frame.w, texture.texture.frame.h, x, y, ts, ts);
 			context.restore();
 			
 			if (texture.bump != '') {
-				contextBump.drawImage(texture.bump, x, y, ts, ts);
+				contextBump.drawImage(texture.bump.source, texture.bump.frame.x, texture.bump.frame.y, texture.bump.frame.w, texture.bump.frame.h, x, y, ts, ts);
 			}
 		}
 
@@ -806,13 +809,13 @@ export class DiceFactory {
 			if(materialData.isGhost && labels[index] != "")
 				text = "?";
 			//custom texture face
-			if(text instanceof HTMLImageElement){
+			if(text.source instanceof HTMLImageElement){
 				isTexture = true;
-				context.drawImage(text, 0,0,text.width,text.height,x,y,ts,ts);
+				context.drawImage(text.source, text.frame.x, text.frame.y, text.frame.w, text.frame.h, x, y, ts, ts);
 				if(bump)
-					contextBump.drawImage(bump, 0,0,text.width,text.height,x,y,ts,ts);
+					contextBump.drawImage(bump.source, bump.frame.x, bump.frame.y, bump.frame.w, bump.frame.h,x,y,ts,ts);
 				if(emissive)
-					contextEmissive.drawImage(emissive, 0,0,text.width,text.height,x,y,ts,ts);
+					contextEmissive.drawImage(emissive.source, emissive.frame.x, emissive.frame.y, emissive.frame.w, emissive.frame.h,x,y,ts,ts);
 			}
 			else{
 				let fontsize = ts / (1 + 2 * margin);
@@ -956,15 +959,15 @@ export class DiceFactory {
 				let destX = hw*wShift+x;
 				let destY = (hh - ts * 0.3)*hShift+y;
 				//custom texture face
-				if(text[i] instanceof HTMLImageElement){
+				if(text[i].source instanceof HTMLImageElement){
 					isTexture = true;
-					let textureSize = 60 / (text[i].width / ts);
-					context.drawImage(text[i],0,0,text[i].width,text[i].height,destX-(textureSize/2),destY-(textureSize/2),textureSize,textureSize);
+					let textureSize = 60 / (text[i].frame.w / ts);
+					context.drawImage(text[i].source,text[i].frame.x, text[i].frame.y, text[i].frame.w, text[i].frame.h,destX-(textureSize/2),destY-(textureSize/2),textureSize,textureSize);
 					//There's an issue with bump texture because they are smaller than the dice face so it causes visual glitches
 					/*if(bump)
 						contextBump.drawImage(text[i],0,0,text[i].width,text[i].height,destX-(textureSize/2),destY-(textureSize/2),textureSize,textureSize);*/
 					if(emissive)
-						contextEmissive.drawImage(text[i],0,0,text[i].width,text[i].height,destX-(textureSize/2),destY-(textureSize/2),textureSize,textureSize);
+						contextEmissive.drawImage(text[i].source,text[i].frame.x, text[i].frame.y, text[i].frame.w, text[i].frame.h,destX-(textureSize/2),destY-(textureSize/2),textureSize,textureSize);
 				}
 				else{
 					// attempt to outline the text with a meaningful color
@@ -1100,7 +1103,7 @@ export class DiceFactory {
 		let materialData = {};
 		let colorindex;
 
-		if(appearance.texture && !appearance.texture.id)
+		if(appearance.texture && !appearance.texture.name)
 			appearance.texture = DiceColors.getTexture(appearance.texture);
 
 		let colorsetData = DiceColors.getColorSet(appearance.colorset);
