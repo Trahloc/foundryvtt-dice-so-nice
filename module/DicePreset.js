@@ -25,6 +25,7 @@ export class DicePreset {
 		this.modelLoading = false;
 		this.modelFile = null;
 		this.internalAdd = false;
+		this.atlas = null;
 
 		//todo : check if this is useful
 		this.appearance = {
@@ -103,18 +104,25 @@ export class DicePreset {
 
 	setLabels(labels) {
 		this.labels = labels;
-		this.modelLoaded = false;
-		this.modelLoading = false;
+		this.unloadModel();
 	}
 
 	setBumpMaps(bumps) {
 		this.bumps = bumps;
-		this.modelLoaded = false;
-		this.modelLoading = false;
+		this.unloadModel();
 	}
 
 	setEmissiveMaps(emissiveMaps) {
 		this.emissiveMaps = emissiveMaps;
+		this.unloadModel();
+	}
+
+	setAtlas(atlas) {
+		this.atlas = atlas;
+		this.unloadModel();
+	}
+
+	unloadModel() {
 		this.modelLoaded = false;
 		this.modelLoading = false;
 	}

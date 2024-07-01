@@ -20,13 +20,14 @@ BASE_PRESETS_LIST.push(diceobj);
 
 diceobj = new DicePreset('dc', 'd2');
 diceobj.term = 'Coin';
+diceobj.setAtlas('modules/dice-so-nice/textures/standard.json');
 diceobj.setLabels([
-    'modules/dice-so-nice/textures/coin/tail.webp',
-    'modules/dice-so-nice/textures/coin/heads.webp'
+    'tail.webp',
+    'heads.webp'
 ]);
 diceobj.setBumpMaps([
-    'modules/dice-so-nice/textures/coin/tail_bump.webp',
-    'modules/dice-so-nice/textures/coin/heads_bump.webp'
+    'tail_bump.webp',
+    'heads_bump.webp'
 ]);
 diceobj.setValues(0, 1);
 diceobj.inertia = 8;
