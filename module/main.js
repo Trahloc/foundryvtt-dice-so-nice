@@ -188,7 +188,12 @@ Hooks.once('init', () => {
         name: "DICESONICE.showGhostDice",
         hint: "DICESONICE.showGhostDiceHint",
         scope: "world",
-        type: Boolean,
+        type: String,
+        choices: Utils.localize({
+            "0": "DICESONICE.ghostDiceDisabled",
+            "1": "DICESONICE.ghostDiceForAll",
+            "2": "DICESONICE.ghostDiceForRollAuthor"
+        }),
         default: false,
         config: true
     });
@@ -216,7 +221,9 @@ Hooks.on('createChatMessage', (chatMessage) => {
     //precheck for better perf
     const hasInlineRoll = game.settings.get("dice-so-nice", "animateInlineRoll") && chatMessage.content.includes('inline-roll');
 
-    const shouldShowGhostDice = game.settings.get("dice-so-nice", "showGhostDice");
+    const showGhostDice = game.settings.get("dice-so-nice", "showGhostDice");
+    const shouldShowGhostDice = showGhostDice === "1" || (showGhostDice === "2" && game.user.id === chatMessage.author.id);
+    
     const isContentVisible = chatMessage.isContentVisible;
     const shouldAnimateRollTable = game.settings.get("dice-so-nice", "animateRollTable");
     const hasRollTableFlag = chatMessage.getFlag("core", "RollTable");
@@ -226,7 +233,7 @@ Hooks.on('createChatMessage', (chatMessage) => {
     const shouldInterceptMessage = (
         //Is a roll
         (chatMessage.isRoll || hasInlineRoll) &&
-        //If the content is not visible and ghost dice should not be shown
+        //If the content is  visible and ghost dice should  be shown
         (isContentVisible || shouldShowGhostDice) &&
         //If dsn is correctly enabled and the message hook is not disabled
         game.dice3d && !game.dice3d.messageHookDisabled &&

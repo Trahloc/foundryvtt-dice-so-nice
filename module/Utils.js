@@ -4,8 +4,9 @@ import { TEXTURELIST, COLORSETS } from './DiceColors.js';
  */
  export class Utils {
 
+    static DATA_FORMAT_VERSION = "4.2";
     /**
-     * Migrate old 1.0 or 2.0 setting to new 4.0 format.
+     * Migrate old 1.0 or 2.0 setting to new 4.2 format.
      */
     static async migrateOldSettings() {
 
@@ -18,7 +19,7 @@ import { TEXTURELIST, COLORSETS } from './DiceColors.js';
 
         let formatversion = game.settings.get("dice-so-nice", "formatVersion");
 
-        if (formatversion == "" || formatversion != "4.1") { //Never updated or first install
+        if (formatversion == "" || formatversion != Utils.DATA_FORMAT_VERSION) { //Never updated or first install
             if (!game.user.isGM) {
                 ui.notifications.warn(game.i18n.localize("DICESONICE.migrateMessageNeedGM"));
                 return false;
@@ -121,7 +122,13 @@ import { TEXTURELIST, COLORSETS } from './DiceColors.js';
             }
         }));
 
-        game.settings.set("dice-so-nice", "formatVersion", "4.1");
+        //v4.1 to v4.2
+        //showGhostDice is now a string with 3 values. 0, 1 or 2
+        //If the setting was previously false, set it to 0. If it was true, set it to 1
+        await game.settings.set("dice-so-nice", "showGhostDice", game.settings.get("dice-so-nice", "showGhostDice") ? '1' : '0');
+
+
+        game.settings.set("dice-so-nice", "formatVersion", Utils.DATA_FORMAT_VERSION);
         if(migrated)
             ui.notifications.info(game.i18n.localize("DICESONICE.migrateMessage"));
         return true;
@@ -195,8 +202,22 @@ import { TEXTURELIST, COLORSETS } from './DiceColors.js';
 
     static prepareSystemList() {
         let systems = game.dice3d.box.dicefactory.systems;
-        return Object.keys(systems).reduce((i18nCfg, key) => {
-            i18nCfg[key] = game.i18n.localize(systems[key].name);
+        return Object.keys(systems).sort((a, b) => {
+            if (a === "standard") {
+                return -1;
+            } else if (b === "standard") {
+                return 1;
+            } else if (systems[a].group === systems[b].group) {
+                return systems[a].name.localeCompare(systems[b].name);
+            } else if (systems[a].group === null) {
+                return 1;
+            } else if (systems[b].group === null) {
+                return -1;
+            } else {
+                return systems[a].group.localeCompare(systems[b].group);
+            }
+        }).reduce((i18nCfg, key) => {
+            i18nCfg[key] = { label:game.i18n.localize(systems[key].name), group: systems[key].group };
             return i18nCfg;
         }, {});
     };
