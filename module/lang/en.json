@@ -11,6 +11,7 @@
     "DICESONICE.showExtraDice": "Enable Extra Dice Customization",
     "DICESONICE.labelColor": "Label Color",
     "DICESONICE.diceColor": "Dice Color",
+    "DICESONICE.onlyShowMyDice": "Only show my dice",
     "DICESONICE.hideAfterRoll": "Automatically Hide",
     "DICESONICE.timeBeforeHide": "Millisecs Before Hiding",
     "DICESONICE.hideFX": "Hide FX",

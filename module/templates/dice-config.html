@@ -40,6 +40,11 @@
         <div class="tab" data-tab="preferences" data-group="dsn-main">
             <div class="settings-list">
                 <div class="form-group">
+                    <label>{{localize "DICESONICE.onlyShowMyDice"}}</label>
+                    <input type="checkbox" data-onlyShowOwnDice name="onlyShowOwnDice" data-dtype="Boolean" {{checked onlyShowOwnDice}} />
+                </div>
+
+                <div class="form-group">
                     <label>{{localize "DICESONICE.hideAfterRoll"}}</label>
                     <input type="checkbox" data-hideAfterRoll name="hideAfterRoll" data-dtype="Boolean" {{checked hideAfterRoll}} />
                 </div>

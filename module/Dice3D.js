@@ -45,6 +45,7 @@ export class Dice3D {
         return {
             enabled: true,
             showExtraDice: game.dice3d && game.dice3d.hasOwnProperty("defaultShowExtraDice") ? game.dice3d.defaultShowExtraDice : false,
+            onlyShowOwnDice: false,
             hideAfterRoll: true,
             timeBeforeHide: 2000,
             hideFX: 'fadeOut',
@@ -628,6 +629,11 @@ export class Dice3D {
                 return Promise.resolve(false);
             }
         }
+
+        if (Dice3D.CONFIG().onlyShowOwnDice && user !== game.user) {
+            return Promise.resolve(false);
+        }
+
         let chatMessage = game.messages.get(messageID);
         if (chatMessage) {
             if (chatMessage.whisper.length > 0)
