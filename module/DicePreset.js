@@ -16,6 +16,7 @@ export class DicePreset {
 		this.bumps = [];
 		this.emissiveMaps = [];
 		this.emissive = 0x000000;
+		this.emissiveIntensity = 1;
 		this.mass = 300;
 		this.inertia = 13;
 		this.geometry = null;

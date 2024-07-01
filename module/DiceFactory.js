@@ -31,10 +31,10 @@ export class DiceFactory {
 
 		this.systems = {
 			'standard': {id: 'standard', name: game.i18n.localize("DICESONICE.System.Standard"), dice:[], mode:"default"},
-			'spectrum': {id: 'spectrum', name: game.i18n.localize("DICESONICE.System.SpectrumDice"), dice:[], mode:"default"},
-			'foundry_vtt': {id: 'foundry_vtt', name: game.i18n.localize("DICESONICE.System.FoundryVTT"), dice:[], mode:"default"},
-			'dot': {id: 'dot', name: game.i18n.localize("DICESONICE.System.Dot"), dice:[], mode:"default"},
-			'dot_b': {id: 'dot_b', name: game.i18n.localize("DICESONICE.System.DotBlack"), dice:[], mode:"default"}
+			'spectrum': {id: 'spectrum', name: game.i18n.localize("DICESONICE.System.SpectrumDice"), dice:[], mode:"default", group:"Dice So Nice!"},
+			'foundry_vtt': {id: 'foundry_vtt', name: game.i18n.localize("DICESONICE.System.FoundryVTT"), dice:[], mode:"default", group:"Dice So Nice!"},
+			'dot': {id: 'dot', name: game.i18n.localize("DICESONICE.System.Dot"), dice:[], mode:"default", group:"Dice So Nice!"},
+			'dot_b': {id: 'dot_b', name: game.i18n.localize("DICESONICE.System.DotBlack"), dice:[], mode:"default", group:"Dice So Nice!"}
 		};
 		
 		BASE_PRESETS_LIST.forEach((preset) => {
@@ -358,9 +358,12 @@ export class DiceFactory {
 	}
 
 	//{id: 'standard', name: game.i18n.localize("DICESONICE.System.Standard")}
+	//Internal use
+	//See dice3d.addSystem for API
 	addSystem(system, mode="default"){
 		system.dice = [];
 		system.mode = mode;
+		
 		if(mode != "default" && this.preferredSystem == "standard")
 			this.preferredSystem = system.id;
 		this.systems[system.id] = system;

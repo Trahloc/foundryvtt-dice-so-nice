@@ -152,8 +152,9 @@ export class Dice3D {
      * Register a new system
      * The id is to be used with addDicePreset
      * The name can be a localized string
-     * @param {Object} system {id, name}
+     * @param {Object} system {id, name, group}
      * @param {Boolean} mode "default,preferred". Default will add the system as a choice. Preferred will be enabled for all users unless they change their settings.
+     * @param {String} group Group to display in the dice selector. Can be any string, like the dice maker name or a brand
      */
     addSystem(system, mode = "default") {
         //retrocompatibility with  API version < 3.1
