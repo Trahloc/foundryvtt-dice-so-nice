@@ -744,7 +744,12 @@ export class DiceFactory {
 		mat.depthTest = true;
 		mat.needUpdate = true;
 
+		mat.userData.diceobj = diceobj;
+		mat.userData.materialData = materialData;
+		mat.userData.dice_texture = dice_texture;
+
 		mat.onBeforeCompile = ShaderUtils.applyDiceSoNiceShader;
+		Hooks.callAll("diceSoNiceOnMaterialReady", mat, baseTextureCacheString);
 
 		this.baseTextureCache[baseTextureCacheString] = mat;
 		return mat;

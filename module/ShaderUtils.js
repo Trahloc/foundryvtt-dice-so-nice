@@ -7,23 +7,26 @@ export class ShaderUtils {
 
 	static applyDiceSoNiceShader(shader) {
 
-		if(this.emissive !== undefined && game.dice3d.DiceFactory.realisticLighting) {
-			ShaderUtils.selectiveBloomShaderFragment(shader);
-		}
+        if(this.emissive !== undefined && game.dice3d.DiceFactory.realisticLighting) {
+            ShaderUtils.selectiveBloomShaderFragment(shader);
+        }
 
-		// This is the old iridescent shader, which is now deprecated.
-		if (this.userData.iridescent) {
-			ShaderUtils.iridescentShaderFragment(shader);
-		}
+        // This is the old iridescent shader, which is now deprecated.
+        if (this.userData.iridescent) {
+            ShaderUtils.iridescentShaderFragment(shader);
+        }
 
-		if (shader.shaderName == "MeshPhysicalMaterial" && shader.transmission) {
-			ShaderUtils.transmissionAlphaShaderFragment(shader);
-		}
+        if (shader.shaderName == "MeshPhysicalMaterial" && shader.transmission) {
+            ShaderUtils.transmissionAlphaShaderFragment(shader);
+        }
 
-		if (shader.shaderName == "MeshPhysicalMaterial" && shader.iridescence) {
-			ShaderUtils.iridescenceShaderFragment(shader);
-		}
-	}
+        if (shader.shaderName == "MeshPhysicalMaterial" && shader.iridescence) {
+            ShaderUtils.iridescenceShaderFragment(shader);
+        }
+
+        Hooks.callAll("diceSoNiceShaderOnBeforeCompile", shader, this)
+    }
+
 
 	static transmissionAlphaShaderFragment(shader) {
 		shader.fragmentShader = shader.fragmentShader.replace(`#include <transmission_fragment>`,
