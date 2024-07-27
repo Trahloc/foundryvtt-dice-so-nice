@@ -1,21 +1,21 @@
-import * as THREE from 'three';
+import { TextureLoader } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-import { PlaySoundEpicFail } from './sfx/PlaySoundEpicFail.js';
-import { PlaySoundEpicWin } from './sfx/PlaySoundEpicWin.js';
-import { PlaySoundCustom } from './sfx/PlaySoundCustom.js';
+import { PlayAnimationBright } from './sfx/PlayAnimationBright.js';
+import { PlayAnimationDark } from './sfx/PlayAnimationDark.js';
+import { PlayAnimationImpact } from './sfx/PlayAnimationImpact.js';
+import { PlayAnimationOutline } from './sfx/PlayAnimationOutline.js';
+import { PlayAnimationParticleSparkles } from './sfx/PlayAnimationParticleSparkles.js';
+import { PlayAnimationParticleSpiral } from './sfx/PlayAnimationParticleSpiral.js';
+import { PlayAnimationParticleVortex } from './sfx/PlayAnimationParticleVortex.js';
+import { PlayAnimationThormund } from './sfx/PlayAnimationThormund.js';
 import { PlayConfettiStrength1 } from './sfx/PlayConfettiStrength1.js';
 import { PlayConfettiStrength2 } from './sfx/PlayConfettiStrength2.js';
 import { PlayConfettiStrength3 } from './sfx/PlayConfettiStrength3.js';
-import { PlayAnimationParticleSpiral } from './sfx/PlayAnimationParticleSpiral.js';
-import { PlayAnimationParticleSparkles } from './sfx/PlayAnimationParticleSparkles.js';
-import { PlayAnimationParticleVortex } from './sfx/PlayAnimationParticleVortex.js';
-import { PlayAnimationBright } from './sfx/PlayAnimationBright.js';
-import { PlayAnimationDark } from './sfx/PlayAnimationDark.js';
-import { PlayAnimationThormund } from './sfx/PlayAnimationThormund.js';
-import { PlayAnimationImpact } from './sfx/PlayAnimationImpact.js';
 import { PlayMacro } from './sfx/PlayMacro.js';
-import { PlayAnimationOutline } from './sfx/PlayAnimationOutline.js';
+import { PlaySoundCustom } from './sfx/PlaySoundCustom.js';
+import { PlaySoundEpicFail } from './sfx/PlaySoundEpicFail.js';
+import { PlaySoundEpicWin } from './sfx/PlaySoundEpicWin.js';
 
 export const DiceSFXManager = {
     SFX_MODE_CLASS : {
@@ -54,7 +54,7 @@ export const DiceSFXManager = {
         }
 
         DiceSFXManager.GLTFLoader = new GLTFLoader();
-        DiceSFXManager.TextureLoader = new THREE.TextureLoader();
+        DiceSFXManager.TextureLoader = new TextureLoader();
 
         let sfxUniqueList = [];
         game.users.forEach((user) => {

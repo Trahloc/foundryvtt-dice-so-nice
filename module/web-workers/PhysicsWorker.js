@@ -30,7 +30,7 @@ class PhysicsWorker {
         this.desk_body_material = new Material();
         this.barrier_body_material = new Material();
 
-        this.soundDelay = 1; // time between sound effects in worldstep
+        this.soundDelay = 2; // time between sound effects in worldstep
         this.animstate = 'throw';
 
         this.mouseConstraint = null;

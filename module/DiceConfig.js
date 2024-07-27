@@ -123,7 +123,7 @@ export class DiceConfig extends FormApplication {
             this.navOrder[el.userData] = i++;
             triggerTypeList.push({ id: el.userData, name: el.userData });
             this.possibleResultList[el.userData] = [];
-            let preset = this.box.dicefactory.systems.standard.dice.find(dice => dice.type == el.userData);
+            let preset = this.box.dicefactory.systems.get("standard").dice.get(el.userData);
             let termClass = Object.values(CONFIG.Dice.terms).find(term => term.name == preset.term) || foundry.dice.terms.Die;
             let term = new termClass({});
 
@@ -842,7 +842,7 @@ export class DiceConfig extends FormApplication {
                 let system = $(element).find('[data-system]').val();
                 let customizationElements = $(element).find('[data-colorset],[data-texture],[data-material],[data-font]');
                 if (system != "standard") {
-                    let diceobj = this.box.dicefactory.systems[system].dice.find(obj => obj.type == diceType);
+                    let diceobj = this.box.dicefactory.systems.get(system).dice.get(diceType);
                     if (diceobj) {
                         let colorsetData = {};
                         if (diceobj.colorset) {
@@ -880,8 +880,8 @@ export class DiceConfig extends FormApplication {
             let diceType = $(element).data("dicetype");
             if (diceType != "global") {
                 $(element).find("option").each((indexOpt, elementOpt) => {
-                    let model = this.box.dicefactory.systems["standard"].dice.find(obj => obj.type == diceType);
-                    if (!this.box.dicefactory.systems[$(elementOpt).val()].dice.find(obj => obj.type == diceType || (model && obj.shape == model.shape && obj.values.length == model.values.length)))
+                    let model = this.box.dicefactory.systems.get("standard").dice.get(diceType);
+                    if (!this.box.dicefactory.systems.get($(elementOpt).val()).dice.has(diceType) || this.box.dicefactory.systems.get($(elementOpt).val()).getDiceByShapeAndValues(model.shape, model.values))
                         $(elementOpt).attr("disabled", "disabled");
                 });
             }

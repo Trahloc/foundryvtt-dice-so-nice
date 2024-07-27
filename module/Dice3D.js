@@ -157,13 +157,13 @@ export class Dice3D {
      * @param {Boolean} mode "default,preferred". Default will add the system as a choice. Preferred will be enabled for all users unless they change their settings.
      * @param {String} group Group to display in the dice selector. Can be any string, like the dice maker name or a brand
      */
-    addSystem(system, mode = "default") {
+    addSystem(system, mode = "default", settings = null) {
         //retrocompatibility with  API version < 3.1
         if (typeof mode == "boolean") {
             mode = mode ? "preferred" : "default";
         }
 
-        this.DiceFactory.addSystem(system, mode);
+        this.DiceFactory.addSystem(system, mode, settings);
     }
 
     /**

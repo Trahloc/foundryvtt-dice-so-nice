@@ -42,7 +42,10 @@ export class SoundManager {
 
     processSoundsData(target, jsonData, prefix) {
         const sound = new foundry.audio.Sound(`modules/dice-so-nice/sounds/${jsonData.resources[0]}`);
+
+        //preload the sound
         sound.load().then(src => target.source = src);
+
         Object.entries(jsonData.spritemap).forEach(sound => {
             let type = sound[0].match(new RegExp(`${prefix}\\_([a-z\\_]*)`))[1];
             if (!target[type])
@@ -54,7 +57,10 @@ export class SoundManager {
     playAudioSprite(source, sprite, selfVolume) {
         if (!source)
             return false;
-        source.play({loop: sprite.loop, loopStart: sprite.start, loopEnd: sprite.end, volume: selfVolume * this.volume});
+
+        const spriteInstance = new foundry.audio.Sound(source.src);
+        //in v12, the load() method use a cache so we can call it without any extra network calls
+        spriteInstance.load().then(sound => sound.play({loop: sprite.loop, loopStart: sprite.start, loopEnd: sprite.end, volume: selfVolume * this.volume}));
     }
 
     eventCollide({ source, diceType, diceMaterial, strength }) {

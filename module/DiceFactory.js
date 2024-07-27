@@ -2,11 +2,28 @@ import {DicePreset} from './DicePreset.js';
 import {BASE_PRESETS_LIST, EXTRA_PRESETS_LIST} from './DiceDefaultPresets.js';
 import {DiceColors, DICE_SCALE, COLORSETS} from './DiceColors.js';
 import {DICE_MODELS} from './DiceModels.js';
-import * as THREE from 'three';
+import {DiceSystem} from './DiceSystem.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { ShaderUtils } from './ShaderUtils';
 import PhysicsWorker from 'web-worker:./web-workers/PhysicsWorker.js';
 import WebworkerPromise from 'webworker-promise';
+
+import {
+	MixOperation,
+	AddOperation,
+	AnimationMixer,
+	Mesh,
+	Color,
+	Vector3,
+	MeshPhongMaterial,
+	MeshStandardMaterial,
+	MeshLambertMaterial,
+	MeshPhysicalMaterial,
+	CanvasTexture,
+	SRGBColorSpace,
+	BufferGeometryLoader
+} from 'three';
+
 export class DiceFactory {
 
 	constructor() {
@@ -29,13 +46,12 @@ export class DiceFactory {
 
 		this.baseTextureCache = {};
 
-		this.systems = {
-			'standard': {id: 'standard', name: game.i18n.localize("DICESONICE.System.Standard"), dice:[], mode:"default"},
-			'spectrum': {id: 'spectrum', name: game.i18n.localize("DICESONICE.System.SpectrumDice"), dice:[], mode:"default", group:"Dice So Nice!"},
-			'foundry_vtt': {id: 'foundry_vtt', name: game.i18n.localize("DICESONICE.System.FoundryVTT"), dice:[], mode:"default", group:"Dice So Nice!"},
-			'dot': {id: 'dot', name: game.i18n.localize("DICESONICE.System.Dot"), dice:[], mode:"default", group:"Dice So Nice!"},
-			'dot_b': {id: 'dot_b', name: game.i18n.localize("DICESONICE.System.DotBlack"), dice:[], mode:"default", group:"Dice So Nice!"}
-		};
+		this.systems = new Map();
+		this.systems.set("standard", new DiceSystem("standard", game.i18n.localize("DICESONICE.System.Standard"), null, "default"));
+		this.systems.set("spectrum", new DiceSystem("spectrum", game.i18n.localize("DICESONICE.System.SpectrumDice"), null, "default", "Dice So Nice!"));
+		this.systems.set("foundry_vtt", new DiceSystem("foundry_vtt", game.i18n.localize("DICESONICE.System.FoundryVTT"), null, "default", "Dice So Nice!"));
+		this.systems.set("dot", new DiceSystem("dot", game.i18n.localize("DICESONICE.System.Dot"), null, "default", "Dice So Nice!"));
+		this.systems.set("dot_b", new DiceSystem("dot_b", game.i18n.localize("DICESONICE.System.DotBlack"), null, "default", "Dice So Nice!"));
 		
 		BASE_PRESETS_LIST.forEach((preset) => {
 			this.register(preset);
@@ -194,7 +210,7 @@ export class DiceFactory {
 						color: 0xb5b5b5,
 						shininess: 0.3,
 						reflectivity:0.1,
-						combine:THREE.MixOperation
+						combine:MixOperation
 					},
 					'scopedOptions':{
 						envMap:true
@@ -207,7 +223,7 @@ export class DiceFactory {
 						color: 0xb5b5b5,
 						shininess: 1,
 						reflectivity:0.7,
-						combine:THREE.AddOperation
+						combine:AddOperation
 					},
 					'scopedOptions':{
 						envMap:true
@@ -270,11 +286,11 @@ export class DiceFactory {
 		//If it is added to standard, it can be from automated system detecting DiceTerm, or the basic dice list. In those case, the internalAdd preorperty is set to true
 		//Everything should exist in the standard system
 		//We check to see if there's already this Dice DONOMINATOR in the standard system
-		let index = this.systems.standard.dice.findIndex(el => el.type == diceobj.type);
+		const hasDice = this.systems.get("standard").dice.has(diceobj.type);
 
 		//If it exists in the standard system, and it was added there by the automated system, we want to override and load it
-		if(index>=0 && (this.systems.standard.dice[index].internalAdd || diceobj.internalAdd)){
-			this.systems.standard.dice[index] = diceobj;
+		if(hasDice && (this.systems.get("standard").dice.get(diceobj.type).internalAdd || diceobj.internalAdd)){
+			this.systems.get("standard").set(diceobj.type, diceobj);
 			if(diceobj.modelFile){
 				diceobj.loadModel(this.loaderGLTF);
 			} else {
@@ -283,14 +299,14 @@ export class DiceFactory {
 		}
 		if(diceobj.system == "standard"){
 			//If we're adding to the standard system directly, we only do it if it didn't exist previously
-			if(index < 0){
-				this.systems[diceobj.system].dice.push(diceobj);
+			if(!hasDice){
+				this.systems.get(diceobj.system).dice.set(diceobj.type, diceobj);
 			}	
 		} else {
 			//If for some reasons, we try to register a dice type that doesnt exist on the standard system, we add it there first.
 			//This should not happen because of internalAddDicePreset but I'm only 95% sure.
-			if(index<0){
-				this.systems.standard.dice.push(diceobj);
+			if(!hasDice){
+				this.systems.get("standard").dice.set(diceobj.type, diceobj);
 				if(diceobj.modelFile){
 					diceobj.loadModel(this.loaderGLTF);
 				} else {
@@ -298,7 +314,7 @@ export class DiceFactory {
 				}
 			}
 			//Then we add it to its own system. No need to load it, that will be taken care of automatically
-			this.systems[diceobj.system].dice.push(diceobj);
+			this.systems.get(diceobj.system).dice.set(diceobj.type, diceobj);
 		}
 	}
 
@@ -314,7 +330,7 @@ export class DiceFactory {
 					appearance.global.colorset = this.preferredColorset;
 			}
 			//load basic model
-			this.systems["standard"].dice.forEach((obj) =>{
+			this.systems.get("standard").dice.forEach((obj) =>{
 				activePresets.push(obj);
 			});
 			foundry.utils.mergeObject(appearance, config,{performDeletions:true});
@@ -323,8 +339,8 @@ export class DiceFactory {
 					if (appearance.hasOwnProperty(scope)) {
 						if(scope != "global")
 							activePresets.push(this.getPresetBySystem(scope, appearance[scope].system));
-						else if(this.systems.hasOwnProperty(appearance[scope].system)){
-							this.systems[appearance[scope].system].dice.forEach((obj) =>{
+						else if(this.systems.has(appearance[scope].system)){
+							this.systems.get(appearance[scope].system).dice.forEach((obj) =>{
 								activePresets.push(obj);
 							});
 						}
@@ -359,23 +375,22 @@ export class DiceFactory {
 
 	//{id: 'standard', name: game.i18n.localize("DICESONICE.System.Standard")}
 	//Internal use
-	//See dice3d.addSystem for API
-	addSystem(system, mode="default"){
-		system.dice = [];
-		system.mode = mode;
-		
+	//See dice3d.addSystem for public API
+	addSystem(system, mode="default", settings){
 		if(mode != "default" && this.preferredSystem == "standard")
 			this.preferredSystem = system.id;
-		this.systems[system.id] = system;
+
+		this.systems.set(system.id, new DiceSystem(system.id, system.name, null, mode, system.group));
 	}
+
 	//{type:"",labels:[],system:""}
 	//Should have been called "addDicePresetFromModel" but ¯\_(ツ)_/¯
 	addDicePreset(dice, shape = null){
-		let model = this.systems["standard"].dice.find(el => el.type == dice.type);
+		let model = this.systems.get("standard").dice.get(dice.type);
 		if(!model || !model.internalAdd){
 			if(!shape)
 				shape = dice.type;
-			model = this.systems["standard"].dice.find(el => el.type == shape);
+			model = this.systems.get("standard").dice.get(shape);
 		}
 		let preset = new DicePreset(dice.type, model.shape);
 		let denominator = dice.type.substr(1);
@@ -407,7 +422,7 @@ export class DiceFactory {
 		preset.fontScale = dice.fontScale || null;
 		preset.colorset = dice.colorset || null;
 		//If it overrides an existing model that isn't a numbered die, set a font scale to prevent undesired fontScale from previous model
-		if(!preset.fontScale && !["d2","d4","d6","d8","d10","d12","d14","d16","d20","d24","d30","d100"].includes(dice.type) && this.systems["standard"].dice.find(el => el.type == dice.type))
+		if(!preset.fontScale && !["d2","d4","d6","d8","d10","d12","d14","d16","d20","d24","d30","d100"].includes(dice.type) && this.systems.get("standard").dice.has(dice.type))
 			preset.fontScale = DICE_SCALE[shape];
 		
 		if(dice.bumpMaps && dice.bumpMaps.length)
@@ -441,7 +456,7 @@ export class DiceFactory {
 		else
 			shape += diceobj.faces;
 		let type = "d" + diceobj.constructor.DENOMINATION;
-		let model = this.systems["standard"].dice.find(el => el.type == shape);
+		let model = this.systems.get("standard").dice.get(shape);
 		let preset = new DicePreset(type, model.shape);
 		preset.term = diceobj.constructor.name;
 		let labels = [];
@@ -484,22 +499,26 @@ export class DiceFactory {
 	}
 
 	getPresetBySystem(type, system = "standard"){
-		let model = this.systems["standard"].dice.find(obj => obj.type == type);
+		let model = this.systems.get("standard").dice.get(type);
 		if(!model)
 			return null;
 		let diceobj = null;
 		if(system != "standard"){
-			if(this.systems.hasOwnProperty(system)){
-				diceobj = this.systems[system].dice.find(obj => obj.type == type && obj.shape == model.shape);
+			if(this.systems.has(system)){
+				// If it exists, we look for a similar shape
+				diceobj = this.systems.get(system).dice.get(type)?.shape == model.shape ? this.systems.get(system).dice.get(type) : null;
 				if(!diceobj && !['Coin', 'FateDie', 'Die'].includes(model.term)){
 					//If it doesn't exist and is not a core DiceTerm, we look for a similar shape and values
-					diceobj = this.systems[system].dice.find(obj => obj.shape == model.shape && obj.values.length == model.values.length && !model.colorset);
+					if(!model.colorset)
+						diceobj = this.systems.get(system).getDiceByShapeAndValues(model.shape, model.values);
+					else
+						diceobj = null;
 				}
 			}
 		}
 
 		if(!diceobj){
-			diceobj = this.systems.standard.dice.find(obj => obj.type == type);
+			diceobj = this.systems.get("standard").dice.get(type);
 		}
 		return diceobj;
 	}
@@ -532,7 +551,7 @@ export class DiceFactory {
 			if(!dicemesh.geometry)
 				dicemesh.geometry = {};
 			if(diceobj.model.animations.length>0){
-				dicemesh.mixer = new THREE.AnimationMixer(dicemesh);
+				dicemesh.mixer = new AnimationMixer(dicemesh);
 				dicemesh.mixer.clipAction(diceobj.model.animations[0]).play();
 			}
 		}else{
@@ -545,15 +564,15 @@ export class DiceFactory {
 			else
 				materials = this.createMaterials(scopedTextureCache, baseTextureCacheString, diceobj, materialData);
 			
-			dicemesh = new THREE.Mesh(geom, materials);
+			dicemesh = new Mesh(geom, materials);
 
 			//TODO: Find if this entire block is still needed
 			//I think not
 			if (diceobj.color) {
-				dicemesh.material[0].color = new THREE.Color(diceobj.color);
+				dicemesh.material[0].color = new Color(diceobj.color);
 				if(this.realisticLighting)
 					dicemesh.material[0].color.convertLinearToSRGB();
-				//dicemesh.material[0].emissive = new THREE.Color(diceobj.color);
+				//dicemesh.material[0].emissive = new Color(diceobj.color);
 				dicemesh.material[0].emissiveIntensity = diceobj.emissiveIntensity ? diceobj.emissiveIntensity : 1;
 				dicemesh.material[0].needsUpdate = true;
 			}
@@ -562,7 +581,7 @@ export class DiceFactory {
 		//Because of an orientation change in cannon-es for the Cylinder shape, we need to rotate the mesh for the d2
 		//https://github.com/pmndrs/cannon-es/pull/30
 		if(diceobj.shape == "d2")
-			dicemesh.lookAt(new THREE.Vector3(0,-1,0));
+			dicemesh.lookAt(new Vector3(0,-1,0));
 		
 		dicemesh.result = null;
 		dicemesh.shape = diceobj.shape;
@@ -593,19 +612,19 @@ export class DiceFactory {
 		}
 		switch(materialSelected.type){
 			case "phong":
-				mat = new THREE.MeshPhongMaterial(materialSelected.options);
+				mat = new MeshPhongMaterial(materialSelected.options);
 				break;
 			case "standard":
-				mat = new THREE.MeshStandardMaterial(materialSelected.options);
+				mat = new MeshStandardMaterial(materialSelected.options);
 				break;
 			case "lambert":
-				mat = new THREE.MeshLambertMaterial(materialSelected.options);
+				mat = new MeshLambertMaterial(materialSelected.options);
 				break;
 			case "physical":
-				mat = new THREE.MeshPhysicalMaterial(materialSelected.options);
+				mat = new MeshPhysicalMaterial(materialSelected.options);
 				break;
 			default: //plastic
-				mat = new THREE.MeshPhongMaterial(this.material_options.plastic.options);
+				mat = new MeshPhongMaterial(this.material_options.plastic.options);
 		}
 		if(materialSelected.scopedOptions){
 			if(materialSelected.scopedOptions.envMap)
@@ -702,25 +721,25 @@ export class DiceFactory {
 		//document.write('<img src="'+img+'"/>');
 		//generate basetexture for caching
 		if(!this.baseTextureCache[baseTextureCacheString]){
-			let texture = new THREE.CanvasTexture(canvas);
+			let texture = new CanvasTexture(canvas);
 			if(this.realisticLighting)
-				texture.colorSpace = THREE.SRGBColorSpace;
+				texture.colorSpace = SRGBColorSpace;
 			texture.flipY = false;
 			mat.map = texture;
 			mat.map.anisotropy = game.dice3d.box.anisotropy;
 
 			if(this.realisticLighting){
-				let bumpMap = new THREE.CanvasTexture(canvasBump);
+				let bumpMap = new CanvasTexture(canvasBump);
 				bumpMap.flipY = false;
 				mat.bumpMap = bumpMap;
 
-				let emissiveMap = new THREE.CanvasTexture(canvasEmissive);
+				let emissiveMap = new CanvasTexture(canvasEmissive);
 				if(this.realisticLighting)
-					emissiveMap.colorSpace = THREE.SRGBColorSpace;
+					emissiveMap.colorSpace = SRGBColorSpace;
 				emissiveMap.flipY = false;
 				mat.emissiveMap = emissiveMap;
 				mat.emissiveIntensity = diceobj.emissiveIntensity ? diceobj.emissiveIntensity:1;
-				mat.emissive = new THREE.Color(diceobj.emissive);
+				mat.emissive = new Color(diceobj.emissive);
 				if(this.realisticLighting)
 					mat.emissive.convertLinearToSRGB();
 			}
@@ -1269,7 +1288,7 @@ export class DiceFactory {
 	}
 	
 	loadGeometry(type, scopedScale) {
-		const loader = new THREE.BufferGeometryLoader();
+		const loader = new BufferGeometryLoader();
 		const bufferGeometry = loader.parse(DICE_MODELS[type]);
 		bufferGeometry.scale(scopedScale / 100, scopedScale / 100, scopedScale / 100);
 	

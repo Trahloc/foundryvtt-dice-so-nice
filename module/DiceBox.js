@@ -5,14 +5,42 @@ import { RendererStats } from './libs/threex.rendererstats.js';
 //import {GLTFExporter} from 'three/examples/jsm/loaders/exporters/GLTFExporter.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
-import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
-import { SMAAPass } from './libs/SMAAPass.js';
 import { GammaCorrectionShader } from 'three/examples/jsm/shaders/GammaCorrectionShader.js';
+import { SMAAPass } from './libs/SMAAPass.js';
 import { TransparentUnrealBloomPass } from './libs/TransparentUnrealBloomPass.js';
 
-import * as THREE from 'three';
+import {
+	ACESFilmicToneMapping,
+	Clock,
+	Color,
+	CubeTextureLoader,
+	DirectionalLight,
+	Euler,
+	FloatType,
+	Group,
+	HalfFloatType,
+	HemisphereLight,
+	MathUtils,
+	Mesh,
+	PCFSoftShadowMap,
+	PerspectiveCamera,
+	PlaneGeometry,
+	PMREMGenerator,
+	Quaternion,
+	Raycaster,
+	Scene,
+	ShaderMaterial,
+	ShadowMaterial,
+	SRGBColorSpace,
+	TextureLoader,
+	Vector2,
+	Vector3,
+	WebGLRenderer,
+	WebGLRenderTarget
+} from 'three';
 
 
 export class DiceBox {
@@ -29,8 +57,8 @@ export class DiceBox {
 		this.last_time = 0;
 		this.running = false;
 		this.allowInteractivity = false;
-		this.raycaster = new THREE.Raycaster();
-		this.blackColor = new THREE.Color(0, 0, 0);
+		this.raycaster = new Raycaster();
+		this.blackColor = new Color(0, 0, 0);
 		this.nbIterationsBetweenRolls = 15;
 
 		this.display = {
@@ -43,7 +71,7 @@ export class DiceBox {
 		};
 
 		this.mouse = {
-			pos: new THREE.Vector2(),
+			pos: new Vector2(),
 			startDrag: undefined,
 			startDragTime: undefined,
 			constraintDown: false,
@@ -57,7 +85,7 @@ export class DiceBox {
 			far: null
 		};
 
-		this.clock = new THREE.Clock();
+		this.clock = new Clock();
 
 		this.iteration;
 		this.renderer;
@@ -120,7 +148,7 @@ export class DiceBox {
 				this.speed = parseInt(globalAnimationSpeed, 10);
 			this.throwingForce = this.config.throwingForce;
 			this.immersiveDarkness = this.config.immersiveDarkness;
-			this.scene = new THREE.Scene();
+			this.scene = new Scene();
 			if (game.dice3d.dice3dRenderers[this.config.boxType] != null) {
 				this.renderer = game.dice3d.dice3dRenderers[this.config.boxType];
 				this.scene.environment = this.renderer.scopedTextureCache.textureCube;
@@ -130,11 +158,11 @@ export class DiceBox {
 			}
 			else {
 				const preserveDrawingBuffer = game.user.getFlag("dice-so-nice", "preserveDrawingBuffer") || false;
-				this.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: "high-performance", preserveDrawingBuffer: preserveDrawingBuffer });
+				this.renderer = new WebGLRenderer({ antialias: false, alpha: true, powerPreference: "high-performance", preserveDrawingBuffer: preserveDrawingBuffer });
 				if (this.dicefactory.useHighDPI)
 					this.renderer.setPixelRatio(window.devicePixelRatio);
 				if (this.dicefactory.realisticLighting) {
-					this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+					this.renderer.toneMapping = ACESFilmicToneMapping;
 					this.renderer.toneMappingExposure = this.toneMappingExposureDefault;
 				}
 				const capabilities = this.renderer.capabilities;
@@ -156,7 +184,7 @@ export class DiceBox {
 
 			this.container.appendChild(this.renderer.domElement);
 			this.renderer.shadowMap.enabled = this.dicefactory.shadows;
-			this.renderer.shadowMap.type = this.dicefactory.shadowQuality == "high" ? THREE.PCFSoftShadowMap : THREE.PCFShadowMap;
+			this.renderer.shadowMap.type = this.dicefactory.shadowQuality == "high" ? PCFSoftShadowMap : PCFShadowMap;
 			this.renderer.setClearColor(0x000000, 0.0);
 
 			this.setScene(this.config.dimensions);
@@ -183,7 +211,7 @@ export class DiceBox {
 		return new Promise(resolve => {
 			this.renderer.scopedTextureCache = { type: type };
 			if (this.dicefactory.realisticLighting) {
-				let textureLoader = new THREE.TextureLoader();
+				let textureLoader = new TextureLoader();
 				this.renderer.scopedTextureCache.roughnessMap_fingerprint = textureLoader.load('modules/dice-so-nice/textures/roughnessMap_finger.webp');
 				this.renderer.scopedTextureCache.roughnessMap_wood = textureLoader.load('modules/dice-so-nice/textures/roughnessMap_wood.webp');
 				this.renderer.scopedTextureCache.roughnessMap_metal = textureLoader.load('modules/dice-so-nice/textures/roughnessMap_metal.webp');
@@ -195,15 +223,15 @@ export class DiceBox {
 				this.renderer.scopedTextureCache.roughnessMap_metal.anisotropy = this.anisotropy;
 				this.renderer.scopedTextureCache.roughnessMap_stone.anisotropy = this.anisotropy;
 
-				this.pmremGenerator = new THREE.PMREMGenerator(this.renderer);
+				this.pmremGenerator = new PMREMGenerator(this.renderer);
 				this.pmremGenerator.compileEquirectangularShader();
 
 				new RGBELoader()
-					.setDataType(THREE.HalfFloatType)
+					.setDataType(HalfFloatType)
 					.setPath('modules/dice-so-nice/textures/equirectangular/')
 					.load('blouberg_sunrise_2_1k.hdr', function (texture) {
 						this.renderer.scopedTextureCache.textureCube = this.pmremGenerator.fromEquirectangular(texture).texture;
-						this.renderer.scopedTextureCache.textureCube.colorSpace = THREE.SRGBColorSpace;
+						this.renderer.scopedTextureCache.textureCube.colorSpace = SRGBColorSpace;
 						this.scene.environment = this.renderer.scopedTextureCache.textureCube;
 						//this.scene.background = this.renderer.scopedTextureCache.textureCube;
 						texture.dispose();
@@ -212,7 +240,7 @@ export class DiceBox {
 
 					}.bind(this));
 			} else {
-				let loader = new THREE.CubeTextureLoader();
+				let loader = new CubeTextureLoader();
 				loader.setPath('modules/dice-so-nice/textures/cubemap/');
 
 				this.renderer.scopedTextureCache.textureCube = loader.load([
@@ -262,7 +290,7 @@ export class DiceBox {
 		this.cameraHeight.close = this.cameraHeight.max / 2;
 
 		if (this.camera) this.scene.remove(this.camera);
-		this.camera = new THREE.PerspectiveCamera(20, this.display.currentWidth / this.display.currentHeight, 1, this.cameraHeight.max * 1.3);
+		this.camera = new PerspectiveCamera(20, this.display.currentWidth / this.display.currentHeight, 1, this.cameraHeight.max * 1.3);
 
 		switch (this.config.boxType) {
 			case "showcase":
@@ -272,7 +300,7 @@ export class DiceBox {
 				this.camera.position.z = this.cameraHeight.far;
 		}
 		this.camera.near = 10;
-		this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+		this.camera.lookAt(new Vector3(0, 0, 0));
 
 		const maxwidth = Math.max(this.display.containerWidth, this.display.containerHeight);
 
@@ -294,10 +322,10 @@ export class DiceBox {
 		}
 
 
-		this.light_amb = new THREE.HemisphereLight(this.colors.ambient, this.colors.ground, intensity_amb);
+		this.light_amb = new HemisphereLight(this.colors.ambient, this.colors.ground, intensity_amb);
 		this.scene.add(this.light_amb);
 
-		this.light = new THREE.DirectionalLight(this.colors.spotlight, intensity);
+		this.light = new DirectionalLight(this.colors.spotlight, intensity);
 		if (this.config.boxType == "board")
 			this.light.position.set(-this.display.containerWidth / 10, this.display.containerHeight / 10, maxwidth / 2);
 		else
@@ -322,15 +350,15 @@ export class DiceBox {
 		if (this.desk)
 			this.scene.remove(this.desk);
 
-		let shadowplane = new THREE.ShadowMaterial();
+		let shadowplane = new ShadowMaterial();
 		shadowplane.opacity = 0.5;
-		this.desk = new THREE.Mesh(new THREE.PlaneGeometry(this.display.containerWidth * 6, this.display.containerHeight * 6, 1, 1), shadowplane);
+		this.desk = new Mesh(new PlaneGeometry(this.display.containerWidth * 6, this.display.containerHeight * 6, 1, 1), shadowplane);
 		this.desk.receiveShadow = this.dicefactory.shadows;
 		this.desk.position.set(0, 0, -1);
 		this.scene.add(this.desk);
 		if (this.dicefactory.realisticLighting) {
 			let renderScene = new RenderPass(this.scene, this.camera);
-			const canvasSize = new THREE.Vector2(this.display.currentWidth * 2, this.display.currentHeight * 2);
+			const canvasSize = new Vector2(this.display.currentWidth * 2, this.display.currentHeight * 2);
 			this.bloomPass = new TransparentUnrealBloomPass(canvasSize, game.dice3d.uniforms.bloomStrength.value, game.dice3d.uniforms.bloomRadius.value, game.dice3d.uniforms.bloomThreshold.value);
 			this.gammaPass = new ShaderPass(GammaCorrectionShader);
 
@@ -341,7 +369,7 @@ export class DiceBox {
 			let size = canvasSize.multiplyScalar(this.renderer.getPixelRatio());
 			//Create a RenderTarget with high precision
 			let options = {
-				type: game.canvas.app.renderer.context.extensions.floatTextureLinear ? THREE.FloatType : THREE.HalfFloatType,
+				type: game.canvas.app.renderer.context.extensions.floatTextureLinear ? FloatType : HalfFloatType,
 				samples: this.dicefactory.aa == "msaa" ? 4 : 0,
 				anisotropy: this.anisotropy
 			};
@@ -349,7 +377,7 @@ export class DiceBox {
 			if (navigator.userAgent.indexOf('Mac OS X') != -1 && navigator.userAgent.indexOf('Chrome') != -1) {
 				options.stencilBuffer = true;
 			}
-			this.composerTarget = new THREE.WebGLRenderTarget(size.x, size.y, options);
+			this.composerTarget = new WebGLRenderTarget(size.x, size.y, options);
 
 			// This EffectComposer is in charge of rendering the Bloom/Glow effect
 			this.bloomComposer = new EffectComposer(this.renderer, this.composerTarget);
@@ -359,7 +387,7 @@ export class DiceBox {
 
 			//This shader will blend the bloom effect with the scene. Only the alpha from the bloom effect will be used.
 			this.blendingPass = new ShaderPass(
-				new THREE.ShaderMaterial({
+				new ShaderMaterial({
 					uniforms: {
 						baseTexture: { value: null },
 						bloomTexture: { value: this.bloomComposer.renderTarget2.texture },
@@ -435,7 +463,7 @@ export class DiceBox {
 		this.light.castShadow = this.dicefactory.shadows;
 		this.desk.receiveShadow = this.dicefactory.shadows;
 		this.renderer.shadowMap.enabled = this.dicefactory.shadows;
-		this.renderer.shadowMap.type = this.dicefactory.shadowQuality == "high" ? THREE.PCFSoftShadowMap : THREE.PCFShadowMap;
+		this.renderer.shadowMap.type = this.dicefactory.shadowQuality == "high" ? PCFSoftShadowMap : PCFShadowMap;
 
 		await this.dicefactory.preloadPresets(true, null, config.appearance);
 
@@ -574,8 +602,8 @@ export class DiceBox {
 			console.log(`[Dice So Nice] No dice rotation found for ${dicemesh.shape} ${value} ${result}`);
 			rotationDegrees = [0, 0, 0];
 		}
-		let eulerAngle = new THREE.Euler(THREE.MathUtils.degToRad(rotationDegrees[0]), THREE.MathUtils.degToRad(rotationDegrees[1]), THREE.MathUtils.degToRad(rotationDegrees[2]));
-		let quaternion = new THREE.Quaternion().setFromEuler(eulerAngle);
+		let eulerAngle = new Euler(MathUtils.degToRad(rotationDegrees[0]), MathUtils.degToRad(rotationDegrees[1]), MathUtils.degToRad(rotationDegrees[2]));
+		let quaternion = new Quaternion().setFromEuler(eulerAngle);
 		if (value > result)
 			quaternion.invert();
 
@@ -587,8 +615,8 @@ export class DiceBox {
 	  swapTest(dicemesh, mapping, invert = false, revert = true) {
   
 		  let rotationDegrees = DICE_MODELS[dicemesh.shape].rotationCombinations[mapping];
-		  let eulerAngle = new THREE.Euler(THREE.MathUtils.degToRad(rotationDegrees[0]), THREE.MathUtils.degToRad(rotationDegrees[1]), THREE.MathUtils.degToRad(rotationDegrees[2]));
-		  let quaternion = new THREE.Quaternion().setFromEuler(eulerAngle);
+		  let eulerAngle = new Euler(MathUtils.degToRad(rotationDegrees[0]), MathUtils.degToRad(rotationDegrees[1]), MathUtils.degToRad(rotationDegrees[2]));
+		  let quaternion = new Quaternion().setFromEuler(eulerAngle);
 		  if (invert)
 			  quaternion.invert();
   
@@ -604,8 +632,8 @@ export class DiceBox {
 	// Apply an euler angle directly for debugging
 	  swapTest(dicemesh, mapping, invert = false, revert = true) {
 	  swapTestEuler(dicemesh, euler, invert = false, revert = true) {
-		  let eulerAngle = new THREE.Euler(THREE.MathUtils.degToRad(euler[0]), THREE.MathUtils.degToRad(euler[1]), THREE.MathUtils.degToRad(euler[2]));
-		  let quaternion = new THREE.Quaternion().setFromEuler(eulerAngle);
+		  let eulerAngle = new Euler(MathUtils.degToRad(euler[0]), MathUtils.degToRad(euler[1]), MathUtils.degToRad(euler[2]));
+		  let quaternion = new Quaternion().setFromEuler(eulerAngle);
 		  if (invert)
 			  quaternion.invert();
   
@@ -621,7 +649,7 @@ export class DiceBox {
 	// Extract the euler angle from a mesh in degrees for debugging
 	  extractEuler(dicemesh) {
 		  let euler = dicemesh.rotation
-		  console.log("World Euler:", THREE.MathUtils.radToDeg(euler.x), THREE.MathUtils.radToDeg(euler.y), THREE.MathUtils.radToDeg(euler.z), euler.order)
+		  console.log("World Euler:", MathUtils.radToDeg(euler.x), MathUtils.radToDeg(euler.y), MathUtils.radToDeg(euler.z), euler.order)
 	  }
 	*/
 
@@ -676,16 +704,16 @@ export class DiceBox {
 				//If the darkness level is less than 0.5, we activate the "glowing in the dark" mode
 				//This mode is activated by setting the userData.glowingInDarkness to true on the mesh of the dice
 				dicemesh.material.emissiveIntensity = 0.3;
-				dicemesh.material.emissive = new THREE.Color(0xffffff);
+				dicemesh.material.emissive = new Color(0xffffff);
 			} else {
 				dicemesh.material.emissiveIntensity = 0;
-				dicemesh.material.emissive = new THREE.Color(0x000000);
+				dicemesh.material.emissive = new Color(0x000000);
 			}
 		}
 
 		//dicemesh.meshCannon = this.body2mesh(dicemesh.body_sim,true);
 
-		let objectContainer = new THREE.Group();
+		let objectContainer = new Group();
 		objectContainer.add(dicemesh);
 
 		this.diceList.push(dicemesh);
@@ -1061,8 +1089,8 @@ export class DiceBox {
 
 	async showcase(config) {
 		this.clearAll();
-
-		let selectordice = this.dicefactory.systems.standard.dice.map(dice => dice.type);
+		//Get dice type list as an array
+		let selectordice = [...this.dicefactory.systems.get("standard").dice.keys()];
 		const extraDiceTypes = ["d3", "d5", "d7", "d14", "d16", "d24", "d30"];
 		if (!this.showExtraDice)
 			selectordice = selectordice.filter((die) => !extraDiceTypes.includes(die));
@@ -1081,10 +1109,10 @@ export class DiceBox {
 		if (this.desk) this.scene.remove(this.desk);
 		if (this.dicefactory.shadows) {
 
-			let shadowplane = new THREE.ShadowMaterial();
+			let shadowplane = new ShadowMaterial();
 			shadowplane.opacity = 0.5;
 
-			this.pane = new THREE.Mesh(new THREE.PlaneGeometry(this.display.containerWidth * 2, this.display.containerHeight * 2, 1, 1), shadowplane);
+			this.pane = new Mesh(new PlaneGeometry(this.display.containerWidth * 2, this.display.containerHeight * 2, 1, 1), shadowplane);
 			this.pane.receiveShadow = this.dicefactory.shadows;
 			this.pane.position.set(0, 0, -70);
 			this.scene.add(this.pane);
@@ -1152,102 +1180,6 @@ export class DiceBox {
 			this.renderScene();
 		}
 	}
-
-	//used to debug cannon shape vs three shape
-	/*body2mesh(body) {
-		var obj = new THREE.Object3D();
-		let currentMaterial = new THREE.MeshBasicMaterial({ wireframe: true });
-		for (var l = 0; l < body.shapes.length; l++) {
-			var shape = body.shapes[l];
-
-			var mesh;
-
-			switch (shape.type) {
-
-				case CANNON.Shape.types.SPHERE:
-					var sphere_geometry = new THREE.SphereGeometry(shape.radius, 8, 8);
-					mesh = new THREE.Mesh(sphere_geometry, currentMaterial);
-					break;
-
-				case CANNON.Shape.types.CYLINDER:
-					var geometry = new THREE.CylinderGeometry(shape.radiusTop, shape.radiusBottom, shape.height, 8, 1);
-					mesh = new THREE.Mesh(geometry, currentMaterial);
-					break;
-
-				case CANNON.Shape.types.PARTICLE:
-					mesh = new THREE.Mesh(this.particleGeo, this.particleMaterial);
-					var s = this.settings;
-					mesh.scale.set(s.particleSize, s.particleSize, s.particleSize);
-					break;
-
-				case CANNON.Shape.types.PLANE:
-					var geometry = new THREE.PlaneGeometry(10, 10, 4, 4);
-					mesh = new THREE.Object3D();
-					var submesh = new THREE.Object3D();
-					var ground = new THREE.Mesh(geometry, currentMaterial);
-					ground.scale.set(100, 100, 100);
-					submesh.add(ground);
-
-					ground.castShadow = true;
-					ground.receiveShadow = true;
-
-					mesh.add(submesh);
-					break;
-
-				case CANNON.Shape.types.BOX:
-					var box_geometry = new THREE.BoxGeometry(shape.halfExtents.x * 2,
-						shape.halfExtents.y * 2,
-						shape.halfExtents.z * 2);
-					mesh = new THREE.Mesh(box_geometry, currentMaterial);
-					break;
-
-				case CANNON.Shape.types.CONVEXPOLYHEDRON:
-					var geo = new THREE.BufferGeometry()
-					var points = []
-					for (var i = 0; i < shape.faces.length; i++) {
-						var face = shape.faces[i];
-
-						for (var j = 0; j < face.length - 1; j++) {
-							var a = shape.vertices[face[j]];
-							var b = shape.vertices[face[j + 1]];
-							points.push(a);
-							points.push(b);
-						}
-					}
-					geo.setFromPoints(points);
-					geo.computeVertexNormals();
-					mesh = new THREE.Mesh(geo, currentMaterial);
-					break;
-
-				default:
-					throw "Visual type not recognized: " + shape.type;
-			}
-
-			//mesh.receiveShadow = this.dicefactory.shadows;
-			mesh.castShadow = this.dicefactory.shadows;
-			if (mesh.children) {
-				for (var i = 0; i < mesh.children.length; i++) {
-					mesh.children[i].castShadow = true;
-					mesh.children[i].receiveShadow = true;
-					if (mesh.children[i]) {
-						for (var j = 0; j < mesh.children[i].length; j++) {
-							mesh.children[i].children[j].castShadow = true;
-							mesh.children[i].children[j].receiveShadow = true;
-						}
-					}
-				}
-			}
-
-			var o = body.shapeOffsets[l];
-			var q = body.shapeOrientations[l];
-			mesh.position.set(o.x, o.y, o.z);
-			mesh.quaternion.set(q.x, q.y, q.z, q.w);
-
-			obj.add(mesh);
-		}
-
-		return obj;
-	}*/
 
 	findRootObject(object) {
 		if (object.hasOwnProperty("shape"))

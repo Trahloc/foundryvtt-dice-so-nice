@@ -1,6 +1,7 @@
 {
   "name": "foundryvtt-dice-so-nice",
-  "version": "4.5.1",
+  "type": "module",
+  "version": "5.0.0",
   "description": "Adds the ability to show a nice 3D dice simulation when a roll is made.",
   "main": "index.js",
   "scripts": {
@@ -17,19 +18,18 @@
   },
   "homepage": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice#readme",
   "dependencies": {
-    "@rollup/plugin-node-resolve": "^13.1.2",
     "cannon-es": "^0.20.0",
     "cannon-es-debugger": "^1.0.0",
-    "rollup": "^2.58.3",
-    "rollup-plugin-copy": "^3.4.0",
-    "rollup-plugin-delete": "^2.0.0",
-    "rollup-plugin-sourcemaps": "^0.6.3",
-    "rollup-plugin-terser": "^7.0.2",
-    "rollup-plugin-web-worker-loader": "^1.6.1",
+    "rollup": "^4.19.1",
     "three": "github:JiDW/three.js#master",
     "webworker-promise": "^0.5.1"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^24.0.1"
+    "@kineticcafe/rollup-plugin-delete": "^3.0.0",
+    "@rollup/plugin-commonjs": "^26.0.1",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "rollup-plugin-copy": "^3.5.0",
+    "rollup-plugin-web-worker-loader": "github:JiDW/rollup-plugin-web-worker-loader#master"
   }
 }

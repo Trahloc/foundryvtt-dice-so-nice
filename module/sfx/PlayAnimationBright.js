@@ -1,5 +1,5 @@
+import { Clock, Color } from 'three';
 import { DiceSFX } from '../DiceSFX.js';
-import * as THREE from 'three';
 import { ShaderUtils } from './../ShaderUtils';
 
 export class PlayAnimationBright extends DiceSFX {
@@ -10,7 +10,7 @@ export class PlayAnimationBright extends DiceSFX {
     static sound = "modules/dice-so-nice/sfx/sounds/bright.mp3";
     /**@override init */
     static async init() {
-        PlayAnimationBright.brightColor = new THREE.Color(0.3,0.3,0.3);
+        PlayAnimationBright.brightColor = new Color(0.3,0.3,0.3);
         this.glowingMesh=null;
         game.audio.pending.push(function(){
             foundry.audio.AudioHelper.preloadSound(PlayAnimationBright.sound);
@@ -32,7 +32,7 @@ export class PlayAnimationBright extends DiceSFX {
         }
         if(!this.glowingMesh.material.emissiveMap)
             return false;
-        this.clock = new THREE.Clock();
+        this.clock = new Clock();
         this.baseColor = this.glowingMesh.material.emissive.clone();
         this.baseMaterial = this.glowingMesh.material;
         this.glowingMesh.material = this.baseMaterial.clone();

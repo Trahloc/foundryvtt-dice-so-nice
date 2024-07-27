@@ -202,25 +202,27 @@ import { TEXTURELIST, COLORSETS } from './DiceColors.js';
 
     static prepareSystemList() {
         let systems = game.dice3d.box.dicefactory.systems;
-        return Object.keys(systems).sort((a, b) => {
-            if (a === "standard") {
+        return [...systems.values()].sort((systemA, systemB) => {
+            // Direct comparison since we're now working directly with the values
+            if (systemA.id === "standard") {
                 return -1;
-            } else if (b === "standard") {
+            } else if (systemB.id === "standard") {
                 return 1;
-            } else if (systems[a].group === systems[b].group) {
-                return systems[a].name.localeCompare(systems[b].name);
-            } else if (systems[a].group === null) {
+            } else if (systemA.group === systemB.group) {
+                return systemA.name.localeCompare(systemB.name);
+            } else if (systemA.group === null) {
                 return 1;
-            } else if (systems[b].group === null) {
+            } else if (systemB.group === null) {
                 return -1;
             } else {
-                return systems[a].group.localeCompare(systems[b].group);
+                return systemA.group.localeCompare(systemB.group);
             }
-        }).reduce((i18nCfg, key) => {
-            i18nCfg[key] = { label:game.i18n.localize(systems[key].name), group: systems[key].group };
+        }).reduce((i18nCfg, system) => {
+            // Use system.id as the key for i18nCfg
+            i18nCfg[system.id] = { label: game.i18n.localize(system.name), group: system.group };
             return i18nCfg;
         }, {});
-    };
+    }
 
     static filterObject(obj, predicate) {
         return Object.keys(obj)

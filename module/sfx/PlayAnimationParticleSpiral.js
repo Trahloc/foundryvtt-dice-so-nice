@@ -1,5 +1,5 @@
+import { AddEquation, CustomBlending, OneFactor, Sprite, SpriteMaterial, SrcAlphaFactor } from 'three';
 import { DiceSFX } from '../DiceSFX.js';
-import * as THREE from 'three';
 import { Proton } from '../libs/three.proton.js';
 import { DiceSFXManager } from './../DiceSFXManager';
 
@@ -13,16 +13,16 @@ export class PlayAnimationParticleSpiral extends DiceSFX {
     /**@override init */
     static async init() {
         let map = await this.loadAsset(DiceSFXManager.TextureLoader, PlayAnimationParticleSpiral.dot);
-        let material = new THREE.SpriteMaterial({
+        let material = new SpriteMaterial({
             map: map,
             color: 0xff0000,
-            blending: THREE.CustomBlending,
-            blendSrc: THREE.SrcAlphaFactor,
-            blendDst: THREE.OneFactor,
-            blendEquation: THREE.AddEquation,
+            blending: CustomBlending,
+            blendSrc: SrcAlphaFactor,
+            blendDst: OneFactor,
+            blendEquation: AddEquation,
             fog: true
         });
-        PlayAnimationParticleSpiral.sprite = new THREE.Sprite(material);
+        PlayAnimationParticleSpiral.sprite = new Sprite(material);
         game.audio.pending.push(function(){
             foundry.audio.AudioHelper.preloadSound(PlayAnimationParticleSpiral.sound);
         }.bind(this));
