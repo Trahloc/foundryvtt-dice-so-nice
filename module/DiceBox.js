@@ -10,7 +10,7 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { GammaCorrectionShader } from 'three/examples/jsm/shaders/GammaCorrectionShader.js';
 import { SMAAPass } from './libs/SMAAPass.js';
-import { TransparentUnrealBloomPass } from './libs/TransparentUnrealBloomPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 
 import {
 	ACESFilmicToneMapping,
@@ -23,8 +23,10 @@ import {
 	Group,
 	HalfFloatType,
 	HemisphereLight,
+	Layers,
 	MathUtils,
 	Mesh,
+	MeshBasicMaterial,
 	PCFSoftShadowMap,
 	PerspectiveCamera,
 	PlaneGeometry,
@@ -124,6 +126,14 @@ export class DiceBox {
 		this.afterThrowFunctions = {};
 
 		this.soundManager = new SoundManager();
+
+		this.layers = {
+			dice: 0,
+			bloom: 1
+		};
+
+		this.bloomMaterials = {};
+		this.darkMaterial = new MeshBasicMaterial({ color: 'black' });
 	}
 
 	initialize() {
@@ -359,7 +369,9 @@ export class DiceBox {
 		if (this.dicefactory.realisticLighting) {
 			let renderScene = new RenderPass(this.scene, this.camera);
 			const canvasSize = new Vector2(this.display.currentWidth * 2, this.display.currentHeight * 2);
-			this.bloomPass = new TransparentUnrealBloomPass(canvasSize, game.dice3d.uniforms.bloomStrength.value, game.dice3d.uniforms.bloomRadius.value, game.dice3d.uniforms.bloomThreshold.value);
+			this.bloomPass = new UnrealBloomPass(canvasSize, game.dice3d.uniforms.bloomStrength.value, game.dice3d.uniforms.bloomRadius.value, game.dice3d.uniforms.bloomThreshold.value);
+			this.bloomLayer = new Layers();
+			this.bloomLayer.set(this.layers.bloom);
 			this.gammaPass = new ShaderPass(GammaCorrectionShader);
 
 			// Add an outline pass for the outline sfx
@@ -404,9 +416,11 @@ export class DiceBox {
 						uniform sampler2D bloomTexture;
 						varying vec2 vUv;
 						void main() {
-							vec4 base = texture2D( baseTexture, vUv );
-							vec4 bloom = texture2D( bloomTexture, vUv );
-							gl_FragColor = vec4(base.rgb + ( vec3( 1.0 ) * bloom.rgb ), bloom.a);
+							vec4 base_color = texture2D(baseTexture, vUv);
+							vec4 bloom_color = texture2D(bloomTexture, vUv);
+
+							float lum = 0.21 * bloom_color.r + 0.71 * bloom_color.g + 0.07 * bloom_color.b;
+							gl_FragColor = vec4(base_color.rgb + bloom_color.rgb, max(base_color.a, lum));
 						}
 					`,
 					defines: {}
@@ -731,11 +745,11 @@ export class DiceBox {
 			//Can't await here because of the PIXI ticker. Hopefully it's not needed.
 			this.rolling = false;
 			for (let i = 0, len = this.diceList.length; i < len; ++i) {
-				if(!this.diceList[i].sim)
+				if (!this.diceList[i].sim)
 					continue;
 				this.diceList[i].sim.stepPositions = new Float32Array(1001 * 3);
 				this.diceList[i].sim.stepQuaternions = new Float32Array(1001 * 4);
-				if(this.diceList[i].dead > 0)
+				if (this.diceList[i].dead > 0)
 					this.diceList[i].static = true;
 			}
 		}
@@ -822,7 +836,7 @@ export class DiceBox {
 
 			for (const child of this.scene.children) {
 				let dicemesh = child.children && child.children.length && child.children[0].sim != undefined && !child.children[0].sim.dead ? child.children[0] : null;
-				
+
 				if (dicemesh && dicemesh.sim.stepPositions[this.iteration * 3]) {
 					child.position.fromArray(dicemesh.sim.stepPositions, this.iteration * 3);
 					child.quaternion.fromArray(dicemesh.sim.stepQuaternions, this.iteration * 4);
@@ -840,12 +854,12 @@ export class DiceBox {
 		} else if (!this.rolling) {
 			this.physicsWorker.exec('playStep', {
 				time_diff: time_diff
-			}).then(({ ids, quaternionsBuffers, positionsBuffers, worldAsleep}) => {
+			}).then(({ ids, quaternionsBuffers, positionsBuffers, worldAsleep }) => {
 				//If nothing is returned, skip the rest of the function
-				if(!ids)
+				if (!ids)
 					return;
 
-				if(worldAsleep)
+				if (worldAsleep)
 					return;
 				// Create a mapping of IDs to their index in the 'ids' array
 				const quaternions = new Float32Array(quaternionsBuffers);
@@ -878,6 +892,7 @@ export class DiceBox {
 				let darknessLevel = canvas.darknessLevel || 0;
 				this.renderer.toneMappingExposure = this.toneMappingExposureDefault * 0.4 + (this.toneMappingExposureDefault * 0.6 - darknessLevel * 0.6);
 			}
+
 			this.renderScene();
 		}
 		if (this.rendererStats)
@@ -947,7 +962,8 @@ export class DiceBox {
 		if (this.pane) this.scene.remove(this.pane);
 
 		if (this.config.boxType == "board") {
-			await this.physicsWorker.exec("removeDice", diceToRemove);
+			if(this.physicsWorker)
+				await this.physicsWorker.exec("removeDice", diceToRemove);
 			DiceSFXManager.clearQueue();
 			this.removeTicker(this.animateThrow);
 		} else {
@@ -959,7 +975,24 @@ export class DiceBox {
 		this.isVisible = false;
 	}
 
+	darkenNonBloomed(obj) {
+		if (obj.isMesh && this.bloomLayer.test(obj.layers) === false) {
+			this.bloomMaterials[obj.uuid] = obj.material;
+			obj.material = this.darkMaterial;
+		}
+	}
+
+	restoreMaterial(obj) {
+		if (this.bloomMaterials[obj.uuid]) {
+			obj.material = this.bloomMaterials[obj.uuid];
+			delete this.bloomMaterials[obj.uuid];
+		}
+	}
+
 	renderScene() {
+		//Update time uniform
+		game.dice3d.uniforms.time.value = performance.now() / 1000;
+
 		if (this.dicefactory.realisticLighting) {
 			game.dice3d.uniforms.globalBloom.value = 1;
 			if (!this.finalComposer)
@@ -975,7 +1008,11 @@ export class DiceBox {
 				}
 			});
 			if (hasEmissive && this.dicefactory.glow) {
+				// Darken non-bloomed materials
+				this.scene.traverseVisible(this.darkenNonBloomed.bind(this));
 				this.bloomComposer.render();
+				//restore materials
+				this.scene.traverseVisible(this.restoreMaterial.bind(this));
 				this.blendingPass.enabled = true;
 			} else {
 				this.blendingPass.enabled = false;

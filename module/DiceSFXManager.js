@@ -78,7 +78,7 @@ export const DiceSFXManager = {
         });
     },
     addSFXMode : async function(sfx){
-        if(sfx.id && sfx.specialEffectName && !sfx.initialized){
+        if(sfx && sfx.id && sfx.specialEffectName && !sfx.initialized){
             DiceSFXManager.SFX_CLASS[sfx.id] = sfx;
             sfx.initialized = true;
             await sfx.init();
@@ -142,5 +142,9 @@ export const DiceSFXManager = {
             DiceSFXManager.garbageCollector[i].destroy();
         }
         DiceSFXManager.garbageCollector = [];
+    },
+    registerSFXModeClass : function(sfxClass){
+        DiceSFXManager.SFX_MODE_CLASS[sfxClass.id] = sfxClass;
+        DiceSFXManager.SFX_MODE_LIST[sfxClass.id] = sfxClass.specialEffectName;
     }
 }

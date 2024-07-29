@@ -576,6 +576,7 @@ export class DiceFactory {
 				dicemesh.material[0].emissiveIntensity = diceobj.emissiveIntensity ? diceobj.emissiveIntensity : 1;
 				dicemesh.material[0].needsUpdate = true;
 			}
+			dicemesh.layers.enableAll();
 		}
 
 		//Because of an orientation change in cannon-es for the Cylinder shape, we need to rotate the mesh for the d2

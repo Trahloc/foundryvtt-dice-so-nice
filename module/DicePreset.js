@@ -235,7 +235,8 @@ export class DicePreset {
 
 							if (node.material.metalnessMap !== null)
 								node.material.metalnessMap.anisotropy = anisotropy;
-
+							node.layers.enableAll();
+							Hooks.callAll("diceSoNiceOnMaterialReady", node.material, null);
 						}
 					});
 					this.model = gltf;

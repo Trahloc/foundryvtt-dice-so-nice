@@ -8,6 +8,7 @@ import { Utils } from './Utils.js';
 import { ThinFilmFresnelMap } from './libs/ThinFilmFresnelMap.js';
 import { TextureLoader } from 'three';
 import { DiceTourMain } from './tours/DiceTourMain.js';
+import { DiceSFX } from './DiceSFX.js';
 /**
  * Main class to handle 3D Dice animations.
  */
@@ -242,6 +243,16 @@ export class Dice3D {
     }
 
     /**
+     * Registers a new SFX mode class with the DiceSFXManager.
+     *
+     * @param {DiceSFX} sfxClass - The SFX mode class to be registered.
+     * @return {void}
+     */
+    addSFXMode(sfxClass) {
+        DiceSFXManager.registerSFXModeClass(sfxClass);
+    }
+
+    /**
      * Load a save file by its name
      * @param {String} name 
      * @returns {Promise}
@@ -271,12 +282,13 @@ export class Dice3D {
 
         this.uniforms = {
             globalBloom: { value: 1 },
-            bloomStrength: { value: 2.5 },
-            bloomRadius: { value: 0.5 },
-            bloomThreshold: { value: 0.03 },
+            bloomStrength: { value: 1.2 },
+            bloomRadius: { value: 0.2 },
+            bloomThreshold: { value: 0 },
             iridescenceLookUp: { value: new ThinFilmFresnelMap() },
             iridescenceNoise: { value: new TextureLoader().load("modules/dice-so-nice/textures/noise-thin-film.webp") },
-            boost: { value: 1.5 }
+            boost: { value: 1.5 },
+            time: { value: 0 }
         };
 
         this.hiddenAnimationQueue = [];

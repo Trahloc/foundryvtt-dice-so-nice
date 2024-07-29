@@ -19,7 +19,6 @@ export class PlayAnimationBright extends DiceSFX {
 
     /**@override play */
     async play() {
-        
         if(!this.dicemesh.material && this.dicemesh.userData.glow){
             //We check if there's a glow target specified
             this.dicemesh.traverse(object => {
@@ -35,7 +34,10 @@ export class PlayAnimationBright extends DiceSFX {
         this.clock = new Clock();
         this.baseColor = this.glowingMesh.material.emissive.clone();
         this.baseMaterial = this.glowingMesh.material;
+        let userData = this.baseMaterial.userData;
+        this.baseMaterial.userData = {};
         this.glowingMesh.material = this.baseMaterial.clone();
+        this.glowingMesh.userData = userData;
         this.glowingMesh.material.onBeforeCompile = ShaderUtils.applyDiceSoNiceShader;
         foundry.audio.AudioHelper.play({
             src: PlayAnimationBright.sound,

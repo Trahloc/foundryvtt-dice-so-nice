@@ -55,6 +55,13 @@ const config = {
         dest: `dist${file.folder ? `/${file.folder}` : ""}`,
       })),
     }),
+    // Add a copy of three.js to the libs folder for external usage
+    !isWatch && copy({
+      targets: [{ 
+        src: `node_modules/three/build/three.module.min.js`,
+        dest: `dist/libs`
+      }]
+    }),
     nodeResolve({
       browser: true,
       preferBuiltins: false

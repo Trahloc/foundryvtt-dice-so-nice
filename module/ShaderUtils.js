@@ -24,7 +24,8 @@ export class ShaderUtils {
             ShaderUtils.iridescenceShaderFragment(shader);
         }
 
-        Hooks.callAll("diceSoNiceShaderOnBeforeCompile", shader, this)
+        Hooks.callAll("diceSoNiceShaderOnBeforeCompile", shader, this);
+		this.userData.shader = shader;
     }
 
 
@@ -46,7 +47,7 @@ export class ShaderUtils {
 			`#include <dithering_fragment>
 			if (globalBloom > 0.5) {
 				#ifdef USE_EMISSIVEMAP
-					gl_FragColor.rgb = texture2D( emissiveMap, vMapUv ).rgb * emissive;
+					gl_FragColor.rgb = emissiveColor.rgb * emissive * totalEmissiveRadiance;
 				#else
 					gl_FragColor.rgb = vec3(0.0);
 				#endif
