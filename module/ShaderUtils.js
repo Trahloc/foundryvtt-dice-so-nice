@@ -16,10 +16,6 @@ export class ShaderUtils {
             ShaderUtils.iridescentShaderFragment(shader);
         }
 
-        if (shader.shaderName == "MeshPhysicalMaterial" && shader.transmission) {
-            ShaderUtils.transmissionAlphaShaderFragment(shader);
-        }
-
         if (shader.shaderName == "MeshPhysicalMaterial" && shader.iridescence) {
             ShaderUtils.iridescenceShaderFragment(shader);
         }
@@ -27,15 +23,6 @@ export class ShaderUtils {
         Hooks.callAll("diceSoNiceShaderOnBeforeCompile", shader, this);
 		this.userData.shader = shader;
     }
-
-
-	static transmissionAlphaShaderFragment(shader) {
-		shader.fragmentShader = shader.fragmentShader.replace(`#include <transmission_fragment>`,
-			`#include <transmission_fragment>
-			totalDiffuse = mix( totalDiffuse, transmission.rgb, transmissionFactor);
-			float grey = (material.diffuseColor.r + material.diffuseColor.g + material.diffuseColor.b) / 3.0;
-			transmissionAlpha = mix( transmissionAlpha, 1.0-grey, transmissionFactor );`);
-	}
 
 	static selectiveBloomShaderFragment(shader) {
 		shader.uniforms.globalBloom = game.dice3d.uniforms.globalBloom;

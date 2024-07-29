@@ -320,6 +320,7 @@ EXTRA_PRESETS_LIST.push({
         'df-p.webp'
     ],
     emissive: 0xffffff,
+    emissiveIntensity: 2,
     colorset: "spectrum_default",
     system: "spectrum"
 });
@@ -335,6 +336,7 @@ EXTRA_PRESETS_LIST.push({
         'd2-1.webp',
         'd2-2.webp'
     ],
+    emissiveIntensity: 2,
     emissive: 0xffffff,
     colorset: "spectrum_default",
     system: "spectrum"
@@ -351,6 +353,7 @@ EXTRA_PRESETS_LIST.push({
         'dc-h.webp',
         'dc-t.webp'
     ],
+    emissiveIntensity: 2,
     emissive: 0xffffff,
     colorset: "spectrum_default",
     system: "spectrum"
@@ -423,6 +426,7 @@ EXTRA_PRESETS_LIST.push({
         'd8-7.webp',
         'd8-8.webp'
     ],
+    emissiveIntensity: 2,
     emissive: 0xffffff,
     colorset: "spectrum_default",
     system: "spectrum"
@@ -455,6 +459,7 @@ EXTRA_PRESETS_LIST.push({
         'd10-9.webp',
         'd10-0.webp'
     ],
+    emissiveIntensity: 2,
     emissive: 0xffffff,
     colorset: "spectrum_default",
     system: "spectrum"
@@ -491,6 +496,7 @@ EXTRA_PRESETS_LIST.push({
         'd12-11.webp',
         'd12-12.webp'
     ],
+    emissiveIntensity: 2,
     emissive: 0xffffff,
     colorset: "spectrum_default",
     system: "spectrum"
@@ -523,6 +529,7 @@ EXTRA_PRESETS_LIST.push({
         'd100-90.webp',
         'd100-00.webp'
     ],
+    emissiveIntensity: 2,
     emissive: 0xffffff,
     colorset: "spectrum_default",
     system: "spectrum"
@@ -575,6 +582,7 @@ EXTRA_PRESETS_LIST.push({
         'd20-19.webp',
         'd20-20.webp'
     ],
+    emissiveIntensity: 2,
     emissive: 0xffffff,
     colorset: "spectrum_default",
     system: "spectrum"

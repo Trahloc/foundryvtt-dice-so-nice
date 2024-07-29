@@ -780,7 +780,7 @@ export class DiceConfig extends FormApplication {
                     appearanceArray.push(obj);
                 });
                 if (appearanceArray.length > 1) {
-                    let diff = diffObject(appearanceArray[0], appearanceArray[1]);
+                    let diff = foundry.utils.diffObject(appearanceArray[0], appearanceArray[1]);
                     if (foundry.utils.isEmpty(diff)) {
                         this.closeAppearanceTab(this.lastActiveAppearanceTab)
                     }
@@ -881,7 +881,7 @@ export class DiceConfig extends FormApplication {
             if (diceType != "global") {
                 $(element).find("option").each((indexOpt, elementOpt) => {
                     let model = this.box.dicefactory.systems.get("standard").dice.get(diceType);
-                    if (!this.box.dicefactory.systems.get($(elementOpt).val()).dice.has(diceType) || this.box.dicefactory.systems.get($(elementOpt).val()).getDiceByShapeAndValues(model.shape, model.values))
+                    if (!this.box.dicefactory.systems.get($(elementOpt).val()).dice.has(diceType) || !this.box.dicefactory.systems.get($(elementOpt).val()).getDiceByShapeAndValues(model.shape, model.values))
                         $(elementOpt).attr("disabled", "disabled");
                 });
             }
