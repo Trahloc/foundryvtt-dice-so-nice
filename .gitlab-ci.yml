@@ -17,7 +17,7 @@ stages:
 build:
   stage: build
   script:
-    - npm install
+    - npm ci
     - npx rollup -c
     - cd dist
     - zip dice-so-nice.zip -r . -x ".*"
