@@ -1,5 +1,5 @@
+import { AdditiveBlending, Box3, Sprite, SpriteMaterial, Vector3 } from 'three';
 import { DiceSFX } from '../DiceSFX.js';
-import * as THREE from 'three';
 import { Proton } from '../libs/three.proton.js';
 import { DiceSFXManager } from './../DiceSFXManager';
 
@@ -11,16 +11,16 @@ export class PlayAnimationParticleSparkles extends DiceSFX {
     /**@override init */
     static async init() {
         let map = await this.loadAsset(DiceSFXManager.TextureLoader, "modules/dice-so-nice/sfx/textures/glow_point_red_gold.webp");
-        let material = new THREE.SpriteMaterial({
+        let material = new SpriteMaterial({
             map: map,
             fog: true,
-            blending:THREE.AdditiveBlending,
+            blending:AdditiveBlending,
             depthWrite:false,
             depthTest:true
         });
-        PlayAnimationParticleSparkles.sprite = new THREE.Sprite(material);
+        PlayAnimationParticleSparkles.sprite = new Sprite(material);
         game.audio.pending.push(function(){
-            AudioHelper.preloadSound(PlayAnimationParticleSparkles.sound);
+            foundry.audio.AudioHelper.preloadSound(PlayAnimationParticleSparkles.sound);
         }.bind(this));
     }
 
@@ -53,15 +53,15 @@ export class PlayAnimationParticleSparkles extends DiceSFX {
         this.emitter.p.x = parent.position.x;
         this.emitter.p.y = parent.position.y;
 
-        let boundingBox = new THREE.Vector3();
-        new THREE.Box3().setFromObject(parent).getSize(boundingBox);
+        let boundingBox = new Vector3();
+        new Box3().setFromObject(parent).getSize(boundingBox);
 
         this.emitter.p.z = boundingBox.z/2;
         this.emitter.emit('once',true);
         this.proton.addEmitter(this.emitter);
         this.proton.addRender(new Proton.SpriteRender(this.box.scene));
 
-        AudioHelper.play({
+        foundry.audio.AudioHelper.play({
             src: PlayAnimationParticleSparkles.sound,
             volume: this.volume
 		}, false);

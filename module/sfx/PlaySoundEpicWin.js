@@ -7,14 +7,14 @@ export class PlaySoundEpicWin extends DiceSFX {
     /**@override init */
     static async init(){
         game.audio.pending.push(function(){
-            AudioHelper.preloadSound(PlaySoundEpicWin.path);
+            foundry.audio.AudioHelper.preloadSound(PlaySoundEpicWin.path);
         }.bind(this));
         return true;
     }
 
     /**@override play */
     async play(){
-        AudioHelper.play({
+        foundry.audio.AudioHelper.play({
             src: PlaySoundEpicWin.path,
             volume: this.volume
 		}, false);

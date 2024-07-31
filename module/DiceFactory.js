@@ -2,13 +2,34 @@ import {DicePreset} from './DicePreset.js';
 import {BASE_PRESETS_LIST, EXTRA_PRESETS_LIST} from './DiceDefaultPresets.js';
 import {DiceColors, DICE_SCALE, COLORSETS} from './DiceColors.js';
 import {DICE_MODELS} from './DiceModels.js';
-import * as THREE from 'three';
+import {DiceSystem} from './DiceSystem.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { ShaderUtils } from './ShaderUtils';
+import PhysicsWorker from 'web-worker:./web-workers/PhysicsWorker.js';
+import WebworkerPromise from 'webworker-promise';
+
+import {
+	MixOperation,
+	AddOperation,
+	AnimationMixer,
+	Mesh,
+	Color,
+	Vector3,
+	MeshPhongMaterial,
+	MeshStandardMaterial,
+	MeshLambertMaterial,
+	MeshPhysicalMaterial,
+	CanvasTexture,
+	SRGBColorSpace,
+	BufferGeometryLoader
+} from 'three';
+
 export class DiceFactory {
 
 	constructor() {
 		this.geometries = {};
+
+		this.physicsWorker = new WebworkerPromise(new PhysicsWorker());
 
 		this.baseScale = 50;
 
@@ -25,13 +46,12 @@ export class DiceFactory {
 
 		this.baseTextureCache = {};
 
-		this.systems = {
-			'standard': {id: 'standard', name: game.i18n.localize("DICESONICE.System.Standard"), dice:[], mode:"default"},
-			'spectrum': {id: 'spectrum', name: game.i18n.localize("DICESONICE.System.SpectrumDice"), dice:[], mode:"default"},
-			'foundry_vtt': {id: 'foundry_vtt', name: game.i18n.localize("DICESONICE.System.FoundryVTT"), dice:[], mode:"default"},
-			'dot': {id: 'dot', name: game.i18n.localize("DICESONICE.System.Dot"), dice:[], mode:"default"},
-			'dot_b': {id: 'dot_b', name: game.i18n.localize("DICESONICE.System.DotBlack"), dice:[], mode:"default"}
-		};
+		this.systems = new Map();
+		this.systems.set("standard", new DiceSystem("standard", game.i18n.localize("DICESONICE.System.Standard"), null, "default"));
+		this.systems.set("spectrum", new DiceSystem("spectrum", game.i18n.localize("DICESONICE.System.SpectrumDice"), null, "default", "Dice So Nice!"));
+		this.systems.set("foundry_vtt", new DiceSystem("foundry_vtt", game.i18n.localize("DICESONICE.System.FoundryVTT"), null, "default", "Dice So Nice!"));
+		this.systems.set("dot", new DiceSystem("dot", game.i18n.localize("DICESONICE.System.Dot"), null, "default", "Dice So Nice!"));
+		this.systems.set("dot_b", new DiceSystem("dot_b", game.i18n.localize("DICESONICE.System.DotBlack"), null, "default", "Dice So Nice!"));
 		
 		BASE_PRESETS_LIST.forEach((preset) => {
 			this.register(preset);
@@ -44,7 +64,7 @@ export class DiceFactory {
 		for(let i in CONFIG.Dice.terms){
 			let term = CONFIG.Dice.terms[i];
 			//If this is not a core dice type
-			if(![Coin, FateDie, Die].includes(term)){
+			if(![foundry.dice.terms.Coin, foundry.dice.terms.FateDie, foundry.dice.terms.Die].includes(term)){
 				let objTerm = new term({});
 				if([2, 3, 4, 6, 8, 10, 12, 14, 16, 20, 24, 30].includes(objTerm.faces)){
 					this.internalAddDicePreset(objTerm);
@@ -190,7 +210,7 @@ export class DiceFactory {
 						color: 0xb5b5b5,
 						shininess: 0.3,
 						reflectivity:0.1,
-						combine:THREE.MixOperation
+						combine:MixOperation
 					},
 					'scopedOptions':{
 						envMap:true
@@ -203,7 +223,7 @@ export class DiceFactory {
 						color: 0xb5b5b5,
 						shininess: 1,
 						reflectivity:0.7,
-						combine:THREE.AddOperation
+						combine:AddOperation
 					},
 					'scopedOptions':{
 						envMap:true
@@ -266,11 +286,11 @@ export class DiceFactory {
 		//If it is added to standard, it can be from automated system detecting DiceTerm, or the basic dice list. In those case, the internalAdd preorperty is set to true
 		//Everything should exist in the standard system
 		//We check to see if there's already this Dice DONOMINATOR in the standard system
-		let index = this.systems.standard.dice.findIndex(el => el.type == diceobj.type);
+		const hasDice = this.systems.get("standard").dice.has(diceobj.type);
 
 		//If it exists in the standard system, and it was added there by the automated system, we want to override and load it
-		if(index>=0 && (this.systems.standard.dice[index].internalAdd || diceobj.internalAdd)){
-			this.systems.standard.dice[index] = diceobj;
+		if(hasDice && (this.systems.get("standard").dice.get(diceobj.type).internalAdd || diceobj.internalAdd)){
+			this.systems.get("standard").set(diceobj.type, diceobj);
 			if(diceobj.modelFile){
 				diceobj.loadModel(this.loaderGLTF);
 			} else {
@@ -279,14 +299,14 @@ export class DiceFactory {
 		}
 		if(diceobj.system == "standard"){
 			//If we're adding to the standard system directly, we only do it if it didn't exist previously
-			if(index < 0){
-				this.systems[diceobj.system].dice.push(diceobj);
+			if(!hasDice){
+				this.systems.get(diceobj.system).dice.set(diceobj.type, diceobj);
 			}	
 		} else {
 			//If for some reasons, we try to register a dice type that doesnt exist on the standard system, we add it there first.
 			//This should not happen because of internalAddDicePreset but I'm only 95% sure.
-			if(index<0){
-				this.systems.standard.dice.push(diceobj);
+			if(!hasDice){
+				this.systems.get("standard").dice.set(diceobj.type, diceobj);
 				if(diceobj.modelFile){
 					diceobj.loadModel(this.loaderGLTF);
 				} else {
@@ -294,7 +314,7 @@ export class DiceFactory {
 				}
 			}
 			//Then we add it to its own system. No need to load it, that will be taken care of automatically
-			this.systems[diceobj.system].dice.push(diceobj);
+			this.systems.get(diceobj.system).dice.set(diceobj.type, diceobj);
 		}
 	}
 
@@ -310,7 +330,7 @@ export class DiceFactory {
 					appearance.global.colorset = this.preferredColorset;
 			}
 			//load basic model
-			this.systems["standard"].dice.forEach((obj) =>{
+			this.systems.get("standard").dice.forEach((obj) =>{
 				activePresets.push(obj);
 			});
 			foundry.utils.mergeObject(appearance, config,{performDeletions:true});
@@ -319,8 +339,8 @@ export class DiceFactory {
 					if (appearance.hasOwnProperty(scope)) {
 						if(scope != "global")
 							activePresets.push(this.getPresetBySystem(scope, appearance[scope].system));
-						else if(this.systems.hasOwnProperty(appearance[scope].system)){
-							this.systems[appearance[scope].system].dice.forEach((obj) =>{
+						else if(this.systems.has(appearance[scope].system)){
+							this.systems.get(appearance[scope].system).dice.forEach((obj) =>{
 								activePresets.push(obj);
 							});
 						}
@@ -354,21 +374,23 @@ export class DiceFactory {
 	}
 
 	//{id: 'standard', name: game.i18n.localize("DICESONICE.System.Standard")}
-	addSystem(system, mode="default"){
-		system.dice = [];
-		system.mode = mode;
+	//Internal use
+	//See dice3d.addSystem for public API
+	addSystem(system, mode="default", settings){
 		if(mode != "default" && this.preferredSystem == "standard")
 			this.preferredSystem = system.id;
-		this.systems[system.id] = system;
+
+		this.systems.set(system.id, new DiceSystem(system.id, system.name, null, mode, system.group));
 	}
+
 	//{type:"",labels:[],system:""}
 	//Should have been called "addDicePresetFromModel" but ¯\_(ツ)_/¯
 	addDicePreset(dice, shape = null){
-		let model = this.systems["standard"].dice.find(el => el.type == dice.type);
+		let model = this.systems.get("standard").dice.get(dice.type);
 		if(!model || !model.internalAdd){
 			if(!shape)
 				shape = dice.type;
-			model = this.systems["standard"].dice.find(el => el.type == shape);
+			model = this.systems.get("standard").dice.get(shape);
 		}
 		let preset = new DicePreset(dice.type, model.shape);
 		let denominator = dice.type.substr(1);
@@ -400,7 +422,7 @@ export class DiceFactory {
 		preset.fontScale = dice.fontScale || null;
 		preset.colorset = dice.colorset || null;
 		//If it overrides an existing model that isn't a numbered die, set a font scale to prevent undesired fontScale from previous model
-		if(!preset.fontScale && !["d2","d4","d6","d8","d10","d12","d14","d16","d20","d24","d30","d100"].includes(dice.type) && this.systems["standard"].dice.find(el => el.type == dice.type))
+		if(!preset.fontScale && !["d2","d4","d6","d8","d10","d12","d14","d16","d20","d24","d30","d100"].includes(dice.type) && this.systems.get("standard").dice.has(dice.type))
 			preset.fontScale = DICE_SCALE[shape];
 		
 		if(dice.bumpMaps && dice.bumpMaps.length)
@@ -414,6 +436,9 @@ export class DiceFactory {
 
 		if(dice.emissiveIntensity)
 			preset.emissiveIntensity = dice.emissiveIntensity;
+
+		if(dice.atlas)
+			preset.atlas = dice.atlas;
 
 		this.register(preset);
 
@@ -431,7 +456,7 @@ export class DiceFactory {
 		else
 			shape += diceobj.faces;
 		let type = "d" + diceobj.constructor.DENOMINATION;
-		let model = this.systems["standard"].dice.find(el => el.type == shape);
+		let model = this.systems.get("standard").dice.get(shape);
 		let preset = new DicePreset(type, model.shape);
 		preset.term = diceobj.constructor.name;
 		let labels = [];
@@ -474,28 +499,31 @@ export class DiceFactory {
 	}
 
 	getPresetBySystem(type, system = "standard"){
-		let model = this.systems["standard"].dice.find(obj => obj.type == type);
+		let model = this.systems.get("standard").dice.get(type);
 		if(!model)
 			return null;
 		let diceobj = null;
 		if(system != "standard"){
-			if(this.systems.hasOwnProperty(system)){
-				diceobj = this.systems[system].dice.find(obj => obj.type == type && obj.shape == model.shape);
+			if(this.systems.has(system)){
+				// If it exists, we look for a similar shape
+				diceobj = this.systems.get(system).dice.get(type)?.shape == model.shape ? this.systems.get(system).dice.get(type) : null;
 				if(!diceobj && !['Coin', 'FateDie', 'Die'].includes(model.term)){
 					//If it doesn't exist and is not a core DiceTerm, we look for a similar shape and values
-					diceobj = this.systems[system].dice.find(obj => obj.shape == model.shape && obj.values.length == model.values.length && !model.colorset);
+					if(!model.colorset)
+						diceobj = this.systems.get(system).getDiceByShapeAndValues(model.shape, model.values);
+					else
+						diceobj = null;
 				}
 			}
 		}
 
 		if(!diceobj){
-			diceobj = this.systems.standard.dice.find(obj => obj.type == type);
+			diceobj = this.systems.get("standard").dice.get(type);
 		}
 		return diceobj;
 	}
 
-	// returns a dicemesh (THREE.Mesh) object
-	create(scopedTextureCache, type, appearance) {
+	async create(scopedTextureCache, type, appearance) {
 		let diceobj = this.getPresetBySystem(type, appearance.system);
 		if(diceobj.model && appearance.isGhost){
 			diceobj = this.getPresetBySystem(type, "standard");
@@ -503,14 +531,18 @@ export class DiceFactory {
 		let scopedScale = scopedTextureCache.type == "board" ? this.baseScale : 60;
 		if (!diceobj) return null;
 		let dicemesh;
-
+		
 		let geom = this.geometries[type+scopedScale];
 		if(!geom) {
-			geom = this.createGeometry(diceobj.shape, diceobj.scale, scopedScale);
+			geom = await this.createGeometry(diceobj.shape, diceobj.scale, scopedScale);
 			this.geometries[type+scopedScale] = geom;
 		}
 		if (!geom) return null;
 
+		// If we're on the board, we also create the shape in the physics worker
+		if(scopedTextureCache.type == "board"){
+			await this.physicsWorker.exec("createShape", { type:diceobj.shape, radius:diceobj.scale * scopedScale });
+		}
 
 		if(diceobj.model){
 			dicemesh = diceobj.model.scene.children[0].clone();
@@ -518,9 +550,8 @@ export class DiceFactory {
 			dicemesh.scale.set(scale,scale,scale);
 			if(!dicemesh.geometry)
 				dicemesh.geometry = {};
-			dicemesh.geometry.cannon_shape = geom.cannon_shape;
 			if(diceobj.model.animations.length>0){
-				dicemesh.mixer = new THREE.AnimationMixer(dicemesh);
+				dicemesh.mixer = new AnimationMixer(dicemesh);
 				dicemesh.mixer.clipAction(diceobj.model.animations[0]).play();
 			}
 		}else{
@@ -533,72 +564,32 @@ export class DiceFactory {
 			else
 				materials = this.createMaterials(scopedTextureCache, baseTextureCacheString, diceobj, materialData);
 			
-			dicemesh = new THREE.Mesh(geom, materials);
+			dicemesh = new Mesh(geom, materials);
 
 			//TODO: Find if this entire block is still needed
 			//I think not
 			if (diceobj.color) {
-				dicemesh.material[0].color = new THREE.Color(diceobj.color);
+				dicemesh.material[0].color = new Color(diceobj.color);
 				if(this.realisticLighting)
 					dicemesh.material[0].color.convertLinearToSRGB();
-				//dicemesh.material[0].emissive = new THREE.Color(diceobj.color);
+				//dicemesh.material[0].emissive = new Color(diceobj.color);
 				dicemesh.material[0].emissiveIntensity = diceobj.emissiveIntensity ? diceobj.emissiveIntensity : 1;
 				dicemesh.material[0].needsUpdate = true;
 			}
+			dicemesh.layers.enableAll();
 		}
+
+		//Because of an orientation change in cannon-es for the Cylinder shape, we need to rotate the mesh for the d2
+		//https://github.com/pmndrs/cannon-es/pull/30
+		if(diceobj.shape == "d2")
+			dicemesh.lookAt(new Vector3(0,-1,0));
 		
-		dicemesh.result = [];
+		dicemesh.result = null;
 		dicemesh.shape = diceobj.shape;
-		dicemesh.rerolls = 0;
-		dicemesh.resultReason = 'natural';
-
-		let factory = this;
-		dicemesh.getFaceValue = function() {
-			let reason = this.resultReason;
-			let vector = new THREE.Vector3(0, 0, this.shape == 'd4' ? -1 : 1);
-			let faceCannon = new THREE.Vector3();
-			let closest_face, closest_angle = Math.PI * 2;
-			for (let i = 0, l = this.body_sim.shapes[0].faceNormals.length; i < l; ++i) {
-				if(DICE_MODELS[this.shape].faceValues[i] == 0)
-					continue;
-				faceCannon.copy(this.body_sim.shapes[0].faceNormals[i]);
-				
-				let angle = faceCannon.applyQuaternion(this.body_sim.quaternion).angleTo(vector);
-				if (angle < closest_angle) {
-					closest_angle = angle;
-					closest_face = i;
-				}
-			}
-			const diceobj = factory.get(this.notation.type);
-			let dieValue = DICE_MODELS[this.shape].faceValues[closest_face];
-
-			if (this.shape == 'd4') {
-				return {value: dieValue, label: diceobj.labels[dieValue-1], reason: reason};
-			}
-			let labelIndex = dieValue;
-			if (['d10','d2'].includes(this.shape)) labelIndex += 1;
-			let label = diceobj.labels[labelIndex+1];
-
-			//console.log('Face Value', closest_face, dieValue, label)
-
-			return {value: dieValue, label: label, reason: reason};
-		};
-
-		dicemesh.storeRolledValue = function() {
-			this.result.push(this.getFaceValue());
-		};
-
-		dicemesh.getLastValue = function() {
-			if (!this.result || this.result.length < 1) return {value: undefined, label: '', reason: ''};
-
-			return this.result[this.result.length-1];
-		};
-
-		dicemesh.setLastValue = function(result) {
-			if (!this.result || this.result.length < 1) return;
-			if (!result || result.length < 1) return;
-
-			return this.result[this.result.length-1] = result;
+		const that=dicemesh;
+		dicemesh.getValue = async () => {
+			const result = await this.physicsWorker.exec('getDiceValue', that.id);
+			return result;
 		};
 
 		return dicemesh;
@@ -622,19 +613,19 @@ export class DiceFactory {
 		}
 		switch(materialSelected.type){
 			case "phong":
-				mat = new THREE.MeshPhongMaterial(materialSelected.options);
+				mat = new MeshPhongMaterial(materialSelected.options);
 				break;
 			case "standard":
-				mat = new THREE.MeshStandardMaterial(materialSelected.options);
+				mat = new MeshStandardMaterial(materialSelected.options);
 				break;
 			case "lambert":
-				mat = new THREE.MeshLambertMaterial(materialSelected.options);
+				mat = new MeshLambertMaterial(materialSelected.options);
 				break;
 			case "physical":
-				mat = new THREE.MeshPhysicalMaterial(materialSelected.options);
+				mat = new MeshPhysicalMaterial(materialSelected.options);
 				break;
 			default: //plastic
-				mat = new THREE.MeshPhongMaterial(this.material_options.plastic.options);
+				mat = new MeshPhongMaterial(this.material_options.plastic.options);
 		}
 		if(materialSelected.scopedOptions){
 			if(materialSelected.scopedOptions.envMap)
@@ -731,25 +722,25 @@ export class DiceFactory {
 		//document.write('<img src="'+img+'"/>');
 		//generate basetexture for caching
 		if(!this.baseTextureCache[baseTextureCacheString]){
-			let texture = new THREE.CanvasTexture(canvas);
+			let texture = new CanvasTexture(canvas);
 			if(this.realisticLighting)
-				texture.colorSpace = THREE.SRGBColorSpace;
+				texture.colorSpace = SRGBColorSpace;
 			texture.flipY = false;
 			mat.map = texture;
 			mat.map.anisotropy = game.dice3d.box.anisotropy;
 
 			if(this.realisticLighting){
-				let bumpMap = new THREE.CanvasTexture(canvasBump);
+				let bumpMap = new CanvasTexture(canvasBump);
 				bumpMap.flipY = false;
 				mat.bumpMap = bumpMap;
 
-				let emissiveMap = new THREE.CanvasTexture(canvasEmissive);
+				let emissiveMap = new CanvasTexture(canvasEmissive);
 				if(this.realisticLighting)
-					emissiveMap.colorSpace = THREE.SRGBColorSpace;
+					emissiveMap.colorSpace = SRGBColorSpace;
 				emissiveMap.flipY = false;
 				mat.emissiveMap = emissiveMap;
 				mat.emissiveIntensity = diceobj.emissiveIntensity ? diceobj.emissiveIntensity:1;
-				mat.emissive = new THREE.Color(diceobj.emissive);
+				mat.emissive = new Color(diceobj.emissive);
 				if(this.realisticLighting)
 					mat.emissive.convertLinearToSRGB();
 			}
@@ -773,7 +764,12 @@ export class DiceFactory {
 		mat.depthTest = true;
 		mat.needUpdate = true;
 
+		mat.userData.diceobj = diceobj;
+		mat.userData.materialData = materialData;
+		mat.userData.dice_texture = dice_texture;
+
 		mat.onBeforeCompile = ShaderUtils.applyDiceSoNiceShader;
+		Hooks.callAll("diceSoNiceOnMaterialReady", mat, baseTextureCacheString);
 
 		this.baseTextureCache[baseTextureCacheString] = mat;
 		return mat;
@@ -814,11 +810,11 @@ export class DiceFactory {
 			context.rect(x,y,ts,ts);
 			context.clip();
 			context.globalCompositeOperation = texture.composite || 'source-over';
-			context.drawImage(texture.texture, x, y, ts, ts);
+			context.drawImage(texture.texture.source, texture.texture.frame.x, texture.texture.frame.y, texture.texture.frame.w, texture.texture.frame.h, x, y, ts, ts);
 			context.restore();
 			
 			if (texture.bump != '') {
-				contextBump.drawImage(texture.bump, x, y, ts, ts);
+				contextBump.drawImage(texture.bump.source, texture.bump.frame.x, texture.bump.frame.y, texture.bump.frame.w, texture.bump.frame.h, x, y, ts, ts);
 			}
 		}
 
@@ -841,13 +837,13 @@ export class DiceFactory {
 			if(materialData.isGhost && labels[index] != "")
 				text = "?";
 			//custom texture face
-			if(text instanceof HTMLImageElement){
+			if(text.source instanceof HTMLImageElement){
 				isTexture = true;
-				context.drawImage(text, 0,0,text.width,text.height,x,y,ts,ts);
+				context.drawImage(text.source, text.frame.x, text.frame.y, text.frame.w, text.frame.h, x, y, ts, ts);
 				if(bump)
-					contextBump.drawImage(bump, 0,0,text.width,text.height,x,y,ts,ts);
+					contextBump.drawImage(bump.source, bump.frame.x, bump.frame.y, bump.frame.w, bump.frame.h,x,y,ts,ts);
 				if(emissive)
-					contextEmissive.drawImage(emissive, 0,0,text.width,text.height,x,y,ts,ts);
+					contextEmissive.drawImage(emissive.source, emissive.frame.x, emissive.frame.y, emissive.frame.w, emissive.frame.h,x,y,ts,ts);
 			}
 			else{
 				let fontsize = ts / (1 + 2 * margin);
@@ -991,15 +987,15 @@ export class DiceFactory {
 				let destX = hw*wShift+x;
 				let destY = (hh - ts * 0.3)*hShift+y;
 				//custom texture face
-				if(text[i] instanceof HTMLImageElement){
+				if(text[i].source instanceof HTMLImageElement){
 					isTexture = true;
-					let textureSize = 60 / (text[i].width / ts);
-					context.drawImage(text[i],0,0,text[i].width,text[i].height,destX-(textureSize/2),destY-(textureSize/2),textureSize,textureSize);
+					let textureSize = 60 / (text[i].frame.w / ts);
+					context.drawImage(text[i].source,text[i].frame.x, text[i].frame.y, text[i].frame.w, text[i].frame.h,destX-(textureSize/2),destY-(textureSize/2),textureSize,textureSize);
 					//There's an issue with bump texture because they are smaller than the dice face so it causes visual glitches
 					/*if(bump)
 						contextBump.drawImage(text[i],0,0,text[i].width,text[i].height,destX-(textureSize/2),destY-(textureSize/2),textureSize,textureSize);*/
 					if(emissive)
-						contextEmissive.drawImage(text[i],0,0,text[i].width,text[i].height,destX-(textureSize/2),destY-(textureSize/2),textureSize,textureSize);
+						contextEmissive.drawImage(text[i].source,text[i].frame.x, text[i].frame.y, text[i].frame.w, text[i].frame.h,destX-(textureSize/2),destY-(textureSize/2),textureSize,textureSize);
 				}
 				else{
 					// attempt to outline the text with a meaningful color
@@ -1103,16 +1099,24 @@ export class DiceFactory {
 		
 		if(dicenotation){
 			let colorset = null;
+
+			//First we try to find a colorset
 			if (dicenotation.options.colorset)
 				colorset = dicenotation.options.colorset;
 			else if (dicenotation.options.flavor && COLORSETS[dicenotation.options.flavor]) {
 				colorset = dicenotation.options.flavor;
+			} else if(dicenotation.options.appearance && dicenotation.options.appearance.colorset){
+				colorset = dicenotation.options.appearance.colorset;
 			}
+
+			// If we do, we retrieve the colorset data
 			if(colorset){
 				let colorsetData = DiceColors.getColorSet(colorset);
 				colorsetData.edge = colorsetData.edge ? colorsetData.edge : "";
 				appearance = colorsetData;
 			}
+
+			// Then we overwrite the colorset data with the appearance to let players override the colorset default colors
 			if(dicenotation.options.appearance){
 				foundry.utils.mergeObject(appearance, dicenotation.options.appearance,{performDeletions:true});
 			}
@@ -1127,7 +1131,7 @@ export class DiceFactory {
 		let materialData = {};
 		let colorindex;
 
-		if(appearance.texture && !appearance.texture.id)
+		if(appearance.texture && !appearance.texture.name)
 			appearance.texture = DiceColors.getTexture(appearance.texture);
 
 		let colorsetData = DiceColors.getColorSet(appearance.colorset);
@@ -1272,222 +1276,23 @@ export class DiceFactory {
 		return size;
 	}
 
-	createGeometry(type, typeScale, scopedScale) {
-		let radius = typeScale * scopedScale;
-		let geom = null;
-		switch (type) {
-			case 'd2':
-				geom = this.create_d2_geometry(radius, scopedScale);
-				break;
-			case 'd4':
-				geom = this.create_d4_geometry(radius, scopedScale);
-				break;
-			case 'd6':
-				geom = this.create_d6_geometry(radius, scopedScale);
-				break;
-			case 'd8':
-				geom = this.create_d8_geometry(radius, scopedScale);
-				break;
-			case 'd10':
-				geom = this.create_d10_geometry(radius, scopedScale);
-				break;
-			case 'd12':
-				geom = this.create_d12_geometry(radius, scopedScale);
-				break;
-			case 'd14':
-				geom = this.create_d14_geometry(radius, scopedScale);
-				break;
-			case 'd16':
-				geom = this.create_d16_geometry(radius, scopedScale);
-				break;
-			case 'd20':
-				geom = this.create_d20_geometry(radius, scopedScale);
-				break;
-			case 'd24':
-				geom = this.create_d24_geometry(radius, scopedScale);
-				break;
-			case 'd30':
-				geom = this.create_d30_geometry(radius, scopedScale);
-				break;
+	async createGeometry(type, typeScale, scopedScale) {
+		const geometryTypes = [
+			'd2', 'd4', 'd6', 'd8', 'd10', 'd12', 'd14', 'd16', 'd20', 'd24', 'd30'
+		];
+	
+		if (!geometryTypes.includes(type)) {
+			throw new Error(`Invalid geometry type: ${type}`);
 		}
-		return geom;
+	
+		return this.loadGeometry(type, scopedScale);
 	}
-
-	load_geometry(type, scopedScale){
-		var loader = new THREE.BufferGeometryLoader();
-		let bufferGeometry = loader.parse(DICE_MODELS[type]);
-		bufferGeometry.scale(scopedScale/100,scopedScale/100,scopedScale/100);
+	
+	loadGeometry(type, scopedScale) {
+		const loader = new BufferGeometryLoader();
+		const bufferGeometry = loader.parse(DICE_MODELS[type]);
+		bufferGeometry.scale(scopedScale / 100, scopedScale / 100, scopedScale / 100);
+	
 		return bufferGeometry;
-	}
-
-	create_d2_geometry(radius, scopedScale){
-		let geom = this.load_geometry("d2",scopedScale);
-		geom.cannon_shape = new CANNON.Cylinder(1*radius,1*radius,0.1*radius,8);
-		return geom;
-	}
-
-	create_d4_geometry(radius, scopedScale) {
-		let geom = this.load_geometry("d4",scopedScale);
-		var vertices = [[1, 1, 1], [-1, -1, 1], [-1, 1, -1], [1, -1, -1]];
-		var faces = [[1, 0, 2, 1], [0, 1, 3, 2], [0, 3, 2, 3], [1, 2, 3, 4]];
-		geom.cannon_shape = this.create_geom(vertices, faces, radius);
-		return geom;
-	}
-
-	create_d6_geometry(radius, scopedScale) {
-		let geom = this.load_geometry("d6",scopedScale);
-		var vertices = [[-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1],
-				[-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]];
-		var faces = [[0, 3, 2, 1, 1], [1, 2, 6, 5, 2], [0, 1, 5, 4, 3],
-				[3, 7, 6, 2, 4], [0, 4, 7, 3, 5], [4, 5, 6, 7, 6]];
-		geom.cannon_shape = this.create_geom(vertices, faces, radius);
-		return geom;
-	}
-
-	create_d8_geometry(radius, scopedScale) {
-		let geometry = this.load_geometry("d8",scopedScale);
-		
-		var vertices = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
-		var faces = [[0, 2, 4, 1], [0, 4, 3, 2], [0, 3, 5, 3], [0, 5, 2, 4], [1, 3, 4, 5],
-				[1, 4, 2, 6], [1, 2, 5, 7], [1, 5, 3, 8]];
-		geometry.cannon_shape = this.create_geom(vertices, faces, radius);
-		return geometry;
-	}
-
-	create_d10_geometry(radius, scopedScale) {
-		let geom = this.load_geometry("d10",scopedScale);
-		//geom.scale(1.38,1.38,1.38);
-		
-		var a = Math.PI * 2 / 10, h = 0.105, v = -1;
-		var vertices = [];
-		for (var i = 0, b = 0; i < 10; ++i, b += a) {
-			vertices.push([Math.cos(b), Math.sin(b), h * (i % 2 ? 1 : -1)]);
-		}
-		vertices.push([0, 0, -1]);
-		vertices.push([0, 0, 1]);
-
-		var faces = [
-            [5, 6, 7, 11, 0],
-            [4, 3, 2, 10, 1],
-            [1, 2, 3, 11, 2],
-            [0, 9, 8, 10, 3],
-            [7, 8, 9, 11, 4],
-            [8, 7, 6, 10, 5],
-            [9, 0, 1, 11, 6],
-            [2, 1, 0, 10, 7],
-            [3, 4, 5, 11, 8],
-            [6, 5, 4, 10, 9]
-        ];
-		geom.cannon_shape = this.create_geom(vertices, faces, radius);
-		//geom = this.scaleGeometryToShape(geom);
-		return geom;
-	}
-
-	create_d12_geometry(radius, scopedScale) {
-		let geom = this.load_geometry("d12",scopedScale);
-		var p = (1 + Math.sqrt(5)) / 2, q = 1 / p;
-		var vertices = [[0, q, p], [0, q, -p], [0, -q, p], [0, -q, -p], [p, 0, q],
-				[p, 0, -q], [-p, 0, q], [-p, 0, -q], [q, p, 0], [q, -p, 0], [-q, p, 0],
-				[-q, -p, 0], [1, 1, 1], [1, 1, -1], [1, -1, 1], [1, -1, -1], [-1, 1, 1],
-				[-1, 1, -1], [-1, -1, 1], [-1, -1, -1]];
-		var faces = [[2, 14, 4, 12, 0, 1], [15, 9, 11, 19, 3, 2], [16, 10, 17, 7, 6, 3], [6, 7, 19, 11, 18, 4],
-				[6, 18, 2, 0, 16, 5], [18, 11, 9, 14, 2, 6], [1, 17, 10, 8, 13, 7], [1, 13, 5, 15, 3, 8],
-				[13, 8, 12, 4, 5, 9], [5, 4, 14, 9, 15, 10], [0, 12, 8, 10, 16, 11], [3, 19, 7, 17, 1, 12]];
-
-		geom.cannon_shape = this.create_geom(vertices, faces, radius);
-		return geom;
-	}
-
-	create_d14_geometry(radius, scopedScale) {
-		let geom = this.load_geometry("d14",scopedScale);
-
-		var vertices = [[-0.005093127489089966, 1.177548885345459, 0.002782404189929366], [-0.9908595681190491, 0.061759304255247116, 0.22585006058216095], [-0.9924551844596863, -0.06095181778073311, -0.23028047382831573], [-0.7984917163848877, 0.061637163162231445, -0.6402497291564941], [-0.4453684985637665, -0.06121010705828667, -0.9239609241485596], [-0.00504341721534729, 0.06129471957683563, -1.0241185426712036], [0.437289297580719, -0.06156954541802406, -0.9219886660575867], [0.7920035719871521, 0.06098949536681175, -0.6366959810256958], [0.9908595681190491, -0.06175928935408592, -0.22585000097751617], [0.9924551844596863, 0.0609518401324749, 0.23028059303760529], [0.7984917163848877, -0.061637137085199356, 0.6402497291564941], [0.4453684985637665, 0.061210136860609055, 0.9239609241485596], [0.00504341721534729, -0.06129469349980354, 1.0241185426712036], [-0.4372892379760742, 0.061569564044475555, 0.9219887852668762], [-0.7920035719871521, -0.060989461839199066, 0.6366960406303406], [0.005093127489089966, -1.177548885345459, -0.002782404189929366]];
-		var faces = [[0, 3, 2, 1], [1, 14, 13, 0], [12, 11, 0, 13], [10, 9, 0, 11], [8, 7, 0, 9], [6, 5, 0, 7], [4, 3, 0, 5], [10, 11, 12, 15], [14, 15, 12, 13], [2, 15, 14, 1], [2, 3, 4, 15], [4, 5, 6, 15], [6, 7, 8, 15], [8, 9, 10, 15]];
-		geom.cannon_shape = this.create_geom_dcc(vertices, faces, radius * 0.85);
-		return geom;
-	}
-
-	create_d16_geometry(radius, scopedScale) {
-		let geom = this.load_geometry("d16",scopedScale);
-
-		var vertices = [[-1.0301814079284668, 0.002833150327205658, 1.0244150161743164], [-0.0018179342150688171, -0.006610371172428131, -1.4427297115325928], [1.4587815999984741, 0.0028328225016593933, -0.006545569747686386], [1.031739592552185, 0.0028328821063041687, -1.0375059843063354], [-1.4572231769561768, 0.0028332099318504333, -0.006545361131429672], [-1.0301814079284668, 0.002833150327205658, -1.0375059843063354], [1.031739592552185, 0.0028328821063041687, 1.0244150161743164], [-0.0018179342150688171, -0.006610371172428131, 1.4732751846313477], [0.0007793977856636047, 1.4608354568481445, -0.006545450538396835], [-0.0018181726336479187, -1.4646127223968506, 0.015272742137312889]];
-		var faces = [[5, 8, 1], [5, 4, 8], [4, 0, 8], [0, 7, 8], [8, 7, 6], [8, 6, 2], [2, 3, 8], [3, 1, 8], [3, 9, 1], [2, 9, 3], [6, 9, 2], [6, 7, 9], [0, 9, 7], [4, 9, 0], [5, 9, 4], [5, 1, 9]];
-		geom.cannon_shape = this.create_geom_dcc(vertices, faces, radius * 0.83);
-		return geom;
-	}
-
-	create_d20_geometry(radius, scopedScale) {
-		let geom = this.load_geometry("d20",scopedScale);
-
-		var t = (1 + Math.sqrt(5)) / 2;
-		var vertices = [[-1, t, 0], [1, t, 0 ], [-1, -t, 0], [1, -t, 0],
-				[0, -1, t], [0, 1, t], [0, -1, -t], [0, 1, -t],
-				[t, 0, -1], [t, 0, 1], [-t, 0, -1], [-t, 0, 1]];
-		var faces = [[0, 11, 5, 1], [0, 5, 1, 2], [0, 1, 7, 3], [0, 7, 10, 4], [0, 10, 11, 5],
-				[1, 5, 9, 6], [5, 11, 4, 7], [11, 10, 2, 8], [10, 7, 6, 9], [7, 1, 8, 10],
-				[3, 9, 4, 11], [3, 4, 2, 12], [3, 2, 6, 13], [3, 6, 8, 14], [3, 8, 9, 15],
-				[4, 9, 5, 16], [2, 4, 11, 17], [6, 2, 10, 18], [8, 6, 7, 19], [9, 8, 1, 20]];
-		geom.cannon_shape = this.create_geom(vertices, faces, radius);
-		return geom;
-	}
-
-	create_d24_geometry(radius, scopedScale) {
-		let geom = this.load_geometry("d24",scopedScale);
-
-		var vertices = [[0.7070000171661377, -0.0, -0.7070000171661377], [0.7070000171661377, 0.7070000171661377, -0.0], [0.5468999743461609, 0.5468999743461609, -0.5468999743461609], [-0.0, -0.7070000171661377, -0.7070000171661377], [-0.0, 0.7070000171661377, -0.7070000171661377], [-0.5468999743461609, 0.5468999743461609, -0.5468999743461609], [-0.5468999743461609, -0.5468999743461609, -0.5468999743461609], [0.5468999743461609, 0.5468999743461609, 0.5468999743461609], [-0.0, -0.0, -1.0], [1.0, -0.0, -0.0], [0.5468999743461609, -0.5468999743461609, -0.5468999743461609], [-0.5468999743461609, 0.5468999743461609, 0.5468999743461609], [-0.0, -0.0, 1.0], [-0.0, 0.7070000171661377, 0.7070000171661377], [-0.0, 1.0, -0.0], [-0.7070000171661377, 0.7070000171661377, -0.0], [-0.7070000171661377, -0.0, -0.7070000171661377], [-0.7070000171661377, -0.7070000171661377, -0.0], [-0.0, -0.7070000171661377, 0.7070000171661377], [-0.5468999743461609, -0.5468999743461609, 0.5468999743461609], [-1.0, 0.0, -0.0], [0.5468999743461609, -0.5468999743461609, 0.5468999743461609], [0.7070000171661377, -0.0, 0.7070000171661377], [-0.0, -1.0, -0.0], [0.7070000171661377, -0.7070000171661377, -0.0], [-0.7070000171661377, -0.0, 0.7070000171661377]];
-		var faces = [[4, 5, 15, 14], [3, 10, 24, 23], [11, 15, 20, 25], [10, 3, 8, 0], [19, 18, 12, 25], [7, 22, 9, 1], [22, 21, 24, 9], [7, 13, 12, 22], [5, 4, 8, 16], [20, 17, 19, 25], [6, 3, 23, 17], [2, 4, 14, 1], [18, 19, 17, 23], [13, 7, 1, 14], [0, 2, 1, 9], [18, 21, 22, 12], [3, 6, 16, 8], [15, 5, 16, 20], [6, 17, 20, 16], [4, 2, 0, 8], [13, 11, 25, 12], [24, 10, 0, 9], [11, 13, 14, 15], [21, 18, 23, 24]];
-		geom.cannon_shape = this.create_geom(vertices, faces, radius);
-		return geom;
-	}
-
-	create_d30_geometry(radius, scopedScale) {
-		let geom = this.load_geometry("d30",scopedScale);
-
-		var vertices = [[-1.6180000305175781, 0.0, 1.0], [-1.6180000305175781, 0.6179999709129333, -0.0], [-0.0, 1.6180000305175781, 0.6179999709129333], [0.6179999709129333, 0.0, 1.6180000305175781], [-1.0, -1.6180000305175781, -0.0], [1.6180000305175781, 0.0, 1.0], [-1.6180000305175781, -0.6179999709129333, -0.0], [-0.6179999709129333, 0.0, 1.6180000305175781], [-0.0, 1.0, -1.6180000305175781], [-1.0, 1.0, -1.0], [1.6180000305175781, 0.6179999709129333, -0.0], [1.0, -1.6180000305175781, -0.0], [-1.0, -1.0, -1.0], [1.6180000305175781, -0.6179999709129333, -0.0], [-1.0, 1.6180000305175781, -0.0], [1.0, 1.0, -1.0], [1.0, 1.6180000305175781, -0.0], [-0.0, 1.0, 1.6180000305175781], [1.0, -1.0, -1.0], [-0.6179999709129333, 0.0, -1.6180000305175781], [-0.0, -1.0, -1.6180000305175781], [-1.0, 1.0, 1.0], [0.6179999709129333, 0.0, -1.6180000305175781], [-0.0, -1.0, 1.6180000305175781], [-1.0, -1.0, 1.0], [-0.0, 1.6180000305175781, 0.6179999709129333], [-1.6180000305175781, 0.0, -1.0], [1.0, 1.0, 1.0], [-0.0, -1.6180000305175781, -0.6179999709129333], [1.6180000305175781, 0.0, -1.0], [1.0, -1.0, 1.0], [-0.0, 1.6180000305175781, -0.6179999709129333], [-0.0, -1.6180000305175781, 0.6179999709129333]];
-		var faces = [[25, 16, 31, 14], [7, 0, 24, 23], [19, 20, 12, 26], [13, 5, 30, 11], [1, 0, 21, 14], [10, 29, 15, 16], [6, 0, 1, 26], [22, 29, 18, 20], [9, 14, 31, 8], [28, 4, 12, 20], [30, 5, 3, 23], [12, 4, 6, 26], [31, 16, 15, 8], [21, 17, 25, 14], [22, 20, 19, 8], [3, 17, 7, 23], [18, 11, 28, 20], [32, 23, 24, 4], [27, 5, 10, 16], [9, 8, 19, 26], [25, 17, 27, 16], [30, 23, 32, 11], [7, 17, 21, 0], [10, 5, 13, 29], [24, 0, 6, 4], [13, 11, 18, 29], [9, 26, 1, 14], [3, 5, 27, 17], [15, 29, 22, 8], [28, 11, 32, 4]];
-		geom.cannon_shape = this.create_geom_dcc(vertices, faces, radius);
-		return geom;
-	}
-
-	create_shape(vertices, faces, radius) {
-		var cv = new Array(vertices.length), cf = new Array(faces.length);
-		for (var i = 0; i < vertices.length; ++i) {
-			var v = vertices[i];
-			cv[i] = new CANNON.Vec3(v.x * radius, v.y * radius, v.z * radius);
-		}
-		for (var i = 0; i < faces.length; ++i) {
-			cf[i] = faces[i].slice(0, faces[i].length - 1);
-		}
-		return new CANNON.ConvexPolyhedron(cv, cf);
-	}
-
-	create_geom(vertices, faces, radius) {
-		var vectors = new Array(vertices.length);
-		for (var i = 0; i < vertices.length; ++i) {
-			vectors[i] = (new THREE.Vector3).fromArray(vertices[i]).normalize();
-		}
-		let cannon_shape = this.create_shape(vectors, faces, radius);
-		return cannon_shape;
-	}
-
-	create_shape_dcc(vertices, faces, radius) {
-		var cv = new Array(vertices.length), cf = new Array(faces.length);
-		for (var i = 0; i < vertices.length; ++i) {
-			var v = vertices[i];
-			cv[i] = new CANNON.Vec3(v.x * radius, v.y * radius, v.z * radius);
-		}
-		for (var i = 0; i < faces.length; ++i) {
-			cf[i] = faces[i];//.slice(0, faces[i].length - 1);
-		}
-		return new CANNON.ConvexPolyhedron(cv, cf);
-	}
-
-	create_geom_dcc(vertices, faces, radius) {
-		var vectors = new Array(vertices.length);
-		for (var i = 0; i < vertices.length; ++i) {
-			vectors[i] = (new THREE.Vector3).fromArray(vertices[i]).normalize();
-		}
-		let cannon_shape = this.create_shape_dcc(vectors, faces, radius);
-		return cannon_shape;
-	}
+	}	
 }

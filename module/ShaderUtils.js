@@ -7,31 +7,22 @@ export class ShaderUtils {
 
 	static applyDiceSoNiceShader(shader) {
 
-		if(this.emissive !== undefined && game.dice3d.DiceFactory.realisticLighting) {
-			ShaderUtils.selectiveBloomShaderFragment(shader);
-		}
+        if(this.emissive !== undefined && game.dice3d.DiceFactory.realisticLighting) {
+            ShaderUtils.selectiveBloomShaderFragment(shader);
+        }
 
-		// This is the old iridescent shader, which is now deprecated.
-		if (this.userData.iridescent) {
-			ShaderUtils.iridescentShaderFragment(shader);
-		}
+        // This is the old iridescent shader, which is now deprecated.
+        if (this.userData.iridescent) {
+            ShaderUtils.iridescentShaderFragment(shader);
+        }
 
-		if (shader.shaderName == "MeshPhysicalMaterial" && shader.transmission) {
-			ShaderUtils.transmissionAlphaShaderFragment(shader);
-		}
+        if (shader.shaderName == "MeshPhysicalMaterial" && shader.iridescence) {
+            ShaderUtils.iridescenceShaderFragment(shader);
+        }
 
-		if (shader.shaderName == "MeshPhysicalMaterial" && shader.iridescence) {
-			ShaderUtils.iridescenceShaderFragment(shader);
-		}
-	}
-
-	static transmissionAlphaShaderFragment(shader) {
-		shader.fragmentShader = shader.fragmentShader.replace(`#include <transmission_fragment>`,
-			`#include <transmission_fragment>
-			totalDiffuse = mix( totalDiffuse, transmission.rgb, transmissionFactor);
-			float grey = (material.diffuseColor.r + material.diffuseColor.g + material.diffuseColor.b) / 3.0;
-			transmissionAlpha = mix( transmissionAlpha, 1.0-grey, transmissionFactor );`);
-	}
+        Hooks.callAll("diceSoNiceShaderOnBeforeCompile", shader, this);
+		this.userData.shader = shader;
+    }
 
 	static selectiveBloomShaderFragment(shader) {
 		shader.uniforms.globalBloom = game.dice3d.uniforms.globalBloom;
@@ -43,7 +34,7 @@ export class ShaderUtils {
 			`#include <dithering_fragment>
 			if (globalBloom > 0.5) {
 				#ifdef USE_EMISSIVEMAP
-					gl_FragColor.rgb = texture2D( emissiveMap, vMapUv ).rgb * emissive;
+					gl_FragColor.rgb = emissiveColor.rgb * emissive * totalEmissiveRadiance;
 				#else
 					gl_FragColor.rgb = vec3(0.0);
 				#endif

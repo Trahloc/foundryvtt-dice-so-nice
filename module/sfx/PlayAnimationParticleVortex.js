@@ -1,5 +1,5 @@
+import { Mesh, MeshBasicMaterial, NormalBlending, PlaneGeometry } from 'three';
 import { DiceSFX } from '../DiceSFX.js';
-import * as THREE from 'three';
 import { Proton } from '../libs/three.proton.js';
 import { DiceSFXManager } from './../DiceSFXManager';
 
@@ -11,18 +11,18 @@ export class PlayAnimationParticleVortex extends DiceSFX {
     /**@override init */
     static async init() {
         let map = await this.loadAsset(DiceSFXManager.TextureLoader, "modules/dice-so-nice/sfx/textures/magic01.webp");
-        let material = new THREE.MeshBasicMaterial({
+        let material = new MeshBasicMaterial({
             map: map,
-            blending:THREE.NormalBlending,
+            blending:NormalBlending,
             depthWrite:false,
             depthTest:true,
             transparent:true
         });
-        let geometry = new THREE.PlaneGeometry(140,140);
-        PlayAnimationParticleVortex.sprite = new THREE.Mesh(geometry,material);
+        let geometry = new PlaneGeometry(140,140);
+        PlayAnimationParticleVortex.sprite = new Mesh(geometry,material);
         
         game.audio.pending.push(function(){
-            AudioHelper.preloadSound(PlayAnimationParticleVortex.sound);
+            foundry.audio.AudioHelper.preloadSound(PlayAnimationParticleVortex.sound);
         }.bind(this));
     }
 
@@ -73,7 +73,7 @@ export class PlayAnimationParticleVortex extends DiceSFX {
         this.proton.addEmitter(this.emitter);
         this.proton.addRender(new Proton.MeshRender(this.box.scene));
 
-        AudioHelper.play({
+        foundry.audio.AudioHelper.play({
             src: PlayAnimationParticleVortex.sound,
             volume: this.volume
 		}, false);

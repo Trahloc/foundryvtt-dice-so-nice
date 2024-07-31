@@ -21,14 +21,12 @@ export class PlayMacro extends DiceSFX {
                                         <label>{{localize "DICESONICE.sfxOptionsMacro"}}</label>
                                         <div class="form-fields">
                                             <select name="sfxLine[{{id}}][options][macroId]">
-                                                {{selectOptions macroList nameAttr="id" labelAttr="name" selected=macroId}}
+                                                {{selectOptions macroList valueAttr="id" labelAttr="name" selected=macroId}}
                                             </select>
                                         </div>
                                     </div>`);
-
-        let permissionLevel = CONST.DOCUMENT_PERMISSION_LEVELS ? CONST.DOCUMENT_PERMISSION_LEVELS.OBSERVER : CONST.ENTITY_PERMISSIONS.OBSERVER;
         
-        dialogContent.data.macroList = game.macros.filter(macro => macro.testUserPermission(game.user, permissionLevel)).map(macro => {return {id:macro.id,name:macro.name}});
+        dialogContent.data.macroList = game.macros.filter(macro => macro.canExecute).map(macro => {return {id:macro.id,name:macro.name}});
         
         dialogContent.data.macroList.sort((a, b) => a.name > b.name && 1 || -1);
         dialogContent.data.macroId = sfxLine.options?sfxLine.options.macroId:null;

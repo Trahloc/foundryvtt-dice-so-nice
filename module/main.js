@@ -67,6 +67,24 @@ Hooks.once('init', () => {
         onChange: debouncedReload
     });
 
+    //add a button to reset the display of the welcome message for all users
+    game.settings.register("dice-so-nice", "resetWelcomeMessage", {
+        name: "DICESONICE.resetWelcomeMessage",
+        hint: "DICESONICE.resetWelcomeMessageHint",
+        scope: "world",
+        type: Boolean,
+        default: false,
+        config: true,
+        onChange: value => {
+            if (value) {
+                game.users.forEach(user => {
+                    user.setFlag("dice-so-nice", "welcomeMessageShown", false);
+                });
+                game.settings.set("dice-so-nice", "resetWelcomeMessage", false);
+            }
+        }
+    });
+
     game.settings.register("dice-so-nice", "enabledSimultaneousRolls", {
         name: "DICESONICE.enabledSimultaneousRolls",
         hint: "DICESONICE.enabledSimultaneousRollsHint",
@@ -170,7 +188,12 @@ Hooks.once('init', () => {
         name: "DICESONICE.showGhostDice",
         hint: "DICESONICE.showGhostDiceHint",
         scope: "world",
-        type: Boolean,
+        type: String,
+        choices: Utils.localize({
+            "0": "DICESONICE.ghostDiceDisabled",
+            "1": "DICESONICE.ghostDiceForAll",
+            "2": "DICESONICE.ghostDiceForRollAuthor"
+        }),
         default: false,
         config: true
     });
@@ -196,10 +219,29 @@ Hooks.once('ready', () => {
  */
 Hooks.on('createChatMessage', (chatMessage) => {
     //precheck for better perf
-    let hasInlineRoll = game.settings.get("dice-so-nice", "animateInlineRoll") && chatMessage.content.indexOf('inline-roll') !== -1;
-    if ((!chatMessage.isRoll && !hasInlineRoll) || (!chatMessage.isContentVisible && !game.settings.get("dice-so-nice", "showGhostDice")) ||
-        (game.view != "stream" && (!game.dice3d || game.dice3d.messageHookDisabled)) ||
-        (chatMessage.getFlag("core", "RollTable") && !game.settings.get("dice-so-nice", "animateRollTable"))) {
+    const hasInlineRoll = game.settings.get("dice-so-nice", "animateInlineRoll") && chatMessage.content.includes('inline-roll');
+
+    const showGhostDice = game.settings.get("dice-so-nice", "showGhostDice");
+    const shouldShowGhostDice = showGhostDice === "1" || (showGhostDice === "2" && game.user.id === chatMessage.author.id);
+    
+    const isContentVisible = chatMessage.isContentVisible;
+    const shouldAnimateRollTable = game.settings.get("dice-so-nice", "animateRollTable");
+    const hasRollTableFlag = chatMessage.getFlag("core", "RollTable");
+    const rollTableFormulaDisplayed = hasRollTableFlag && game.tables.get(hasRollTableFlag).displayRoll;
+
+    
+    const shouldInterceptMessage = (
+        //Is a roll
+        (chatMessage.isRoll || hasInlineRoll) &&
+        //If the content is  visible and ghost dice should  be shown
+        (isContentVisible || shouldShowGhostDice) &&
+        //If dsn is correctly enabled and the message hook is not disabled
+        game.dice3d && !game.dice3d.messageHookDisabled &&
+        //If it has a roll table, then check if the roll table should be animated and the roll table is displayed
+        (!hasRollTableFlag || (shouldAnimateRollTable && rollTableFormulaDisplayed))
+    );
+
+    if (!shouldInterceptMessage) {
         return;
     }
 

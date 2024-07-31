@@ -11,6 +11,7 @@
     "DICESONICE.showExtraDice": "Enable Extra Dice Customization",
     "DICESONICE.labelColor": "Label Color",
     "DICESONICE.diceColor": "Dice Color",
+    "DICESONICE.onlyShowMyDice": "Only show my dice",
     "DICESONICE.hideAfterRoll": "Automatically Hide",
     "DICESONICE.timeBeforeHide": "Millisecs Before Hiding",
     "DICESONICE.hideFX": "Hide FX",
@@ -91,6 +92,9 @@
     "DICESONICE.allowInteractivityHint": "Let players grab and throw 3D dice after they've been rolled on the table (this has no effect on the results)",
     "DICESONICE.showGhostDice": "Show Ghost dice for hidden rolls",
     "DICESONICE.showGhostDiceHint": "When possible, show a dice without numbers to players when rolling a GM or Blind roll.",
+    "DICESONICE.ghostDiceDisabled": "Disable Ghost dice",
+    "DICESONICE.ghostDiceForAll": "To all players",
+    "DICESONICE.ghostDiceForRollAuthor": "To the roll author only",
     "DICESONICE.navAppearanceHint": "(Click on a die to customize it)",
     "DICESONICE.Add": "Add",
     "DICESONICE.Delete": "Delete",
@@ -264,5 +268,9 @@
     "DICESONICE.TourMainContentShowBackup": "You can save your settings in multiple save files. This is useful if you wish to switch quickly between multiple custom appearances you've created.",
     "DICESONICE.TourMainTitleEndTour": "End of the tour",
     "DICESONICE.TourMainContentEndTour": "If you want more info, check our help page in your Module Management window. Happy rolling!",
-    "DICESONICE.PlayAnimationOutline": "Animation: Outline"
+    "DICESONICE.PlayAnimationOutline": "Animation: Outline",
+    "DICESONICE.resetWelcomeMessage": "Reset welcome message",
+    "DICESONICE.resetWelcomeMessageHint": "This will reset the welcome message for all players. They'll see the welcome message again the next time they join this world.",
+    "DICESONICE.openDiceEditorLabel": "Open the Dice Editor",
+    "DICESONICE.openDiceEditorButton": "Dice Editor"
 }

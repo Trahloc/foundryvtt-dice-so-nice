@@ -163,9 +163,10 @@ export class DiceNotation {
 						if(sfx.diceType == "d100"){
 							if(dsnDie.d100Result && sfx.onResult.includes(dsnDie.d100Result.toString()))
 								return true;
+						} else {
+							if(sfx.diceType == dsnDie.type && sfx.onResult.includes(dsnDie.result.toString()))
+								return true;
 						}
-						if(sfx.diceType == dsnDie.type && sfx.onResult.includes(dsnDie.result.toString()))
-							return true;
 							
 						//if a special effect was manually triggered for this dice, we also include it
 						if(dsnDie.options.sfx && dsnDie.options.sfx.id == sfx.diceType && sfx.onResult.includes(dsnDie.options.sfx.result.toString()))

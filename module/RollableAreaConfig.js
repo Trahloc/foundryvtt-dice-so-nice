@@ -35,7 +35,6 @@ export class RollableAreaConfig extends FormApplication {
                 height: $diceBox.height()
             }
         }
-        console.log(rollingArea);
         this.area.appendTo($('body'));
         this.area.css(rollingArea);
 
