@@ -59,6 +59,7 @@
     "DICESONICE.enableFlavorColorset": "Override your dice appearance when a theme is used to describe dice (ex: 2d10[acid])",
     "DICESONICE.immersiveDarkness": "Enable Immersive Darkness mode (Dice react to scene lighting)",
     "DICESONICE.system": "Dice Presets (Faces)",
+    "DICESONICE.SystemOptions": "System Settings",
     "DICESONICE.maxDiceNumber": "Max Number of Dice",
     "DICESONICE.maxDiceNumberHint": "Maximum number of displayed dice in an animation. Higher numbers will reduce performances",
     "DICESONICE.saveMessage": "Updated 3D Dice Settings Configuration",

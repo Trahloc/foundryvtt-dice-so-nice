@@ -120,6 +120,18 @@ export class Dice3D {
         return sfxArray;
     }
 
+    static SYSTEM_SETTINGS(user = game.user) {
+        let systemSettingsList;
+        if (user.id == game.user.id)
+            systemSettingsList = user.getFlag("dice-so-nice", "systemSettingsList") ? foundry.utils.duplicate(user.getFlag("dice-so-nice", "systemSettingsList")) : [];
+        else
+            systemSettingsList = [];
+        if (!Array.isArray(systemSettingsList)) {
+            systemSettingsList = [];
+        }
+        return systemSettingsList;
+    }
+
     /**
      * Get the full customizations settings for the _showAnimation method 
      */
@@ -151,20 +163,20 @@ export class Dice3D {
     }
 
     /**
-     * Register a new system
+     * Register a new system (legacy)
      * The id is to be used with addDicePreset
      * The name can be a localized string
-     * @param {Object} system {id, name, group}
+     * @param {Object} system {id, name, group} or instance of DiceSystem
      * @param {Boolean} mode "default,preferred". Default will add the system as a choice. Preferred will be enabled for all users unless they change their settings.
      * @param {String} group Group to display in the dice selector. Can be any string, like the dice maker name or a brand
      */
-    addSystem(system, mode = "default", settings = null) {
+    addSystem(system, mode = "default") {
         //retrocompatibility with  API version < 3.1
         if (typeof mode == "boolean") {
             mode = mode ? "preferred" : "default";
         }
 
-        this.DiceFactory.addSystem(system, mode, settings);
+        this.DiceFactory.addSystem(system, mode);
     }
 
     /**
