@@ -835,7 +835,7 @@ export class DiceBox {
 				this.iteration = this.iterationsNeeded;
 
 			for (const child of this.scene.children) {
-				let dicemesh = child.children && child.children.length && child.children[0].sim != undefined && !child.children[0].sim.dead ? child.children[0] : null;
+				let dicemesh = child.children && child.children.length && child.children[0].sim != undefined && (!child.children[0].sim.dead || child.children[0].sim.dead > this.iteration) ? child.children[0] : null;
 
 				if (dicemesh && dicemesh.sim.stepPositions[this.iteration * 3]) {
 					child.position.fromArray(dicemesh.sim.stepPositions, this.iteration * 3);
