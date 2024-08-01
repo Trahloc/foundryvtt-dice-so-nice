@@ -290,7 +290,7 @@ export class DiceFactory {
 
 		//If it exists in the standard system, and it was added there by the automated system, we want to override and load it
 		if(hasDice && (this.systems.get("standard").dice.get(diceobj.type).internalAdd || diceobj.internalAdd)){
-			this.systems.get("standard").set(diceobj.type, diceobj);
+			this.systems.get("standard").dice.set(diceobj.type, diceobj);
 			if(diceobj.modelFile){
 				diceobj.loadModel(this.loaderGLTF);
 			} else {
