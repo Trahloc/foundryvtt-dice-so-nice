@@ -282,7 +282,7 @@ export class Dice3D {
 
         this.uniforms = {
             globalBloom: { value: 1 },
-            bloomStrength: { value: 1.5 },
+            bloomStrength: { value: 1.1 },
             bloomRadius: { value: 0.2 },
             bloomThreshold: { value: 0 },
             iridescenceLookUp: { value: new ThinFilmFresnelMap() },
