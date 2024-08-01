@@ -22,9 +22,7 @@
     "cannon-es-debugger": "^1.0.0",
     "rollup": "^4.19.1",
     "three": "^0.167.0",
-    "webworker-promise": "^0.5.1"
-  },
-  "devDependencies": {
+    "webworker-promise": "^0.5.1",
     "@kineticcafe/rollup-plugin-delete": "^3.0.0",
     "@rollup/plugin-commonjs": "^26.0.1",
     "@rollup/plugin-node-resolve": "^15.2.3",
