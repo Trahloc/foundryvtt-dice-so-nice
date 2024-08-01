@@ -1,8 +1,15 @@
-image: node:latest
+image: node:20.13.1
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .npm/
 
 before_script:
   - apt-get update
   - apt-get install zip
+  - npm install -g npm@10.5.2 # ensure matching versions
+  - npm ci
 
 stages:
   - build
