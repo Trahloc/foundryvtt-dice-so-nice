@@ -28,6 +28,7 @@ import {
 	Mesh,
 	MeshBasicMaterial,
 	PCFSoftShadowMap,
+	PCFShadowMap,
 	PerspectiveCamera,
 	PlaneGeometry,
 	PMREMGenerator,
