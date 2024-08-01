@@ -214,11 +214,7 @@ Hooks.once('ready', () => {
     });
 });
 
-/**
- * Intercepts all roll-type messages hiding the content until the animation is finished
- */
-Hooks.on('createChatMessage', (chatMessage) => {
-    //precheck for better perf
+const shouldInterceptMessage = (chatMessage, options = {dsnCountAddedRoll: 0}) => {
     const hasInlineRoll = game.settings.get("dice-so-nice", "animateInlineRoll") && chatMessage.content.includes('inline-roll');
 
     const showGhostDice = game.settings.get("dice-so-nice", "showGhostDice");
@@ -229,24 +225,28 @@ Hooks.on('createChatMessage', (chatMessage) => {
     const hasRollTableFlag = chatMessage.getFlag("core", "RollTable");
     const rollTableFormulaDisplayed = hasRollTableFlag && game.tables.get(hasRollTableFlag).displayRoll;
 
+    //Is a roll
+    return (chatMessage.isRoll || hasInlineRoll) &&
+    //If the content is  visible and ghost dice should  be shown
+    (isContentVisible || shouldShowGhostDice) &&
+    //If dsn is correctly enabled and the message hook is not disabled
+    game.dice3d && !game.dice3d.messageHookDisabled &&
+    //If it has a roll table, then check if the roll table should be animated and the roll table is displayed
+    (!hasRollTableFlag || (shouldAnimateRollTable && rollTableFormulaDisplayed)) &&
+    //If there's at least one roll with diceterms (could be a deterministic roll without any dice like Roll("5"))
+    chatMessage.rolls.slice(options.dsnCountAddedRoll).some(roll => roll.dice.length > 0);
+};
+
+/**
+ * Intercepts all roll-type messages hiding the content until the animation is finished
+ */
+Hooks.on('createChatMessage', (chatMessage) => {
+    if (!shouldInterceptMessage(chatMessage)) return;
     
-    const shouldInterceptMessage = (
-        //Is a roll
-        (chatMessage.isRoll || hasInlineRoll) &&
-        //If the content is  visible and ghost dice should  be shown
-        (isContentVisible || shouldShowGhostDice) &&
-        //If dsn is correctly enabled and the message hook is not disabled
-        game.dice3d && !game.dice3d.messageHookDisabled &&
-        //If it has a roll table, then check if the roll table should be animated and the roll table is displayed
-        (!hasRollTableFlag || (shouldAnimateRollTable && rollTableFormulaDisplayed))
-    );
-
-    if (!shouldInterceptMessage) {
-        return;
-    }
-
     let rolls = chatMessage.isRoll ? chatMessage.rolls : null;
     let maxRollOrder = rolls ? 0 : -1;
+
+    const hasInlineRoll = game.settings.get("dice-so-nice", "animateInlineRoll") && chatMessage.content.includes('inline-roll');
     if (hasInlineRoll) {
         let JqInlineRolls = $($.parseHTML(`<div>${chatMessage.content}</div>`)).find(".inline-roll.inline-result:not(.inline-dsn-hidden)");
         if (JqInlineRolls.length == 0 && !chatMessage.isRoll) //it was a false positive
@@ -321,11 +321,8 @@ Hooks.on("preUpdateChatMessage", (message, updateData, options) => {
  */
 Hooks.on("updateChatMessage", (message, updateData, options) => {
     //Todo: refactor this check into a function
-    if (!message.rolls || !message.isRoll || (!message.isContentVisible && !game.settings.get("dice-so-nice", "showGhostDice")) ||
-        (game.view != "stream" && (!game.dice3d || game.dice3d.messageHookDisabled)) ||
-        (message.getFlag("core", "RollTable") && !game.settings.get("dice-so-nice", "animateRollTable"))) {
-        return;
-    }
+    if(!shouldInterceptMessage(message, options)) return;
+
     if (options.dsnCountAddedRoll > 0) {
         message._dice3danimating = true;
         message._countNewRolls = options.dsnCountAddedRoll;
