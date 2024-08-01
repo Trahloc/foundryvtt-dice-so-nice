@@ -9,7 +9,7 @@ before_script:
   - apt-get update
   - apt-get install zip
   - npm ci
-  - npm install --only=development
+  - ls node_modules/@rollup/plugin-node-resolve
 
 stages:
   - build
