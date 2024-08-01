@@ -8,8 +8,8 @@ cache:
 before_script:
   - apt-get update
   - apt-get install zip
-  - npm install -g npm@10.5.2 # ensure matching versions
   - npm ci
+  - npm install --only=dev
 
 stages:
   - build
