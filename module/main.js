@@ -206,8 +206,10 @@ Hooks.once('init', () => {
 Hooks.once('ready', () => {
     Utils.migrateOldSettings().then((updated) => {
         if (updated) {
-            if (!game.settings.get("core", "noCanvas"))
+            if (!game.settings.get("core", "noCanvas")){
                 game.dice3d = new Dice3D();
+                game.dice3d.init();
+            }
             else
                 logger.warn("Dice So Nice! is disabled because the user has activated the 'No-Canvas' mode");
         }

@@ -139,8 +139,6 @@ export class DiceBox {
 
 	initialize() {
 		return new Promise(async resolve => {
-			await this.dicefactory.preloadPresets();
-
 			this.soundManager.update({
 				sounds: this.config.sounds,
 				volume: this.config.soundsVolume,
