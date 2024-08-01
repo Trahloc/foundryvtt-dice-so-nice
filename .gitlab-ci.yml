@@ -9,7 +9,7 @@ before_script:
   - apt-get update
   - apt-get install zip
   - npm ci
-  - npm install --only=dev
+  - npm install --only=development
 
 stages:
   - build
