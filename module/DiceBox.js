@@ -139,8 +139,6 @@ export class DiceBox {
 
 	initialize() {
 		return new Promise(async resolve => {
-			await this.dicefactory.preloadPresets();
-
 			this.soundManager.update({
 				sounds: this.config.sounds,
 				volume: this.config.soundsVolume,
@@ -744,7 +742,6 @@ export class DiceBox {
 		stopped = this.iteration >= this.iterationsNeeded;
 		if (stopped && this.rolling) {
 			//Can't await here because of the PIXI ticker. Hopefully it's not needed.
-			this.rolling = false;
 			for (let i = 0, len = this.diceList.length; i < len; ++i) {
 				if (!this.diceList[i].sim)
 					continue;
@@ -908,6 +905,7 @@ export class DiceBox {
 					this.callback(this.throws);
 					this.callback = null;
 					this.throws = null;
+					this.rolling = false;
 					if (!this.animatedDiceDetected && !(this.allowInteractivity && (this.deadDiceList.length + this.diceList.length) > 0) && !DiceSFXManager.renderQueue.length)
 						this.removeTicker(this.animateThrow);
 				});
@@ -1119,6 +1117,7 @@ export class DiceBox {
 		this.rolling = true;
 		this.running = (new Date()).getTime();
 		this.last_time = 0;
+
 		this.callback = callback;
 		this.throws = throws;
 		this.removeTicker(this.animateThrow);

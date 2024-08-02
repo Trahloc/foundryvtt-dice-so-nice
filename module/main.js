@@ -206,8 +206,10 @@ Hooks.once('init', () => {
 Hooks.once('ready', () => {
     Utils.migrateOldSettings().then((updated) => {
         if (updated) {
-            if (!game.settings.get("core", "noCanvas"))
+            if (!game.settings.get("core", "noCanvas")){
                 game.dice3d = new Dice3D();
+                game.dice3d.init();
+            }
             else
                 logger.warn("Dice So Nice! is disabled because the user has activated the 'No-Canvas' mode");
         }
@@ -266,7 +268,7 @@ Hooks.on('createChatMessage', (chatMessage) => {
             if (chatMessage.isRoll)
                 inlineRollList = [...chatMessage.rolls, ...inlineRollList];
 
-            let pool = PoolTerm.fromRolls(inlineRollList);
+            let pool = foundry.dice.terms.PoolTerm.fromRolls(inlineRollList);
             //We use the Roll class registered in the CONFIG constant in case the system overwrites it (eg: HeXXen)
             rolls = [CONFIG.Dice.rolls[0].fromTerms([pool])];
         }

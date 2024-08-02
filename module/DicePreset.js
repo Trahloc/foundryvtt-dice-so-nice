@@ -177,7 +177,7 @@ export class DicePreset {
     async loadTextureType(textureList, loadedAtlasTextures, assetsLoader) {
 		const textureMap = [];
 		const imageRegex = /\.(png|jpg|jpeg|gif|webp)$/i;
-	
+		
 		for (let i = 0; i < textureList.length; i++) {
 			const texture = textureList[i];
 	

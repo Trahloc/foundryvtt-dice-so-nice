@@ -293,6 +293,9 @@ export class Dice3D {
 
         this.hiddenAnimationQueue = [];
         this.defaultShowExtraDice = Dice3D.DEFAULT_OPTIONS.showExtraDice;
+    }
+
+    init() {
         this._buildCanvas();
         this._initListeners();
         this._buildDiceBox();
