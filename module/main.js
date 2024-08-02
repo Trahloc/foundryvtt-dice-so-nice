@@ -268,7 +268,7 @@ Hooks.on('createChatMessage', (chatMessage) => {
             if (chatMessage.isRoll)
                 inlineRollList = [...chatMessage.rolls, ...inlineRollList];
 
-            let pool = PoolTerm.fromRolls(inlineRollList);
+            let pool = foundry.dice.terms.PoolTerm.fromRolls(inlineRollList);
             //We use the Roll class registered in the CONFIG constant in case the system overwrites it (eg: HeXXen)
             rolls = [CONFIG.Dice.rolls[0].fromTerms([pool])];
         }
