@@ -1,8 +1,14 @@
-image: node:latest
+image: node:20.13.1
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .npm/
 
 before_script:
   - apt-get update
   - apt-get install zip curl jq -y
+  - npm ci
 
 stages:
   - build
@@ -11,7 +17,6 @@ stages:
 build:
   stage: build
   script:
-    - npm ci
     - npx rollup -c
     - cd dist
     - zip dice-so-nice.zip -r . -x ".*"
