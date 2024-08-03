@@ -48,7 +48,6 @@ publish:
         -X POST https://api.foundryvtt.com/_api/packages/release_version/ \
         -d '{
           "id": "'"${PACKAGE_ID}"'",
-          "dry-run": true,
           "release": {
             "version": "'"${VERSION}"'",
             "manifest": "'"${MANIFEST_URL}"'",
