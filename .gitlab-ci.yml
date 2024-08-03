@@ -61,7 +61,7 @@ publish:
         }')
       
       # Print response without the token
-      echo "API Response:" $(echo $RESPONSE')
+      echo "API Response:" $(echo $RESPONSE)
       
       if echo $RESPONSE | jq -e '.status == "success"' > /dev/null; then
         echo "Release published successfully"
