@@ -5,6 +5,7 @@ import terser from '@rollup/plugin-terser';
 import { del } from '@kineticcafe/rollup-plugin-delete';
 import copy from 'rollup-plugin-copy';
 import webWorkerLoader from 'rollup-plugin-web-worker-loader';
+import { readFileSync, writeFileSync } from 'fs';
 
 // Define static files for the copy plugin
 const staticFiles = [
@@ -45,6 +46,22 @@ const config = {
     }
   },
   plugins: [
+    !isProduction &&{
+      name: 'set-module-version',
+      buildStart() {
+        const packageJson = JSON.parse(readFileSync('./package.json', 'utf8'));
+        const moduleJson = JSON.parse(readFileSync('./module/module.json', 'utf8'));
+        const compatibilityVerified = moduleJson.compatibility.verified;
+        if(moduleJson.version !== packageJson.version) {
+          moduleJson.version = packageJson.version;
+          moduleJson.download = `https://gitlab.com/riccisi/foundryvtt-dice-so-nice/-/jobs/artifacts/${packageJson.version}/raw/dist/dice-so-nice.zip?job=build`;
+
+          writeFileSync('./module/module.json', JSON.stringify(moduleJson, null, 4));
+          console.log(`[Dice So Nice] Module version set to ${packageJson.version}`);
+          console.log(`[Dice So Nice] Compatibility verified: ${compatibilityVerified}`);
+        }
+      }
+    },
     !isWatch && del({
       targets: 'dist/*',
       runOnce: true
@@ -57,7 +74,7 @@ const config = {
     }),
     // Add a copy of three.js to the libs folder for external usage
     !isWatch && copy({
-      targets: [{ 
+      targets: [{
         src: `node_modules/three/build/three.module.min.js`,
         dest: `dist/libs`
       }]
