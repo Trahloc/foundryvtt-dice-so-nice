@@ -181,7 +181,7 @@ export class DicePreset {
 		for (let i = 0; i < textureList.length; i++) {
 			const texture = textureList[i];
 	
-			if (!texture.match(imageRegex)) {
+			if (!texture || !texture.match(imageRegex)) {
 				// If the entry is not an image, handle it as a string directly.
 				textureMap[i] = texture;
 			} else if (loadedAtlasTextures[texture]) {
