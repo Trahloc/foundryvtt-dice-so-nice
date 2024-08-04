@@ -209,7 +209,6 @@
     border: 1px solid var(--color-border-light-tertiary);
     border-radius: 3px;
     padding: 4px;
-    display:none;
 }
 
 .dice-so-nice button[data-overwrite] {

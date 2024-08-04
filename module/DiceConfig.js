@@ -4,6 +4,7 @@ import { DiceSFXManager } from './DiceSFXManager.js';
 import { Utils } from './Utils.js';
 import { DiceNotation } from './DiceNotation.js';
 import { DiceColors, DICE_SCALE } from './DiceColors.js';
+import { DiceSystem } from './DiceSystem.js';
 /**
  * Form application to configure settings of the 3D Dice.
  */
@@ -183,7 +184,8 @@ export class DiceConfig extends FormApplication {
         }
         data.specialEffectsList = specialEffectsList.join("");
 
-        let tabsList = [];
+        const tabsList = [];
+        const systemSettingsScoped = {};
         for (let scope in data.appearance) {
             if (data.appearance.hasOwnProperty(scope)) {
                 tabsList.push(scope);
@@ -196,6 +198,16 @@ export class DiceConfig extends FormApplication {
                         data.appearance[scope].outlineColor = data.appearance.global.outlineColor;
                     if (!data.appearance[scope].edgeColor)
                         data.appearance[scope].edgeColor = data.appearance.global.edgeColor;
+                }
+
+                if(this.box.dicefactory.systems.has(data.appearance[scope].system)){
+                    const system = this.box.dicefactory.systems.get(data.appearance[scope].system);
+                    const dialogContent = system.getSettingsDialogContent();
+
+                    if(dialogContent.content != ""){
+                        const hdbsTemplate = Handlebars.compile(dialogContent.content);
+                        systemSettingsScoped[scope] = hdbsTemplate(dialogContent.data);
+                    }
                 }
             }
         }
@@ -211,7 +223,8 @@ export class DiceConfig extends FormApplication {
                 colorsetList: data.colorsetList,
                 textureList: data.textureList,
                 materialList: data.materialList,
-                fontList: data.fontList
+                fontList: data.fontList,
+                systemSettings: systemSettingsScoped[diceType]
             }).then((html) => {
                 tabsAppearance.push(html);
             }));
@@ -432,12 +445,18 @@ export class DiceConfig extends FormApplication {
                 }
             });
 
+
+            /**
+             * System Settings
+             */
             $(this.element).on("click", "[data-system-options]", (ev) => {
-                const systemSelected = $(ev.target).parents("[data-system-group]").find("[data-system]").val();
-                const systemSettingsElement = $(ev.target).parents(".dsn-settings-container").find(`[data-systemSettings-hidden] [data-systemSettings="${systemSelected}"]`);
+                const systemSettingsContainer = $(ev.target).parents(".tabAppearance").find(`[data-systemSettings-hidden]`);
+                const systemSettingsElement = systemSettingsContainer.find("[data-systemSettings]");
+                const systemSelected = $(ev.target).parents(".tabAppearance").find("[data-system]").val();
+                const systemName = this.box.dicefactory.systems.get(systemSelected).name;
 
                 let d = new Dialog({
-                    title: game.i18n.localize("DICESONICE.SystemOptions"),
+                    title: `${game.i18n.localize("DICESONICE.SystemOptions")} - ${this.lastActiveAppearanceTab.charAt(0).toUpperCase()}${this.lastActiveAppearanceTab.slice(1)} - ${systemName}`,
                     content: `<form autocomplete="off" onsubmit="event.preventDefault();"></form>`,
                     buttons: {
                         ok: {
@@ -448,11 +467,14 @@ export class DiceConfig extends FormApplication {
                     default: "ok",
                     render: (html) => {
                         systemSettingsElement.detach().appendTo($(html).find("form"));
+                        this.activateDialogListeners(html);
                     },
                     close: (html) => {
-                        $(html).find("[data-systemSettings-hidden]").detach().appendTo(systemSettingsElement);
+                        $(html).find("[data-systemSettings]").detach().appendTo(systemSettingsContainer);
                         this.systemSettingsDialogList = this.systemSettingsDialogList.filter(dialog => dialog.appId != d.appId);
                     }
+                }, {
+                    width: 550
                 });
                 d.render(true);
                 this.systemSettingsDialogList.push(d);
@@ -621,6 +643,16 @@ export class DiceConfig extends FormApplication {
                     if ($(this.element).find(`.dsn-appearance-tabs [data-tab="${diceType}"]`).length) {
                         this.activateAppearanceTab(diceType);
                     } else {
+                        let newSystemSettings = {};
+                        if(this.box.dicefactory.systems.has(this.currentGlobalAppearance.system)){
+                            const system = this.box.dicefactory.systems.get(this.currentGlobalAppearance.system);
+                            const dialogContent = system.getSettingsDialogContent();
+        
+                            if(dialogContent.content != ""){
+                                const hdbsTemplate = Handlebars.compile(dialogContent.content);
+                                newSystemSettings = hdbsTemplate(dialogContent.data);
+                            }
+                        }
                         $(this.element).find(".dsn-appearance-hint").hide();
                         renderTemplate("modules/dice-so-nice/templates/partial-appearance.html", {
                             dicetype: diceType,
@@ -629,7 +661,8 @@ export class DiceConfig extends FormApplication {
                             colorsetList: this.initializationData.colorsetList,
                             textureList: this.initializationData.textureList,
                             materialList: this.initializationData.materialList,
-                            fontList: this.initializationData.fontList
+                            fontList: this.initializationData.fontList,
+                            systemSettings: newSystemSettings
                         }).then((html) => {
                             let tabName = diceType.toUpperCase();
 
@@ -699,6 +732,32 @@ export class DiceConfig extends FormApplication {
                 $(this.element).find("[data-imageQuality]").val("custom");
             });
         }
+    }
+
+    activateDialogListeners(html) {
+        //sync range input with span
+        $(html).on("change", "input[type=range]",(event) => {
+            const value = $(event.target).val();
+            $(event.target).next().text(value);
+        });
+
+        //sync span input with range
+        $(html).on("change", "span.range-value", (event) => {
+            const value = $(event.target).text();
+            $(event.target).prev().val(value);
+        });
+
+        //sync color picker with input
+        $(html).on("change", "input[type=color]", (event) => {
+            const value = $(event.target).val();
+            $(event.target).prev().val(value);
+        });
+
+        //sync input with color picker
+        $(html).on("change", "[data-colorpicker]", (event) => {
+            const value = $(event.target).val();
+            $(event.target).next().val(value);
+        });
     }
 
     async actionSaveAs(name) {
@@ -789,6 +848,7 @@ export class DiceConfig extends FormApplication {
         if (tabs._contentSelector == "#dsn-appearance-content") {
             if (this.lastActiveAppearanceTab != "global") {
                 let appearanceArray = [];
+                let systemSettingsElement = null;
                 $(this.element).find(`.tabAppearance[data-tab="global"],.tabAppearance[data-tab="${this.lastActiveAppearanceTab}"]`).each((index, element) => {
                     let obj = {
                         labelColor: $(element).find('[data-labelColor]').val(),
@@ -799,8 +859,10 @@ export class DiceConfig extends FormApplication {
                         texture: $(element).find('[data-texture]').val(),
                         material: $(element).find('[data-material]').val(),
                         font: $(element).find('[data-font]').val(),
-                        system: $(element).find('[data-system]').val(),
+                        system: $(element).find('[data-system]').val()
                     };
+                    if(index == 1)
+                        systemSettingsElement = $(element).find('[data-systemSettings]');
                     //disabled systems arent returned
                     if (obj.system == null) {
                         obj.system = this.currentGlobalAppearance.system;
@@ -808,8 +870,31 @@ export class DiceConfig extends FormApplication {
                     appearanceArray.push(obj);
                 });
                 if (appearanceArray.length > 1) {
-                    let diff = foundry.utils.diffObject(appearanceArray[0], appearanceArray[1]);
-                    if (foundry.utils.isEmpty(diff)) {
+                    let hasDiff = false;
+                    //Check if at least one appearance is different
+                    hasDiff = !foundry.utils.isEmpty(foundry.utils.diffObject(appearanceArray[0], appearanceArray[1]));
+
+                    //Check if any of the system settings is different from the default settings
+                    if(!hasDiff){
+                        for(let setting of this.box.dicefactory.systems.get(appearanceArray[1].system).settings){
+                            //find the html input value 
+                            let settingElement = $(systemSettingsElement).find(`[name="systemSettings[${appearanceArray[1].system}][${setting.id}]"]`);
+                            let value;
+
+                            if(setting.type == DiceSystem.SETTING_TYPE.BOOLEAN){
+                                value = settingElement.is(":checked");
+                            } else {
+                                value = settingElement.val();
+                            }
+
+                            if(value != setting.defaultValue){
+                                hasDiff = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!hasDiff) {
                         this.closeAppearanceTab(this.lastActiveAppearanceTab)
                     }
                 }
