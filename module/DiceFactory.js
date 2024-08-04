@@ -47,11 +47,11 @@ export class DiceFactory {
 		this.baseTextureCache = {};
 
 		this.systems = new Map();
-		this.systems.set("standard", new DiceSystem("standard", game.i18n.localize("DICESONICE.System.Standard"), null, "default"));
-		this.systems.set("spectrum", new DiceSystem("spectrum", game.i18n.localize("DICESONICE.System.SpectrumDice"), null, "default", "Dice So Nice!"));
-		this.systems.set("foundry_vtt", new DiceSystem("foundry_vtt", game.i18n.localize("DICESONICE.System.FoundryVTT"), null, "default", "Dice So Nice!"));
-		this.systems.set("dot", new DiceSystem("dot", game.i18n.localize("DICESONICE.System.Dot"), null, "default", "Dice So Nice!"));
-		this.systems.set("dot_b", new DiceSystem("dot_b", game.i18n.localize("DICESONICE.System.DotBlack"), null, "default", "Dice So Nice!"));
+		this.systems.set("standard", new DiceSystem("standard", game.i18n.localize("DICESONICE.System.Standard"), "default"));
+		this.systems.set("spectrum", new DiceSystem("spectrum", game.i18n.localize("DICESONICE.System.SpectrumDice"), "default", "Dice So Nice!"));
+		this.systems.set("foundry_vtt", new DiceSystem("foundry_vtt", game.i18n.localize("DICESONICE.System.FoundryVTT"), "default", "Dice So Nice!"));
+		this.systems.set("dot", new DiceSystem("dot", game.i18n.localize("DICESONICE.System.Dot"), "default", "Dice So Nice!"));
+		this.systems.set("dot_b", new DiceSystem("dot_b", game.i18n.localize("DICESONICE.System.DotBlack"), "default", "Dice So Nice!"));
 		
 		BASE_PRESETS_LIST.forEach((preset) => {
 			this.register(preset);
@@ -374,13 +374,18 @@ export class DiceFactory {
 	}
 
 	//{id: 'standard', name: game.i18n.localize("DICESONICE.System.Standard")}
-	//Internal use
+	//Internal use, legacy
 	//See dice3d.addSystem for public API
-	addSystem(system, mode="default", settings){
+	addSystem(system, mode="default"){
+		if(system instanceof DiceSystem){
+			this.systems.set(system.id, system);
+			mode = system.mode;
+		} else {
+			this.systems.set(system.id, new DiceSystem(system.id, system.name, mode, system.group));
+		}
+
 		if(mode != "default" && this.preferredSystem == "standard")
 			this.preferredSystem = system.id;
-
-		this.systems.set(system.id, new DiceSystem(system.id, system.name, null, mode, system.group));
 	}
 
 	//{type:"",labels:[],system:""}

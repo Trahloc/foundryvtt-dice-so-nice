@@ -226,11 +226,13 @@ export class DiceConfig extends FormApplication {
             data.displayHint = '';
 
         data.tabsAppearance = tabsAppearance.join("");
+
         this.lastActiveAppearanceTab = "global";
 
         this.initializationData = data;
         this.currentGlobalAppearance = data.appearance.global;
         this.sfxDialogList = [];
+        this.systemSettingsDialogList = [];
 
         const templateSelect2 = (result) => {
 
@@ -367,7 +369,7 @@ export class DiceConfig extends FormApplication {
             $(this.element).on("click", "[data-sfx-options]", (ev) => {
                 let sfxLineOptions = $(ev.target).parents(".sfx-line").find("[data-sfx-hidden-options]");
 
-                if (sfxLineOptions.length < 1)
+                if(sfxLineOptions.length < 1)
                     return;
 
                 let d = new Dialog({
@@ -428,6 +430,32 @@ export class DiceConfig extends FormApplication {
                 for (let fp of sfxLine.find(".sfx-hidden [data-sfx-hidden-options] button.file-picker")) {
                     fp.onclick = this._activateFilePicker.bind(this);
                 }
+            });
+
+            $(this.element).on("click", "[data-system-options]", (ev) => {
+                const systemSelected = $(ev.target).parents("[data-system-group]").find("[data-system]").val();
+                const systemSettingsElement = $(ev.target).parents(".dsn-settings-container").find(`[data-systemSettings-hidden] [data-systemSettings="${systemSelected}"]`);
+
+                let d = new Dialog({
+                    title: game.i18n.localize("DICESONICE.SystemOptions"),
+                    content: `<form autocomplete="off" onsubmit="event.preventDefault();"></form>`,
+                    buttons: {
+                        ok: {
+                            icon: '<i class="fas fa-check-circle"></i>',
+                            label: 'OK'
+                        }
+                    },
+                    default: "ok",
+                    render: (html) => {
+                        systemSettingsElement.detach().appendTo($(html).find("form"));
+                    },
+                    close: (html) => {
+                        $(html).find("[data-systemSettings-hidden]").detach().appendTo(systemSettingsElement);
+                        this.systemSettingsDialogList = this.systemSettingsDialogList.filter(dialog => dialog.appId != d.appId);
+                    }
+                });
+                d.render(true);
+                this.systemSettingsDialogList.push(d);
             });
 
             /**
