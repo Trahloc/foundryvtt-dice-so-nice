@@ -339,11 +339,13 @@ export class Dice3D {
         const config = Dice3D.CONFIG();
         const sidebarWidth = $('#sidebar').width();
         const sidebarOffset = sidebarWidth > window.innerWidth / 2 ? 0 : sidebarWidth;
+        // Get the body element's top style because of the "Window Controls" plugin that adds a "top" to the body element
+        const bodyTop = parseInt(window.getComputedStyle(document.body).top, 10) || 0;
         const area = config.rollingArea ? config.rollingArea : {
             left: 0,
             top: 0,
             width: window.innerWidth - sidebarOffset,
-            height: window.innerHeight - 1
+            height: window.innerHeight - 1 - bodyTop
         };
 
         if (!config.enabled) {

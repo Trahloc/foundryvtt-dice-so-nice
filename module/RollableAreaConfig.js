@@ -43,6 +43,9 @@ export class RollableAreaConfig extends FormApplication {
 
     activateListeners(html) {
         super.activateListeners(html);
+        // Get the body element's top style because of the "Window Controls" plugin that adds a "top" to the body element
+        const bodyTop = parseInt(window.getComputedStyle(document.body).top, 10) || 0;
+
         html.find('button[name="restore"]').click(this._onRestore.bind(this));
 
         let el = $(this.area).get(0);
@@ -60,8 +63,9 @@ export class RollableAreaConfig extends FormApplication {
                     let newY = prevY - e.clientY;
 
                     const rect = el.getBoundingClientRect();
+
                     el.style.left = rect.left - newX + 'px';
-                    el.style.top = rect.top - newY + 'px';
+                    el.style.top = rect.top - newY - bodyTop + 'px';
 
                     prevX = e.clientX;
                     prevY = e.clientY;
@@ -99,13 +103,13 @@ export class RollableAreaConfig extends FormApplication {
                     else if(resizer.classList.contains("ne")) {
                         el.style.width = rect.width - (prevX - e.clientX) + "px";
                         el.style.height = rect.height + (prevY - e.clientY) + "px";
-                        el.style.top = rect.top - (prevY - e.clientY) + "px";
+                        el.style.top = rect.top - (prevY - e.clientY) - bodyTop + "px";
                     }
                     else {
                         el.style.width = rect.width + (prevX - e.clientX) + "px";
                         el.style.height = rect.height + (prevY - e.clientY) + "px";
                         el.style.left = rect.left - (prevX - e.clientX) + "px";
-                        el.style.top = rect.top - (prevY - e.clientY) + "px";
+                        el.style.top = rect.top - (prevY - e.clientY) - bodyTop + "px";
                     }
 
                     prevX = e.clientX;
