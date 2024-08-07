@@ -1136,7 +1136,7 @@ export class DiceFactory {
 		let materialData = {};
 		let colorindex;
 
-		if(appearance.texture && !appearance.texture.name)
+		if(appearance.texture && !appearance.texture.id)
 			appearance.texture = DiceColors.getTexture(appearance.texture);
 
 		let colorsetData = DiceColors.getColorSet(appearance.colorset);
