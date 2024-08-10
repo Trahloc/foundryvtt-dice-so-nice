@@ -216,7 +216,7 @@ Hooks.once('ready', () => {
     });
 });
 
-const shouldInterceptMessage = (chatMessage, options = {dsnCountAddedRoll: 0}) => {
+const shouldInterceptMessage = (chatMessage, options = {dsnCountAddedRoll: 0, dsnIndexAddedRoll: 0}) => {
     const hasInlineRoll = game.settings.get("dice-so-nice", "animateInlineRoll") && chatMessage.content.includes('inline-roll');
 
     const showGhostDice = game.settings.get("dice-so-nice", "showGhostDice");
@@ -236,7 +236,7 @@ const shouldInterceptMessage = (chatMessage, options = {dsnCountAddedRoll: 0}) =
     //If it has a roll table, then check if the roll table should be animated and the roll table is displayed
     (!hasRollTableFlag || (shouldAnimateRollTable && rollTableFormulaDisplayed)) &&
     //If there's at least one roll with diceterms (could be a deterministic roll without any dice like Roll("5"))
-    chatMessage.rolls.slice(options.dsnCountAddedRoll).some(roll => roll.dice.length > 0);
+    chatMessage.rolls.slice(options.dsnIndexAddedRoll).some(roll => roll.dice.length > 0);
 };
 
 /**
@@ -297,6 +297,10 @@ Hooks.on('createChatMessage', (chatMessage) => {
  * Hide messages which are animating rolls.
  */
 Hooks.on("renderChatMessage", (message, html, data) => {
+    //todo: there's a race condition here where the html is not updated yet by a previous renderChatMessage
+    //therefore, when updating the chat message right after creating it, the global "dsn-hide" class is not applied
+    //resulting in the first rolls not being hidden
+    //idea: keep a list of message ids currently being animated
     if (game.dice3d && game.dice3d.messageHookDisabled) {
         return;
     }
@@ -315,20 +319,21 @@ Hooks.on("renderChatMessage", (message, html, data) => {
 Hooks.on("preUpdateChatMessage", (message, updateData, options) => {
     if (!("rolls" in updateData)) return;
     // We test against the source data in case the system/macro/module has modified the scoped message variable
-    options.dsnCountAddedRoll = updateData.rolls.length - message.toObject().rolls.length;
+    const originalRollsArrayLength = message.toObject().rolls.length;
+    options.dsnCountAddedRoll = updateData.rolls.length - originalRollsArrayLength;
+    options.dsnIndexAddedRoll = originalRollsArrayLength;
 });
 
 /**
  * Hide and roll new rolls added in a chat message in a update
  */
 Hooks.on("updateChatMessage", (message, updateData, options) => {
-    //Todo: refactor this check into a function
     if(!shouldInterceptMessage(message, options)) return;
 
     if (options.dsnCountAddedRoll > 0) {
         message._dice3danimating = true;
         message._countNewRolls = options.dsnCountAddedRoll;
-        game.dice3d.renderRolls(message, message.rolls.slice(-options.dsnCountAddedRoll));
+        game.dice3d.renderRolls(message, message.rolls.slice(options.dsnIndexAddedRoll));
     }
 });
 
