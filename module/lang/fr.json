@@ -267,5 +267,13 @@
     "DICESONICE.TourMainContentGotoModulesSettings": "Cliquez sur le filtre 'Dice So Nice'",
     "DICESONICE.WelcomeTitle": "Dice So Nice - Vos dés 3D",
     "DICESONICE.sfxOptionsMuteSound": "Couper le son",
-    "DICESONICE.PlayAnimationOutline": "Animation : Aperçu"
+    "DICESONICE.PlayAnimationOutline": "Animation : Aperçu",
+    "DICESONICE.ghostDiceForAll": "Pour tous les joueurs",
+    "DICESONICE.ghostDiceForRollAuthor": "Seulement pour l'auteur du jet",
+    "DICESONICE.openDiceEditorButton": "Éditeur de dé",
+    "DICESONICE.onlyShowMyDice": "Ne voir que mes dés",
+    "DICESONICE.ghostDiceDisabled": "Désactiver les dés fantômes",
+    "DICESONICE.resetWelcomeMessage": "Ré-afficher le message de bienvenue",
+    "DICESONICE.resetWelcomeMessageHint": "A la prochaine connexion des joueurs, ils recevront à nouveau le message de bienvenue.",
+    "DICESONICE.openDiceEditorLabel": "Ouvrir l’Éditeur de Dé"
 }
