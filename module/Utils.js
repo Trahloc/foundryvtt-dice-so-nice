@@ -4,8 +4,9 @@ import { TEXTURELIST, COLORSETS } from './DiceColors.js';
  */
  export class Utils {
 
+    static DATA_FORMAT_VERSION = "4.2";
     /**
-     * Migrate old 1.0 or 2.0 setting to new 4.0 format.
+     * Migrate old 1.0 or 2.0 setting to new 4.2 format.
      */
     static async migrateOldSettings() {
 
@@ -18,7 +19,7 @@ import { TEXTURELIST, COLORSETS } from './DiceColors.js';
 
         let formatversion = game.settings.get("dice-so-nice", "formatVersion");
 
-        if (formatversion == "" || formatversion != "4.1") { //Never updated or first install
+        if (formatversion == "" || formatversion != Utils.DATA_FORMAT_VERSION) { //Never updated or first install
             if (!game.user.isGM) {
                 ui.notifications.warn(game.i18n.localize("DICESONICE.migrateMessageNeedGM"));
                 return false;
@@ -121,7 +122,13 @@ import { TEXTURELIST, COLORSETS } from './DiceColors.js';
             }
         }));
 
-        game.settings.set("dice-so-nice", "formatVersion", "4.1");
+        //v4.1 to v4.2
+        //showGhostDice is now a string with 3 values. 0, 1 or 2
+        //If the setting was previously false, set it to 0. If it was true, set it to 1
+        await game.settings.set("dice-so-nice", "showGhostDice", game.settings.get("dice-so-nice", "showGhostDice") ? '1' : '0');
+
+
+        game.settings.set("dice-so-nice", "formatVersion", Utils.DATA_FORMAT_VERSION);
         if(migrated)
             ui.notifications.info(game.i18n.localize("DICESONICE.migrateMessage"));
         return true;
@@ -183,31 +190,39 @@ import { TEXTURELIST, COLORSETS } from './DiceColors.js';
     };
 
     static prepareColorsetList() {
-        let groupedSetsList = Object.values(COLORSETS);
-        groupedSetsList.sort((set1, set2) => {
-            if (game.i18n.localize(set1.description) < game.i18n.localize(set2.description)) return -1;
-            if (game.i18n.localize(set1.description) > game.i18n.localize(set2.description)) return 1;
-        });
-        let preparedList = {};
-        for (let i = 0; i < groupedSetsList.length; i++) {
-            if (groupedSetsList[i].visibility == 'hidden')
-                continue;
-            let locCategory = game.i18n.localize(groupedSetsList[i].category);
-            if (!preparedList.hasOwnProperty(locCategory))
-                preparedList[locCategory] = {};
-            preparedList[locCategory][groupedSetsList[i].name] = game.i18n.localize(groupedSetsList[i].description);
-        }
+        let colorsetList = Object.entries(COLORSETS).reduce((colorsetObj, [key, colorset]) => {
+            if (colorset.visibility !== 'hidden') {
+                colorsetObj[key] = Object.assign({}, colorset, { label:game.i18n.localize(colorset.description), group: game.i18n.localize(colorset.category) });
+            }
+            return colorsetObj;
+        }, {});
 
-        return preparedList;
+        return Object.fromEntries(Object.entries(colorsetList).sort((a,b) => a[1].label.localeCompare(b[1].label)));
     };
 
     static prepareSystemList() {
         let systems = game.dice3d.box.dicefactory.systems;
-        return Object.keys(systems).reduce((i18nCfg, key) => {
-            i18nCfg[key] = game.i18n.localize(systems[key].name);
+        return [...systems.values()].sort((systemA, systemB) => {
+            // Direct comparison since we're now working directly with the values
+            if (systemA.id === "standard") {
+                return -1;
+            } else if (systemB.id === "standard") {
+                return 1;
+            } else if (systemA.group === systemB.group) {
+                return systemA.name.localeCompare(systemB.name);
+            } else if (systemA.group === null) {
+                return 1;
+            } else if (systemB.group === null) {
+                return -1;
+            } else {
+                return systemA.group.localeCompare(systemB.group);
+            }
+        }).reduce((i18nCfg, system) => {
+            // Use system.id as the key for i18nCfg
+            i18nCfg[system.id] = { label: game.i18n.localize(system.name), group: system.group };
             return i18nCfg;
         }, {});
-    };
+    }
 
     static filterObject(obj, predicate) {
         return Object.keys(obj)

@@ -113,7 +113,7 @@ export class DiceConfig extends FormApplication {
             if (this.box.dicefactory.preferredColorset != "standard")
                 config.appearance.global.colorset = this.box.dicefactory.preferredColorset;
         }
-        this.box.showcase(config);
+        await this.box.showcase(config);
 
         this.navOrder = {};
         let triggerTypeList = [{ id: "", name: "" }];
@@ -123,8 +123,8 @@ export class DiceConfig extends FormApplication {
             this.navOrder[el.userData] = i++;
             triggerTypeList.push({ id: el.userData, name: el.userData });
             this.possibleResultList[el.userData] = [];
-            let preset = this.box.dicefactory.systems.standard.dice.find(dice => dice.type == el.userData);
-            let termClass = Object.values(CONFIG.Dice.terms).find(term => term.name == preset.term) || Die;
+            let preset = this.box.dicefactory.systems.get("standard").dice.get(el.userData);
+            let termClass = Object.values(CONFIG.Dice.terms).find(term => term.name == preset.term) || foundry.dice.terms.Die;
             let term = new termClass({});
 
             if(el.userData == "d100"){
@@ -321,7 +321,7 @@ export class DiceConfig extends FormApplication {
                     if (el.userData != "d10")
                         denominationList.push(el.userData);
                 });
-                let roll = new Roll(denominationList.join("+")).evaluate({async:true}).then((roll) =>{
+                let roll = new Roll(denominationList.join("+")).evaluate().then((roll) =>{
                     let data = new DiceNotation(roll);
 
                     let specialEffects = this.getShowcaseSFX();
@@ -780,7 +780,7 @@ export class DiceConfig extends FormApplication {
                     appearanceArray.push(obj);
                 });
                 if (appearanceArray.length > 1) {
-                    let diff = diffObject(appearanceArray[0], appearanceArray[1]);
+                    let diff = foundry.utils.diffObject(appearanceArray[0], appearanceArray[1]);
                     if (foundry.utils.isEmpty(diff)) {
                         this.closeAppearanceTab(this.lastActiveAppearanceTab)
                     }
@@ -842,7 +842,7 @@ export class DiceConfig extends FormApplication {
                 let system = $(element).find('[data-system]').val();
                 let customizationElements = $(element).find('[data-colorset],[data-texture],[data-material],[data-font]');
                 if (system != "standard") {
-                    let diceobj = this.box.dicefactory.systems[system].dice.find(obj => obj.type == diceType);
+                    let diceobj = this.box.dicefactory.systems.get(system).dice.get(diceType);
                     if (diceobj) {
                         let colorsetData = {};
                         if (diceobj.colorset) {
@@ -880,8 +880,8 @@ export class DiceConfig extends FormApplication {
             let diceType = $(element).data("dicetype");
             if (diceType != "global") {
                 $(element).find("option").each((indexOpt, elementOpt) => {
-                    let model = this.box.dicefactory.systems["standard"].dice.find(obj => obj.type == diceType);
-                    if (!this.box.dicefactory.systems[$(elementOpt).val()].dice.find(obj => obj.type == diceType || (model && obj.shape == model.shape && obj.values.length == model.values.length)))
+                    let model = this.box.dicefactory.systems.get("standard").dice.get(diceType);
+                    if (!this.box.dicefactory.systems.get($(elementOpt).val()).dice.has(diceType) || !this.box.dicefactory.systems.get($(elementOpt).val()).getDiceByShapeAndValues(model.shape, model.values))
                         $(elementOpt).attr("disabled", "disabled");
                 });
             }

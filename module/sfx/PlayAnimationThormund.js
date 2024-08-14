@@ -1,5 +1,5 @@
+import { Box3, CatmullRomCurve3, Clock, Vector3 } from 'three';
 import { DiceSFX } from '../DiceSFX.js';
-import * as THREE from 'three';
 import { DiceSFXManager } from './../DiceSFXManager';
 import { ShaderUtils } from './../ShaderUtils';
 
@@ -13,11 +13,11 @@ export class PlayAnimationThormund extends DiceSFX {
     static curve = null;
     static duration1 = 2.5;
     static duration2 = 2.5;
-    static up = new THREE.Vector3(0,0,1);
+    static up = new Vector3(0,0,1);
     /**@override init */
     static async init() {
         game.audio.pending.push(function(){
-            AudioHelper.preloadSound(PlayAnimationThormund.sound);
+            foundry.audio.AudioHelper.preloadSound(PlayAnimationThormund.sound);
         }.bind(this));
 
         let gltf = await this.loadAsset(DiceSFXManager.GLTFLoader, PlayAnimationThormund.file);
@@ -33,11 +33,11 @@ export class PlayAnimationThormund extends DiceSFX {
     /**@override play */
     async play() {
         this.step = 1;
-        this.clock = new THREE.Clock();
+        this.clock = new Clock();
         this.thormund = PlayAnimationThormund.model.clone();
         let scale = this.box.dicefactory.baseScale/100;
 
-        let boundingBox = new THREE.Vector3();
+        let boundingBox = new Vector3();
         let parent = null;
         if(this.dicemesh.isMesh){
             parent = this.dicemesh.parent;
@@ -45,7 +45,7 @@ export class PlayAnimationThormund extends DiceSFX {
             parent = this.dicemesh.parent.clone();
             delete parent.children[0].geometry;
         }
-        new THREE.Box3().setFromObject(parent).getSize(boundingBox);
+        new Box3().setFromObject(parent).getSize(boundingBox);
         
 		this.thormund.scale.set(scale,scale,scale);
         this.thormund.rotation.x = Math.PI/2;
@@ -53,28 +53,28 @@ export class PlayAnimationThormund extends DiceSFX {
         this.thormund.position.y = parent.position.y;
         this.thormund.position.z = parent.position.z + (boundingBox.z/2);
 
-        this.curve = new THREE.CatmullRomCurve3( [
-            new THREE.Vector3( this.thormund.position.x, this.thormund.position.y,-50),
-            new THREE.Vector3( this.thormund.position.x +0, this.thormund.position.y    -100, this.thormund.position.z  +0 ),
-            new THREE.Vector3( this.thormund.position.x +100, this.thormund.position.y  -30, this.thormund.position.z    +0 ),
-            new THREE.Vector3( this.thormund.position.x +100, this.thormund.position.y  +30, this.thormund.position.z    +0 ),
-            new THREE.Vector3( this.thormund.position.x +30, this.thormund.position.y    +100, this.thormund.position.z  +0 ),
-            new THREE.Vector3( this.thormund.position.x -30, this.thormund.position.y    +100, this.thormund.position.z  +0 ),
-            new THREE.Vector3( this.thormund.position.x -100, this.thormund.position.y  +30, this.thormund.position.z    +80 ),
-            new THREE.Vector3( this.thormund.position.x /2, this.thormund.position.y /2, this.thormund.position.z    +100 )
+        this.curve = new CatmullRomCurve3( [
+            new Vector3( this.thormund.position.x, this.thormund.position.y,-50),
+            new Vector3( this.thormund.position.x +0, this.thormund.position.y    -100, this.thormund.position.z  +0 ),
+            new Vector3( this.thormund.position.x +100, this.thormund.position.y  -30, this.thormund.position.z    +0 ),
+            new Vector3( this.thormund.position.x +100, this.thormund.position.y  +30, this.thormund.position.z    +0 ),
+            new Vector3( this.thormund.position.x +30, this.thormund.position.y    +100, this.thormund.position.z  +0 ),
+            new Vector3( this.thormund.position.x -30, this.thormund.position.y    +100, this.thormund.position.z  +0 ),
+            new Vector3( this.thormund.position.x -100, this.thormund.position.y  +30, this.thormund.position.z    +80 ),
+            new Vector3( this.thormund.position.x /2, this.thormund.position.y /2, this.thormund.position.z    +100 )
         ],false,"chordal");
 
-        this.curve2 = new THREE.CatmullRomCurve3([
-            new THREE.Vector3( this.thormund.position.x /2, this.thormund.position.y /2, this.thormund.position.z    +100 ),
-            new THREE.Vector3( 100, 50, this.box.camera.position.z/4 ),
-            new THREE.Vector3( -100, -50, this.box.camera.position.z/4*2 ),
-            new THREE.Vector3( 0, -50, this.box.camera.position.z/4*3 ),
-            new THREE.Vector3( 0, 0, this.box.camera.position.z )
+        this.curve2 = new CatmullRomCurve3([
+            new Vector3( this.thormund.position.x /2, this.thormund.position.y /2, this.thormund.position.z    +100 ),
+            new Vector3( 100, 50, this.box.camera.position.z/4 ),
+            new Vector3( -100, -50, this.box.camera.position.z/4*2 ),
+            new Vector3( 0, -50, this.box.camera.position.z/4*3 ),
+            new Vector3( 0, 0, this.box.camera.position.z )
         ],false,"chordal");
 
-        this.axis = new THREE.Vector3();
+        this.axis = new Vector3();
         this.box.scene.add(this.thormund);
-        AudioHelper.play({
+        foundry.audio.AudioHelper.play({
             src: PlayAnimationThormund.sound,
             volume: this.volume
 		}, false);

@@ -1,21 +1,21 @@
-import * as THREE from 'three';
+import { TextureLoader } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-import { PlaySoundEpicFail } from './sfx/PlaySoundEpicFail.js';
-import { PlaySoundEpicWin } from './sfx/PlaySoundEpicWin.js';
-import { PlaySoundCustom } from './sfx/PlaySoundCustom.js';
+import { PlayAnimationBright } from './sfx/PlayAnimationBright.js';
+import { PlayAnimationDark } from './sfx/PlayAnimationDark.js';
+import { PlayAnimationImpact } from './sfx/PlayAnimationImpact.js';
+import { PlayAnimationOutline } from './sfx/PlayAnimationOutline.js';
+import { PlayAnimationParticleSparkles } from './sfx/PlayAnimationParticleSparkles.js';
+import { PlayAnimationParticleSpiral } from './sfx/PlayAnimationParticleSpiral.js';
+import { PlayAnimationParticleVortex } from './sfx/PlayAnimationParticleVortex.js';
+import { PlayAnimationThormund } from './sfx/PlayAnimationThormund.js';
 import { PlayConfettiStrength1 } from './sfx/PlayConfettiStrength1.js';
 import { PlayConfettiStrength2 } from './sfx/PlayConfettiStrength2.js';
 import { PlayConfettiStrength3 } from './sfx/PlayConfettiStrength3.js';
-import { PlayAnimationParticleSpiral } from './sfx/PlayAnimationParticleSpiral.js';
-import { PlayAnimationParticleSparkles } from './sfx/PlayAnimationParticleSparkles.js';
-import { PlayAnimationParticleVortex } from './sfx/PlayAnimationParticleVortex.js';
-import { PlayAnimationBright } from './sfx/PlayAnimationBright.js';
-import { PlayAnimationDark } from './sfx/PlayAnimationDark.js';
-import { PlayAnimationThormund } from './sfx/PlayAnimationThormund.js';
-import { PlayAnimationImpact } from './sfx/PlayAnimationImpact.js';
 import { PlayMacro } from './sfx/PlayMacro.js';
-import { PlayAnimationOutline } from './sfx/PlayAnimationOutline.js';
+import { PlaySoundCustom } from './sfx/PlaySoundCustom.js';
+import { PlaySoundEpicFail } from './sfx/PlaySoundEpicFail.js';
+import { PlaySoundEpicWin } from './sfx/PlaySoundEpicWin.js';
 
 export const DiceSFXManager = {
     SFX_MODE_CLASS : {
@@ -54,7 +54,7 @@ export const DiceSFXManager = {
         }
 
         DiceSFXManager.GLTFLoader = new GLTFLoader();
-        DiceSFXManager.TextureLoader = new THREE.TextureLoader();
+        DiceSFXManager.TextureLoader = new TextureLoader();
 
         let sfxUniqueList = [];
         game.users.forEach((user) => {
@@ -78,7 +78,7 @@ export const DiceSFXManager = {
         });
     },
     addSFXMode : async function(sfx){
-        if(sfx.id && sfx.specialEffectName && !sfx.initialized){
+        if(sfx && sfx.id && sfx.specialEffectName && !sfx.initialized){
             DiceSFXManager.SFX_CLASS[sfx.id] = sfx;
             sfx.initialized = true;
             await sfx.init();
@@ -96,16 +96,18 @@ export const DiceSFXManager = {
             }
                 
             let sfxInstance = new DiceSFXManager.SFX_CLASS[id](box, dicemesh, sfx.options);
-
-            sfxInstance.play(sfx.options).then(result => {
-                if(result !== false){
-                    if(typeof sfxInstance.render === 'function')
-                        DiceSFXManager.renderQueue.push(sfxInstance);
-                    if(sfxInstance.enableGC)
-                        DiceSFXManager.garbageCollector.push(sfxInstance);
-                }
-                resolve();
-            });
+            //Add a timeout to prevent a visual glitch in v5 (probably linked to the async worker)
+            setTimeout(()=>{
+                sfxInstance.play(sfx.options).then(result => {
+                    if(result !== false){
+                        if(typeof sfxInstance.render === 'function')
+                            DiceSFXManager.renderQueue.push(sfxInstance);
+                        if(sfxInstance.enableGC)
+                            DiceSFXManager.garbageCollector.push(sfxInstance);
+                    }
+                    resolve();
+                });
+            }, 100);
         });
     },
     renderSFX : function(){
@@ -140,5 +142,9 @@ export const DiceSFXManager = {
             DiceSFXManager.garbageCollector[i].destroy();
         }
         DiceSFXManager.garbageCollector = [];
+    },
+    registerSFXModeClass : function(sfxClass){
+        DiceSFXManager.SFX_MODE_CLASS[sfxClass.id] = sfxClass;
+        DiceSFXManager.SFX_MODE_LIST[sfxClass.id] = sfxClass.specialEffectName;
     }
 }

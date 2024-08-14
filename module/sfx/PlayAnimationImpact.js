@@ -1,5 +1,5 @@
+import { Clock, Mesh, MeshStandardMaterial, PlaneGeometry } from 'three';
 import { DiceSFX } from '../DiceSFX.js';
-import * as THREE from 'three';
 import { DiceSFXManager } from './../DiceSFXManager';
 
 export class PlayAnimationImpact extends DiceSFX {
@@ -16,22 +16,22 @@ export class PlayAnimationImpact extends DiceSFX {
     /**@override init */
     static async init() {
         game.audio.pending.push(function () {
-            AudioHelper.preloadSound(PlayAnimationImpact.sound);
+            foundry.audio.AudioHelper.preloadSound(PlayAnimationImpact.sound);
         }.bind(this));
             
         let data = await this.loadAsset(DiceSFXManager.TextureLoader, "modules/dice-so-nice/sfx/textures/glassimpact_color.webp");
-        const geometry = new THREE.PlaneGeometry(730, 730);
-        const material = new THREE.MeshStandardMaterial({
+        const geometry = new PlaneGeometry(730, 730);
+        const material = new MeshStandardMaterial({
             map: data,
             transparent: true,
             opacity: 2
         });
-        PlayAnimationImpact.planeImpact = new THREE.Mesh(geometry, material);
+        PlayAnimationImpact.planeImpact = new Mesh(geometry, material);
     }
 
     /**@override play */
     async play() {
-        this.clock = new THREE.Clock();
+        this.clock = new Clock();
         this.plane = PlayAnimationImpact.planeImpact.clone();
         this.plane.receiveShadow = this.box.shadows;
 
@@ -63,7 +63,7 @@ export class PlayAnimationImpact extends DiceSFX {
         this.plane.position.y = this.dicemesh.parent.position.y;
         this.plane.rotation.z = Math.random() * Math.PI * 2;
         this.box.scene.add(this.plane);
-        AudioHelper.play({
+        foundry.audio.AudioHelper.play({
             src: PlayAnimationImpact.sound,
             volume: this.volume
         }, false);

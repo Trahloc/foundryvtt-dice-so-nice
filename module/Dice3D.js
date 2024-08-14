@@ -8,6 +8,7 @@ import { Utils } from './Utils.js';
 import { ThinFilmFresnelMap } from './libs/ThinFilmFresnelMap.js';
 import { TextureLoader } from 'three';
 import { DiceTourMain } from './tours/DiceTourMain.js';
+import { DiceSFX } from './DiceSFX.js';
 /**
  * Main class to handle 3D Dice animations.
  */
@@ -15,7 +16,7 @@ export class Dice3D {
 
     static get DEFAULT_OPTIONS() {
         const quality = {};
-        switch(game.settings.get("core", "performanceMode")) {
+        switch (game.settings.get("core", "performanceMode")) {
             case 0:
                 quality.bumpMapping = false;
                 quality.shadowQuality = "low";
@@ -37,7 +38,7 @@ export class Dice3D {
                 quality.bumpMapping = true;
                 quality.shadowQuality = "high";
                 quality.glow = true;
-                quality.antialiasing = game.canvas.app.renderer.context.webGLVersion===2 ?"msaa":"smaa";
+                quality.antialiasing = game.canvas.app.renderer.context.webGLVersion === 2 ? "msaa" : "smaa";
                 quality.useHighDPI = true;
                 quality.imageQuality = "high";
                 break;
@@ -45,6 +46,7 @@ export class Dice3D {
         return {
             enabled: true,
             showExtraDice: game.dice3d && game.dice3d.hasOwnProperty("defaultShowExtraDice") ? game.dice3d.defaultShowExtraDice : false,
+            onlyShowOwnDice: false,
             hideAfterRoll: true,
             timeBeforeHide: 2000,
             hideFX: 'fadeOut',
@@ -152,16 +154,17 @@ export class Dice3D {
      * Register a new system
      * The id is to be used with addDicePreset
      * The name can be a localized string
-     * @param {Object} system {id, name}
+     * @param {Object} system {id, name, group}
      * @param {Boolean} mode "default,preferred". Default will add the system as a choice. Preferred will be enabled for all users unless they change their settings.
+     * @param {String} group Group to display in the dice selector. Can be any string, like the dice maker name or a brand
      */
-    addSystem(system, mode = "default") {
+    addSystem(system, mode = "default", settings = null) {
         //retrocompatibility with  API version < 3.1
         if (typeof mode == "boolean") {
             mode = mode ? "preferred" : "default";
         }
 
-        this.DiceFactory.addSystem(system, mode);
+        this.DiceFactory.addSystem(system, mode, settings);
     }
 
     /**
@@ -240,6 +243,16 @@ export class Dice3D {
     }
 
     /**
+     * Registers a new SFX mode class with the DiceSFXManager.
+     *
+     * @param {DiceSFX} sfxClass - The SFX mode class to be registered.
+     * @return {void}
+     */
+    addSFXMode(sfxClass) {
+        DiceSFXManager.registerSFXModeClass(sfxClass);
+    }
+
+    /**
      * Load a save file by its name
      * @param {String} name 
      * @returns {Promise}
@@ -269,16 +282,20 @@ export class Dice3D {
 
         this.uniforms = {
             globalBloom: { value: 1 },
-            bloomStrength: { value: 2.5 },
-            bloomRadius: { value: 0.5 },
-            bloomThreshold: { value: 0.03 },
+            bloomStrength: { value: 1.1 },
+            bloomRadius: { value: 0.2 },
+            bloomThreshold: { value: 0 },
             iridescenceLookUp: { value: new ThinFilmFresnelMap() },
             iridescenceNoise: { value: new TextureLoader().load("modules/dice-so-nice/textures/noise-thin-film.webp") },
-            boost: { value: 1.5 }
+            boost: { value: 1.5 },
+            time: { value: 0 }
         };
 
         this.hiddenAnimationQueue = [];
         this.defaultShowExtraDice = Dice3D.DEFAULT_OPTIONS.showExtraDice;
+    }
+
+    init() {
         this._buildCanvas();
         this._initListeners();
         this._buildDiceBox();
@@ -316,7 +333,7 @@ export class Dice3D {
             height: window.innerHeight - 1
         };
 
-        if(!config.enabled){
+        if (!config.enabled) {
             area.width = 1;
             area.height = 1;
         }
@@ -358,9 +375,31 @@ export class Dice3D {
             this._rtime = new Date();
             if (this._timeout === false) {
                 this._timeout = true;
-                setTimeout(this._resizeEnd.bind(this), 1000);
+                setTimeout(resizeEnd.bind(this), 1000);
             }
         });
+
+        const resizeEnd = () => {
+            if (new Date() - this._rtime < 1000) {
+                setTimeout(resizeEnd.bind(this), 1000);
+            } else {
+                this._timeout = false;
+                //resize ended probably, lets remake the canvas
+                this.resizeAndRebuild();
+            }
+        };
+    
+        this.resizeAndRebuild = () => {
+            this.canvas[0].remove();
+            this.box.clearScene();
+            this._buildCanvas();
+            let config = Dice3D.ALL_CONFIG();
+            config.boxType = "board";
+            this.box = new DiceBox(this.canvas[0], this.DiceFactory, config);
+            this.box.initialize();
+            this.box.soundManager.preloadSounds();
+        };
+
 
         $(document).on("click", ".dice-so-nice-btn-settings", (ev) => {
             ev.preventDefault();
@@ -390,37 +429,7 @@ export class Dice3D {
             }
         });
 
-        if (game.settings.get("dice-so-nice", "allowInteractivity")) {
-            $(document).on("mousemove.dicesonice", "body", this._onMouseMove.bind(this));
-
-            $(document).on("mousedown.dicesonice", "body", this._onMouseDown.bind(this));
-
-            $(document).on("mouseup.dicesonice", "body", this._onMouseUp.bind(this));
-        }
-    }
-
-    _mouseNDC(event) {
-        let rect = this.canvas[0].getBoundingClientRect();
-        let x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-        if (x > 1)
-            x = 1;
-        let y = - ((event.clientY - rect.top) / rect.height) * 2 + 1;
-        return { x: x, y: y };
-    }
-
-    _onMouseMove(event) {
-        if (!this.canInteract)
-            return;
-        this.box.onMouseMove(event, this._mouseNDC(event));
-    }
-
-    _onMouseDown(event) {
-        if (!this.canInteract)
-            return;
-        let hit = this.box.onMouseDown(event, this._mouseNDC(event));
-        if (hit)
-            this._beforeShow();
-        else {
+        const hideCanvasAndClear = () => {
             const config = Dice3D.CONFIG();
             if (!config.hideAfterRoll && this.canvas.is(":visible") && !this.box.rolling) {
                 this.canvas.hide();
@@ -428,51 +437,45 @@ export class Dice3D {
             }
         }
 
-    }
-
-    _onMouseUp(event) {
-        if (!this.canInteract)
-            return;
-        let hit = this.box.onMouseUp(event);
-        if (hit)
-            this._afterShow();
-    }
-
-    _resizeEnd() {
-        if (new Date() - this._rtime < 1000) {
-            setTimeout(this._resizeEnd.bind(this), 1000);
-        } else {
-            this._timeout = false;
-            //resize ended probably, lets remake the canvas
-            this.resizeAndRebuild();
+        const mouseNDC = (event) => {
+            let rect = this.canvas[0].getBoundingClientRect();
+            let x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            if (x > 1)
+                x = 1;
+            let y = - ((event.clientY - rect.top) / rect.height) * 2 + 1;
+            return { x: x, y: y };
         }
-    }
 
-    resizeAndRebuild() {
-        this.canvas[0].remove();
-        this.box.clearScene();
-        this._buildCanvas();
-        let config = Dice3D.ALL_CONFIG();
-        config.boxType = "board";
-        this.box = new DiceBox(this.canvas[0], this.DiceFactory, config);
-        this.box.initialize();
-        this.box.preloadSounds();
-    }
+        if (game.settings.get("dice-so-nice", "allowInteractivity")) {
+            $(document).on("mousemove.dicesonice", "body", async (event) => {
+                if (!this.canInteract)
+                    return;
+                await this.box.onMouseMove(event, mouseNDC(event));
+            });
 
-    /**
-     * Start polling and watching te queue for animation requests.
-     * Each request is resolved in sequence.
-     *
-     * @private
-     */
-    _startQueueHandler() {
-        this.queue = [];
-        setInterval(() => {
-            if (this.queue.length > 0 && !this.box.rolling) {
-                let animate = this.queue.shift();
-                animate();
-            }
-        }, 100);
+            $(document).on("mousedown.dicesonice", "body", async (event) => {
+                if (!this.canInteract)
+                    return;
+                let hit = await this.box.onMouseDown(event, mouseNDC(event));
+                if (hit)
+                    this._beforeShow();
+                else {
+                    hideCanvasAndClear();
+                }
+            });
+
+            $(document).on("mouseup.dicesonice", "body", async (event) => {
+                if (!this.canInteract)
+                    return;
+                let hit = await this.box.onMouseUp(event);
+                if (hit)
+                    this._afterShow();
+            });
+        } else {
+            $(document).on("mousedown.dicesonice", "body", async (event) => {
+                hideCanvasAndClear();
+            });
+        }
     }
 
     /**
@@ -480,38 +483,36 @@ export class Dice3D {
      */
     _welcomeMessage() {
         if (!game.user.getFlag("dice-so-nice", "welcomeMessageShown")) {
-            if (!game.user.getFlag("dice-so-nice", "appearance")) {
-                const content = [`
-                <div class="dice-so-nice">
-                    <h3 class="nue">${game.i18n.localize("DICESONICE.WelcomeTitle")}</h3>
-                    <p class="nue">${game.i18n.localize("DICESONICE.WelcomeMessage1")}</p>
-                    <p class="nue">${game.i18n.localize("DICESONICE.WelcomeMessage2")}</p>
-                    <p>
-                        <button type="button" class="dice-so-nice-btn-settings" data-key="dice-so-nice.dice-so-nice">
-                            <i class="fas fa-dice-d20"></i> ${game.i18n.localize("DICESONICE.configTitle")}
-                        </button>
-                    </p>
-                    <p class="nue">${game.i18n.localize("DICESONICE.WelcomeMessage3")}</p>
-                    <p class="nue">${game.i18n.localize("DICESONICE.WelcomeMessageTour")}</p>
-                    <p>
-                        <button type="button" class="dice-so-nice-btn-tour" data-tour="dice-so-nice-tour">
-                            <i class="fas fa-hiking"></i> ${game.i18n.localize("DICESONICE.WelcomeMessageTourBtn")}
-                        </button>
-                    </p>
-                    <p class="nue">${game.i18n.localize("DICESONICE.WelcomeMessage4")}</p>
-                    <footer class="nue">${game.i18n.localize("NUE.FirstLaunchHint")}</footer>
-                </div>
-                `];
-                const chatData = content.map(c => {
-                    return {
-                        whisper: [game.user.id],
-                        speaker: { alias: "Dice So Nice!" },
-                        flags: { core: { canPopout: true } },
-                        content: c
-                    };
-                });
-                ChatMessage.implementation.createDocuments(chatData);
-            }
+            const content = [`
+            <div class="dice-so-nice">
+                <h3 class="nue">${game.i18n.localize("DICESONICE.WelcomeTitle")}</h3>
+                <p class="nue">${game.i18n.localize("DICESONICE.WelcomeMessage1")}</p>
+                <p class="nue">${game.i18n.localize("DICESONICE.WelcomeMessage2")}</p>
+                <p>
+                    <button type="button" class="dice-so-nice-btn-settings" data-key="dice-so-nice.dice-so-nice">
+                        <i class="fas fa-dice-d20"></i> ${game.i18n.localize("DICESONICE.configTitle")}
+                    </button>
+                </p>
+                <p class="nue">${game.i18n.localize("DICESONICE.WelcomeMessage3")}</p>
+                <p class="nue">${game.i18n.localize("DICESONICE.WelcomeMessageTour")}</p>
+                <p>
+                    <button type="button" class="dice-so-nice-btn-tour" data-tour="dice-so-nice-tour">
+                        <i class="fas fa-hiking"></i> ${game.i18n.localize("DICESONICE.WelcomeMessageTourBtn")}
+                    </button>
+                </p>
+                <p class="nue">${game.i18n.localize("DICESONICE.WelcomeMessage4")}</p>
+                <footer class="nue">${game.i18n.localize("NUE.FirstLaunchHint")}</footer>
+            </div>
+            `];
+            const chatData = content.map(c => {
+                return {
+                    whisper: [game.user.id],
+                    speaker: { alias: "Dice So Nice!" },
+                    flags: { core: { canPopout: true } },
+                    content: c
+                };
+            });
+            ChatMessage.implementation.createDocuments(chatData);
             game.user.setFlag("dice-so-nice", "welcomeMessageShown", true);
         }
     }
@@ -557,7 +558,10 @@ export class Dice3D {
 
             Hooks.callAll("diceSoNiceRollComplete", chatMessage.id);
 
-            window.ui.chat.scrollBottom({ popout: true });
+            if (window.ui.chat.isAtBottom || chatMessage.user.id === game.user.id)
+                window.ui.chat.scrollBottom({ popout: false });
+            if (window.ui.sidebar.popouts.chat && (window.ui.sidebar.popouts.chat.isAtBottom || chatMessage.user.id === game.user.id))
+                window.ui.sidebar.popouts.chat.scrollBottom();
         }
 
         if (game.view == "stream" && !game.modules.get("0streamutils")?.active) {
@@ -582,7 +586,7 @@ export class Dice3D {
             orderedDiceList = orderedDiceList.filter(el => el != null);
 
             let rollList = [];
-            const plus = new OperatorTerm({ operator: "+" }).evaluate();
+            const plus = new foundry.dice.terms.OperatorTerm({ operator: "+" }).evaluate();
             orderedDiceList.forEach(dice => {
                 //add a "plus" between each term
                 if (Array.isArray(dice) && dice.length) {
@@ -594,7 +598,7 @@ export class Dice3D {
 
             //call each promise one after the other, then call the showMessage function
             const recursShowForRoll = (rollList, index) => {
-                this.showForRoll(rollList[index], chatMessage.user, false, null, false, chatMessage.id, chatMessage.speaker).then(() => {
+                this.showForRoll(rollList[index], chatMessage.author, false, null, false, chatMessage.id, chatMessage.speaker).then(() => {
                     index++;
                     if (rollList[index] != null)
                         recursShowForRoll(rollList, index);
@@ -617,15 +621,25 @@ export class Dice3D {
      * @param blind if the roll is blind for the current user
      * @param messageID ChatMessage related to this roll (default: null)
      * @param speaker Object based on the ChatSpeakerData data schema related to this roll. Useful to fully support DsN settings like "hide npc rolls". (Default: null)
+     * @param options Object with 2 booleans: ghost (default: false) and secret (default: false)
      * @returns {Promise<boolean>} when resolved true if the animation was displayed, false if not.
      */
-    showForRoll(roll, user = game.user, synchronize, users = null, blind, messageID = null, speaker = null) {
+    showForRoll(roll, user = game.user, synchronize, users = null, blind, messageID = null, speaker = null, options = {ghost:false, secret:false}) {
         let context = {
             roll: roll,
             user: user,
             users: users,
             blind: blind
         };
+
+        if (options.ghost) {
+            context.roll.ghost = true;
+        }
+
+        if (options.secret) {  
+            context.roll.secret = true;
+        }
+
         if (speaker) {
             let actor = game.actors.get(speaker.actor);
             const isNpc = actor ? actor.type === 'npc' : false;
@@ -633,6 +647,11 @@ export class Dice3D {
                 return Promise.resolve(false);
             }
         }
+
+        if (Dice3D.CONFIG().onlyShowOwnDice && user !== game.user) {
+            return Promise.resolve(false);
+        }
+
         let chatMessage = game.messages.get(messageID);
         if (chatMessage) {
             if (chatMessage.whisper.length > 0)
@@ -747,31 +766,53 @@ export class Dice3D {
         });
     }
 
-    _nextAnimationHandler() {
+    /**
+     * Start polling and watching the queue for animation requests.
+     * Each request is resolved in sequence.
+     *
+     * @private
+     */
+    _startQueueHandler() {
+        this.queue = [];
+        setInterval(() => {
+            this._processQueue();
+        }, 100);
+    }
+
+    _processQueue() {
+        if (this.queue.length > 0 && !this.box.rolling) {
+            let animate = this.queue.shift();
+            animate();
+        }
+    }
+
+    async _nextAnimationHandler() {
         let timing = game.settings.get("dice-so-nice", "enabledSimultaneousRolls") ? 400 : 0;
-        this.nextAnimation = new Accumulator(timing, (items) => {
+        this.nextAnimation = new Accumulator(timing, async (items) => {
             let commands = DiceNotation.mergeQueuedRollCommands(items);
             if (this.isEnabled() && this.queue.length < 10) {
                 let count = commands.length;
-                commands.forEach(aThrow => {
-                    this.queue.push(() => {
+                for (const aThrow of commands) {
+                    this.queue.push(async () => {
                         this._beforeShow();
-                        this.box.start_throw(aThrow, () => {
+                        await this.box.start_throw(aThrow, () => {
                             if (!--count) {
                                 for (let item of items)
                                     item.resolve(true);
                                 this._afterShow();
                             }
-                        }
-                        );
+                            // Immediately process the next animation if there is one
+                            this._processQueue();
+                        });
                     });
-                });
+                }
             } else {
                 for (let item of items)
                     item.resolve(false);
             }
         });
     }
+
 
     /**
      *

@@ -7,7 +7,21 @@
  * http://www.opensource.org/licenses/mit-license
  *
  */
-import * as THREE from 'three';
+
+import {
+    BoxGeometry,
+    MeshBasicMaterial,
+    MeshLambertMaterial,
+    OctahedronGeometry,
+    SphereGeometry,
+    Sprite,
+    SpriteMaterial,
+    Texture,
+    Color as THREEColor,
+    Mesh as THREEMesh,
+    Vector3
+} from 'three';
+
     //the max particle number in pool
     Proton.POOL_MAX = 500;
     Proton.TIME_STEP = 60;
@@ -345,7 +359,7 @@ import * as THREE from 'three';
                     rgb.g = parseInt(hex.charAt(2) + hex.charAt(3), 16) / 255;
                     rgb.b = parseInt(hex.charAt(4) + hex.charAt(5), 16) / 255;
                 }
-            } else if (color instanceof THREE.Color) {
+            } else if (color instanceof THREEColor) {
                 rgb.r = color.r;
                 rgb.g = color.g;
                 rgb.b = color.b;
@@ -362,7 +376,7 @@ import * as THREE from 'three';
 
     var THREEUtil = {
         toScreenPos: function() {
-            var vector = new THREE.Vector3();
+            var vector = new Vector3();
 
             return function(pos, camera, canvas) {
                 vector.copy(pos);
@@ -378,8 +392,8 @@ import * as THREE from 'three';
         }(),
 
         toSpacePos: function() {
-            var vector = new THREE.Vector3(),
-                dir = new THREE.Vector3(),
+            var vector = new Vector3(),
+                dir = new Vector3(),
                 distance;
 
             return function(pos, camera, canvas) {
@@ -399,15 +413,15 @@ import * as THREE from 'three';
             var store = {};
 
             return function(img) {
-                if (img instanceof THREE.Texture) {
+                if (img instanceof Texture) {
                     return img;
                 } else if (typeof img == "string") {
                     var id = Proton.PUID.hash(img);
-                    if (!store[id]) store[id] = new THREE.Texture(img);;
+                    if (!store[id]) store[id] = new Texture(img);;
                     return store[id];
                 } else if (img instanceof Image) {
                     var id = Proton.PUID.hash(img.src);
-                    if (!store[id]) store[id] = new THREE.Texture(img);;
+                    if (!store[id]) store[id] = new Texture(img);;
                     return store[id];
                 }
             }
@@ -3000,9 +3014,9 @@ import * as THREE from 'three';
 
         this._targetPool = new Proton.Pool();
         this._materialPool = new Proton.Pool();
-        this._body = new THREE.Mesh(
-            new THREE.BoxGeometry(50, 50, 50),
-            new THREE.MeshLambertMaterial({ color: "#ff0000" })
+        this._body = new THREEMesh(
+            new BoxGeometry(50, 50, 50),
+            new MeshLambertMaterial({ color: "#ff0000" })
         );
         
         this.name = "MeshRender";
@@ -3082,7 +3096,7 @@ import * as THREE from 'three';
 
     PointsRender.prototype.onParticleCreated = function(particle) {
         if (!particle.target) {
-            particle.target = new THREE.Vector3();
+            particle.target = new Vector3();
         }
 
         particle.target.copy(particle.p);
@@ -3113,7 +3127,7 @@ import * as THREE from 'three';
     function SpriteRender(container) {
         SpriteRender._super_.call(this, container);
 
-        this._body = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0xffffff }));
+        this._body = new Sprite(new SpriteMaterial({ color: 0xffffff }));
         this.name = "SpriteRender";
     }
 
@@ -3339,10 +3353,10 @@ import * as THREE from 'three';
 
     /**
      * MeshZone is a threejs mesh zone
-     * @param {Mesh} geometry - a THREE.Mesh object
+     * @param {Mesh} geometry - a Mesh object
      * @example 
-     * var geometry = new THREE.CylinderGeometry( 5, 5, 20, 32 );
-     * var cylinder = new THREE.Mesh( geometry, material );
+     * var geometry = new CylinderGeometry( 5, 5, 20, 32 );
+     * var cylinder = new Mesh( geometry, material );
      * var meshZone = new Proton.MeshZone(geometry);
      * or
      * var meshZone = new Proton.MeshZone(cylinder);
@@ -3715,22 +3729,22 @@ import * as THREE from 'three';
             var geometry, material, mesh;
 
             if (zone instanceof Proton.PointZone) {
-                geometry = new THREE.SphereGeometry(15);
+                geometry = new SphereGeometry(15);
             } else if (zone instanceof Proton.LineZone) {
 
             } else if (zone instanceof Proton.BoxZone) {
-                geometry = new THREE.BoxGeometry(zone.width, zone.height, zone.depth);
+                geometry = new BoxGeometry(zone.width, zone.height, zone.depth);
             } else if (zone instanceof Proton.SphereZone) {
-                geometry = new THREE.SphereGeometry(zone.radius, 10, 10);
+                geometry = new SphereGeometry(zone.radius, 10, 10);
             } else if (zone instanceof Proton.MeshZone) {
                 //There's an error here but not sure what should be done. Leaving it for now.
                 geometry = zone.geometry.geometry.toBufferGeometry();
 
-                geometry = new THREE.SphereGeometry(zone.radius, 10, 10);
+                geometry = new SphereGeometry(zone.radius, 10, 10);
             }
 
-            material = new THREE.MeshBasicMaterial({ color: "#2194ce", wireframe: true });
-            mesh = new THREE.Mesh(geometry, material);
+            material = new MeshBasicMaterial({ color: "#2194ce", wireframe: true });
+            mesh = new THREEMesh(geometry, material);
             container.add(mesh);
 
             this.addEventListener(proton, function(e) {
@@ -3739,9 +3753,9 @@ import * as THREE from 'three';
         },
 
         drawEmitter: function(proton, container, emitter, color) {
-            var geometry = new THREE.OctahedronGeometry(15);
-            var material = new THREE.MeshBasicMaterial({ color: color || "#aaa", wireframe: true });
-            var mesh = new THREE.Mesh(geometry, material);
+            var geometry = new OctahedronGeometry(15);
+            var material = new MeshBasicMaterial({ color: color || "#aaa", wireframe: true });
+            var mesh = new THREEMesh(geometry, material);
             container.add(mesh);
 
             this.addEventListener(proton, function() {

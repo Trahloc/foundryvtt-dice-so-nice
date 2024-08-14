@@ -1,3 +1,5 @@
+import { AssetsLoader } from "./AssetsLoader.js";
+
 export const TEXTURELIST = {
 	'none': {
 		name: 'DICESONICE.TextureNone',
@@ -8,211 +10,243 @@ export const TEXTURELIST = {
 	'cloudy': {
 		name: 'DICESONICE.TextureCloudsTransparent',
 		composite: 'destination-in',
-		source: 'modules/dice-so-nice/textures/cloudy.webp',
-		bump: 'modules/dice-so-nice/textures/cloudy.alt.webp'
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'cloudy.webp',
+		bump: 'cloudy.alt.webp'
 	},
 	'cloudy_2': {
 		name: 'DICESONICE.TextureClouds',
 		composite: 'multiply',
-		source: 'modules/dice-so-nice/textures/cloudy.alt.webp',
-		bump: 'modules/dice-so-nice/textures/cloudy.alt.webp'
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'cloudy.alt.webp',
+		bump: 'cloudy.alt.webp'
 	},
 	'fire': {
 		name: 'DICESONICE.TextureFire',
 		composite: 'multiply',
-		source: 'modules/dice-so-nice/textures/fire.webp',
-		bump: 'modules/dice-so-nice/textures/fire.webp'
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'fire.webp',
+		bump: 'fire.webp'
 	},
 	'marble': {
 		name: 'DICESONICE.TextureMarble',
 		composite: 'multiply',
-		source: 'modules/dice-so-nice/textures/marble.webp',
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'marble.webp',
 		bump: '',
 		material: "glass"
 	},
 	'water': {
 		name: 'DICESONICE.TextureWaterTransparent',
 		composite: 'destination-in',
-		source: 'modules/dice-so-nice/textures/water.webp',
-		bump: 'modules/dice-so-nice/textures/water.webp',
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'water.webp',
+		bump: 'water.webp',
 		material: 'glass',
 	},
 	'water_2': {
 		name: 'DICESONICE.TextureWater',
 		composite: 'multiply',
-		source: 'modules/dice-so-nice/textures/water.webp',
-		bump: 'modules/dice-so-nice/textures/water.webp',
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'water.webp',
+		bump: 'water.webp',
 		material: 'glass',
 	},
 	'ice': {
 		name: 'DICESONICE.TextureIceTransparent',
 		composite: 'destination-in',
-		source: 'modules/dice-so-nice/textures/ice.webp',
-		bump: 'modules/dice-so-nice/textures/ice.webp',
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'ice.webp',
+		bump: 'ice.webp',
 		material: 'glass'
 	},
 	'ice_2': {
 		name: 'DICESONICE.TextureIce',
 		composite: 'multiply',
-		source: 'modules/dice-so-nice/textures/ice.webp',
-		bump: 'modules/dice-so-nice/textures/ice.webp',
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'ice.webp',
+		bump: 'ice.webp',
 		material: 'glass'
 	},
 	'paper': {
 		name: 'DICESONICE.TexturePaper',
 		composite: 'multiply',
-		source: 'modules/dice-so-nice/textures/paper.webp',
-		bump: 'modules/dice-so-nice/textures/paper-bump.webp',
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'paper.webp',
+		bump: 'paper_bump.webp',
 		material: 'wood'
 	},
 	'speckles': {
 		name: 'DICESONICE.TextureSpeckles',
 		composite: 'multiply',
-		source: 'modules/dice-so-nice/textures/speckles.webp',
-		bump: 'modules/dice-so-nice/textures/speckles.webp'
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'speckles.webp',
+		bump: 'speckles.webp'
 	},
 	'glitter': {
 		name: 'DICESONICE.TextureGlitter',
 		composite: 'multiply',
-		source: 'modules/dice-so-nice/textures/glitter.webp',
-		bump: 'modules/dice-so-nice/textures/glitter-bump.webp'
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'glitter.webp',
+		bump: 'glitter_bump.webp'
 	},
 	'glitter_2': {
 		name: 'DICESONICE.TextureGlitterTransparent',
 		composite: 'destination-in',
-		source: 'modules/dice-so-nice/textures/glitter-alpha.webp',
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'glitter-alpha.webp',
 		bump: ''
 	},
 	'stars': {
 		name: 'DICESONICE.TextureStars',
 		composite: 'multiply',
-		source: 'modules/dice-so-nice/textures/stars.webp',
-		bump: 'modules/dice-so-nice/textures/stars.webp'
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'stars.webp',
+		bump: 'stars.webp'
 	},
 	'stainedglass': {
 		name: 'DICESONICE.TextureStainedGlass',
 		composite: 'multiply',
-		source: 'modules/dice-so-nice/textures/stainedglass.webp',
-		bump: 'modules/dice-so-nice/textures/stainedglass-bump.webp',
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'stainedglass.webp',
+		bump: 'stainedglass_bump.webp',
 		material: 'iridescent'
 	},
 	'skulls': {
 		name: 'DICESONICE.TextureSkulls',
 		composite: 'multiply',
-		source: 'modules/dice-so-nice/textures/skulls.webp',
-		bump: 'modules/dice-so-nice/textures/skulls.webp'
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'skulls.webp',
+		bump: 'skulls.webp'
 	},
 	'leopard': {
 		name: 'DICESONICE.TextureLeopard',
 		composite: 'multiply',
-		source: 'modules/dice-so-nice/textures/leopard.webp',
-		bump: 'modules/dice-so-nice/textures/leopard.webp',
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'leopard.webp',
+		bump: 'leopard.webp',
 		material: 'wood'
 	},
 	'tiger': {
 		name: 'DICESONICE.TextureTiger',
 		composite: 'multiply',
-		source: 'modules/dice-so-nice/textures/tiger.webp',
-		bump: 'modules/dice-so-nice/textures/tiger.webp',
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'tiger.webp',
+		bump: 'tiger.webp',
 		material: 'wood'
 	},
 	'cheetah': {
 		name: 'DICESONICE.TextureCheetah',
 		composite: 'multiply',
-		source: 'modules/dice-so-nice/textures/cheetah.webp',
-		bump: 'modules/dice-so-nice/textures/cheetah.webp',
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'cheetah.webp',
+		bump: 'cheetah.webp',
 		material: 'wood'
 	},
 	'dragon': {
 		name: 'Dragon',
 		composite: 'multiply',
-		source: 'modules/dice-so-nice/textures/dragon.webp',
-		bump: 'modules/dice-so-nice/textures/dragon-bump.webp'
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'dragon.webp',
+		bump: 'dragon_bump.webp'
 	},
 	'lizard': {
 		name: 'Lizard',
 		composite: 'multiply',
-		source: 'modules/dice-so-nice/textures/lizard.webp',
-		bump: 'modules/dice-so-nice/textures/lizard-bump.webp'
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'lizard.webp',
+		bump: 'lizard_bump.webp'
 	},
 	'bird': {
 		name: 'Bird',
 		composite: 'multiply',
-		source: 'modules/dice-so-nice/textures/feather.webp',
-		bump: 'modules/dice-so-nice/textures/feather-bump.webp'
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'feather.webp',
+		bump: 'feather_bump.webp'
 	},
 	'astral': {
 		name: 'DICESONICE.TextureAstralSea',
 		composite: 'multiply',
-		source: 'modules/dice-so-nice/textures/astral.webp',
-		bump: 'modules/dice-so-nice/textures/stars.webp'
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'astral.webp',
+		bump: 'stars.webp'
 	},
 	'wood': {
 		name: 'DICESONICE.TextureWood',
 		composite: 'multiply',
-		source: 'modules/dice-so-nice/textures/wood.webp',
-		bump: 'modules/dice-so-nice/textures/wood.webp',
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'wood.webp',
+		bump: 'wood.webp',
 		material: 'wood'
 	},
 	'metal': {
 		name: 'DICESONICE.TextureMetal',
 		composite: 'multiply',
-		source: 'modules/dice-so-nice/textures/metal.webp',
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'metal.webp',
 		bump: '',
 		material: 'metal'
 	},
 	'stone': {
 		name: 'DICESONICE.TextureStone',
 		composite: 'soft-light',
-		source: 'modules/dice-so-nice/textures/stone.webp',
-		bump: 'modules/dice-so-nice/textures/stone.webp',
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'stone.webp',
+		bump: 'stone.webp',
 		material: 'stone'
 	},
 	'radial': {
 		name: 'DICESONICE.TextureRadial',
 		composite: 'source-over',
-		source: 'modules/dice-so-nice/textures/radial.webp',
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'radial.webp',
 		bump: '',
 	},
 	'bronze01': {
 		name: 'DICESONICE.TextureBronze1',
 		composite: 'difference',
-		source: 'modules/dice-so-nice/textures/bronze01.webp',
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'bronze01.webp',
 		material: 'metal',
 		bump: ''
 	},
 	'bronze02': {
 		name: 'DICESONICE.TextureBronze2',
 		composite: 'difference',
-		source: 'modules/dice-so-nice/textures/bronze02.webp',
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'bronze02.webp',
 		material: 'metal',
 		bump: ''
 	},
 	'bronze03': {
 		name: 'DICESONICE.TextureBronze3',
 		composite: 'difference',
-		source: 'modules/dice-so-nice/textures/bronze03.webp',
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'bronze03.webp',
 		material: 'metal',
 		bump: ''
 	},
 	'bronze03a': {
 		name: 'DICESONICE.TextureBronze3a',
 		composite: 'difference',
-		source: 'modules/dice-so-nice/textures/bronze03a.webp',
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'bronze03a.webp',
 		material: 'metal',
 		bump: ''
 	},
 	'bronze03b': {
 		name: 'DICESONICE.TextureBronze3b',
 		composite: 'difference',
-		source: 'modules/dice-so-nice/textures/bronze03b.webp',
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'bronze03b.webp',
 		material: 'metal',
 		bump: ''
 	},
 	'bronze04': {
 		name: 'DICESONICE.TextureBronze4',
 		composite: 'difference',
-		source: 'modules/dice-so-nice/textures/bronze04.webp',
+		atlas: "modules/dice-so-nice/textures/standard.json",
+		source: 'bronze04.webp',
 		material: 'metal',
 		bump: ''
 	}
@@ -634,9 +668,51 @@ export const DICE_SCALE = {
 
 export class DiceColors {
 
-	static loadTextures(sources, callback) {
+	static diceTextures = {};
+	static diceBumps = {};
 
-		let images = {};
+	static loadTextures(sources, callback) {
+		// Retrieve all the file paths (textures and atlases) from the sources object
+		// Loop through them and add them to a list
+		const textureList = []
+		const itemprops = Object.entries(sources);
+		for (const [key, value] of itemprops) {
+			// If there's an atlas, we load the atlas. If not, we load the source and the bump
+			if(value.atlas) {
+				textureList.push(value.atlas);
+			} else {
+				if(value.source && value.source !== '') {
+					textureList.push(value.source);
+				}
+				if(value.bump && value.bump !== '') {
+					textureList.push(value.bump);
+				}
+			}
+		}
+		
+		const loader = new AssetsLoader();
+		loader.load(textureList).then((resources) => {
+			// Now we can set the textures and bump textures in the diceTextures and diceBumps object
+			for (const [key, value] of itemprops) {
+
+				if(value.atlas) {
+					if(value.source && value.source !== '')
+						DiceColors.diceTextures[key] = resources[value.atlas][value.source];
+					if(value.bump && value.bump !== '')
+						DiceColors.diceBumps[key] = resources[value.atlas][value.bump];
+				} else {
+					if(value.source && value.source !== '') {
+						DiceColors.diceTextures[key] = resources[value.source];
+					}
+					if(value.bump && value.bump !== '') {
+						DiceColors.diceBumps[key] = resources[value.bump];
+					}
+				}
+			}
+
+			callback(resources);
+		});
+		/*let images = {};
 		let bumps = {};
 		let loadedImages = 0;
 	
@@ -678,7 +754,7 @@ export class DiceColors {
 			};
 
 			bumps[key].src = value.bump;
-		}
+		}*/
 	}
 	
 	static getTexture(texturename) {
@@ -704,9 +780,6 @@ export class DiceColors {
 	
 		if(texturename == 'random') {
 			let names = Object.keys(DiceColors.diceTextures);
-			// add 'none' for possibility of no texture
-			names.pop(); //remove 'random' from this list
-	
 			return this.getTexture(names[Math.floor(Math.random() * names.length)]);
 		}
 		//Init not done yet, let the init load the texture
