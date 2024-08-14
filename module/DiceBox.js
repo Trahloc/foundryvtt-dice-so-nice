@@ -1,5 +1,6 @@
 import { DICE_MODELS } from './DiceModels.js';
 import { DiceSFXManager } from './DiceSFXManager.js';
+import { DiceSystem } from './DiceSystem.js';
 import { SoundManager } from './SoundManager.js';
 import { RendererStats } from './libs/threex.rendererstats.js';
 //import {GLTFExporter} from 'three/examples/jsm/loaders/exporters/GLTFExporter.js';
@@ -691,15 +692,20 @@ export class DiceBox {
 				break;
 		}
 
+		//todo these should be moved to .userData. old code
 		dicemesh.notation = vectordata;
 		dicemesh.result = null;
 		dicemesh.forcedResult = dicedata.result;
 		dicemesh.startAtIteration = dicedata.startAtIteration;
 		dicemesh.stopped = 0;
-		dicemesh.castShadow = this.dicefactory.shadows;
-		dicemesh.receiveShadow = this.dicefactory.shadows;
 		dicemesh.specialEffects = dicedata.specialEffects;
 		dicemesh.options = dicedata.options;
+		//todo
+
+		dicemesh.castShadow = this.dicefactory.shadows;
+		dicemesh.receiveShadow = this.dicefactory.shadows;
+
+		dicemesh.userData.system = appearance.system;
 
 		// Add the dice to the physics world
 		await this.physicsWorker.exec('createDice', {
@@ -732,6 +738,7 @@ export class DiceBox {
 		this.diceList.push(dicemesh);
 		if (dicemesh.startAtIteration == 0) {
 			this.scene.add(objectContainer);
+			this.dicefactory.systems.get(appearance.system).fire(DiceSystem.DICE_EVENT_TYPE.SPAWN, { dice: dicemesh });
 			await this.physicsWorker.exec('addDice', dicemesh.id);
 		}
 	}
@@ -806,17 +813,23 @@ export class DiceBox {
 
 		//Update animated dice mixer
 		if (this.animatedDiceDetected) {
+			let animatedMaterials = new Set();
 			let delta = this.clock.getDelta();
 			for (const child of this.scene.children) {
 				let dicemesh = child.children && child.children.length && child.children[0].sim != undefined ? child.children[0] : null;
-				if (dicemesh && dicemesh.mixer) {
-					dicemesh.mixer.update(delta);
+				if (dicemesh){
+					if(dicemesh.mixer)
+						dicemesh.mixer.update(delta);
+
+					if(dicemesh.material.mixer)
+						animatedMaterials.add(dicemesh.material);
 				}
 			}
-		}
 
-		const iterationPos = this.iteration * 3;
-		const iterationQuat = this.iteration * 4;
+			for (const material of animatedMaterials) {
+				material.mixer.update(delta);
+			}
+		}
 
 		if (neededSteps && this.rolling) {
 			for (let i = 0; i < neededSteps * this.speed; i++) {
@@ -825,6 +838,7 @@ export class DiceBox {
 					for (let i = 0; i < this.diceList.length; i++) {
 						if (this.diceList[i].startAtIteration == this.iteration) {
 							this.scene.add(this.diceList[i].parent);
+							this.dicefactory.systems.get(this.diceList[i].userData.system).fire(DiceSystem.DICE_EVENT_TYPE.SPAWN, { dice: dicemesh });
 						}
 					}
 				}
@@ -838,11 +852,6 @@ export class DiceBox {
 				if (dicemesh && dicemesh.sim.stepPositions[this.iteration * 3]) {
 					child.position.fromArray(dicemesh.sim.stepPositions, this.iteration * 3);
 					child.quaternion.fromArray(dicemesh.sim.stepQuaternions, this.iteration * 4);
-
-					/*if (dicemesh.meshCannon) {
-						dicemesh.meshCannon.position.copy(dicemesh.body_sim.stepPositions[this.iteration]);
-						dicemesh.meshCannon.quaternion.copy(dicemesh.body_sim.stepQuaternions[this.iteration]);
-					}*/
 				}
 			}
 
@@ -872,11 +881,6 @@ export class DiceBox {
 					if (dicemesh) {
 						child.position.fromArray(positions, idToIndex.get(dicemesh.id) * 3);
 						child.quaternion.fromArray(quaternions, idToIndex.get(dicemesh.id) * 4);
-
-						/*if (dicemesh.meshCannon) {
-							dicemesh.meshCannon.position.copy(dicemesh.body_sim.position);
-							dicemesh.meshCannon.quaternion.copy(dicemesh.body_sim.quaternion);
-						}*/
 					}
 				}
 			});
@@ -1103,6 +1107,8 @@ export class DiceBox {
 			if (!dicemesh) continue;
 			await this.swapDiceFace(dicemesh);
 			if (dicemesh.mixer)
+				this.animatedDiceDetected = true;
+			else if(dicemesh.material.mixer)
 				this.animatedDiceDetected = true;
 		}
 

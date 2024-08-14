@@ -22,6 +22,7 @@ export class DicePreset {
 		this.geometry = null;
 		this.model = null;
 		this.system = 'standard';
+		this._diceSystem = null;
 		this.modelLoaded = false;
 		this.modelLoading = false;
 		this.modelFile = null;
@@ -39,6 +40,18 @@ export class DicePreset {
 			font: "auto",
 			colorset: "custom"
 		};
+	}
+
+	set diceSystem(system) {
+		this._diceSystem = system;
+	}
+
+	get diceSystem() {
+		return this._diceSystem;
+	}
+
+	get systemSettings() {
+		return this.diceSystem.getSettingsByDiceType(this.type);
 	}
 
 	setValues(min = 1, max = 20, step = 1) {

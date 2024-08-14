@@ -202,11 +202,14 @@ export class DiceConfig extends FormApplication {
 
                 if(this.box.dicefactory.systems.has(data.appearance[scope].system)){
                     const system = this.box.dicefactory.systems.get(data.appearance[scope].system);
-                    const dialogContent = system.getSettingsDialogContent();
 
-                    if(dialogContent.content != ""){
-                        const hdbsTemplate = Handlebars.compile(dialogContent.content);
-                        systemSettingsScoped[scope] = hdbsTemplate(dialogContent.data);
+                    if(system.settings.length > 0){
+                        const dialogContent = system.getSettingsDialogContent(scope);
+
+                        if(dialogContent.content != ""){
+                            const hdbsTemplate = Handlebars.compile(dialogContent.content);
+                            systemSettingsScoped[scope] = hdbsTemplate(dialogContent.data);
+                        }
                     }
                 }
             }
@@ -224,7 +227,8 @@ export class DiceConfig extends FormApplication {
                 textureList: data.textureList,
                 materialList: data.materialList,
                 fontList: data.fontList,
-                systemSettings: systemSettingsScoped[diceType]
+                systemSettings: systemSettingsScoped.hasOwnProperty(diceType) ? systemSettingsScoped[diceType] : '',
+                systemSettingsVisible: systemSettingsScoped.hasOwnProperty(diceType) ? '' : 'dsn-hidden'
             }).then((html) => {
                 tabsAppearance.push(html);
             }));
@@ -309,6 +313,23 @@ export class DiceConfig extends FormApplication {
 
             $(this.element).on("change", "[data-system]", (ev) => {
                 this.toggleCustomization($(ev.target).data("dicetype"));
+
+                //replace system settings
+                const systemSettingsContainer = $(ev.target).parents(".tabAppearance").find('[data-systemsettings-hidden]');
+                systemSettingsContainer.children().remove();
+
+                const system = this.box.dicefactory.systems.get($(ev.target).val());
+
+                if(system.settings.length>0){
+                    $(ev.target).next("[data-system-options]").removeClass("dsn-hidden");
+                    const dialogContent = system.getSettingsDialogContent($(ev.target).data("dicetype"));
+                    if(dialogContent.content != ""){
+                        const hdbsTemplate = Handlebars.compile(dialogContent.content);
+                        systemSettingsContainer.append(hdbsTemplate(dialogContent.data));
+                    }
+                } else {
+                    $(ev.target).next("[data-system-options]").addClass("dsn-hidden");
+                }
             });
 
             $(this.element).on("change", "input,select", (ev) => {
@@ -646,11 +667,14 @@ export class DiceConfig extends FormApplication {
                         let newSystemSettings = {};
                         if(this.box.dicefactory.systems.has(this.currentGlobalAppearance.system)){
                             const system = this.box.dicefactory.systems.get(this.currentGlobalAppearance.system);
-                            const dialogContent = system.getSettingsDialogContent();
+
+                            if(system.settings.length > 0){
+                                const dialogContent = system.getSettingsDialogContent(diceType);
         
-                            if(dialogContent.content != ""){
-                                const hdbsTemplate = Handlebars.compile(dialogContent.content);
-                                newSystemSettings = hdbsTemplate(dialogContent.data);
+                                if(dialogContent.content != ""){
+                                    const hdbsTemplate = Handlebars.compile(dialogContent.content);
+                                    newSystemSettings = hdbsTemplate(dialogContent.data);
+                                }
                             }
                         }
                         $(this.element).find(".dsn-appearance-hint").hide();
@@ -1099,8 +1123,8 @@ export class DiceConfig extends FormApplication {
 
             for (var i in parts) {
                 var part = parts[i];
-                if (part.substr(-1) == ']') {
-                    part = part.substr(0, part.length - 1);
+                if (part.substring(part.length - 1) == ']') {
+                    part = part.substring(0, part.length - 1);
                 }
 
                 if (i == parts.length - 1) {
@@ -1138,14 +1162,25 @@ export class DiceConfig extends FormApplication {
             delete formData.sfxLine;
         }
 
-        for (let scope in formData.appearance) {
-            if (formData.appearance.hasOwnProperty(scope)) {
-                if (formData.appearance[scope].colorset != "custom") {
-                    delete formData.appearance[scope].labelColor;
-                    delete formData.appearance[scope].diceColor;
-                    delete formData.appearance[scope].outlineColor;
-                    delete formData.appearance[scope].edgeColor;
-                }
+        let scopedAppearance = Object.keys(formData.appearance);
+        let systemsInUse = new Set();
+        for (let scope of scopedAppearance) {
+            if (formData.appearance[scope].colorset != "custom") {
+                delete formData.appearance[scope].labelColor;
+                delete formData.appearance[scope].diceColor;
+                delete formData.appearance[scope].outlineColor;
+                delete formData.appearance[scope].edgeColor;
+            }
+
+            // filter form system settings based on the system settings to remove helpers and selectors
+            systemsInUse.add(formData.appearance[scope].system);
+            const system = this.box.dicefactory.systems.get(formData.appearance[scope].system);
+            if (system && system.settings.length > 0) {
+                const systemSettingsList = system.settings;
+                const systemSettingsIDs = systemSettingsList.map(setting => setting.id);
+
+                //Only keep settings form entries that are in the system settings id list. systemSettings is an object with the ids as keys
+                formData.appearance[scope].systemSettings = Object.fromEntries(Object.entries(formData.appearance[scope].systemSettings).filter(([key]) => systemSettingsIDs.includes(key)));
             }
         }
         let currentSettings = Dice3D.CONFIG();
@@ -1155,8 +1190,16 @@ export class DiceConfig extends FormApplication {
         await game.user.unsetFlag("dice-so-nice", "appearance");
         await game.user.unsetFlag("dice-so-nice", "settings");
 
+        //system settings won't be merged here because insertValues is false
+        let appearance = foundry.utils.mergeObject(Dice3D.APPEARANCE(), formData.appearance, { insertKeys: true, insertValues: false, performDeletions:true });
 
-        let appearance = foundry.utils.mergeObject(Dice3D.APPEARANCE(), formData.appearance, { insertKeys: true, insertValues: false, performDeletions:true});
+        //So we add back the system settings to the appearance
+        for (let scope of scopedAppearance) {
+            if(formData.appearance[scope].systemSettings) {
+                appearance[scope].systemSettings = formData.appearance[scope].systemSettings;
+            }
+        }
+
         delete formData.appearance;
         let settings = foundry.utils.mergeObject(Dice3D.CONFIG(), formData, { insertKeys: false, insertValues: false ,performDeletions:true});
 
@@ -1169,6 +1212,9 @@ export class DiceConfig extends FormApplication {
 
         game.socket.emit("module.dice-so-nice", { type: "update", user: game.user.id });
         DiceSFXManager.init();
+        for(let system of systemsInUse) {
+            this.box.dicefactory.systems.get(system).loadSettings();
+        }
         ui.notifications.info(game.i18n.localize("DICESONICE.saveMessage"));
 
         let reloadRequiredIfChanged = ["canvasZIndex", "bumpMapping", "useHighDPI", "glow", "antialiasing", "enabled"];
@@ -1191,6 +1237,11 @@ export class DiceConfig extends FormApplication {
         this.sfxDialogList.forEach((dialog) => {
             dialog.close();
         });
+
+        this.systemSettingsDialogList.forEach((dialog) => {
+            dialog.close();
+        });
+
         await super._onSubmit(event, options);
     }
 }

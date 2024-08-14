@@ -20,8 +20,12 @@ export class ShaderUtils {
             ShaderUtils.iridescenceShaderFragment(shader);
         }
 
+		// deprecated shader hook
         Hooks.callAll("diceSoNiceShaderOnBeforeCompile", shader, this);
-		this.userData.shader = shader;
+
+		// new shader hook system
+		const system = game.dice3d.DiceFactory.systems.get(this.userData.system);
+		system.beforeShaderCompile(shader, this);
     }
 
 	static selectiveBloomShaderFragment(shader) {

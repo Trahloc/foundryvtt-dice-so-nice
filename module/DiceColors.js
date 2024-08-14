@@ -712,49 +712,6 @@ export class DiceColors {
 
 			callback(resources);
 		});
-		/*let images = {};
-		let bumps = {};
-		let loadedImages = 0;
-	
-		let itemprops = Object.entries(sources);
-		let numImages = itemprops.length*2; //One for texture, one for bump texture
-		for (const [key, value] of itemprops) {
-
-			if(value.source === '') {
-				loadedImages+=2;
-				continue;
-			}
-	
-			images[key] = new Image();
-			images[key].crossOrigin = "Anonymous";
-			images[key].onload = function() {
-	
-				if (++loadedImages >= numImages) {
-					DiceColors.diceTextures = foundry.utils.mergeObject(images, DiceColors.diceTextures || {},{performDeletions:true});
-					DiceColors.diceBumps = foundry.utils.mergeObject(bumps, DiceColors.diceBumps || {},{performDeletions:true});
-					callback(images);
-				}
-			};
-			images[key].src = value.source;
-
-			if(value.bump === '') {
-				++loadedImages;
-				continue;
-			}
-
-			bumps[key] = new Image();
-			bumps[key].crossOrigin = "Anonymous";
-			bumps[key].onload = function() {
-	
-				if (++loadedImages >= numImages) {
-					DiceColors.diceTextures = foundry.utils.mergeObject(images, DiceColors.diceTextures || {},{performDeletions:true});
-					DiceColors.diceBumps = foundry.utils.mergeObject(bumps, DiceColors.diceBumps || {},{performDeletions:true});
-					callback(images);
-				}
-			};
-
-			bumps[key].src = value.bump;
-		}*/
 	}
 	
 	static getTexture(texturename) {

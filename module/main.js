@@ -235,8 +235,8 @@ const shouldInterceptMessage = (chatMessage, options = {dsnCountAddedRoll: 0, ds
     game.dice3d && !game.dice3d.messageHookDisabled &&
     //If it has a roll table, then check if the roll table should be animated and the roll table is displayed
     (!hasRollTableFlag || (shouldAnimateRollTable && rollTableFormulaDisplayed)) &&
-    //If there's at least one roll with diceterms (could be a deterministic roll without any dice like Roll("5"))
-    chatMessage.rolls.slice(options.dsnIndexAddedRoll).some(roll => roll.dice.length > 0);
+    //If there's at least one roll with diceterms (could be a deterministic roll without any dice like Roll("5")) or has an inline roll
+    (chatMessage.rolls.slice(options.dsnIndexAddedRoll).some(roll => roll.dice.length > 0) || hasInlineRoll);
 };
 
 /**

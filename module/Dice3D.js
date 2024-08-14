@@ -83,8 +83,7 @@ export class Dice3D {
                 material: "auto",
                 font: "auto",
                 colorset: "custom",
-                system: "standard",
-                systemSettings: {}
+                system: "standard"
             }
         };
     }

@@ -44,7 +44,7 @@ export class DiceFactory {
 		this.loaderGLTF = new GLTFLoader();
 		this.fontLoadingPromises = [];
 
-		this.baseTextureCache = {};
+		this.baseMaterialCache = {};
 
 		this.systems = new Map();
 		this.systems.set("standard", new DiceSystem("standard", game.i18n.localize("DICESONICE.System.Standard"), "default"));
@@ -52,6 +52,11 @@ export class DiceFactory {
 		this.systems.set("foundry_vtt", new DiceSystem("foundry_vtt", game.i18n.localize("DICESONICE.System.FoundryVTT"), "default", "Dice So Nice!"));
 		this.systems.set("dot", new DiceSystem("dot", game.i18n.localize("DICESONICE.System.Dot"), "default", "Dice So Nice!"));
 		this.systems.set("dot_b", new DiceSystem("dot_b", game.i18n.localize("DICESONICE.System.DotBlack"), "default", "Dice So Nice!"));
+
+		//load all the systems
+		for(let [id, system] of this.systems){
+			system.loadSettings();
+		}
 		
 		BASE_PRESETS_LIST.forEach((preset) => {
 			this.register(preset);
@@ -381,9 +386,11 @@ export class DiceFactory {
 			this.systems.set(system.id, system);
 			mode = system.mode;
 		} else {
-			this.systems.set(system.id, new DiceSystem(system.id, system.name, mode, system.group));
+			system = new DiceSystem(system.id, system.name, mode, system.group);
+			this.systems.set(system.id, system);
+			
 		}
-
+		system.loadSettings();
 		if(mode != "default" && this.preferredSystem == "standard")
 			this.preferredSystem = system.id;
 	}
@@ -398,7 +405,7 @@ export class DiceFactory {
 			model = this.systems.get("standard").dice.get(shape);
 		}
 		let preset = new DicePreset(dice.type, model.shape);
-		let denominator = dice.type.substr(1);
+		let denominator = dice.type.substring(1,dice.type.length);
 
 		preset.term = isNaN(denominator) ? CONFIG.Dice.terms[denominator].name : "Die";
 		
@@ -478,15 +485,16 @@ export class DiceFactory {
 	}
 
 	disposeCachedMaterials(type = null){
-		for (const material in this.baseTextureCache) {
-			if(type == null || material.substr(0,type.length) == type){
-				this.baseTextureCache[material].map.dispose();
-				if(this.baseTextureCache[material].bumpMap)
-					this.baseTextureCache[material].bumpMap.dispose();
-				if(this.baseTextureCache[material].emissiveMap)
-					this.baseTextureCache[material].emissiveMap.dispose();
-				this.baseTextureCache[material].dispose();
-				delete this.baseTextureCache[material];
+		for (const material in this.baseMaterialCache) {
+			if(type == null || material.substring(0,type.length) == type){
+				if(this.baseMaterialCache[material].map instanceof CanvasTexture)
+					this.baseMaterialCache[material].map.dispose();
+				if(this.baseMaterialCache[material].bumpMap && this.baseMaterialCache[material].bumpMap instanceof CanvasTexture)
+					this.baseMaterialCache[material].bumpMap.dispose();
+				if(this.baseMaterialCache[material].emissiveMap && this.baseMaterialCache[material].emissiveMap instanceof CanvasTexture)
+					this.baseMaterialCache[material].emissiveMap.dispose();
+				this.baseMaterialCache[material].dispose();
+				delete this.baseMaterialCache[material];
 			}
 		}
 	}
@@ -559,17 +567,58 @@ export class DiceFactory {
 				dicemesh.mixer = new AnimationMixer(dicemesh);
 				dicemesh.mixer.clipAction(diceobj.model.animations[0]).play();
 			}
+
+			//for each mesh, we need to clone the material, pass it to the system for optional processing and then cache it in the baseMaterialCache
+
+			//first, we get all the different materials
+			const materialList = new Set();
+			dicemesh.traverse((child) => {
+				if(child.isMesh) {
+					materialList.add(child.material);
+				}
+			});
+
+			//then we process each material or get the cached one
+			for(let uniqueMaterial of materialList){
+				let material;
+				let baseMaterialCacheString = scopedTextureCache.type+type+appearance.system+uniqueMaterial.uuid+this.systems.get(appearance.system).getCacheString(appearance.systemSettings);
+				if(this.baseMaterialCache[baseMaterialCacheString]) {
+					material = this.baseMaterialCache[baseMaterialCacheString];
+				} else {
+					material = uniqueMaterial.clone();
+					if(this.systems.get(appearance.system).settings.length > 0) {
+						material = this.systems.get(appearance.system).processMaterial(type, uniqueMaterial, appearance);
+					}
+					//and replace the original material with the processed based on the model material uuid
+					dicemesh.traverse((child) => {
+						if(child.isMesh) {
+							if(child.material.uuid == uniqueMaterial.uuid){
+								child.material = material;
+							}
+						}
+					});
+
+					//finally, we cache the material
+					this.baseMaterialCache[baseMaterialCacheString] = material;
+				}
+			}
 		}else{
 			let materialData = this.generateMaterialData(diceobj, appearance);
 
-			let baseTextureCacheString = scopedTextureCache.type+type+materialData.cacheString;
-			let materials;
-			if(this.baseTextureCache[baseTextureCacheString])
-				materials = this.baseTextureCache[baseTextureCacheString];
-			else
-				materials = this.createMaterials(scopedTextureCache, baseTextureCacheString, diceobj, materialData);
-			
-			dicemesh = new Mesh(geom, materials);
+			let baseMaterialCacheString = scopedTextureCache.type+type+materialData.cacheString+this.systems.get(appearance.system).getCacheString(appearance.systemSettings);
+			let material;
+			if(this.baseMaterialCache[baseMaterialCacheString]){
+				material = this.baseMaterialCache[baseMaterialCacheString];
+			}
+			else {
+				material = this.createMaterial(scopedTextureCache, baseMaterialCacheString, diceobj, materialData);
+				//send to the system for processing
+				if(this.systems.get(appearance.system).settings.length > 0) {
+					material = this.systems.get(appearance.system).processMaterial(type, material, appearance);
+				}
+			}
+				
+			dicemesh = new Mesh(geom, material);
 
 			//TODO: Find if this entire block is still needed
 			//I think not
@@ -600,9 +649,9 @@ export class DiceFactory {
 		return dicemesh;
 	}
 
-	createMaterials(scopedTextureCache, baseTextureCacheString, diceobj, materialData) {
-		if(this.baseTextureCache[baseTextureCacheString])
-			return this.baseTextureCache[baseTextureCacheString];
+	createMaterial(scopedTextureCache, baseMaterialCacheString, diceobj, materialData) {
+		if(this.baseMaterialCache[baseMaterialCacheString])
+			return this.baseMaterialCache[baseMaterialCacheString];
 
 		let labels = diceobj.labels;
 		if (diceobj.shape == 'd4') {
@@ -726,7 +775,7 @@ export class DiceFactory {
 		//var img    = canvas.toDataURL("image/png");
 		//document.write('<img src="'+img+'"/>');
 		//generate basetexture for caching
-		if(!this.baseTextureCache[baseTextureCacheString]){
+		if(!this.baseMaterialCache[baseMaterialCacheString]){
 			let texture = new CanvasTexture(canvas);
 			if(this.realisticLighting)
 				texture.colorSpace = SRGBColorSpace;
@@ -769,14 +818,12 @@ export class DiceFactory {
 		mat.depthTest = true;
 		mat.needUpdate = true;
 
-		mat.userData.diceobj = diceobj;
-		mat.userData.materialData = materialData;
-		mat.userData.dice_texture = dice_texture;
-
 		mat.onBeforeCompile = ShaderUtils.applyDiceSoNiceShader;
-		Hooks.callAll("diceSoNiceOnMaterialReady", mat, baseTextureCacheString);
 
-		this.baseTextureCache[baseTextureCacheString] = mat;
+		// deprecated shader hook
+		Hooks.callAll("diceSoNiceOnMaterialReady", mat, baseMaterialCacheString);
+
+		this.baseMaterialCache[baseMaterialCacheString] = mat;
 		return mat;
 	}
 	createTextMaterial(context, contextBump, contextEmissive, x, y, ts, diceobj, labels, font, index, texture, materialData) {
@@ -1073,7 +1120,8 @@ export class DiceFactory {
 			texture: settings.texture ? settings.texture:appearances.global.texture ? appearances.global.texture : "none",
 			material: settings.material ? settings.material:appearances.global.material ? appearances.global.material : "auto",
 			font: settings.font ? settings.font:appearances.global.font ? appearances.global.font : "Arial",
-			system: settings.system ? settings.system:appearances.global.system ? appearances.global.system : "standard"
+			system: settings.system ? settings.system:appearances.global.system ? appearances.global.system : "standard",
+			systemSettings: settings.systemSettings ? settings.systemSettings:appearances.global.systemSettings ? appearances.global.systemSettings : {}
 		};
 
 		if(appearance.colorset == "custom"){

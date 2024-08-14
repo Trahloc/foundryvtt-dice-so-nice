@@ -10,8 +10,20 @@ export class DiceSystem {
         COLOR: "color",
         FILE: "file",
         RANGE: "range",
-        STRING: "string",
-        SEPARATOR: "separator"
+        STRING: "string"
+    }
+
+    static SETTING_FORMATING = {
+        SEPARATOR: "separator",
+        HTML: "html"
+    }
+
+    static DICE_EVENT_TYPE = {
+        SPAWN: 0,
+        CLICK: 1,
+        RESULT: 2,
+        COLLIDE: 3,
+        DESPAWN: 4
     }
 
     /**
@@ -26,11 +38,14 @@ export class DiceSystem {
     constructor(id, name, mode = "default", group = null) {
         this._id = id;
         this._name = name;
-        this._dice = new Map();
+        this._dice = new DiceMap(this);
         this._mode = mode;
         this._group = group;
 
         this._settings = [];
+        this._scopedSettings = new Map();
+
+        this._listeners = [];
     }
 
     get id() {
@@ -54,32 +69,102 @@ export class DiceSystem {
     }
 
     get settings() {
-        return this._settings.filter((setting) => setting.type !== DiceSystem.SETTING_TYPE.SEPARATOR);
+        const objValues = Object.values(DiceSystem.SETTING_TYPE);
+        return this._settings.filter((setting) => objValues.includes(setting.type));
     }
 
-    /**
-     * Updates the material of the dice objects in the system.
-     *
-     * @param {string|null} [diceType=null] - The type of dice to update. If null, all dice will be updated.
-     * @return {void}
-     */
-    updateMaterial(diceType = null) {
-        for (const [key, dice] of this.dice) {
-            if (diceType && dice.type !== diceType) {
-                continue;
-            }
+    on(eventType, listener) {
+        if(!Object.values(DiceSystem.DICE_EVENT_TYPE).includes(eventType))
+            throw new Error(`[DiceSystem.fire] Invalid dice event type: ${eventType}`);
 
-            if (dice.model) {
-                dice.model.scene.traverse((child) => {
-                    if (child.isMaterial) {
-                        child.needsUpdate = true;
-                    }
-                });
-            } else {
-                for (const cacheEntry of game.dice3d.DiceFactory.baseTextureCache) {
-                    if (cacheEntry.userData?.diceobj?.system == this.id) {
-                        cacheEntry.needsUpdate = true;
-                    }
+        if (!this._listeners[eventType]) {
+            this._listeners[eventType] = [];
+        }
+        this._listeners[eventType].push(listener);
+    }
+
+    off(eventType, listener) {
+        if (!this._listeners[eventType]) return;
+
+        const index = this._listeners[eventType].indexOf(listener);
+        if (index > -1) {
+            this._listeners[eventType].splice(index, 1);
+        }
+    }
+
+    fire(eventType, event) {
+        if(!Object.values(DiceSystem.DICE_EVENT_TYPE).includes(eventType))
+            throw new Error(`[DiceSystem.fire] Invalid dice event type: ${eventType}`);
+
+        this._dispatchEvent(eventType, event);
+    }
+
+    _dispatchEvent(eventType, event) {
+        if (!this._listeners[eventType]) return;
+
+        for (const listener of this._listeners[eventType]) {
+            listener(event);
+        }
+    }
+
+    getSettingsByDiceType(diceType) {
+        return this._scopedSettings.get(diceType) || this._scopedSettings.get("global");
+    }
+
+    getCacheString(settings) {
+        return this.id+JSON.stringify(Object.values(settings));
+    }
+
+    processMaterial(diceType, material, appearance) {
+        if(this.dice.has(diceType)) {
+            this.onProcessMaterial(diceType, material, appearance);
+
+            material.userData.diceType = diceType;
+            material.userData.system = this.id;
+            material.userData.systemSettings = {...appearance.systemSettings};
+        }
+        return material;
+    }
+
+    beforeShaderCompile(shader, material) {
+        let fragmentShader = shader.fragmentShader;
+        let vertexShader = shader.vertexShader;
+        
+        this.onBeforeShaderCompile(shader, material, material.userData.diceType, material.userData.systemSettings);
+
+        if(fragmentShader !== shader.fragmentShader || vertexShader !== shader.vertexShader){
+            const cacheString = this.getCacheString(appearance.systemSettings);
+            material.customProgramCacheKey = () => cacheString;
+        }
+
+    }
+
+    onProcessMaterial(diceType, material, appearance) {
+        //to be overwritten
+    }
+
+    onBeforeShaderCompile(shader, material, diceType, settings) {
+        //to be overwritten
+    }
+
+    updateSettings(diceType = "global", settings) {
+        this._scopedSettings.set(diceType, {...settings});
+    }
+
+    loadSettings() {
+        this._scopedSettings = new Map();
+        //called after the system is added to the dice factory
+        //check for saved settings and load them
+        const savedSettings = game.user.getFlag("dice-so-nice", "appearance");
+
+        //set default settings (just key/value pairs)
+        const defaultSettings = this.settings.reduce((acc, { id, defaultValue }) => ({ ...acc, [id]: defaultValue }), {});
+        this._scopedSettings.set("global", defaultSettings);
+
+        if(savedSettings) {
+            for(let diceType of Object.keys(savedSettings)) {
+                if(savedSettings[diceType].system === this.id) {
+                    this._scopedSettings.set(diceType, {...savedSettings[diceType].systemSettings});
                 }
             }
         }
@@ -98,21 +183,21 @@ export class DiceSystem {
      */
     _createSetting(type, id, name, scope, defaultValue, additionalProperties = {}) {
         //field checks
-        if(!Object.values(DiceSystem.SETTING_TYPE).includes(type)) {
-            throw new Error(`Invalid setting type: ${type}`);
+        if (!Object.values(DiceSystem.SETTING_TYPE).includes(type) && !Object.values(DiceSystem.SETTING_FORMATING).includes(type)) {
+            throw new Error(`[DiceSystem._createSetting] Invalid setting type: ${type}`);
         }
 
-        if(!Object.values(DiceSystem.SETTING_SCOPE).includes(scope)) {
-            throw new Error(`Invalid setting scope: ${scope}`);
+        if (!Object.values(DiceSystem.SETTING_SCOPE).includes(scope) && !Object.values(DiceSystem.SETTING_SCOPE).includes(scope)) {
+            throw new Error(`[DiceSystem._createSetting] Invalid setting scope: ${scope}`);
         }
 
-        if(type != DiceSystem.SETTING_TYPE.SEPARATOR){
+        if (DiceSystem.SETTING_TYPE.hasOwnProperty(type)) {
             if (!id) {
-                throw new Error(`Invalid setting id: ${id}`);
+                throw new Error(`[DiceSystem._createSetting] Invalid setting id: ${id}`);
             }
 
             if (!name) {
-                throw new Error(`Invalid setting name: ${name}`);
+                throw new Error(`[DiceSystem._createSetting] Invalid setting name: ${name}`);
             }
         }
 
@@ -135,6 +220,10 @@ export class DiceSystem {
      */
     addSettingSeparator({ name = "" } = {}) {
         this._createSetting("separator", null, name, DiceSystem.SETTING_SCOPE.LOCAL, null);
+    }
+
+    addSettingHTML({ name }) {
+        this._createSetting("html", null, name, DiceSystem.SETTING_SCOPE.LOCAL, null);
     }
 
     /**
@@ -249,12 +338,24 @@ export class DiceSystem {
     }
 
     /**
+     * Retrieves the value of a scoped setting for a specific dice type.
+     *
+     * @param {string} diceType - The type of the dice.
+     * @param {string} settingId - The ID of the setting.
+     * @return {any} The value of the scoped setting, or the default value if not found.
+     */
+    getScopedSettingValue(diceType, settingId) {
+        return this._scopedSettings.get(diceType)?.[settingId] ?? this._scopedSettings.get("global")?.[settingId];
+    }
+
+    /**
      * Generates the HTML content and data for a settings dialog line based on the provided setting.
      *
      * @param {Object} setting - The setting object containing the type, id, name, and value.
+     * @param {string} diceType - The type of the dice or "global"
      * @return {Object} An object containing the HTML content and data for the settings dialog line.
      */
-    getSettingsDialogLine(setting) {
+    getSettingsDialogLine(setting, diceType) {
         let line = {
             content: "",
             data: {}
@@ -265,13 +366,13 @@ export class DiceSystem {
                     <div class="form-group">
                         <label>${setting.name}</label>
                         <div class="form-fields">
-                            <input type="checkbox" name="systemSettings[${this.id}][${setting.id}]" data-dtype="Boolean" {{checked ${setting.id}.value}} />
+                            <input type="checkbox" name="appearance[${diceType}][systemSettings][${setting.id}]" data-dtype="Boolean" {{checked ${setting.id}.value}} />
                         </div>
                     </div>
                 `;
 
                 line.data = {
-                    value: setting.defaultValue
+                    value: this.getScopedSettingValue(diceType, setting.id)
                 };
                 break;
             case DiceSystem.SETTING_TYPE.STRING:
@@ -279,13 +380,13 @@ export class DiceSystem {
                     <div class="form-group">
                         <label>${setting.name}</label>
                         <div class="form-fields">
-                            <input type="text" name="systemSettings[${this.id}][${setting.id}]" value="{{${setting.id}.value}}" data-dtype="String" />
+                            <input type="text" name="appearance[${diceType}][systemSettings][${setting.id}]" value="{{${setting.id}.value}}" data-dtype="String" />
                         </div>
                     </div>
                 `;
 
                 line.data = {
-                    value: setting.defaultValue
+                    value: this.getScopedSettingValue(diceType, setting.id)
                 };
                 break;
             case DiceSystem.SETTING_TYPE.COLOR:
@@ -293,15 +394,15 @@ export class DiceSystem {
                     <div class="form-group">
                         <label>${setting.name}</label>
                         <div class="form-fields">
-                            <input type="text" data-colorpicker name="systemSettings[${this.id}][${setting.id}]" value="{{${setting.id}.value}}" data-dtype="String" />
-                            <input type="color" name="systemSettings[${this.id}][${setting.id}Selector]" value="{{${setting.id}.value}}"
-                                data-edit="systemSettings[${this.id}][${setting.id}]" data-${setting.id}Selector />
+                            <input type="text" data-colorpicker name="appearance[${diceType}][systemSettings][${setting.id}]" value="{{${setting.id}.value}}" data-dtype="String" />
+                            <input type="color" name="appearance[${diceType}][systemSettings][${setting.id}Selector]" value="{{${setting.id}.value}}"
+                                data-edit="appearance[${diceType}][systemSettings][${setting.id}]" data-${setting.id}Selector />
                         </div>
                     </div>
                 `;
 
                 line.data = {
-                    value: setting.defaultValue
+                    value: this.getScopedSettingValue(diceType, setting.id)
                 };
                 break;
             case DiceSystem.SETTING_TYPE.RANGE:
@@ -309,14 +410,14 @@ export class DiceSystem {
                     <div class="form-group">
                         <label>${setting.name}</label>
                         <div class="form-fields">
-                            <input type="range" name="systemSettings[${this.id}][${setting.id}]" value="{{${setting.id}.value}}" min="{{${setting.id}.min}}" max="{{${setting.id}.max}}" step="{{${setting.id}.step}}" data-dtype="Number">
+                            <input type="range" name="appearance[${diceType}][systemSettings][${setting.id}]" value="{{${setting.id}.value}}" min="{{${setting.id}.min}}" max="{{${setting.id}.max}}" step="{{${setting.id}.step}}" data-dtype="Number">
                             <span class="range-value">{{${setting.id}.value}}</span>
                         </div>
                     </div>
                 `;
 
                 line.data = {
-                    value: setting.defaultValue,
+                    value: this.getScopedSettingValue(diceType, setting.id),
                     min: setting.min,
                     max: setting.max,
                     step: setting.step
@@ -327,14 +428,14 @@ export class DiceSystem {
                     <div class="form-group">
                         <label>${setting.name}</label>
                         <div class="form-fields">
-                            <input type="file" name="systemSettings[${this.id}][${setting.id}]" value="{{${setting.id}.value}}"
-                                data-edit="systemSettings[${this.id}][${setting.id}]" data-${setting.id} />
+                            <input type="file" name="appearance[${diceType}][systemSettings][${setting.id}]" value="{{${setting.id}.value}}"
+                                data-edit="appearance[${diceType}][systemSettings][${setting.id}]" data-${setting.id} />
                         </div>
                     </div>
                 `;
 
                 line.data = {
-                    value: setting.defaultValue
+                    value: this.getScopedSettingValue(diceType, setting.id)
                 };
                 break;
             case DiceSystem.SETTING_TYPE.SELECT:
@@ -342,7 +443,7 @@ export class DiceSystem {
                     <div class="form-group">
                         <label>${setting.name}</label>
                         <div class="form-fields">
-                            <select name="systemSettings[${this.id}][${setting.id}]" data-dtype="String">
+                            <select name="appearance[${diceType}][systemSettings][${setting.id}]" data-dtype="String">
                                 {{selectOptions ${setting.id}.options selected=${setting.id}.value}}
                             </select>
                         </div>
@@ -350,32 +451,35 @@ export class DiceSystem {
                 `;
 
                 line.data = {
-                    value: setting.defaultValue,
+                    value: this.getScopedSettingValue(diceType, setting.id),
                     options: setting.options
                 };
                 break;
             case DiceSystem.SETTING_TYPE.SEPARATOR:
-                if(setting.name != "")
+                if (setting.name != "")
                     line.content = `<h2>${setting.name}</h2>`;
                 else
                     line.content = `<hr />`;
+                break;
+            case DiceSystem.SETTING_TYPE.HTML:
+                line.content = setting.name;
                 break;
         }
 
         return line;
     }
 
-    getSettingsDialogContent() {
+    getSettingsDialogContent(diceType) {
         let dialogContent = {
             content: "",
             data: {}
         };
 
-        if(!this._settings.length) return dialogContent;
+        if (!this._settings.length) return dialogContent;
 
         // generate the content and data for each setting
         for (let setting of this._settings) {
-            let line = this.getSettingsDialogLine(setting);
+            let line = this.getSettingsDialogLine(setting, diceType);
             dialogContent.content += line.content;
             dialogContent.data[setting.id] = line.data;
         }
@@ -383,5 +487,29 @@ export class DiceSystem {
         dialogContent.content = `<div data-systemSettings="${this.id}">${dialogContent.content}</div>`;
 
         return dialogContent;
+    }
+
+    callSettingsChange(settings) {
+        //todo: format settings
+
+        this.onSettingsChange(settings);
+    }
+
+    onSettingsChange(settings) {
+        // placeholder
+    }
+}
+
+class DiceMap extends Map {
+    constructor(diceSystem, ...args) {
+        super(...args);
+        this._diceSystem = diceSystem;
+    }
+    set(key, value) {
+        if (!this.has(key)) {
+            // Set the DiceSystem object as the value of value.diceSystem
+            value.diceSystem = this._diceSystem;
+        }
+        return super.set(key, value);
     }
 }
