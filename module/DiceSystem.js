@@ -133,7 +133,7 @@ export class DiceSystem {
         this.onBeforeShaderCompile(shader, material, material.userData.diceType, material.userData.systemSettings);
 
         if(fragmentShader !== shader.fragmentShader || vertexShader !== shader.vertexShader){
-            const cacheString = this.getCacheString(appearance.systemSettings);
+            const cacheString = this.getCacheString(material.userData.systemSettings);
             material.customProgramCacheKey = () => cacheString;
         }
 

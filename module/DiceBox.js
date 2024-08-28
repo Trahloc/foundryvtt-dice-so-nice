@@ -738,7 +738,7 @@ export class DiceBox {
 		this.diceList.push(dicemesh);
 		if (dicemesh.startAtIteration == 0) {
 			this.scene.add(objectContainer);
-			this.dicefactory.systems.get(appearance.system).fire(DiceSystem.DICE_EVENT_TYPE.SPAWN, { dice: dicemesh });
+			//this.dicefactory.systems.get(appearance.system).fire(DiceSystem.DICE_EVENT_TYPE.SPAWN, { dice: dicemesh });
 			await this.physicsWorker.exec('addDice', dicemesh.id);
 		}
 	}
@@ -820,8 +820,8 @@ export class DiceBox {
 				if (dicemesh){
 					if(dicemesh.mixer)
 						dicemesh.mixer.update(delta);
-
-					if(dicemesh.material.mixer)
+					//Todo : this is wrong, dicemesh != one material
+					if(dicemesh.material?.mixer)
 						animatedMaterials.add(dicemesh.material);
 				}
 			}
@@ -1108,7 +1108,7 @@ export class DiceBox {
 			await this.swapDiceFace(dicemesh);
 			if (dicemesh.mixer)
 				this.animatedDiceDetected = true;
-			else if(dicemesh.material.mixer)
+			else if(dicemesh.material?.mixer)//todo this is wrong, dicemesh != one material
 				this.animatedDiceDetected = true;
 		}
 

@@ -586,7 +586,7 @@ export class DiceFactory {
 					material = this.baseMaterialCache[baseMaterialCacheString];
 				} else {
 					material = uniqueMaterial.clone();
-					if(this.systems.get(appearance.system).settings.length > 0) {
+					if(true || this.systems.get(appearance.system).settings.length > 0) { //todo see if we can avoid calling this when not needed
 						material = this.systems.get(appearance.system).processMaterial(type, uniqueMaterial, appearance);
 					}
 					//and replace the original material with the processed based on the model material uuid
@@ -613,7 +613,7 @@ export class DiceFactory {
 			else {
 				material = this.createMaterial(scopedTextureCache, baseMaterialCacheString, diceobj, materialData);
 				//send to the system for processing
-				if(this.systems.get(appearance.system).settings.length > 0) {
+				if(true || this.systems.get(appearance.system).settings.length > 0) { //todo
 					material = this.systems.get(appearance.system).processMaterial(type, material, appearance);
 				}
 			}
@@ -1123,6 +1123,11 @@ export class DiceFactory {
 			system: settings.system ? settings.system:appearances.global.system ? appearances.global.system : "standard",
 			systemSettings: settings.systemSettings ? settings.systemSettings:appearances.global.systemSettings ? appearances.global.systemSettings : {}
 		};
+
+		//Check if this dice exists for this system. If not, it means it is the one from global
+		const system = this.systems.get(settings.system);
+		if(!system || !system.dice.has(dicetype))
+			appearance.system = "standard";
 
 		if(appearance.colorset == "custom"){
 			appearance.outline = settings.outlineColor ? settings.outlineColor:"";
