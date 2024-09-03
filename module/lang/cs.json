@@ -264,5 +264,10 @@
     "DICESONICE.TourMainContentShow3DDice": "Toto je náhled kostek 3D. Zde si můžete prohlédnout vlastní kostky. Každý hráč má své vlastní kostky. Na kostku můžete také kliknout a přizpůsobit si ji.",
     "DICESONICE.TourMainContentShowPreferences": "Změňte své preference podle svých představ. Zvuky, rychlost animace, měřítko kostek a další.",
     "DICESONICE.TourMainContentShowPerformance": "Pokud je váš počítač trochu pomalejší, můžete tato nastavení upravit a zlepšit tak výkon 3D animace.",
-    "DICESONICE.TourMainContentShowBackup": "Nastavení můžete uložit do více souborů. To je užitečné, pokud chcete rychle přepínat mezi několika vytvořenými vlastními vzhledy."
+    "DICESONICE.TourMainContentShowBackup": "Nastavení můžete uložit do více souborů. To je užitečné, pokud chcete rychle přepínat mezi několika vytvořenými vlastními vzhledy.",
+    "DICESONICE.onlyShowMyDice": "Pouze zobraz moje kostky",
+    "DICESONICE.ghostDiceForAll": "Všem hráčům",
+    "DICESONICE.ghostDiceForRollAuthor": "Pouze tomu co hodil",
+    "DICESONICE.resetWelcomeMessage": "Obnovit uvítací zprávu",
+    "DICESONICE.resetWelcomeMessageHint": "Toto obnoví uvítací zprávu všem hráčům. Uvidí ji při dalším připojení se do světa."
 }
