@@ -264,5 +264,12 @@
     "DICESONICE.TourMainContentShowBackup": "Puedes salvar tu configuracion guardando multiples archivos. Esto es muy util para cambiar entre multiples apariencias configuradas que hayas creado.",
     "DICESONICE.TourMainTitleEndTour": "Fin del tour",
     "DICESONICE.TourMainContentEndTour": "Si quieres mas informacion, revisa nuestra pagina de ayuda en tu ventana de Administrador de Modulos. ¡Buenos tiros!",
-    "DICESONICE.WelcomeTitle": "Dice So Nice - Tus dados 3D"
+    "DICESONICE.WelcomeTitle": "Dice So Nice - Tus dados 3D",
+    "DICESONICE.onlyShowMyDice": "Solo mostrar mis dados",
+    "DICESONICE.ghostDiceDisabled": "Desactivar dado fantasma",
+    "DICESONICE.ghostDiceForAll": "Para todos los jugadores",
+    "DICESONICE.ghostDiceForRollAuthor": "Solo para el autor de la tirada",
+    "DICESONICE.sfxOptionsMuteSound": "Silenciar sonido",
+    "DICESONICE.PlayAnimationOutline": "Animación: Delineado",
+    "DICESONICE.resetWelcomeMessage": "Reiniciar mensaje de bienvenida"
 }
