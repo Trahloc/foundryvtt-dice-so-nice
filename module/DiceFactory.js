@@ -586,9 +586,8 @@ export class DiceFactory {
 					material = this.baseMaterialCache[baseMaterialCacheString];
 				} else {
 					material = uniqueMaterial.clone();
-					if(true || this.systems.get(appearance.system).settings.length > 0) { //todo see if we can avoid calling this when not needed
-						material = this.systems.get(appearance.system).processMaterial(type, uniqueMaterial, appearance);
-					}
+					material = this.systems.get(appearance.system).processMaterial(type, uniqueMaterial, appearance);
+
 					//and replace the original material with the processed based on the model material uuid
 					dicemesh.traverse((child) => {
 						if(child.isMesh) {
@@ -629,6 +628,7 @@ export class DiceFactory {
 				//dicemesh.material[0].emissive = new Color(diceobj.color);
 				dicemesh.material[0].emissiveIntensity = diceobj.emissiveIntensity ? diceobj.emissiveIntensity : 1;
 				dicemesh.material[0].needsUpdate = true;
+				console.log("[Dice So Nice][Debug] If you see this message, please report it to the module author <3");
 			}
 			dicemesh.layers.enableAll();
 		}

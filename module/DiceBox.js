@@ -738,7 +738,7 @@ export class DiceBox {
 		this.diceList.push(dicemesh);
 		if (dicemesh.startAtIteration == 0) {
 			this.scene.add(objectContainer);
-			//this.dicefactory.systems.get(appearance.system).fire(DiceSystem.DICE_EVENT_TYPE.SPAWN, { dice: dicemesh });
+			this.dicefactory.systems.get(appearance.system).fire(DiceSystem.DICE_EVENT_TYPE.SPAWN, { dice: dicemesh });
 			await this.physicsWorker.exec('addDice', dicemesh.id);
 		}
 	}
@@ -818,11 +818,12 @@ export class DiceBox {
 			for (const child of this.scene.children) {
 				let dicemesh = child.children && child.children.length && child.children[0].sim != undefined ? child.children[0] : null;
 				if (dicemesh){
-					if(dicemesh.mixer)
-						dicemesh.mixer.update(delta);
-					//Todo : this is wrong, dicemesh != one material
-					if(dicemesh.material?.mixer)
-						animatedMaterials.add(dicemesh.material);
+					dicemesh.traverse(obj => {
+						if(obj.mixer)
+							dicemesh.mixer.update(delta);
+						if(obj.material?.mixer)
+							animatedMaterials.add(obj);
+					});
 				}
 			}
 
@@ -838,7 +839,7 @@ export class DiceBox {
 					for (let i = 0; i < this.diceList.length; i++) {
 						if (this.diceList[i].startAtIteration == this.iteration) {
 							this.scene.add(this.diceList[i].parent);
-							this.dicefactory.systems.get(this.diceList[i].userData.system).fire(DiceSystem.DICE_EVENT_TYPE.SPAWN, { dice: dicemesh });
+							this.dicefactory.systems.get(this.diceList[i].userData.system).fire(DiceSystem.DICE_EVENT_TYPE.SPAWN, { dice: this.diceList[i] });
 						}
 					}
 				}
@@ -1106,10 +1107,11 @@ export class DiceBox {
 			let dicemesh = this.diceList[i];
 			if (!dicemesh) continue;
 			await this.swapDiceFace(dicemesh);
-			if (dicemesh.mixer)
-				this.animatedDiceDetected = true;
-			else if(dicemesh.material?.mixer)//todo this is wrong, dicemesh != one material
-				this.animatedDiceDetected = true;
+			dicemesh.traverse(obj => {
+				if(obj.mixer || obj.material.mixer){
+					this.animatedDiceDetected = true;
+				}
+			});
 		}
 
 		//reset the result

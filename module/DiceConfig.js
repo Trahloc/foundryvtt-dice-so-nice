@@ -230,6 +230,10 @@ export class DiceConfig extends FormApplication {
                 systemSettings: systemSettingsScoped.hasOwnProperty(diceType) ? systemSettingsScoped[diceType] : '',
                 systemSettingsVisible: systemSettingsScoped.hasOwnProperty(diceType) ? '' : 'dsn-hidden'
             }).then((html) => {
+                //We add a "title" attribute to all colorsets to give a way to users to see the colorset id
+                //However the FVTT Hdlb helper does not provide such functionnality so we have to do it ourselves
+                html = this.addTitleToOptions(html, '[data-colorset] option');
+                
                 tabsAppearance.push(html);
             }));
             if (diceType != "global")
@@ -274,6 +278,27 @@ export class DiceConfig extends FormApplication {
         }
 
         return data;
+    }
+
+    addTitleToOptions(htmlString, selectorString) {
+        // Initialize a DOMParser to parse the HTML string
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlString, 'text/html');
+        
+        // Select all <option> elements within elements that have the 'data-colorset' attribute
+        const options = doc.querySelectorAll(selectorString);
+        
+        // Iterate over each <option> and set its 'title' attribute to its 'value'
+        options.forEach(option => {
+            // Ensure the 'value' attribute exists
+            if (option.hasAttribute('value')) {
+                const value = option.getAttribute('value');
+                option.setAttribute('title', value);
+            }
+        });
+        
+        // Serialize the modified DOM back to an HTML string
+        return doc.documentElement.outerHTML;
     }
 
     activateListeners(html) {
@@ -688,6 +713,10 @@ export class DiceConfig extends FormApplication {
                             fontList: this.initializationData.fontList,
                             systemSettings: newSystemSettings
                         }).then((html) => {
+                            //We add a "title" attribute to all colorsets to give a way to users to see the colorset id
+                            //However the FVTT Hdlb helper does not provide such functionnality so we have to do it ourselves
+                            html = this.addTitleToOptions(html, '[data-colorset] option');
+
                             let tabName = diceType.toUpperCase();
 
                             let insertBefore = null;

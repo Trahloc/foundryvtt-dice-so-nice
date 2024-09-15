@@ -225,7 +225,10 @@ const shouldInterceptMessage = (chatMessage, options = {dsnCountAddedRoll: 0, ds
     const isContentVisible = chatMessage.isContentVisible;
     const shouldAnimateRollTable = game.settings.get("dice-so-nice", "animateRollTable");
     const hasRollTableFlag = chatMessage.getFlag("core", "RollTable");
-    const rollTableFormulaDisplayed = hasRollTableFlag && game.tables.get(hasRollTableFlag).displayRoll;
+    
+    //The table could be in a compedium pack and foundry does not have an easy way to find the packed table without looping over all compediums
+    //In such case, we assume the roll table is displayed
+    const rollTableFormulaDisplayed = hasRollTableFlag && (game.tables.get(hasRollTableFlag)?.displayRoll ?? true);
 
     //Is a roll
     return (chatMessage.isRoll || hasInlineRoll) &&
