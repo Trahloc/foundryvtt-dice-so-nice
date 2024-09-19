@@ -88,7 +88,7 @@ export class DiceConfig extends FormApplication {
         delete data.sfxLine;
 
         //remove MSAA if not supported
-        if (game.canvas.app.renderer.context.webGLVersion<2){
+        if (game.canvas.app.renderer.context.webGLVersion < 2) {
             delete data.antialiasingList.msaa;
         }
 
@@ -128,8 +128,8 @@ export class DiceConfig extends FormApplication {
             let termClass = Object.values(CONFIG.Dice.terms).find(term => term.name == preset.term) || foundry.dice.terms.Die;
             let term = new termClass({});
 
-            if(el.userData == "d100"){
-                for(let i = 1; i<=100;i++){
+            if (el.userData == "d100") {
+                for (let i = 1; i <= 100; i++) {
                     let label = term.getResultLabel({ result: i });
                     let option = { id: i + "", name: label };
                     this.possibleResultList[el.userData].push(option);
@@ -143,8 +143,8 @@ export class DiceConfig extends FormApplication {
             }
 
             //add special triggers, like "keep hihest" (kh)
-            this.possibleResultList[el.userData].push({id: "kh", name: "Keep Highest"});
-            this.possibleResultList[el.userData].push({id: "kl", name: "Keep Lowest"});
+            this.possibleResultList[el.userData].push({ id: "kh", name: "Keep Highest" });
+            this.possibleResultList[el.userData].push({ id: "kl", name: "Keep Lowest" });
         });
 
         let specialEffectsList = [];
@@ -153,7 +153,7 @@ export class DiceConfig extends FormApplication {
         if (this.reset)
             specialEffects = [];
         this.triggerTypeList = [...triggerTypeList, ...DiceSFXManager.EXTRA_TRIGGER_TYPE];
-        foundry.utils.mergeObject(this.possibleResultList, DiceSFXManager.EXTRA_TRIGGER_RESULTS,{performDeletions:true});
+        foundry.utils.mergeObject(this.possibleResultList, DiceSFXManager.EXTRA_TRIGGER_RESULTS, { performDeletions: true });
 
         //Filter out the SFX that are not registered
         if (specialEffects) {
@@ -200,13 +200,13 @@ export class DiceConfig extends FormApplication {
                         data.appearance[scope].edgeColor = data.appearance.global.edgeColor;
                 }
 
-                if(this.box.dicefactory.systems.has(data.appearance[scope].system)){
+                if (this.box.dicefactory.systems.has(data.appearance[scope].system)) {
                     const system = this.box.dicefactory.systems.get(data.appearance[scope].system);
 
-                    if(system.settings.length > 0){
+                    if (system.settings.length > 0) {
                         const dialogContent = system.getSettingsDialogContent(scope);
 
-                        if(dialogContent.content != ""){
+                        if (dialogContent.content != "") {
                             const hdbsTemplate = Handlebars.compile(dialogContent.content);
                             systemSettingsScoped[scope] = hdbsTemplate(dialogContent.data);
                         }
@@ -233,7 +233,7 @@ export class DiceConfig extends FormApplication {
                 //We add a "title" attribute to all colorsets to give a way to users to see the colorset id
                 //However the FVTT Hdlb helper does not provide such functionnality so we have to do it ourselves
                 html = this.addTitleToOptions(html, '[data-colorset] option');
-                
+
                 tabsAppearance.push(html);
             }));
             if (diceType != "global")
@@ -284,10 +284,10 @@ export class DiceConfig extends FormApplication {
         // Initialize a DOMParser to parse the HTML string
         const parser = new DOMParser();
         const doc = parser.parseFromString(htmlString, 'text/html');
-        
+
         // Select all <option> elements within elements that have the 'data-colorset' attribute
         const options = doc.querySelectorAll(selectorString);
-        
+
         // Iterate over each <option> and set its 'title' attribute to its 'value'
         options.forEach(option => {
             // Ensure the 'value' attribute exists
@@ -296,7 +296,7 @@ export class DiceConfig extends FormApplication {
                 option.setAttribute('title', value);
             }
         });
-        
+
         // Serialize the modified DOM back to an HTML string
         return doc.documentElement.outerHTML;
     }
@@ -345,10 +345,10 @@ export class DiceConfig extends FormApplication {
 
                 const system = this.box.dicefactory.systems.get($(ev.target).val());
 
-                if(system.settings.length>0){
+                if (system.settings.length > 0) {
                     $(ev.target).next("[data-system-options]").removeClass("dsn-hidden");
                     const dialogContent = system.getSettingsDialogContent($(ev.target).data("dicetype"));
-                    if(dialogContent.content != ""){
+                    if (dialogContent.content != "") {
                         const hdbsTemplate = Handlebars.compile(dialogContent.content);
                         systemSettingsContainer.append(hdbsTemplate(dialogContent.data));
                     }
@@ -382,11 +382,11 @@ export class DiceConfig extends FormApplication {
                     if (el.userData != "d10")
                         denominationList.push(el.userData);
                 });
-                let roll = new Roll(denominationList.join("+")).evaluate().then((roll) =>{
+                let roll = new Roll(denominationList.join("+")).evaluate().then((roll) => {
                     let data = new DiceNotation(roll);
 
                     let specialEffects = this.getShowcaseSFX();
-                    let customization = foundry.utils.mergeObject({ appearance: config.appearance }, { specialEffects: specialEffects },{performDeletions:true});
+                    let customization = foundry.utils.mergeObject({ appearance: config.appearance }, { specialEffects: specialEffects }, { performDeletions: true });
 
                     game.dice3d._showAnimation(data, customization);
                 });
@@ -428,7 +428,7 @@ export class DiceConfig extends FormApplication {
             $(this.element).on("click", "[data-sfx-options]", (ev) => {
                 let sfxLineOptions = $(ev.target).parents(".sfx-line").find("[data-sfx-hidden-options]");
 
-                if(sfxLineOptions.length < 1)
+                if (sfxLineOptions.length < 1)
                     return;
 
                 let d = new Dialog({
@@ -518,6 +518,9 @@ export class DiceConfig extends FormApplication {
                     close: (html) => {
                         $(html).find("[data-systemSettings]").detach().appendTo(systemSettingsContainer);
                         this.systemSettingsDialogList = this.systemSettingsDialogList.filter(dialog => dialog.appId != d.appId);
+
+                        //apply changes
+                        this.onApply();
                     }
                 }, {
                     width: 550
@@ -690,13 +693,13 @@ export class DiceConfig extends FormApplication {
                         this.activateAppearanceTab(diceType);
                     } else {
                         let newSystemSettings = {};
-                        if(this.box.dicefactory.systems.has(this.currentGlobalAppearance.system)){
+                        if (this.box.dicefactory.systems.has(this.currentGlobalAppearance.system)) {
                             const system = this.box.dicefactory.systems.get(this.currentGlobalAppearance.system);
 
-                            if(system.settings.length > 0){
+                            if (system.settings.length > 0) {
                                 const dialogContent = system.getSettingsDialogContent(diceType);
-        
-                                if(dialogContent.content != ""){
+
+                                if (dialogContent.content != "") {
                                     const hdbsTemplate = Handlebars.compile(dialogContent.content);
                                     newSystemSettings = hdbsTemplate(dialogContent.data);
                                 }
@@ -748,10 +751,10 @@ export class DiceConfig extends FormApplication {
                     bumpMapping: true,
                     shadowQuality: "high",
                     glow: true,
-                    antialiasing: game.canvas.app.renderer.context.webGLVersion===2 ?"msaa":"smaa",
+                    antialiasing: game.canvas.app.renderer.context.webGLVersion === 2 ? "msaa" : "smaa",
                     useHighDPI: true
                 };
-                switch(event.target.value) {
+                switch (event.target.value) {
                     case "low":
                         quality.bumpMapping = false;
                         quality.shadowQuality = "low";
@@ -770,7 +773,7 @@ export class DiceConfig extends FormApplication {
                         quality.bumpMapping = true;
                         quality.shadowQuality = "high";
                         quality.glow = true;
-                        quality.antialiasing = game.canvas.app.renderer.context.webGLVersion===2 ?"msaa":"smaa";
+                        quality.antialiasing = game.canvas.app.renderer.context.webGLVersion === 2 ? "msaa" : "smaa";
                         quality.useHighDPI = true;
                         break;
                 }
@@ -789,7 +792,7 @@ export class DiceConfig extends FormApplication {
 
     activateDialogListeners(html) {
         //sync range input with span
-        $(html).on("change", "input[type=range]",(event) => {
+        $(html).on("change", "input[type=range]", (event) => {
             const value = $(event.target).val();
             $(event.target).next().text(value);
         });
@@ -914,7 +917,7 @@ export class DiceConfig extends FormApplication {
                         font: $(element).find('[data-font]').val(),
                         system: $(element).find('[data-system]').val()
                     };
-                    if(index == 1)
+                    if (index == 1)
                         systemSettingsElement = $(element).find('[data-systemSettings]');
                     //disabled systems arent returned
                     if (obj.system == null) {
@@ -928,19 +931,19 @@ export class DiceConfig extends FormApplication {
                     hasDiff = !foundry.utils.isEmpty(foundry.utils.diffObject(appearanceArray[0], appearanceArray[1]));
 
                     //Check if any of the system settings is different from the default settings
-                    if(!hasDiff){
-                        for(let setting of this.box.dicefactory.systems.get(appearanceArray[1].system).settings){
+                    if (!hasDiff) {
+                        for (let setting of this.box.dicefactory.systems.get(appearanceArray[1].system).settings) {
                             //find the html input value 
                             let settingElement = $(systemSettingsElement).find(`[name="systemSettings[${appearanceArray[1].system}][${setting.id}]"]`);
                             let value;
 
-                            if(setting.type == DiceSystem.SETTING_TYPE.BOOLEAN){
+                            if (setting.type == DiceSystem.SETTING_TYPE.BOOLEAN) {
                                 value = settingElement.is(":checked");
                             } else {
                                 value = settingElement.val();
                             }
 
-                            if(value != setting.defaultValue){
+                            if (value != setting.defaultValue) {
                                 hasDiff = true;
                                 break;
                             }
@@ -1091,9 +1094,34 @@ export class DiceConfig extends FormApplication {
                 texture: $(element).find('[data-texture]').val(),
                 material: $(element).find('[data-material]').val(),
                 font: $(element).find('[data-font]').val(),
-                system: $(element).find('[data-system]').val(),
+                system: $(element).find('[data-system]').val()
             };
+            
+            const systemSettingsRaw = {};
+            const systemSettingsFields = $(element).find('[data-systemsettings]').find('input, select');
+            systemSettingsFields.each((index, element) => {
+                let name = $(element).attr("name");
+                //keep only the last string between the last "[" and "]"
+                name = name.substring(name.lastIndexOf("[") + 1, name.lastIndexOf("]"));
+
+                //if it is a checkbox, we need to convert "on" to true and "off" to false
+                if ($(element).is(':checkbox')) {
+                    systemSettingsRaw[name] = $(element).is(':checked') ? true : false;
+                } else {
+                    systemSettingsRaw[name] = $(element).val();
+                }
+            });
+
+            const system = this.box.dicefactory.systems.get(config.appearance[$(element).data("tab")].system);
+            if (system && system.settings.length > 0) {
+                const systemSettingsList = system.settings;
+                const systemSettingsIDs = systemSettingsList.map(setting => setting.id);
+
+                //Only keep settings form entries that are in the system settings id list. systemSettings is an object with the ids as keys
+                config.appearance[$(element).data("tab")].systemSettings = Object.fromEntries(Object.entries(systemSettingsRaw).filter(([key]) => systemSettingsIDs.includes(key)));
+            }
         });
+
         this.currentGlobalAppearance = config.appearance.global;
         return config;
     }
@@ -1220,17 +1248,17 @@ export class DiceConfig extends FormApplication {
         await game.user.unsetFlag("dice-so-nice", "settings");
 
         //system settings won't be merged here because insertValues is false
-        let appearance = foundry.utils.mergeObject(Dice3D.APPEARANCE(), formData.appearance, { insertKeys: true, insertValues: false, performDeletions:true });
+        let appearance = foundry.utils.mergeObject(Dice3D.APPEARANCE(), formData.appearance, { insertKeys: true, insertValues: false, performDeletions: true });
 
         //So we add back the system settings to the appearance
         for (let scope of scopedAppearance) {
-            if(formData.appearance[scope].systemSettings) {
+            if (formData.appearance[scope].systemSettings) {
                 appearance[scope].systemSettings = formData.appearance[scope].systemSettings;
             }
         }
 
         delete formData.appearance;
-        let settings = foundry.utils.mergeObject(Dice3D.CONFIG(), formData, { insertKeys: false, insertValues: false ,performDeletions:true});
+        let settings = foundry.utils.mergeObject(Dice3D.CONFIG(), formData, { insertKeys: false, insertValues: false, performDeletions: true });
 
         // preserve rollingArea config
         settings.rollingArea = currentSettings.rollingArea;
@@ -1241,7 +1269,7 @@ export class DiceConfig extends FormApplication {
 
         game.socket.emit("module.dice-so-nice", { type: "update", user: game.user.id });
         DiceSFXManager.init();
-        for(let system of systemsInUse) {
+        for (let system of systemsInUse) {
             this.box.dicefactory.systems.get(system).loadSettings();
         }
         ui.notifications.info(game.i18n.localize("DICESONICE.saveMessage"));

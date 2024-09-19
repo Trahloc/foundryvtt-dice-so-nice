@@ -802,7 +802,7 @@ export class DiceBox {
 
 
 
-	//This is the render loop
+	//This is the render loop for the board. /!\ Not called in the showcase /!\
 	animateThrow() {
 
 		let time = (new Date()).getTime();
@@ -810,27 +810,6 @@ export class DiceBox {
 		let time_diff = (time - this.last_time) / 1000;
 
 		let neededSteps = Math.floor(time_diff / this.framerate);
-
-		//Update animated dice mixer
-		if (this.animatedDiceDetected) {
-			let animatedMaterials = new Set();
-			let delta = this.clock.getDelta();
-			for (const child of this.scene.children) {
-				let dicemesh = child.children && child.children.length && child.children[0].sim != undefined ? child.children[0] : null;
-				if (dicemesh){
-					dicemesh.traverse(obj => {
-						if(obj.mixer)
-							dicemesh.mixer.update(delta);
-						if(obj.material?.mixer)
-							animatedMaterials.add(obj);
-					});
-				}
-			}
-
-			for (const material of animatedMaterials) {
-				material.mixer.update(delta);
-			}
-		}
 
 		if (neededSteps && this.rolling) {
 			for (let i = 0; i < neededSteps * this.speed; i++) {
@@ -904,6 +883,9 @@ export class DiceBox {
 
 		// roll finished
 		if (this.throwFinished()) {
+			for(let i = 0; i < this.diceList.length; i++){
+				this.dicefactory.systems.get(this.diceList[i].userData.system).fire(DiceSystem.DICE_EVENT_TYPE.RESULT, { dice: this.diceList[i] });
+			}
 			//if animated dice still on the table, keep animating
 			if (this.running) {
 				this.handleSpecialEffectsInit().then(() => {
@@ -994,6 +976,23 @@ export class DiceBox {
 	}
 
 	renderScene() {
+		//Update animated dice mixer
+		if (this.animatedDiceDetected) {
+			let animatedMaterials = new Set();
+			let delta = this.clock.getDelta();
+			
+			this.scene.traverse(obj => {
+				if(obj.mixer)
+					dicemesh.mixer.update(delta);
+				if(obj.material?.mixer)
+					animatedMaterials.add(obj.material);
+			});
+
+			for (const material of animatedMaterials) {
+				material.mixer.update(delta);
+			}
+		}
+
 		//Update time uniform
 		game.dice3d.uniforms.time.value = performance.now() / 1000;
 
@@ -1099,20 +1098,14 @@ export class DiceBox {
 		await this.simulateThrow();
 		this.iteration = 0;
 
-
-		//check forced results, fix dice faces if necessary
-		//Detect if there's an animated dice
-		this.animatedDiceDetected = false;
+		// swap faces if needed based on fvtt roll result
 		for (let i = 0, len = this.diceList.length; i < len; ++i) {
 			let dicemesh = this.diceList[i];
 			if (!dicemesh) continue;
 			await this.swapDiceFace(dicemesh);
-			dicemesh.traverse(obj => {
-				if(obj.mixer || obj.material.mixer){
-					this.animatedDiceDetected = true;
-				}
-			});
 		}
+
+		this.animatedDiceDetected = await this.checkForAnimatedDice();
 
 		//reset the result
 		for (let i = 0, len = this.diceList.length; i < len; ++i) {
@@ -1130,6 +1123,23 @@ export class DiceBox {
 		this.throws = throws;
 		this.removeTicker(this.animateThrow);
 		canvas.app.ticker.add(this.animateThrow, this);
+	}
+
+	//Check if there's an animated dice to reduce render loop complexecity if there's none
+	async checkForAnimatedDice() {
+		//Detect if there's an animated dice
+		let animatedDiceDetected = false;
+		for (let i = 0, len = this.diceList.length; i < len; ++i) {
+			let dicemesh = this.diceList[i];
+			if (!dicemesh) continue;
+			dicemesh.traverse(obj => {
+				if(obj.mixer || obj.material.mixer){
+					animatedDiceDetected = true;
+				}
+			});
+		}
+
+		return animatedDiceDetected;
 	}
 
 	async showcase(config) {
@@ -1188,6 +1198,8 @@ export class DiceBox {
 				count++;
 			}
 		}
+
+		this.animatedDiceDetected = await this.checkForAnimatedDice();
 
 		this.last_time = 0;
 		if (this.selector.animate) {
@@ -1296,6 +1308,8 @@ export class DiceBox {
 			try {
 				await this.physicsWorker.exec("addConstraint", { id: root.id, pos: pos });
 				this.mouse.constraint = true;
+				let diceSystem = root.userData?.system ?? "standard";
+				this.dicefactory.systems.get(diceSystem).fire(DiceSystem.DICE_EVENT_TYPE.CLICK, { dice: root, position: pos });
 				return true;
 			} catch (error) {
 				console.error(error);

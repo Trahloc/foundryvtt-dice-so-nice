@@ -9,6 +9,7 @@ import { ThinFilmFresnelMap } from './libs/ThinFilmFresnelMap.js';
 import { TextureLoader } from 'three';
 import { DiceTourMain } from './tours/DiceTourMain.js';
 import { DiceSFX } from './DiceSFX.js';
+import { DiceSystem } from './DiceSystem.js';
 /**
  * Main class to handle 3D Dice animations.
  */
@@ -594,6 +595,16 @@ export class Dice3D {
                             orderedDiceList[index] = [];
                         }
                     }
+
+                    //In order to allow for custom appearance and the roll level, we merge the roll appearance in the dice term
+                    if(roll.options?.appearance) {
+                        if(!diceTerm.options)
+                            diceTerm.options = {};
+                        if(!diceTerm.options.appearance)
+                            diceTerm.options.appearance = {};
+                        diceTerm.options.appearance = foundry.utils.mergeObject(diceTerm.options.appearance, roll.options.appearance);
+                    }
+
                     orderedDiceList[index].push(diceTerm);
                 });
             });
@@ -679,7 +690,7 @@ export class Dice3D {
         //We allow the hook to modify the roll to be shown without altering the original roll reference
         //This is useful for example to show a different roll than the one made by the user without relying on the manual showForRoll method
         let hookedRoll = context.dsnRoll || context.roll;
-        let notation = new DiceNotation(hookedRoll, Dice3D.ALL_CONFIG(user));
+        let notation = new DiceNotation(hookedRoll, Dice3D.ALL_CONFIG(user), user);
         return this.show(notation, context.user, synchronize, context.users, context.blind);
     }
 
@@ -701,7 +712,6 @@ export class Dice3D {
             if (!data.throws.length || !this.isEnabled()) {
                 resolve(false);
             } else {
-
                 if (synchronize) {
                     users = users && users.length > 0 ? (users[0]?.id ? users.map(user => user.id) : users) : users;
                     game.socket.emit("module.dice-so-nice", { type: "show", data: data, user: user.id, users: users });

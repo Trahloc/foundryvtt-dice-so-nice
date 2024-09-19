@@ -1,4 +1,9 @@
+import { ShaderUtils } from "./ShaderUtils.js"
+
 export class DiceSystem {
+
+    //setting scoping is currently useless as there's no good way for the user to set a "local" setting if they are not using this dice set
+    //keeping this for future use
     static SETTING_SCOPE = {
         LOCAL: 0, // User specific settings that is not shared with other players
         SHARED: 1 // User specific settings that is shared with other players
@@ -22,8 +27,8 @@ export class DiceSystem {
         SPAWN: 0,
         CLICK: 1,
         RESULT: 2,
-        COLLIDE: 3,
-        DESPAWN: 4
+        COLLIDE: 3, //not implemented, risk of performance impact 
+        DESPAWN: 4 //not implemented. need a use-case. "result" seems to be the enough for despawning animations
     }
 
     /**
@@ -122,6 +127,7 @@ export class DiceSystem {
             material.userData.diceType = diceType;
             material.userData.system = this.id;
             material.userData.systemSettings = {...appearance.systemSettings};
+            material.onBeforeCompile = ShaderUtils.applyDiceSoNiceShader;
         }
         return material;
     }
@@ -236,7 +242,7 @@ export class DiceSystem {
      * @param {boolean} [args.defaultValue=false] - The default value of the setting.
      * @return {void}
      */
-    addSettingBoolean({ id, name, scope, defaultValue = false }) {
+    addSettingBoolean({ id, name, scope = DiceSystem.SETTING_SCOPE.SHARED, defaultValue = false }) {
         this._createSetting("boolean", id, name, scope, defaultValue);
     }
 
@@ -250,7 +256,7 @@ export class DiceSystem {
      * @param {string} [args.defaultValue=null] - The default value of the setting, in hex format, e.g. "#ffffff".
      * @return {void}
      */
-    addSettingColor({ id, name, scope, defaultValue = "#ffffff" }) {
+    addSettingColor({ id, name, scope = DiceSystem.SETTING_SCOPE.SHARED, defaultValue = "#ffffff" }) {
         this._createSetting("color", id, name, scope, defaultValue);
     }
 
@@ -267,7 +273,7 @@ export class DiceSystem {
      * @param {number} [args.step=1] - The step value of the setting.
      * @return {void}
      */
-    addSettingRange({ id, name, scope, defaultValue = 0, min = 0, max = 100, step = 1 }) {
+    addSettingRange({ id, name, scope = DiceSystem.SETTING_SCOPE.SHARED, defaultValue = 0, min = 0, max = 100, step = 1 }) {
         this._createSetting("range", id, name, scope, defaultValue, { min, max, step });
     }
 
@@ -281,7 +287,7 @@ export class DiceSystem {
      * @param {string|null} [args.defaultValue=null] - The default value of the setting.
      * @return {void}
      */
-    addSettingFile({ id, name, scope, defaultValue = "" }) {
+    addSettingFile({ id, name, scope = DiceSystem.SETTING_SCOPE.SHARED, defaultValue = "" }) {
         // Make sure defaultValue is a string)
         defaultValue = defaultValue || "";
         this._createSetting("file", id, name, scope, defaultValue);
@@ -301,7 +307,7 @@ export class DiceSystem {
      * @param {string} [args.options.group=null] - The group for the option.
      * @return {void}
      */
-    addSettingSelect({ id, name, scope, defaultValue = null, options = {} }) {
+    addSettingSelect({ id, name, scope = DiceSystem.SETTING_SCOPE.SHARED, defaultValue = null, options = {} }) {
         this._createSetting("select", id, name, scope, defaultValue, { options });
     }
 
@@ -315,7 +321,7 @@ export class DiceSystem {
      * @param {string|null} [options.defaultValue=null] - The default value of the setting.
      * @return {void}
      */
-    addSettingString({ id, name, scope, defaultValue = "" }) {
+    addSettingString({ id, name, scope = DiceSystem.SETTING_SCOPE.SHARED, defaultValue = "" }) {
         // Make sure defaultValue is a string
         defaultValue = defaultValue || "";
         this._createSetting("string", id, name, scope, defaultValue);
@@ -455,13 +461,13 @@ export class DiceSystem {
                     options: setting.options
                 };
                 break;
-            case DiceSystem.SETTING_TYPE.SEPARATOR:
+            case DiceSystem.SETTING_FORMATING.SEPARATOR:
                 if (setting.name != "")
                     line.content = `<h2>${setting.name}</h2>`;
                 else
                     line.content = `<hr />`;
                 break;
-            case DiceSystem.SETTING_TYPE.HTML:
+            case DiceSystem.SETTING_FORMATING.HTML:
                 line.content = setting.name;
                 break;
         }
@@ -487,6 +493,17 @@ export class DiceSystem {
         dialogContent.content = `<div data-systemSettings="${this.id}">${dialogContent.content}</div>`;
 
         return dialogContent;
+    }
+
+    getDefaultSettings() {
+        let settings = this.settings;
+        let defaultSettings = {};
+
+        for (let setting of settings) {
+            defaultSettings[setting.id] = setting.defaultValue;
+        }
+
+        return defaultSettings;
     }
 
     callSettingsChange(settings) {

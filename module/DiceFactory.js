@@ -586,20 +586,19 @@ export class DiceFactory {
 					material = this.baseMaterialCache[baseMaterialCacheString];
 				} else {
 					material = uniqueMaterial.clone();
-					material = this.systems.get(appearance.system).processMaterial(type, uniqueMaterial, appearance);
-
-					//and replace the original material with the processed based on the model material uuid
-					dicemesh.traverse((child) => {
-						if(child.isMesh) {
-							if(child.material.uuid == uniqueMaterial.uuid){
-								child.material = material;
-							}
-						}
-					});
+					material = this.systems.get(appearance.system).processMaterial(type, material, appearance);
 
 					//finally, we cache the material
 					this.baseMaterialCache[baseMaterialCacheString] = material;
 				}
+				//replace the original material with the processed based on the model material uuid
+				dicemesh.traverse((child) => {
+					if(child.isMesh) {
+						if(child.material.uuid == uniqueMaterial.uuid){
+							child.material = material;
+						}
+					}
+				});
 			}
 		}else{
 			let materialData = this.generateMaterialData(diceobj, appearance);
@@ -1124,8 +1123,12 @@ export class DiceFactory {
 			systemSettings: settings.systemSettings ? settings.systemSettings:appearances.global.systemSettings ? appearances.global.systemSettings : {}
 		};
 
-		//Check if this dice exists for this system. If not, it means it is the one from global
+		//Merge with the default systemSettings to aply default values
 		const system = this.systems.get(settings.system);
+		const defaultSystemSettings = system.getDefaultSettings();
+		foundry.utils.mergeObject(appearance.systemSettings, defaultSystemSettings, { overwrite: false });
+
+		//Check if this dice exists for this system. If not, it means it is the one from global
 		if(!system || !system.dice.has(dicetype))
 			appearance.system = "standard";
 
@@ -1171,6 +1174,9 @@ export class DiceFactory {
 			if(colorset){
 				let colorsetData = DiceColors.getColorSet(colorset);
 				colorsetData.edge = colorsetData.edge ? colorsetData.edge : "";
+				//save system and systemSettings before we overwrite them
+				colorsetData.system = appearance.system;
+				colorsetData.systemSettings = appearance.systemSettings;
 				appearance = colorsetData;
 			}
 
