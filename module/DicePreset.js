@@ -249,6 +249,8 @@ export class DicePreset {
 							if (node.material.metalnessMap !== null)
 								node.material.metalnessMap.anisotropy = anisotropy;
 							node.layers.enableAll();
+
+							//deprecated shader hook
 							Hooks.callAll("diceSoNiceOnMaterialReady", node.material, null);
 						}
 					});

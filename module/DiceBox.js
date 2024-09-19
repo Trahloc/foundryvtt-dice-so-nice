@@ -924,7 +924,7 @@ export class DiceBox {
 
 		let maxDiceNumber = game.settings.get("dice-so-nice", "maxDiceNumber");
 		if (this.deadDiceList.length + this.diceList.length + countNewDice > maxDiceNumber) {
-			this.clearAll();
+			await this.clearAll();
 		}
 		this.isVisible = true;
 		await this.rollDice(throws, callback);
@@ -1143,7 +1143,7 @@ export class DiceBox {
 	}
 
 	async showcase(config) {
-		this.clearAll();
+		await this.clearAll();
 		//Get dice type list as an array
 		let selectordice = [...this.dicefactory.systems.get("standard").dice.keys()];
 		const extraDiceTypes = ["d3", "d5", "d7", "d14", "d16", "d24", "d30"];

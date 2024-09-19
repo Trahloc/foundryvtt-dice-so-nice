@@ -6,7 +6,7 @@ export class DiceNotation {
 	 * A roll object from Foundry 
 	 * @param {Roll} rolls 
 	 */
-	constructor(rolls, userConfig = null, user) {
+	constructor(rolls, userConfig = null, user = game.user) {
 		this.throws = [{dice:[]}];
 		this.userConfig = userConfig;
 		
