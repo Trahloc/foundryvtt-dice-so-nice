@@ -7,9 +7,6 @@ import { Utils } from './Utils.js';
  * Registers the exposed settings for the various 3D dice options.
  */
 Hooks.once('init', () => {
-    const debouncedReload = foundry.utils.debounce(() => {
-        window.location.reload();
-    }, 100);
     game.settings.registerMenu("dice-so-nice", "dice-so-nice", {
         name: "DICESONICE.config",
         label: "DICESONICE.configTitle",
@@ -64,7 +61,7 @@ Hooks.once('init', () => {
         }),
         default: "0",
         config: true,
-        onChange: debouncedReload
+        requiresReload: true
     });
 
     //add a button to reset the display of the welcome message for all users
@@ -92,7 +89,7 @@ Hooks.once('init', () => {
         type: Boolean,
         default: true,
         config: true,
-        onChange: debouncedReload
+        requiresReload: true
     });
 
     game.settings.register("dice-so-nice", "enabledSimultaneousRollForMessage", {
@@ -135,6 +132,16 @@ Hooks.once('init', () => {
         scope: "world",
         type: Boolean,
         default: false,
+        config: true
+    });
+    
+    //Settings for forcing the dice appearance of the character owner during an initative roll instead of the message author
+    game.settings.register("dice-so-nice", "forceCharacterOwnerAppearanceForInitiative", {
+        name: "DICESONICE.forceCharacterOwnerAppearanceForInitiative",
+        hint: "DICESONICE.forceCharacterOwnerAppearanceForInitiativeHint",
+        scope: "world",
+        type: Boolean,
+        default: true,
         config: true
     });
 
@@ -181,7 +188,7 @@ Hooks.once('init', () => {
         type: Boolean,
         default: true,
         config: true,
-        onChange: debouncedReload
+        requiresReload: true
     });
 
     game.settings.register("dice-so-nice", "showGhostDice", {
@@ -200,6 +207,8 @@ Hooks.once('init', () => {
 
 });
 
+const chatMessagesCurrentlyBeingAnimated = new Set();
+
 /**
  * Foundry is ready, let's create a new Dice3D!
  */
@@ -216,7 +225,7 @@ Hooks.once('ready', () => {
     });
 });
 
-const shouldInterceptMessage = (chatMessage, options = {dsnCountAddedRoll: 0}) => {
+const shouldInterceptMessage = (chatMessage, options = {dsnCountAddedRoll: 0, dsnIndexAddedRoll: 0}) => {
     const hasInlineRoll = game.settings.get("dice-so-nice", "animateInlineRoll") && chatMessage.content.includes('inline-roll');
 
     const showGhostDice = game.settings.get("dice-so-nice", "showGhostDice");
@@ -225,18 +234,25 @@ const shouldInterceptMessage = (chatMessage, options = {dsnCountAddedRoll: 0}) =
     const isContentVisible = chatMessage.isContentVisible;
     const shouldAnimateRollTable = game.settings.get("dice-so-nice", "animateRollTable");
     const hasRollTableFlag = chatMessage.getFlag("core", "RollTable");
-    const rollTableFormulaDisplayed = hasRollTableFlag && game.tables.get(hasRollTableFlag).displayRoll;
+    
+    //The table could be in a compedium pack and foundry does not have an easy way to find the packed table without looping over all compediums
+    //In such case, we assume the roll table is displayed
+    const rollTableFormulaDisplayed = hasRollTableFlag && (game.tables.get(hasRollTableFlag)?.displayRoll ?? true);
 
     //Is a roll
-    return (chatMessage.isRoll || hasInlineRoll) &&
+    let interception = (chatMessage.isRoll || hasInlineRoll) &&
     //If the content is  visible and ghost dice should  be shown
     (isContentVisible || shouldShowGhostDice) &&
     //If dsn is correctly enabled and the message hook is not disabled
     game.dice3d && !game.dice3d.messageHookDisabled &&
     //If it has a roll table, then check if the roll table should be animated and the roll table is displayed
     (!hasRollTableFlag || (shouldAnimateRollTable && rollTableFormulaDisplayed)) &&
-    //If there's at least one roll with diceterms (could be a deterministic roll without any dice like Roll("5"))
-    chatMessage.rolls.slice(options.dsnCountAddedRoll).some(roll => roll.dice.length > 0);
+    //If there's at least one roll with diceterms (could be a deterministic roll without any dice like Roll("5")) or has an inline roll
+    (chatMessage.rolls.slice(options.dsnIndexAddedRoll).some(roll => roll.dice.length > 0) || hasInlineRoll);
+
+    Hooks.callAll("diceSoNiceMessageProcessed", chatMessage.id, interception);
+
+    return interception;
 };
 
 /**
@@ -301,11 +317,48 @@ Hooks.on("renderChatMessage", (message, html, data) => {
         return;
     }
     if (message._dice3danimating && !game.settings.get("dice-so-nice", "immediatelyDisplayChatMessages")) {
+        /* How does this work:
+         * First, it should be noted that updates to the DOM of the message will be erased by the next update as FVTT will rerender the entire message
+         * DsN will hide the message for the first render
+         * It will then hide the following .dice-roll 
+         * We need to keep track of what to hide in order to correctly hide unfinished rolls every time the message is rendered
+         * For this, we store two variables in the message: _dice3dRollsHidden and _dice3dMessageHidden
+         * _dice3dRollsHidden is an array of the number of rolls added to the message at every update
+         * _dice3dMessageHidden is a boolean, true if the original rolls are yet to be finished
+         * The reveal/unhiding part can be found in Dice3D.renderRolls
+         */
+        if (message._dice3dCountNewRolls){
+            if(!message._dice3dRollsHidden)
+                message._dice3dRollsHidden = [];
 
-        if (message._countNewRolls)
-            html.find(`.dice-roll:nth-last-child(-n+${message._countNewRolls})`).addClass("dsn-hide");
-        else
+            //push the number of new rolls to the array
+            message._dice3dRollsHidden.push(message._dice3dCountNewRolls);
+            
+            //if there's the popout chat, we need to keep track of which render we are in
+            if(window.ui.sidebar.popouts.chat) {
+                //if _dice3dRenderedInPopout is undefined, we are in the first render (not in the popout), so we set it to false
+                //if it exists and is false, we are in a popout render, so we set it to true
+                //if it exists and is true, we are in sidebar render, so we set it to false
+                message._dice3dRenderedInPopout = typeof message._dice3dRenderedInPopout === "undefined" ? false : !message._dice3dRenderedInPopout;
+            }
+
+            //calculate the sum of all hidden rolls
+            //if _dice3dRenderedInPopout is true, we need to divide by 2 the sum
+            let sumOfAllHiddenRolls = message._dice3dRollsHidden.reduce((a, b) => a + b, 0) / (message._dice3dRenderedInPopout ? 2 : 1);
+
+            //use this sum to hide the rolls with nth-last-child. this selector matches the nth-last-child of the message
+            //which should be the most recent rolls
+            html.find(`.dice-roll:nth-last-child(-n+${sumOfAllHiddenRolls})`).addClass("dsn-hide");
+
+            //In case _dice3dMessageHidden is still true, we hide the message as it means the original rolls are not yet finished
+            if(message._dice3dMessageHidden)
+                html.addClass("dsn-hide");
+        }
+        else {
+            //first time rendering the message
             html.addClass("dsn-hide");
+            message._dice3dMessageHidden = true;
+        }
     }
 });
 
@@ -315,20 +368,21 @@ Hooks.on("renderChatMessage", (message, html, data) => {
 Hooks.on("preUpdateChatMessage", (message, updateData, options) => {
     if (!("rolls" in updateData)) return;
     // We test against the source data in case the system/macro/module has modified the scoped message variable
-    options.dsnCountAddedRoll = updateData.rolls.length - message.toObject().rolls.length;
+    const originalRollsArrayLength = message.toObject().rolls.length;
+    options.dsnCountAddedRoll = updateData.rolls.length - originalRollsArrayLength;
+    options.dsnIndexAddedRoll = originalRollsArrayLength;
 });
 
 /**
  * Hide and roll new rolls added in a chat message in a update
  */
 Hooks.on("updateChatMessage", (message, updateData, options) => {
-    //Todo: refactor this check into a function
     if(!shouldInterceptMessage(message, options)) return;
 
     if (options.dsnCountAddedRoll > 0) {
         message._dice3danimating = true;
-        message._countNewRolls = options.dsnCountAddedRoll;
-        game.dice3d.renderRolls(message, message.rolls.slice(-options.dsnCountAddedRoll));
+        message._dice3dCountNewRolls = options.dsnCountAddedRoll;
+        game.dice3d.renderRolls(message, message.rolls.slice(options.dsnIndexAddedRoll));
     }
 });
 

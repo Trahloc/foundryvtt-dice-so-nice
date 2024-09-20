@@ -9,6 +9,7 @@ import { ThinFilmFresnelMap } from './libs/ThinFilmFresnelMap.js';
 import { TextureLoader } from 'three';
 import { DiceTourMain } from './tours/DiceTourMain.js';
 import { DiceSFX } from './DiceSFX.js';
+import { DiceSystem } from './DiceSystem.js';
 /**
  * Main class to handle 3D Dice animations.
  */
@@ -120,6 +121,18 @@ export class Dice3D {
         return sfxArray;
     }
 
+    static SYSTEM_SETTINGS(user = game.user) {
+        let systemSettingsList;
+        if (user.id == game.user.id)
+            systemSettingsList = user.getFlag("dice-so-nice", "systemSettingsList") ? foundry.utils.duplicate(user.getFlag("dice-so-nice", "systemSettingsList")) : [];
+        else
+            systemSettingsList = [];
+        if (!Array.isArray(systemSettingsList)) {
+            systemSettingsList = [];
+        }
+        return systemSettingsList;
+    }
+
     /**
      * Get the full customizations settings for the _showAnimation method 
      */
@@ -151,20 +164,20 @@ export class Dice3D {
     }
 
     /**
-     * Register a new system
+     * Register a new system (legacy)
      * The id is to be used with addDicePreset
      * The name can be a localized string
-     * @param {Object} system {id, name, group}
+     * @param {Object} system {id, name, group} or instance of DiceSystem
      * @param {Boolean} mode "default,preferred". Default will add the system as a choice. Preferred will be enabled for all users unless they change their settings.
      * @param {String} group Group to display in the dice selector. Can be any string, like the dice maker name or a brand
      */
-    addSystem(system, mode = "default", settings = null) {
+    addSystem(system, mode = "default") {
         //retrocompatibility with  API version < 3.1
         if (typeof mode == "boolean") {
             mode = mode ? "preferred" : "default";
         }
 
-        this.DiceFactory.addSystem(system, mode, settings);
+        this.DiceFactory.addSystem(system, mode);
     }
 
     /**
@@ -262,6 +275,15 @@ export class Dice3D {
             await Utils.actionLoadSave(name);
     }
 
+    /**
+     * Get Loaded Dice Systems
+     * return a map of DiceSystem
+     * @returns {Map<systemId, DiceSystem>}
+     */
+    getLoadedDiceSystems() {
+        return this.DiceFactory.systems;
+    }
+
 
     /**
      * Constructor. Create and initialize a new Dice3d.
@@ -326,11 +348,13 @@ export class Dice3D {
         const config = Dice3D.CONFIG();
         const sidebarWidth = $('#sidebar').width();
         const sidebarOffset = sidebarWidth > window.innerWidth / 2 ? 0 : sidebarWidth;
+        // Get the body element's top style because of the "Window Controls" plugin that adds a "top" to the body element
+        const bodyTop = parseInt(window.getComputedStyle(document.body).top, 10) || 0;
         const area = config.rollingArea ? config.rollingArea : {
             left: 0,
             top: 0,
             width: window.innerWidth - sidebarOffset,
-            height: window.innerHeight - 1
+            height: window.innerHeight - 1 - bodyTop
         };
 
         if (!config.enabled) {
@@ -552,9 +576,26 @@ export class Dice3D {
         const showMessage = () => {
             delete chatMessage._dice3danimating;
 
-            window.ui.chat.element.find(`.message[data-message-id="${chatMessage.id}"]`).removeClass("dsn-hide").find(".dice-roll").removeClass("dsn-hide");
-            if (window.ui.sidebar.popouts.chat)
-                window.ui.sidebar.popouts.chat.element.find(`.message[data-message-id="${chatMessage.id}"]`).removeClass("dsn-hide").find(".dice-roll").removeClass("dsn-hide");
+            let messageElement = window.ui.chat.element.find(`.message[data-message-id="${chatMessage.id}"]`);
+            messageElement.removeClass("dsn-hide");
+
+            let messageElementPopout;
+            if(window.ui.sidebar.popouts.chat){
+                messageElementPopout = window.ui.sidebar.popouts.chat.element.find(`.message[data-message-id="${chatMessage.id}"]`);
+                messageElementPopout.removeClass("dsn-hide");
+            }
+            
+            if(chatMessage._dice3dMessageHidden){
+                //first/initial rolls are done
+                chatMessage._dice3dMessageHidden = false;
+            } else if(chatMessage._dice3dRollsHidden && chatMessage._dice3dRollsHidden.length){ 
+                //subsequent rolls. for every 'done' roll we reveal x hidden rolls by shifting the _dice3dRollsHidden array
+                messageElement.find(`.dice-roll.dsn-hide`).slice(0,chatMessage._dice3dRollsHidden.shift()).removeClass("dsn-hide");
+
+                if(window.ui.sidebar.popouts.chat){
+                    messageElementPopout.find(`.dice-roll.dsn-hide`).slice(0,chatMessage._dice3dRollsHidden.shift()).removeClass("dsn-hide");
+                }
+            }
 
             Hooks.callAll("diceSoNiceRollComplete", chatMessage.id);
 
@@ -580,6 +621,16 @@ export class Dice3D {
                             orderedDiceList[index] = [];
                         }
                     }
+
+                    //In order to allow for custom appearance and the roll level, we merge the roll appearance in the dice term
+                    if(roll.options?.appearance) {
+                        if(!diceTerm.options)
+                            diceTerm.options = {};
+                        if(!diceTerm.options.appearance)
+                            diceTerm.options.appearance = {};
+                        diceTerm.options.appearance = foundry.utils.mergeObject(diceTerm.options.appearance, roll.options.appearance);
+                    }
+
                     orderedDiceList[index].push(diceTerm);
                 });
             });
@@ -598,7 +649,17 @@ export class Dice3D {
 
             //call each promise one after the other, then call the showMessage function
             const recursShowForRoll = (rollList, index) => {
-                this.showForRoll(rollList[index], chatMessage.author, false, null, false, chatMessage.id, chatMessage.speaker).then(() => {
+                let author = chatMessage.author;
+                if(chatMessage.getFlag("core", "initiativeRoll") && game.settings.get("dice-so-nice", "forceCharacterOwnerAppearanceForInitiative")) {
+                    if(chatMessage.speaker){
+                        const actor = game.actors.get(chatMessage.speaker.actor);
+                        if(actor && actor.hasPlayerOwner) {
+                            //get the user from game.users
+                            author = game.users.find(user => !user.isGM && user.character?.id == actor.id);
+                        }
+                    }
+                }
+                this.showForRoll(rollList[index], author, false, null, false, chatMessage.id, chatMessage.speaker).then(() => {
                     index++;
                     if (rollList[index] != null)
                         recursShowForRoll(rollList, index);
@@ -640,9 +701,9 @@ export class Dice3D {
             context.roll.secret = true;
         }
 
-        if (speaker) {
+        if (speaker) { 
             let actor = game.actors.get(speaker.actor);
-            const isNpc = actor ? actor.type === 'npc' : false;
+            const isNpc = actor ? !actor.hasPlayerOwner : false;
             if (isNpc && game.settings.get("dice-so-nice", "hideNpcRolls")) {
                 return Promise.resolve(false);
             }
@@ -665,7 +726,7 @@ export class Dice3D {
         //We allow the hook to modify the roll to be shown without altering the original roll reference
         //This is useful for example to show a different roll than the one made by the user without relying on the manual showForRoll method
         let hookedRoll = context.dsnRoll || context.roll;
-        let notation = new DiceNotation(hookedRoll, Dice3D.ALL_CONFIG(user));
+        let notation = new DiceNotation(hookedRoll, Dice3D.ALL_CONFIG(user), user);
         return this.show(notation, context.user, synchronize, context.users, context.blind);
     }
 
@@ -687,7 +748,6 @@ export class Dice3D {
             if (!data.throws.length || !this.isEnabled()) {
                 resolve(false);
             } else {
-
                 if (synchronize) {
                     users = users && users.length > 0 ? (users[0]?.id ? users.map(user => user.id) : users) : users;
                     game.socket.emit("module.dice-so-nice", { type: "show", data: data, user: user.id, users: users });

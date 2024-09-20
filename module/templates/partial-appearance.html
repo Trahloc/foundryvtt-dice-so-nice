@@ -1,10 +1,10 @@
 <div class="tab tabAppearance" data-tab="{{dicetype}}" data-group="dsn-dice">
-    <div class="form-group">
+    <div class="form-group" data-system-group>
         <label>{{localize "DICESONICE.system"}}</label>
         <select data-system data-dicetype="{{dicetype}}" name="appearance[{{dicetype}}][system]">
             {{selectOptions systemList selected=appearance.system}}
         </select>
-        <a class="system-control" data-system-options title='{{localize "DICESONICE.Options"}}'><i class="fas fa-cog"></i></a>
+        <a class="system-control {{systemSettingsVisible}}" data-system-options title='{{localize "DICESONICE.Options"}}'><i class="fas fa-cog"></i></a>
     </div>
 
     <div class="form-group">
@@ -70,6 +70,11 @@
             <input type="text" data-edgeColor data-dicetype="{{dicetype}}" name="appearance[{{dicetype}}][edgeColor]" value="{{appearance.edgeColor}}" data-dtype="String" />
             <input type="color" name="appearance[{{dicetype}}][edgeColorSelector]" value="{{appearance.edgeColor}}"
                 data-edit="appearance[{{dicetype}}][edgeColor]" data-edgeColorSelector />
+        </div>
+    </div>
+    <div class="dsn-hidden">
+        <div data-systemSettings-hidden>
+            {{{systemSettings}}}
         </div>
     </div>
 </div>

@@ -41,7 +41,7 @@ export class SoundManager {
     }
 
     processSoundsData(target, jsonData, prefix) {
-        const sound = new foundry.audio.Sound(`modules/dice-so-nice/sounds/${jsonData.resources[0]}`, {forceBuffer:true});
+        const sound = new foundry.audio.Sound(`modules/dice-so-nice/sounds/${jsonData.resources[0]}`, {forceBuffer:true, context: game.audio.interface});
 
         //preload the sound
         sound.load().then(src => target.source = src);
@@ -58,7 +58,7 @@ export class SoundManager {
         if (!source)
             return false;
 
-        const spriteInstance = new foundry.audio.Sound(source.src,{forceBuffer:true});
+        const spriteInstance = new foundry.audio.Sound(source.src,{forceBuffer:true, context: game.audio.interface});
         //in v12, the load() method use a cache so we can call it without any extra network calls
         spriteInstance.load().then(sound => sound.play({loop: sprite.loop, loopStart: sprite.start, loopEnd: sprite.end, volume: selfVolume * this.volume}));
     }
