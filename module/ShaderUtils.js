@@ -24,8 +24,10 @@ export class ShaderUtils {
         Hooks.callAll("diceSoNiceShaderOnBeforeCompile", shader, this);
 
 		// new shader hook system
-		const system = game.dice3d.DiceFactory.systems.get(this.userData.system);
-		system.beforeShaderCompile(shader, this);
+		if(this.userData.system && game.dice3d.DiceFactory.systems.has(this.userData.system)) {
+			const system = game.dice3d.DiceFactory.systems.get(this.userData.system);
+			system.beforeShaderCompile(shader, this);
+		}
     }
 
 	static selectiveBloomShaderFragment(shader) {

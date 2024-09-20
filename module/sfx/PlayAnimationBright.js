@@ -10,7 +10,7 @@ export class PlayAnimationBright extends DiceSFX {
     static sound = "modules/dice-so-nice/sfx/sounds/bright.mp3";
     /**@override init */
     static async init() {
-        PlayAnimationBright.brightColor = new Color(0.3,0.3,0.3);
+        PlayAnimationBright.brightColor = new Color(0.5,0.5,0.5);
         this.glowingMesh=null;
         game.audio.pending.push(function(){
             foundry.audio.AudioHelper.preloadSound(PlayAnimationBright.sound);

@@ -278,7 +278,7 @@ export class Dice3D {
     /**
      * Get Loaded Dice Systems
      * return a map of DiceSystem
-     * @returns {Map}
+     * @returns {Map<systemId, DiceSystem>}
      */
     getLoadedDiceSystems() {
         return this.DiceFactory.systems;

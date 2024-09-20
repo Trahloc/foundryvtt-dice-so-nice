@@ -585,6 +585,7 @@ export class DiceFactory {
 				} else {
 					material = uniqueMaterial.clone();
 					material = this.systems.get(appearance.system).processMaterial(type, material, appearance);
+					material.onBeforeCompile = ShaderUtils.applyDiceSoNiceShader;
 
 					if(!this.realisticLighting){
 						material.envMap = scopedTextureCache.textureCube;
@@ -614,6 +615,7 @@ export class DiceFactory {
 				material = this.createMaterial(scopedTextureCache, baseMaterialCacheString, diceobj, materialData);
 				//send to the system for processing
 				material = this.systems.get(appearance.system).processMaterial(type, material, appearance);
+				material.onBeforeCompile = ShaderUtils.applyDiceSoNiceShader;
 			}
 				
 			dicemesh = new Mesh(geom, material);

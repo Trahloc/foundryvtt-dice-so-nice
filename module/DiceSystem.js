@@ -1,5 +1,3 @@
-import { ShaderUtils } from "./ShaderUtils.js"
-
 export class DiceSystem {
 
     //setting scoping is currently useless as there's no good way for the user to set a "local" setting if they are not using this dice set
@@ -127,7 +125,6 @@ export class DiceSystem {
             material.userData.diceType = diceType;
             material.userData.system = this.id;
             material.userData.systemSettings = {...appearance.systemSettings};
-            material.onBeforeCompile = ShaderUtils.applyDiceSoNiceShader;
         }
         return material;
     }
