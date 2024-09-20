@@ -588,6 +588,10 @@ export class DiceFactory {
 					material = uniqueMaterial.clone();
 					material = this.systems.get(appearance.system).processMaterial(type, material, appearance);
 
+					if(!this.realisticLighting){
+						material.envMap = scopedTextureCache.textureCube;
+					}
+
 					//finally, we cache the material
 					this.baseMaterialCache[baseMaterialCacheString] = material;
 				}
@@ -1122,7 +1126,10 @@ export class DiceFactory {
 		};
 
 		//Merge with the default systemSettings to aply default values
-		const system = this.systems.get(settings.system);
+		if(!this.systems.has(appearance.system))
+			appearance.system = "standard";
+
+		const system = this.systems.get(appearance.system);
 		const defaultSystemSettings = system.getDefaultSettings();
 		foundry.utils.mergeObject(appearance.systemSettings, defaultSystemSettings, { overwrite: false });
 

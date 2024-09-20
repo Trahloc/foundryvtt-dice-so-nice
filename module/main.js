@@ -134,6 +134,16 @@ Hooks.once('init', () => {
         default: false,
         config: true
     });
+    
+    //Settings for forcing the dice appearance of the character owner during an initative roll instead of the message author
+    game.settings.register("dice-so-nice", "forceCharacterOwnerAppearanceForInitiative", {
+        name: "DICESONICE.forceCharacterOwnerAppearanceForInitiative",
+        hint: "DICESONICE.forceCharacterOwnerAppearanceForInitiativeHint",
+        scope: "world",
+        type: Boolean,
+        default: true,
+        config: true
+    });
 
     game.settings.register("dice-so-nice", "immediatelyDisplayChatMessages", {
         name: "DICESONICE.immediatelyDisplayChatMessages",

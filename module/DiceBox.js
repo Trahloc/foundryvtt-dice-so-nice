@@ -119,7 +119,7 @@ export class DiceBox {
 		this.showExtraDice = false;
 
 		this.colors = {
-			ambient: 0xffeeb1,
+			ambient: 0xf0f0f0,
 			spotlight: 0x000000,
 			ground: 0x080820
 		};
@@ -320,14 +320,16 @@ export class DiceBox {
 		let intensity, intensity_amb;
 		if (this.dicefactory.realisticLighting) { //advanced lighting
 			intensity = 1.5;
-			intensity_amb = 1.0;
+			intensity_amb = 4.0;
 		} else {
+			this.colors.spotlight = 0xffffff;
+			this.colors.ambient = 0xffffff;
 			if (this.config.boxType == "board") {
-				intensity = 1.2;
-				intensity_amb = 1.0;
+				intensity = 0.2;
+				intensity_amb = 8.0;
 			} else {
-				intensity = 1.5;
-				intensity_amb = 3;
+				intensity = 0.2;
+				intensity_amb = 8.0;
 			}
 		}
 
@@ -1133,7 +1135,7 @@ export class DiceBox {
 			let dicemesh = this.diceList[i];
 			if (!dicemesh) continue;
 			dicemesh.traverse(obj => {
-				if(obj.mixer || obj.material.mixer){
+				if(obj.mixer || obj.material?.mixer){
 					animatedDiceDetected = true;
 				}
 			});

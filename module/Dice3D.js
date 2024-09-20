@@ -649,7 +649,17 @@ export class Dice3D {
 
             //call each promise one after the other, then call the showMessage function
             const recursShowForRoll = (rollList, index) => {
-                this.showForRoll(rollList[index], chatMessage.author, false, null, false, chatMessage.id, chatMessage.speaker).then(() => {
+                let author = chatMessage.author;
+                if(chatMessage.getFlag("core", "initiativeRoll") && game.settings.get("dice-so-nice", "forceCharacterOwnerAppearanceForInitiative")) {
+                    if(chatMessage.speaker){
+                        const actor = game.actors.get(chatMessage.speaker.actor);
+                        if(actor && actor.hasPlayerOwner) {
+                            //get the user from game.users
+                            author = game.users.find(user => !user.isGM && user.character?.id == actor.id);
+                        }
+                    }
+                }
+                this.showForRoll(rollList[index], author, false, null, false, chatMessage.id, chatMessage.speaker).then(() => {
                     index++;
                     if (rollList[index] != null)
                         recursShowForRoll(rollList, index);
@@ -691,9 +701,9 @@ export class Dice3D {
             context.roll.secret = true;
         }
 
-        if (speaker) {
+        if (speaker) { 
             let actor = game.actors.get(speaker.actor);
-            const isNpc = actor ? actor.type === 'npc' : false;
+            const isNpc = actor ? !actor.hasPlayerOwner : false;
             if (isNpc && game.settings.get("dice-so-nice", "hideNpcRolls")) {
                 return Promise.resolve(false);
             }
