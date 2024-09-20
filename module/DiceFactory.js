@@ -244,6 +244,7 @@ export class DiceFactory {
 						flatShading: true
 					}
 				},
+				//not possible without advanced ligthing
 				'iridescent': {
 					'type':'standard',
 					'options': {
@@ -251,10 +252,7 @@ export class DiceFactory {
 						emissive:0x111111,
 						roughness: 0.2,
 						metalness: 1,
-						envMapIntensity:2,
-						userData:{
-							iridescent:true
-						}
+						envMapIntensity:2
 					},
 					'scopedOptions':{
 						envMap:true
