@@ -605,7 +605,7 @@ export class Dice3D {
                 window.ui.sidebar.popouts.chat.scrollBottom();
         }
 
-        if (game.view == "stream" && !game.modules.get("0streamutils")?.active) {
+        if (game.view == "stream" && !(game.modules.get("0streamutils")?.active || game.modules.get("obs-utils")?.active)) {
             setTimeout(showMessage, 2500, chatMessage);
         } else {
             //1- We create a list of all 3D rolls, ordered ASC
