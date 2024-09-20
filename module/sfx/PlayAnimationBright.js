@@ -10,7 +10,7 @@ export class PlayAnimationBright extends DiceSFX {
     static sound = "modules/dice-so-nice/sfx/sounds/bright.mp3";
     /**@override init */
     static async init() {
-        PlayAnimationBright.brightColor = new Color(0.3,0.3,0.3);
+        PlayAnimationBright.brightColor = new Color(0.5,0.5,0.5);
         this.glowingMesh=null;
         game.audio.pending.push(function(){
             foundry.audio.AudioHelper.preloadSound(PlayAnimationBright.sound);
@@ -34,10 +34,7 @@ export class PlayAnimationBright extends DiceSFX {
         this.clock = new Clock();
         this.baseColor = this.glowingMesh.material.emissive.clone();
         this.baseMaterial = this.glowingMesh.material;
-        let userData = this.baseMaterial.userData;
-        this.baseMaterial.userData = {};
         this.glowingMesh.material = this.baseMaterial.clone();
-        this.glowingMesh.userData = userData;
         this.glowingMesh.material.onBeforeCompile = ShaderUtils.applyDiceSoNiceShader;
         foundry.audio.AudioHelper.play({
             src: PlayAnimationBright.sound,

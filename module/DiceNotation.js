@@ -6,7 +6,7 @@ export class DiceNotation {
 	 * A roll object from Foundry 
 	 * @param {Roll} rolls 
 	 */
-	constructor(rolls, userConfig = null) {
+	constructor(rolls, userConfig = null, user = game.user) {
 		this.throws = [{dice:[]}];
 		this.userConfig = userConfig;
 		
@@ -46,6 +46,9 @@ export class DiceNotation {
 					if(++diceNumber >= maxDiceNumber)
 						return true;
 					if(!die.results[i].hidden){
+						//save the user in the options
+						options.owner = user.id;
+
 						//ghost can't be secret
 						if(rolls.ghost)
 							options.ghost = true;

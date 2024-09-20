@@ -1,5 +1,6 @@
 import { DICE_MODELS } from './DiceModels.js';
 import { DiceSFXManager } from './DiceSFXManager.js';
+import { DiceSystem } from './DiceSystem.js';
 import { SoundManager } from './SoundManager.js';
 import { RendererStats } from './libs/threex.rendererstats.js';
 //import {GLTFExporter} from 'three/examples/jsm/loaders/exporters/GLTFExporter.js';
@@ -118,7 +119,7 @@ export class DiceBox {
 		this.showExtraDice = false;
 
 		this.colors = {
-			ambient: 0xffeeb1,
+			ambient: 0xf0f0f0,
 			spotlight: 0x000000,
 			ground: 0x080820
 		};
@@ -319,14 +320,16 @@ export class DiceBox {
 		let intensity, intensity_amb;
 		if (this.dicefactory.realisticLighting) { //advanced lighting
 			intensity = 1.5;
-			intensity_amb = 1.0;
+			intensity_amb = 4.0;
 		} else {
+			this.colors.spotlight = 0xffffff;
+			this.colors.ambient = 0xffffff;
 			if (this.config.boxType == "board") {
-				intensity = 1.2;
-				intensity_amb = 1.0;
+				intensity = 0.2;
+				intensity_amb = 8.0;
 			} else {
-				intensity = 1.5;
-				intensity_amb = 3;
+				intensity = 0.2;
+				intensity_amb = 8.0;
 			}
 		}
 
@@ -691,15 +694,20 @@ export class DiceBox {
 				break;
 		}
 
+		//todo these should be moved to .userData. old code
 		dicemesh.notation = vectordata;
 		dicemesh.result = null;
 		dicemesh.forcedResult = dicedata.result;
 		dicemesh.startAtIteration = dicedata.startAtIteration;
 		dicemesh.stopped = 0;
-		dicemesh.castShadow = this.dicefactory.shadows;
-		dicemesh.receiveShadow = this.dicefactory.shadows;
 		dicemesh.specialEffects = dicedata.specialEffects;
 		dicemesh.options = dicedata.options;
+		//todo
+
+		dicemesh.castShadow = this.dicefactory.shadows;
+		dicemesh.receiveShadow = this.dicefactory.shadows;
+
+		dicemesh.userData.system = appearance.system;
 
 		// Add the dice to the physics world
 		await this.physicsWorker.exec('createDice', {
@@ -732,6 +740,7 @@ export class DiceBox {
 		this.diceList.push(dicemesh);
 		if (dicemesh.startAtIteration == 0) {
 			this.scene.add(objectContainer);
+			this.dicefactory.systems.get(appearance.system).fire(DiceSystem.DICE_EVENT_TYPE.SPAWN, { dice: dicemesh });
 			await this.physicsWorker.exec('addDice', dicemesh.id);
 		}
 	}
@@ -795,7 +804,7 @@ export class DiceBox {
 
 
 
-	//This is the render loop
+	//This is the render loop for the board. /!\ Not called in the showcase /!\
 	animateThrow() {
 
 		let time = (new Date()).getTime();
@@ -804,20 +813,6 @@ export class DiceBox {
 
 		let neededSteps = Math.floor(time_diff / this.framerate);
 
-		//Update animated dice mixer
-		if (this.animatedDiceDetected) {
-			let delta = this.clock.getDelta();
-			for (const child of this.scene.children) {
-				let dicemesh = child.children && child.children.length && child.children[0].sim != undefined ? child.children[0] : null;
-				if (dicemesh && dicemesh.mixer) {
-					dicemesh.mixer.update(delta);
-				}
-			}
-		}
-
-		const iterationPos = this.iteration * 3;
-		const iterationQuat = this.iteration * 4;
-
 		if (neededSteps && this.rolling) {
 			for (let i = 0; i < neededSteps * this.speed; i++) {
 				++this.iteration;
@@ -825,6 +820,7 @@ export class DiceBox {
 					for (let i = 0; i < this.diceList.length; i++) {
 						if (this.diceList[i].startAtIteration == this.iteration) {
 							this.scene.add(this.diceList[i].parent);
+							this.dicefactory.systems.get(this.diceList[i].userData.system).fire(DiceSystem.DICE_EVENT_TYPE.SPAWN, { dice: this.diceList[i] });
 						}
 					}
 				}
@@ -838,11 +834,6 @@ export class DiceBox {
 				if (dicemesh && dicemesh.sim.stepPositions[this.iteration * 3]) {
 					child.position.fromArray(dicemesh.sim.stepPositions, this.iteration * 3);
 					child.quaternion.fromArray(dicemesh.sim.stepQuaternions, this.iteration * 4);
-
-					/*if (dicemesh.meshCannon) {
-						dicemesh.meshCannon.position.copy(dicemesh.body_sim.stepPositions[this.iteration]);
-						dicemesh.meshCannon.quaternion.copy(dicemesh.body_sim.stepQuaternions[this.iteration]);
-					}*/
 				}
 			}
 
@@ -872,11 +863,6 @@ export class DiceBox {
 					if (dicemesh) {
 						child.position.fromArray(positions, idToIndex.get(dicemesh.id) * 3);
 						child.quaternion.fromArray(quaternions, idToIndex.get(dicemesh.id) * 4);
-
-						/*if (dicemesh.meshCannon) {
-							dicemesh.meshCannon.position.copy(dicemesh.body_sim.position);
-							dicemesh.meshCannon.quaternion.copy(dicemesh.body_sim.quaternion);
-						}*/
 					}
 				}
 			});
@@ -899,6 +885,9 @@ export class DiceBox {
 
 		// roll finished
 		if (this.throwFinished()) {
+			for(let i = 0; i < this.diceList.length; i++){
+				this.dicefactory.systems.get(this.diceList[i].userData.system).fire(DiceSystem.DICE_EVENT_TYPE.RESULT, { dice: this.diceList[i] });
+			}
 			//if animated dice still on the table, keep animating
 			if (this.running) {
 				this.handleSpecialEffectsInit().then(() => {
@@ -937,7 +926,7 @@ export class DiceBox {
 
 		let maxDiceNumber = game.settings.get("dice-so-nice", "maxDiceNumber");
 		if (this.deadDiceList.length + this.diceList.length + countNewDice > maxDiceNumber) {
-			this.clearAll();
+			await this.clearAll();
 		}
 		this.isVisible = true;
 		await this.rollDice(throws, callback);
@@ -989,6 +978,23 @@ export class DiceBox {
 	}
 
 	renderScene() {
+		//Update animated dice mixer
+		if (this.animatedDiceDetected) {
+			let animatedMaterials = new Set();
+			let delta = this.clock.getDelta();
+			
+			this.scene.traverse(obj => {
+				if(obj.mixer)
+					dicemesh.mixer.update(delta);
+				if(obj.material?.mixer)
+					animatedMaterials.add(obj.material);
+			});
+
+			for (const material of animatedMaterials) {
+				material.mixer.update(delta);
+			}
+		}
+
 		//Update time uniform
 		game.dice3d.uniforms.time.value = performance.now() / 1000;
 
@@ -1094,17 +1100,14 @@ export class DiceBox {
 		await this.simulateThrow();
 		this.iteration = 0;
 
-
-		//check forced results, fix dice faces if necessary
-		//Detect if there's an animated dice
-		this.animatedDiceDetected = false;
+		// swap faces if needed based on fvtt roll result
 		for (let i = 0, len = this.diceList.length; i < len; ++i) {
 			let dicemesh = this.diceList[i];
 			if (!dicemesh) continue;
 			await this.swapDiceFace(dicemesh);
-			if (dicemesh.mixer)
-				this.animatedDiceDetected = true;
 		}
+
+		this.animatedDiceDetected = await this.checkForAnimatedDice();
 
 		//reset the result
 		for (let i = 0, len = this.diceList.length; i < len; ++i) {
@@ -1124,8 +1127,25 @@ export class DiceBox {
 		canvas.app.ticker.add(this.animateThrow, this);
 	}
 
+	//Check if there's an animated dice to reduce render loop complexecity if there's none
+	async checkForAnimatedDice() {
+		//Detect if there's an animated dice
+		let animatedDiceDetected = false;
+		for (let i = 0, len = this.diceList.length; i < len; ++i) {
+			let dicemesh = this.diceList[i];
+			if (!dicemesh) continue;
+			dicemesh.traverse(obj => {
+				if(obj.mixer || obj.material?.mixer){
+					animatedDiceDetected = true;
+				}
+			});
+		}
+
+		return animatedDiceDetected;
+	}
+
 	async showcase(config) {
-		this.clearAll();
+		await this.clearAll();
 		//Get dice type list as an array
 		let selectordice = [...this.dicefactory.systems.get("standard").dice.keys()];
 		const extraDiceTypes = ["d3", "d5", "d7", "d14", "d16", "d24", "d30"];
@@ -1180,6 +1200,8 @@ export class DiceBox {
 				count++;
 			}
 		}
+
+		this.animatedDiceDetected = await this.checkForAnimatedDice();
 
 		this.last_time = 0;
 		if (this.selector.animate) {
@@ -1288,6 +1310,8 @@ export class DiceBox {
 			try {
 				await this.physicsWorker.exec("addConstraint", { id: root.id, pos: pos });
 				this.mouse.constraint = true;
+				let diceSystem = root.userData?.system ?? "standard";
+				this.dicefactory.systems.get(diceSystem).fire(DiceSystem.DICE_EVENT_TYPE.CLICK, { dice: root, position: pos });
 				return true;
 			} catch (error) {
 				console.error(error);

@@ -4,6 +4,7 @@ import { DiceSFXManager } from './DiceSFXManager.js';
 import { Utils } from './Utils.js';
 import { DiceNotation } from './DiceNotation.js';
 import { DiceColors, DICE_SCALE } from './DiceColors.js';
+import { DiceSystem } from './DiceSystem.js';
 /**
  * Form application to configure settings of the 3D Dice.
  */
@@ -87,7 +88,7 @@ export class DiceConfig extends FormApplication {
         delete data.sfxLine;
 
         //remove MSAA if not supported
-        if (game.canvas.app.renderer.context.webGLVersion<2){
+        if (game.canvas.app.renderer.context.webGLVersion < 2) {
             delete data.antialiasingList.msaa;
         }
 
@@ -127,8 +128,8 @@ export class DiceConfig extends FormApplication {
             let termClass = Object.values(CONFIG.Dice.terms).find(term => term.name == preset.term) || foundry.dice.terms.Die;
             let term = new termClass({});
 
-            if(el.userData == "d100"){
-                for(let i = 1; i<=100;i++){
+            if (el.userData == "d100") {
+                for (let i = 1; i <= 100; i++) {
                     let label = term.getResultLabel({ result: i });
                     let option = { id: i + "", name: label };
                     this.possibleResultList[el.userData].push(option);
@@ -142,8 +143,8 @@ export class DiceConfig extends FormApplication {
             }
 
             //add special triggers, like "keep hihest" (kh)
-            this.possibleResultList[el.userData].push({id: "kh", name: "Keep Highest"});
-            this.possibleResultList[el.userData].push({id: "kl", name: "Keep Lowest"});
+            this.possibleResultList[el.userData].push({ id: "kh", name: "Keep Highest" });
+            this.possibleResultList[el.userData].push({ id: "kl", name: "Keep Lowest" });
         });
 
         let specialEffectsList = [];
@@ -152,7 +153,7 @@ export class DiceConfig extends FormApplication {
         if (this.reset)
             specialEffects = [];
         this.triggerTypeList = [...triggerTypeList, ...DiceSFXManager.EXTRA_TRIGGER_TYPE];
-        foundry.utils.mergeObject(this.possibleResultList, DiceSFXManager.EXTRA_TRIGGER_RESULTS,{performDeletions:true});
+        foundry.utils.mergeObject(this.possibleResultList, DiceSFXManager.EXTRA_TRIGGER_RESULTS, { performDeletions: true });
 
         //Filter out the SFX that are not registered
         if (specialEffects) {
@@ -183,7 +184,8 @@ export class DiceConfig extends FormApplication {
         }
         data.specialEffectsList = specialEffectsList.join("");
 
-        let tabsList = [];
+        const tabsList = [];
+        const systemSettingsScoped = {};
         for (let scope in data.appearance) {
             if (data.appearance.hasOwnProperty(scope)) {
                 tabsList.push(scope);
@@ -196,6 +198,19 @@ export class DiceConfig extends FormApplication {
                         data.appearance[scope].outlineColor = data.appearance.global.outlineColor;
                     if (!data.appearance[scope].edgeColor)
                         data.appearance[scope].edgeColor = data.appearance.global.edgeColor;
+                }
+
+                if (this.box.dicefactory.systems.has(data.appearance[scope].system)) {
+                    const system = this.box.dicefactory.systems.get(data.appearance[scope].system);
+
+                    if (system.settings.length > 0) {
+                        const dialogContent = system.getSettingsDialogContent(scope);
+
+                        if (dialogContent.content != "") {
+                            const hdbsTemplate = Handlebars.compile(dialogContent.content);
+                            systemSettingsScoped[scope] = hdbsTemplate(dialogContent.data);
+                        }
+                    }
                 }
             }
         }
@@ -211,8 +226,14 @@ export class DiceConfig extends FormApplication {
                 colorsetList: data.colorsetList,
                 textureList: data.textureList,
                 materialList: data.materialList,
-                fontList: data.fontList
+                fontList: data.fontList,
+                systemSettings: systemSettingsScoped.hasOwnProperty(diceType) ? systemSettingsScoped[diceType] : '',
+                systemSettingsVisible: systemSettingsScoped.hasOwnProperty(diceType) ? '' : 'dsn-hidden'
             }).then((html) => {
+                //We add a "title" attribute to all colorsets to give a way to users to see the colorset id
+                //However the FVTT Hdlb helper does not provide such functionnality so we have to do it ourselves
+                html = this.addTitleToOptions(html, '[data-colorset] option');
+
                 tabsAppearance.push(html);
             }));
             if (diceType != "global")
@@ -226,11 +247,13 @@ export class DiceConfig extends FormApplication {
             data.displayHint = '';
 
         data.tabsAppearance = tabsAppearance.join("");
+
         this.lastActiveAppearanceTab = "global";
 
         this.initializationData = data;
         this.currentGlobalAppearance = data.appearance.global;
         this.sfxDialogList = [];
+        this.systemSettingsDialogList = [];
 
         const templateSelect2 = (result) => {
 
@@ -255,6 +278,27 @@ export class DiceConfig extends FormApplication {
         }
 
         return data;
+    }
+
+    addTitleToOptions(htmlString, selectorString) {
+        // Initialize a DOMParser to parse the HTML string
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlString, 'text/html');
+
+        // Select all <option> elements within elements that have the 'data-colorset' attribute
+        const options = doc.querySelectorAll(selectorString);
+
+        // Iterate over each <option> and set its 'title' attribute to its 'value'
+        options.forEach(option => {
+            // Ensure the 'value' attribute exists
+            if (option.hasAttribute('value')) {
+                const value = option.getAttribute('value');
+                option.setAttribute('title', value);
+            }
+        });
+
+        // Serialize the modified DOM back to an HTML string
+        return doc.documentElement.outerHTML;
     }
 
     activateListeners(html) {
@@ -294,6 +338,23 @@ export class DiceConfig extends FormApplication {
 
             $(this.element).on("change", "[data-system]", (ev) => {
                 this.toggleCustomization($(ev.target).data("dicetype"));
+
+                //replace system settings
+                const systemSettingsContainer = $(ev.target).parents(".tabAppearance").find('[data-systemsettings-hidden]');
+                systemSettingsContainer.children().remove();
+
+                const system = this.box.dicefactory.systems.get($(ev.target).val());
+
+                if (system.settings.length > 0) {
+                    $(ev.target).next("[data-system-options]").removeClass("dsn-hidden");
+                    const dialogContent = system.getSettingsDialogContent($(ev.target).data("dicetype"));
+                    if (dialogContent.content != "") {
+                        const hdbsTemplate = Handlebars.compile(dialogContent.content);
+                        systemSettingsContainer.append(hdbsTemplate(dialogContent.data));
+                    }
+                } else {
+                    $(ev.target).next("[data-system-options]").addClass("dsn-hidden");
+                }
             });
 
             $(this.element).on("change", "input,select", (ev) => {
@@ -321,11 +382,11 @@ export class DiceConfig extends FormApplication {
                     if (el.userData != "d10")
                         denominationList.push(el.userData);
                 });
-                let roll = new Roll(denominationList.join("+")).evaluate().then((roll) =>{
+                let roll = new Roll(denominationList.join("+")).evaluate().then((roll) => {
                     let data = new DiceNotation(roll);
 
                     let specialEffects = this.getShowcaseSFX();
-                    let customization = foundry.utils.mergeObject({ appearance: config.appearance }, { specialEffects: specialEffects },{performDeletions:true});
+                    let customization = foundry.utils.mergeObject({ appearance: config.appearance }, { specialEffects: specialEffects }, { performDeletions: true });
 
                     game.dice3d._showAnimation(data, customization);
                 });
@@ -428,6 +489,44 @@ export class DiceConfig extends FormApplication {
                 for (let fp of sfxLine.find(".sfx-hidden [data-sfx-hidden-options] button.file-picker")) {
                     fp.onclick = this._activateFilePicker.bind(this);
                 }
+            });
+
+
+            /**
+             * System Settings
+             */
+            $(this.element).on("click", "[data-system-options]", (ev) => {
+                const systemSettingsContainer = $(ev.target).parents(".tabAppearance").find(`[data-systemSettings-hidden]`);
+                const systemSettingsElement = systemSettingsContainer.find("[data-systemSettings]");
+                const systemSelected = $(ev.target).parents(".tabAppearance").find("[data-system]").val();
+                const systemName = this.box.dicefactory.systems.get(systemSelected).name;
+
+                let d = new Dialog({
+                    title: `${game.i18n.localize("DICESONICE.SystemOptions")} - ${this.lastActiveAppearanceTab.charAt(0).toUpperCase()}${this.lastActiveAppearanceTab.slice(1)} - ${systemName}`,
+                    content: `<form autocomplete="off" onsubmit="event.preventDefault();"></form>`,
+                    buttons: {
+                        ok: {
+                            icon: '<i class="fas fa-check-circle"></i>',
+                            label: 'OK'
+                        }
+                    },
+                    default: "ok",
+                    render: (html) => {
+                        systemSettingsElement.detach().appendTo($(html).find("form"));
+                        this.activateDialogListeners(html);
+                    },
+                    close: (html) => {
+                        $(html).find("[data-systemSettings]").detach().appendTo(systemSettingsContainer);
+                        this.systemSettingsDialogList = this.systemSettingsDialogList.filter(dialog => dialog.appId != d.appId);
+
+                        //apply changes
+                        this.onApply();
+                    }
+                }, {
+                    width: 550
+                });
+                d.render(true);
+                this.systemSettingsDialogList.push(d);
             });
 
             /**
@@ -593,6 +692,19 @@ export class DiceConfig extends FormApplication {
                     if ($(this.element).find(`.dsn-appearance-tabs [data-tab="${diceType}"]`).length) {
                         this.activateAppearanceTab(diceType);
                     } else {
+                        let newSystemSettings = {};
+                        if (this.box.dicefactory.systems.has(this.currentGlobalAppearance.system)) {
+                            const system = this.box.dicefactory.systems.get(this.currentGlobalAppearance.system);
+
+                            if (system.settings.length > 0) {
+                                const dialogContent = system.getSettingsDialogContent(diceType);
+
+                                if (dialogContent.content != "") {
+                                    const hdbsTemplate = Handlebars.compile(dialogContent.content);
+                                    newSystemSettings = hdbsTemplate(dialogContent.data);
+                                }
+                            }
+                        }
                         $(this.element).find(".dsn-appearance-hint").hide();
                         renderTemplate("modules/dice-so-nice/templates/partial-appearance.html", {
                             dicetype: diceType,
@@ -601,8 +713,13 @@ export class DiceConfig extends FormApplication {
                             colorsetList: this.initializationData.colorsetList,
                             textureList: this.initializationData.textureList,
                             materialList: this.initializationData.materialList,
-                            fontList: this.initializationData.fontList
+                            fontList: this.initializationData.fontList,
+                            systemSettings: newSystemSettings
                         }).then((html) => {
+                            //We add a "title" attribute to all colorsets to give a way to users to see the colorset id
+                            //However the FVTT Hdlb helper does not provide such functionnality so we have to do it ourselves
+                            html = this.addTitleToOptions(html, '[data-colorset] option');
+
                             let tabName = diceType.toUpperCase();
 
                             let insertBefore = null;
@@ -634,10 +751,10 @@ export class DiceConfig extends FormApplication {
                     bumpMapping: true,
                     shadowQuality: "high",
                     glow: true,
-                    antialiasing: game.canvas.app.renderer.context.webGLVersion===2 ?"msaa":"smaa",
+                    antialiasing: game.canvas.app.renderer.context.webGLVersion === 2 ? "msaa" : "smaa",
                     useHighDPI: true
                 };
-                switch(event.target.value) {
+                switch (event.target.value) {
                     case "low":
                         quality.bumpMapping = false;
                         quality.shadowQuality = "low";
@@ -656,7 +773,7 @@ export class DiceConfig extends FormApplication {
                         quality.bumpMapping = true;
                         quality.shadowQuality = "high";
                         quality.glow = true;
-                        quality.antialiasing = game.canvas.app.renderer.context.webGLVersion===2 ?"msaa":"smaa";
+                        quality.antialiasing = game.canvas.app.renderer.context.webGLVersion === 2 ? "msaa" : "smaa";
                         quality.useHighDPI = true;
                         break;
                 }
@@ -671,6 +788,32 @@ export class DiceConfig extends FormApplication {
                 $(this.element).find("[data-imageQuality]").val("custom");
             });
         }
+    }
+
+    activateDialogListeners(html) {
+        //sync range input with span
+        $(html).on("change", "input[type=range]", (event) => {
+            const value = $(event.target).val();
+            $(event.target).next().text(value);
+        });
+
+        //sync span input with range
+        $(html).on("change", "span.range-value", (event) => {
+            const value = $(event.target).text();
+            $(event.target).prev().val(value);
+        });
+
+        //sync color picker with input
+        $(html).on("change", "input[type=color]", (event) => {
+            const value = $(event.target).val();
+            $(event.target).prev().val(value);
+        });
+
+        //sync input with color picker
+        $(html).on("change", "[data-colorpicker]", (event) => {
+            const value = $(event.target).val();
+            $(event.target).next().val(value);
+        });
     }
 
     async actionSaveAs(name) {
@@ -761,6 +904,7 @@ export class DiceConfig extends FormApplication {
         if (tabs._contentSelector == "#dsn-appearance-content") {
             if (this.lastActiveAppearanceTab != "global") {
                 let appearanceArray = [];
+                let systemSettingsElement = null;
                 $(this.element).find(`.tabAppearance[data-tab="global"],.tabAppearance[data-tab="${this.lastActiveAppearanceTab}"]`).each((index, element) => {
                     let obj = {
                         labelColor: $(element).find('[data-labelColor]').val(),
@@ -771,8 +915,10 @@ export class DiceConfig extends FormApplication {
                         texture: $(element).find('[data-texture]').val(),
                         material: $(element).find('[data-material]').val(),
                         font: $(element).find('[data-font]').val(),
-                        system: $(element).find('[data-system]').val(),
+                        system: $(element).find('[data-system]').val()
                     };
+                    if (index == 1)
+                        systemSettingsElement = $(element).find('[data-systemSettings]');
                     //disabled systems arent returned
                     if (obj.system == null) {
                         obj.system = this.currentGlobalAppearance.system;
@@ -780,8 +926,31 @@ export class DiceConfig extends FormApplication {
                     appearanceArray.push(obj);
                 });
                 if (appearanceArray.length > 1) {
-                    let diff = foundry.utils.diffObject(appearanceArray[0], appearanceArray[1]);
-                    if (foundry.utils.isEmpty(diff)) {
+                    let hasDiff = false;
+                    //Check if at least one appearance is different
+                    hasDiff = !foundry.utils.isEmpty(foundry.utils.diffObject(appearanceArray[0], appearanceArray[1]));
+
+                    //Check if any of the system settings is different from the default settings
+                    if (!hasDiff) {
+                        for (let setting of this.box.dicefactory.systems.get(appearanceArray[1].system).settings) {
+                            //find the html input value 
+                            let settingElement = $(systemSettingsElement).find(`[name="systemSettings[${appearanceArray[1].system}][${setting.id}]"]`);
+                            let value;
+
+                            if (setting.type == DiceSystem.SETTING_TYPE.BOOLEAN) {
+                                value = settingElement.is(":checked");
+                            } else {
+                                value = settingElement.val();
+                            }
+
+                            if (value != setting.defaultValue) {
+                                hasDiff = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!hasDiff) {
                         this.closeAppearanceTab(this.lastActiveAppearanceTab)
                     }
                 }
@@ -925,9 +1094,34 @@ export class DiceConfig extends FormApplication {
                 texture: $(element).find('[data-texture]').val(),
                 material: $(element).find('[data-material]').val(),
                 font: $(element).find('[data-font]').val(),
-                system: $(element).find('[data-system]').val(),
+                system: $(element).find('[data-system]').val()
             };
+            
+            const systemSettingsRaw = {};
+            const systemSettingsFields = $(element).find('[data-systemsettings]').find('input, select');
+            systemSettingsFields.each((index, element) => {
+                let name = $(element).attr("name");
+                //keep only the last string between the last "[" and "]"
+                name = name.substring(name.lastIndexOf("[") + 1, name.lastIndexOf("]"));
+
+                //if it is a checkbox, we need to convert "on" to true and "off" to false
+                if ($(element).is(':checkbox')) {
+                    systemSettingsRaw[name] = $(element).is(':checked') ? true : false;
+                } else {
+                    systemSettingsRaw[name] = $(element).val();
+                }
+            });
+
+            const system = this.box.dicefactory.systems.get(config.appearance[$(element).data("tab")].system);
+            if (system && system.settings.length > 0) {
+                const systemSettingsList = system.settings;
+                const systemSettingsIDs = systemSettingsList.map(setting => setting.id);
+
+                //Only keep settings form entries that are in the system settings id list. systemSettings is an object with the ids as keys
+                config.appearance[$(element).data("tab")].systemSettings = Object.fromEntries(Object.entries(systemSettingsRaw).filter(([key]) => systemSettingsIDs.includes(key)));
+            }
         });
+
         this.currentGlobalAppearance = config.appearance.global;
         return config;
     }
@@ -986,8 +1180,8 @@ export class DiceConfig extends FormApplication {
 
             for (var i in parts) {
                 var part = parts[i];
-                if (part.substr(-1) == ']') {
-                    part = part.substr(0, part.length - 1);
+                if (part.substring(part.length - 1) == ']') {
+                    part = part.substring(0, part.length - 1);
                 }
 
                 if (i == parts.length - 1) {
@@ -1025,14 +1219,25 @@ export class DiceConfig extends FormApplication {
             delete formData.sfxLine;
         }
 
-        for (let scope in formData.appearance) {
-            if (formData.appearance.hasOwnProperty(scope)) {
-                if (formData.appearance[scope].colorset != "custom") {
-                    delete formData.appearance[scope].labelColor;
-                    delete formData.appearance[scope].diceColor;
-                    delete formData.appearance[scope].outlineColor;
-                    delete formData.appearance[scope].edgeColor;
-                }
+        let scopedAppearance = Object.keys(formData.appearance);
+        let systemsInUse = new Set();
+        for (let scope of scopedAppearance) {
+            if (formData.appearance[scope].colorset != "custom") {
+                delete formData.appearance[scope].labelColor;
+                delete formData.appearance[scope].diceColor;
+                delete formData.appearance[scope].outlineColor;
+                delete formData.appearance[scope].edgeColor;
+            }
+
+            // filter form system settings based on the system settings to remove helpers and selectors
+            systemsInUse.add(formData.appearance[scope].system);
+            const system = this.box.dicefactory.systems.get(formData.appearance[scope].system);
+            if (system && system.settings.length > 0) {
+                const systemSettingsList = system.settings;
+                const systemSettingsIDs = systemSettingsList.map(setting => setting.id);
+
+                //Only keep settings form entries that are in the system settings id list. systemSettings is an object with the ids as keys
+                formData.appearance[scope].systemSettings = Object.fromEntries(Object.entries(formData.appearance[scope].systemSettings).filter(([key]) => systemSettingsIDs.includes(key)));
             }
         }
         let currentSettings = Dice3D.CONFIG();
@@ -1042,10 +1247,18 @@ export class DiceConfig extends FormApplication {
         await game.user.unsetFlag("dice-so-nice", "appearance");
         await game.user.unsetFlag("dice-so-nice", "settings");
 
+        //system settings won't be merged here because insertValues is false
+        let appearance = foundry.utils.mergeObject(Dice3D.APPEARANCE(), formData.appearance, { insertKeys: true, insertValues: false, performDeletions: true });
 
-        let appearance = foundry.utils.mergeObject(Dice3D.APPEARANCE(), formData.appearance, { insertKeys: true, insertValues: false, performDeletions:true});
+        //So we add back the system settings to the appearance
+        for (let scope of scopedAppearance) {
+            if (formData.appearance[scope].systemSettings) {
+                appearance[scope].systemSettings = formData.appearance[scope].systemSettings;
+            }
+        }
+
         delete formData.appearance;
-        let settings = foundry.utils.mergeObject(Dice3D.CONFIG(), formData, { insertKeys: false, insertValues: false ,performDeletions:true});
+        let settings = foundry.utils.mergeObject(Dice3D.CONFIG(), formData, { insertKeys: false, insertValues: false, performDeletions: true });
 
         // preserve rollingArea config
         settings.rollingArea = currentSettings.rollingArea;
@@ -1056,6 +1269,9 @@ export class DiceConfig extends FormApplication {
 
         game.socket.emit("module.dice-so-nice", { type: "update", user: game.user.id });
         DiceSFXManager.init();
+        for (let system of systemsInUse) {
+            this.box.dicefactory.systems.get(system).loadSettings();
+        }
         ui.notifications.info(game.i18n.localize("DICESONICE.saveMessage"));
 
         let reloadRequiredIfChanged = ["canvasZIndex", "bumpMapping", "useHighDPI", "glow", "antialiasing", "enabled"];
@@ -1078,6 +1294,11 @@ export class DiceConfig extends FormApplication {
         this.sfxDialogList.forEach((dialog) => {
             dialog.close();
         });
+
+        this.systemSettingsDialogList.forEach((dialog) => {
+            dialog.close();
+        });
+
         await super._onSubmit(event, options);
     }
 }
