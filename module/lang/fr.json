@@ -267,5 +267,16 @@
     "DICESONICE.TourMainContentGotoModulesSettings": "Cliquez sur le filtre 'Dice So Nice'",
     "DICESONICE.WelcomeTitle": "Dice So Nice - Vos dés 3D",
     "DICESONICE.sfxOptionsMuteSound": "Couper le son",
-    "DICESONICE.PlayAnimationOutline": "Animation : Aperçu"
+    "DICESONICE.PlayAnimationOutline": "Animation : Aperçu",
+    "DICESONICE.ghostDiceForAll": "Pour tous les joueurs",
+    "DICESONICE.ghostDiceForRollAuthor": "Seulement pour l'auteur du jet",
+    "DICESONICE.openDiceEditorButton": "Éditeur de dé",
+    "DICESONICE.onlyShowMyDice": "Ne voir que mes dés",
+    "DICESONICE.ghostDiceDisabled": "Désactiver les dés fantômes",
+    "DICESONICE.resetWelcomeMessage": "Ré-afficher le message de bienvenue",
+    "DICESONICE.resetWelcomeMessageHint": "A la prochaine connexion des joueurs, ils recevront à nouveau le message de bienvenue.",
+    "DICESONICE.openDiceEditorLabel": "Ouvrir l’Éditeur de Dé",
+    "DICESONICE.forceCharacterOwnerAppearanceForInitiative": "Utiliser les dés du joueur pour l'initiative",
+    "DICESONICE.forceCharacterOwnerAppearanceForInitiativeHint": "Lorsque cette option est activée, l'apparence des dés du joueur du personnage est utilisée lors des jets d'initiative, quel que soit l'auteur du jet (ex : MJ).",
+    "DICESONICE.SystemOptions": "Paramètres du système"
 }

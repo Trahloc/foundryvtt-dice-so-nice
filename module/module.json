@@ -121,6 +121,11 @@
             "lang": "hu",
             "name": "Magyar",
             "path": "./lang/hu.json"
+        },
+        {
+            "lang": "tr",
+            "name": "Türkçe",
+            "path": "./lang/tr.json"
         }
     ],
     "media": [
