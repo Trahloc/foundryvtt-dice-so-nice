@@ -611,9 +611,7 @@ export class DiceFactory {
 			else {
 				material = this.createMaterial(scopedTextureCache, baseMaterialCacheString, diceobj, materialData);
 				//send to the system for processing
-				if(true || this.systems.get(appearance.system).settings.length > 0) { //todo
-					material = this.systems.get(appearance.system).processMaterial(type, material, appearance);
-				}
+				material = this.systems.get(appearance.system).processMaterial(type, material, appearance);
 			}
 				
 			dicemesh = new Mesh(geom, material);

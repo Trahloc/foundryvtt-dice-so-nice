@@ -505,16 +505,6 @@ export class DiceSystem {
 
         return defaultSettings;
     }
-
-    callSettingsChange(settings) {
-        //todo: format settings
-
-        this.onSettingsChange(settings);
-    }
-
-    onSettingsChange(settings) {
-        // placeholder
-    }
 }
 
 class DiceMap extends Map {

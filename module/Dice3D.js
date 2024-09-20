@@ -275,6 +275,15 @@ export class Dice3D {
             await Utils.actionLoadSave(name);
     }
 
+    /**
+     * Get Loaded Dice Systems
+     * return a map of DiceSystem
+     * @returns {Map}
+     */
+    getLoadedDiceSystems() {
+        return this.DiceFactory.systems;
+    }
+
 
     /**
      * Constructor. Create and initialize a new Dice3d.
@@ -567,9 +576,26 @@ export class Dice3D {
         const showMessage = () => {
             delete chatMessage._dice3danimating;
 
-            window.ui.chat.element.find(`.message[data-message-id="${chatMessage.id}"]`).removeClass("dsn-hide").find(".dice-roll").removeClass("dsn-hide");
-            if (window.ui.sidebar.popouts.chat)
-                window.ui.sidebar.popouts.chat.element.find(`.message[data-message-id="${chatMessage.id}"]`).removeClass("dsn-hide").find(".dice-roll").removeClass("dsn-hide");
+            let messageElement = window.ui.chat.element.find(`.message[data-message-id="${chatMessage.id}"]`);
+            messageElement.removeClass("dsn-hide");
+
+            let messageElementPopout;
+            if(window.ui.sidebar.popouts.chat){
+                messageElementPopout = window.ui.sidebar.popouts.chat.element.find(`.message[data-message-id="${chatMessage.id}"]`);
+                messageElementPopout.removeClass("dsn-hide");
+            }
+            
+            if(chatMessage._dice3dMessageHidden){
+                //first/initial rolls are done
+                chatMessage._dice3dMessageHidden = false;
+            } else if(chatMessage._dice3dRollsHidden && chatMessage._dice3dRollsHidden.length){ 
+                //subsequent rolls. for every 'done' roll we reveal x hidden rolls by shifting the _dice3dRollsHidden array
+                messageElement.find(`.dice-roll.dsn-hide`).slice(0,chatMessage._dice3dRollsHidden.shift()).removeClass("dsn-hide");
+
+                if(window.ui.sidebar.popouts.chat){
+                    messageElementPopout.find(`.dice-roll.dsn-hide`).slice(0,chatMessage._dice3dRollsHidden.shift()).removeClass("dsn-hide");
+                }
+            }
 
             Hooks.callAll("diceSoNiceRollComplete", chatMessage.id);
 

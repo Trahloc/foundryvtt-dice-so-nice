@@ -7,9 +7,6 @@ import { Utils } from './Utils.js';
  * Registers the exposed settings for the various 3D dice options.
  */
 Hooks.once('init', () => {
-    const debouncedReload = foundry.utils.debounce(() => {
-        window.location.reload();
-    }, 100);
     game.settings.registerMenu("dice-so-nice", "dice-so-nice", {
         name: "DICESONICE.config",
         label: "DICESONICE.configTitle",
@@ -64,7 +61,7 @@ Hooks.once('init', () => {
         }),
         default: "0",
         config: true,
-        onChange: debouncedReload
+        requiresReload: true
     });
 
     //add a button to reset the display of the welcome message for all users
@@ -92,7 +89,7 @@ Hooks.once('init', () => {
         type: Boolean,
         default: true,
         config: true,
-        onChange: debouncedReload
+        requiresReload: true
     });
 
     game.settings.register("dice-so-nice", "enabledSimultaneousRollForMessage", {
@@ -181,7 +178,7 @@ Hooks.once('init', () => {
         type: Boolean,
         default: true,
         config: true,
-        onChange: debouncedReload
+        requiresReload: true
     });
 
     game.settings.register("dice-so-nice", "showGhostDice", {
@@ -199,6 +196,8 @@ Hooks.once('init', () => {
     });
 
 });
+
+const chatMessagesCurrentlyBeingAnimated = new Set();
 
 /**
  * Foundry is ready, let's create a new Dice3D!
@@ -304,19 +303,52 @@ Hooks.on('createChatMessage', (chatMessage) => {
  * Hide messages which are animating rolls.
  */
 Hooks.on("renderChatMessage", (message, html, data) => {
-    //todo: there's a race condition here where the html is not updated yet by a previous renderChatMessage
-    //therefore, when updating the chat message right after creating it, the global "dsn-hide" class is not applied
-    //resulting in the first rolls not being hidden
-    //idea: keep a list of message ids currently being animated
     if (game.dice3d && game.dice3d.messageHookDisabled) {
         return;
     }
     if (message._dice3danimating && !game.settings.get("dice-so-nice", "immediatelyDisplayChatMessages")) {
+        /* How does this work:
+         * First, it should be noted that updates to the DOM of the message will be erased by the next update as FVTT will rerender the entire message
+         * DsN will hide the message for the first render
+         * It will then hide the following .dice-roll 
+         * We need to keep track of what to hide in order to correctly hide unfinished rolls every time the message is rendered
+         * For this, we store two variables in the message: _dice3dRollsHidden and _dice3dMessageHidden
+         * _dice3dRollsHidden is an array of the number of rolls added to the message at every update
+         * _dice3dMessageHidden is a boolean, true if the original rolls are yet to be finished
+         * The reveal/unhiding part can be found in Dice3D.renderRolls
+         */
+        if (message._dice3dCountNewRolls){
+            if(!message._dice3dRollsHidden)
+                message._dice3dRollsHidden = [];
 
-        if (message._countNewRolls)
-            html.find(`.dice-roll:nth-last-child(-n+${message._countNewRolls})`).addClass("dsn-hide");
-        else
+            //push the number of new rolls to the array
+            message._dice3dRollsHidden.push(message._dice3dCountNewRolls);
+            
+            //if there's the popout chat, we need to keep track of which render we are in
+            if(window.ui.sidebar.popouts.chat) {
+                //if _dice3dRenderedInPopout is undefined, we are in the first render (not in the popout), so we set it to false
+                //if it exists and is false, we are in a popout render, so we set it to true
+                //if it exists and is true, we are in sidebar render, so we set it to false
+                message._dice3dRenderedInPopout = typeof message._dice3dRenderedInPopout === "undefined" ? false : !message._dice3dRenderedInPopout;
+            }
+
+            //calculate the sum of all hidden rolls
+            //if _dice3dRenderedInPopout is true, we need to divide by 2 the sum
+            let sumOfAllHiddenRolls = message._dice3dRollsHidden.reduce((a, b) => a + b, 0) / (message._dice3dRenderedInPopout ? 2 : 1);
+
+            //use this sum to hide the rolls with nth-last-child. this selector matches the nth-last-child of the message
+            //which should be the most recent rolls
+            html.find(`.dice-roll:nth-last-child(-n+${sumOfAllHiddenRolls})`).addClass("dsn-hide");
+
+            //In case _dice3dMessageHidden is still true, we hide the message as it means the original rolls are not yet finished
+            if(message._dice3dMessageHidden)
+                html.addClass("dsn-hide");
+        }
+        else {
+            //first time rendering the message
             html.addClass("dsn-hide");
+            message._dice3dMessageHidden = true;
+        }
     }
 });
 
@@ -339,7 +371,7 @@ Hooks.on("updateChatMessage", (message, updateData, options) => {
 
     if (options.dsnCountAddedRoll > 0) {
         message._dice3danimating = true;
-        message._countNewRolls = options.dsnCountAddedRoll;
+        message._dice3dCountNewRolls = options.dsnCountAddedRoll;
         game.dice3d.renderRolls(message, message.rolls.slice(options.dsnIndexAddedRoll));
     }
 });
