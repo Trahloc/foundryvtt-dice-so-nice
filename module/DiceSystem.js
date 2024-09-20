@@ -120,6 +120,8 @@ export class DiceSystem {
 
     processMaterial(diceType, material, appearance) {
         if(this.dice.has(diceType)) {
+            material.customProgramCacheKey = () => this.onBeforeShaderCompile.toString();
+
             this.onProcessMaterial(diceType, material, appearance);
 
             material.userData.diceType = diceType;
@@ -134,12 +136,6 @@ export class DiceSystem {
         let vertexShader = shader.vertexShader;
         
         this.onBeforeShaderCompile(shader, material, material.userData.diceType, material.userData.appearance);
-
-        if(fragmentShader !== shader.fragmentShader || vertexShader !== shader.vertexShader){
-            const cacheString = this.getCacheString(material.userData.appearance);
-            material.customProgramCacheKey = () => cacheString;
-        }
-
     }
 
     onProcessMaterial(diceType, material, appearance) {
