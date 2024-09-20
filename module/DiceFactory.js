@@ -818,7 +818,7 @@ export class DiceFactory {
 		mat.transparent = true;
 		mat.depthTest = true;
 		mat.needUpdate = true;
-
+		mat.userData.materialData = materialData;
 		mat.onBeforeCompile = ShaderUtils.applyDiceSoNiceShader;
 
 		// deprecated shader hook

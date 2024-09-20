@@ -633,7 +633,7 @@ export const COLORSETS = {
 		background: ['#705206','#7A4E06','#643100','#7A2D06'],
 		outline: ['#3D2D03','#472D04','#301700','#471A04'],
 		edge: ['#FF5D0D','#FF7B00','#FFA20D','#FFBA0D'],
-		texture: [['bronze01','bronze02','bronze03','bronze03b','bronze03b','bronze04']]
+		texture: ['bronze01','bronze02','bronze03','bronze03b','bronze03b','bronze04']
 	},
 	'custom': {
 		name: 'custom',
@@ -782,8 +782,10 @@ export class DiceColors {
 			COLORSETS[name].id = name;
 			if(data.texture != "custom")
 				COLORSETS[name].texture = this.getTexture(data.texture);
+			/*if(typeof COLORSETS[name].texture == "object")
+				COLORSETS[name].texture.id = data.texture;*/
 			if(typeof COLORSETS[name].texture == "object")
-				COLORSETS[name].texture.id = data.texture;
+				COLORSETS[name].texture.id = data.id;
 			if(!COLORSETS[name].material)
 				COLORSETS[name].material = '';
 			if(!COLORSETS[name].font)

@@ -124,7 +124,7 @@ export class DiceSystem {
 
             material.userData.diceType = diceType;
             material.userData.system = this.id;
-            material.userData.systemSettings = {...appearance.systemSettings};
+            material.userData.appearance = appearance;
         }
         return material;
     }
@@ -133,10 +133,10 @@ export class DiceSystem {
         let fragmentShader = shader.fragmentShader;
         let vertexShader = shader.vertexShader;
         
-        this.onBeforeShaderCompile(shader, material, material.userData.diceType, material.userData.systemSettings);
+        this.onBeforeShaderCompile(shader, material, material.userData.diceType, material.userData.appearance);
 
         if(fragmentShader !== shader.fragmentShader || vertexShader !== shader.vertexShader){
-            const cacheString = this.getCacheString(material.userData.systemSettings);
+            const cacheString = this.getCacheString(material.userData.appearance.systemSettings);
             material.customProgramCacheKey = () => cacheString;
         }
 
@@ -146,7 +146,7 @@ export class DiceSystem {
         //to be overwritten
     }
 
-    onBeforeShaderCompile(shader, material, diceType, settings) {
+    onBeforeShaderCompile(shader, material, diceType, appearance) {
         //to be overwritten
     }
 
