@@ -114,8 +114,8 @@ export class DiceSystem {
         return this._scopedSettings.get(diceType) || this._scopedSettings.get("global");
     }
 
-    getCacheString(settings) {
-        return this.id+JSON.stringify(Object.values(settings));
+    getCacheString(appearance) {
+        return this.id+JSON.stringify(Object.values(appearance));
     }
 
     processMaterial(diceType, material, appearance) {
@@ -136,7 +136,7 @@ export class DiceSystem {
         this.onBeforeShaderCompile(shader, material, material.userData.diceType, material.userData.appearance);
 
         if(fragmentShader !== shader.fragmentShader || vertexShader !== shader.vertexShader){
-            const cacheString = this.getCacheString(material.userData.appearance.systemSettings);
+            const cacheString = this.getCacheString(material.userData.appearance);
             material.customProgramCacheKey = () => cacheString;
         }
 
