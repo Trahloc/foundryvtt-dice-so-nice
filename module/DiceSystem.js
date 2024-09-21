@@ -49,6 +49,9 @@ export class DiceSystem {
         this._scopedSettings = new Map();
 
         this._listeners = [];
+
+        this._registeredProcessMaterialCallbacks = [];
+        this._registeredBeforeShaderCompileCallbacks = [];
     }
 
     get id() {
@@ -120,9 +123,9 @@ export class DiceSystem {
 
     processMaterial(diceType, material, appearance) {
         if(this.dice.has(diceType)) {
-            material.customProgramCacheKey = () => this.onBeforeShaderCompile.toString();
-
-            this.onProcessMaterial(diceType, material, appearance);
+            for(const callback of this._registeredProcessMaterialCallbacks) {
+                callback(diceType, material, appearance);
+            }
 
             material.userData.diceType = diceType;
             material.userData.system = this.id;
@@ -134,16 +137,35 @@ export class DiceSystem {
     beforeShaderCompile(shader, material) {
         let fragmentShader = shader.fragmentShader;
         let vertexShader = shader.vertexShader;
-        
-        this.onBeforeShaderCompile(shader, material, material.userData.diceType, material.userData.appearance);
+        //this.onBeforeShaderCompile(shader, material, material.userData.diceType, material.userData.appearance);
+        for(const callback of this._registeredBeforeShaderCompileCallbacks) {
+            callback(shader, material, material.userData.diceType, material.userData.appearance);
+        }
+
+        if(fragmentShader != shader.fragmentShader || vertexShader != shader.vertexShader) {
+            material.customProgramCacheKey = () => {
+                return shader.fragmentShader+shader.vertexShader;
+            }
+            material.needsUpdate = true;
+        }
     }
 
-    onProcessMaterial(diceType, material, appearance) {
-        //to be overwritten
+    /**
+     * Registers a callback to be called when a material is processed for a dice of this system.
+     * The callback will be called with the diceType, material and appearance as arguments.
+     * @param {function} callback - The callback to be called.
+     */
+    registerProcessMaterialCallback(callback) {
+        this._registeredProcessMaterialCallbacks.push(callback);
     }
-
-    onBeforeShaderCompile(shader, material, diceType, appearance) {
-        //to be overwritten
+    
+    /**
+     * Registers a callback to be called when a shader is compiled for a dice of this system.
+     * The callback will be called with the shader, material and appearance as arguments.
+     * @param {function} callback - The callback to be called.
+     */
+    registerBeforeShaderCompileCallback(callback) {
+        this._registeredBeforeShaderCompileCallbacks.push(callback);
     }
 
     updateSettings(diceType = "global", settings) {
