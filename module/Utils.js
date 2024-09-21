@@ -2,44 +2,85 @@ import { TEXTURELIST, COLORSETS } from './DiceColors.js';
 /**
  * Generic utilities class...
  */
- export class Utils {
+export class Utils {
 
     static DATA_FORMAT_VERSION = "4.2";
-    /**
-     * Migrate old 1.0 or 2.0 setting to new 4.2 format.
-     */
-    static async migrateOldSettings() {
 
-        //migrate settings to flags. This is a scoped migration, no GM needed
-        let userSettings = game.settings.get("dice-so-nice", "settings");
-        if(userSettings.hasOwnProperty("enabled")){
-            await game.user.setFlag("dice-so-nice", "settings", userSettings);
-            await game.settings.set("dice-so-nice","settings",{});
+    /**
+     * Check if the user's version is less than a specific target version.
+     * @param {string} userVersion - The user's version string (e.g., "2.1").
+     * @param {string} targetVersion - The target version string to compare against (e.g., "2.3").
+     * @returns {boolean} True if userVersion < targetVersion, else false.
+     */
+    static isVersionLessThan(userVersion, targetVersion) {
+        const segments1 = userVersion.split('.').map(Number);
+        const segments2 = targetVersion.split('.').map(Number);
+        const length = Math.max(segments1.length, segments2.length);
+
+        for (let i = 0; i < length; i++) {
+            const num1 = segments1[i] || 0;
+            const num2 = segments2[i] || 0;
+
+            if (num1 < num2) return true;
+            if (num1 > num2) return false;
+            // If equal, continue to next segment
         }
 
+        // Versions are equal
+        return false;
+    }
+
+
+    /**
+     * Migrate old 1.0 or 2.0 setting to new 4.x format.
+     */
+    static async migrateOldSettings() {
         let formatversion = game.settings.get("dice-so-nice", "formatVersion");
+
+        // We assume a new install. Could be a very very old a, before we had a formatversion
+        // But it means 3y or more. Not worth worrying about.
+        if (formatversion == "")
+            formatversion = Utils.DATA_FORMAT_VERSION;
+
+        if (formatversion == Utils.DATA_FORMAT_VERSION)
+            return true;
 
         if (formatversion == "" || formatversion != Utils.DATA_FORMAT_VERSION) { //Never updated or first install
             if (!game.user.isGM) {
                 ui.notifications.warn(game.i18n.localize("DICESONICE.migrateMessageNeedGM"));
                 return false;
             }
-        } else if (formatversion == "4.1") {
+        }
+
+        let migrated = false;
+
+        if (Utils.isVersionLessThan(formatversion, "3.0")) {
+            //migrate settings to flags. This is a scoped migration, no GM needed
+            let userSettings = game.settings.get("dice-so-nice", "settings");
+            if (userSettings.hasOwnProperty("enabled")) {
+                await game.user.setFlag("dice-so-nice", "settings", userSettings);
+                await game.settings.set("dice-so-nice", "settings", {});
+            }
+
+            migrated = true;
+        }
+
+        if (Utils.isVersionLessThan(formatversion, "4.1")) {
             //Fuck it, lets do this so I'm sure it it not because of DsN itself.
             if (game.user.isGM) {
                 await Promise.all(game.users.map(async (user) => {
                     let appearance = user.getFlag("dice-so-nice", "appearance") ? foundry.utils.duplicate(user.getFlag("dice-so-nice", "appearance")) : null;
                     if (appearance && appearance.hasOwnProperty("labelColor")) {
                         let data = {
-                            "-=colorset":null,
-                            "-=diceColor":null,
-                            "-=edgeColor":null,
-                            "-=font":null,
-                            "-=labelColor":null,
-                            "-=material":null,
-                            "-=outlineColor":null,
-                            "-=system":null,
-                            "-=texture":null
+                            "-=colorset": null,
+                            "-=diceColor": null,
+                            "-=edgeColor": null,
+                            "-=font": null,
+                            "-=labelColor": null,
+                            "-=material": null,
+                            "-=outlineColor": null,
+                            "-=system": null,
+                            "-=texture": null
                         };
                         await user.setFlag("dice-so-nice", "appearance", data);
                     }
@@ -48,34 +89,37 @@ import { TEXTURELIST, COLORSETS } from './DiceColors.js';
                 let appearance = game.user.getFlag("dice-so-nice", "appearance") ? foundry.utils.duplicate(game.user.getFlag("dice-so-nice", "appearance")) : null;
                 if (appearance && appearance.hasOwnProperty("labelColor")) {
                     let data = {
-                        "-=colorset":null,
-                        "-=diceColor":null,
-                        "-=edgeColor":null,
-                        "-=font":null,
-                        "-=labelColor":null,
-                        "-=material":null,
-                        "-=outlineColor":null,
-                        "-=system":null,
-                        "-=texture":null
+                        "-=colorset": null,
+                        "-=diceColor": null,
+                        "-=edgeColor": null,
+                        "-=font": null,
+                        "-=labelColor": null,
+                        "-=material": null,
+                        "-=outlineColor": null,
+                        "-=system": null,
+                        "-=texture": null
                     };
                     await game.user.setFlag("dice-so-nice", "appearance", data);
                 }
             }
-            return true;
+
+            migrated = true;
         }
-        let migrated = false;
-        
-        if(formatversion == ""){
+
+
+        if (Utils.isVersionLessThan(formatversion, "2.0")) {
             //v1 to v2
-            let settings = game.user.getFlag("dice-so-nice", "settings") ? foundry.utils.duplicate(game.user.getFlag("dice-so-nice", "settings")):{};
+            let settings = game.user.getFlag("dice-so-nice", "settings") ? foundry.utils.duplicate(game.user.getFlag("dice-so-nice", "settings")) : {};
             if (settings.diceColor || settings.labelColor) {
-                let newSettings = foundry.utils.mergeObject(game.dice3d.constructor.DEFAULT_OPTIONS, settings, { insertKeys: false, insertValues: false,performDeletions:true });
-                let appearance = foundry.utils.mergeObject(game.dice3d.constructor.DEFAULT_APPEARANCE(), settings, { insertKeys: false, insertValues: false,performDeletions:true});
-                await game.settings.set("dice-so-nice", "settings", foundry.utils.mergeObject(newSettings, { "-=dimensions": null, "-=fxList": null },{performDeletions:true}));
+                let newSettings = foundry.utils.mergeObject(game.dice3d.constructor.DEFAULT_OPTIONS, settings, { insertKeys: false, insertValues: false, performDeletions: true });
+                let appearance = foundry.utils.mergeObject(game.dice3d.constructor.DEFAULT_APPEARANCE(), settings, { insertKeys: false, insertValues: false, performDeletions: true });
+                await game.settings.set("dice-so-nice", "settings", foundry.utils.mergeObject(newSettings, { "-=dimensions": null, "-=fxList": null }, { performDeletions: true }));
                 await game.user.setFlag("dice-so-nice", "appearance", appearance);
                 migrated = true;
             }
+        }
 
+        if (Utils.isVersionLessThan(formatversion, "4.0")) {
             //v2 to v4
             await Promise.all(game.users.map(async (user) => {
                 let appearance = user.getFlag("dice-so-nice", "appearance") ? foundry.utils.duplicate(user.getFlag("dice-so-nice", "appearance")) : null;
@@ -89,11 +133,11 @@ import { TEXTURELIST, COLORSETS } from './DiceColors.js';
                 }
 
                 let sfxList = user.getFlag("dice-so-nice", "sfxList") ? foundry.utils.duplicate(user.getFlag("dice-so-nice", "sfxList")) : null;
-            
-                if(sfxList){
-                    if(!Array.isArray(sfxList))
+
+                if (sfxList) {
+                    if (!Array.isArray(sfxList))
                         sfxList = Object.values(sfxList);
-                    sfxList.forEach((sfx)=>{
+                    sfxList.forEach((sfx) => {
                         sfx.onResult = [sfx.onResult];
                     });
                     await user.unsetFlag("dice-so-nice", "sfxList");
@@ -101,39 +145,48 @@ import { TEXTURELIST, COLORSETS } from './DiceColors.js';
                     migrated = true;
                 }
             }));
+
+            migrated = true;
         }
-        //v4 to v4.1 (fix)
-        //Remove the extra properties, no idea why tho
-        await Promise.all(game.users.map(async (user) => {
-            let appearance = user.getFlag("dice-so-nice", "appearance") ? foundry.utils.duplicate(user.getFlag("dice-so-nice", "appearance")) : null;
-            if (appearance && appearance.hasOwnProperty("labelColor")) {
-                let data = {
-                    "-=colorset":null,
-                    "-=diceColor":null,
-                    "-=edgeColor":null,
-                    "-=font":null,
-                    "-=labelColor":null,
-                    "-=material":null,
-                    "-=outlineColor":null,
-                    "-=system":null,
-                    "-=texture":null
-                };
-                await user.setFlag("dice-so-nice", "appearance", data);
-            }
-        }));
 
-        //v4.1 to v4.2
-        //showGhostDice is now a string with 3 values. 0, 1 or 2
-        //If the setting was previously false, set it to 0. If it was true, set it to 1
-        await game.settings.set("dice-so-nice", "showGhostDice", game.settings.get("dice-so-nice", "showGhostDice") ? '1' : '0');
+        if (Utils.isVersionLessThan(formatversion, "4.1")) {
+            //v4 to v4.1 (fix)
+            //Remove the extra properties, no idea why tho
+            await Promise.all(game.users.map(async (user) => {
+                let appearance = user.getFlag("dice-so-nice", "appearance") ? foundry.utils.duplicate(user.getFlag("dice-so-nice", "appearance")) : null;
+                if (appearance && appearance.hasOwnProperty("labelColor")) {
+                    let data = {
+                        "-=colorset": null,
+                        "-=diceColor": null,
+                        "-=edgeColor": null,
+                        "-=font": null,
+                        "-=labelColor": null,
+                        "-=material": null,
+                        "-=outlineColor": null,
+                        "-=system": null,
+                        "-=texture": null
+                    };
+                    await user.setFlag("dice-so-nice", "appearance", data);
+                }
+            }));
 
+            migrated = true;
+        }
+
+        if(Utils.isVersionLessThan(formatversion, "4.2")) {
+            //v4.1 to v4.2
+            //showGhostDice is now a string with 3 values. 0, 1 or 2
+            //If the setting was previously false, set it to 0. If it was true, set it to 1
+            await game.settings.set("dice-so-nice", "showGhostDice", game.settings.get("dice-so-nice", "showGhostDice") ? '1' : '0');
+
+            migrated = true;
+        }
 
         game.settings.set("dice-so-nice", "formatVersion", Utils.DATA_FORMAT_VERSION);
-        if(migrated)
+        if (migrated)
             ui.notifications.info(game.i18n.localize("DICESONICE.migrateMessage"));
         return true;
     }
-
 
     /**
      *
@@ -186,18 +239,18 @@ import { TEXTURELIST, COLORSETS } from './DiceColors.js';
         let fontList = {
             "auto": game.i18n.localize("DICESONICE.FontAuto")
         };
-        return foundry.utils.mergeObject(fontList,FontConfig.getAvailableFontChoices());
+        return foundry.utils.mergeObject(fontList, FontConfig.getAvailableFontChoices());
     };
 
     static prepareColorsetList() {
         let colorsetList = Object.entries(COLORSETS).reduce((colorsetObj, [key, colorset]) => {
             if (colorset.visibility !== 'hidden') {
-                colorsetObj[key] = Object.assign({}, colorset, { label:game.i18n.localize(colorset.description), group: game.i18n.localize(colorset.category) });
+                colorsetObj[key] = Object.assign({}, colorset, { label: game.i18n.localize(colorset.description), group: game.i18n.localize(colorset.category) });
             }
             return colorsetObj;
         }, {});
 
-        return Object.fromEntries(Object.entries(colorsetList).sort((a,b) => a[1].label.localeCompare(b[1].label)));
+        return Object.fromEntries(Object.entries(colorsetList).sort((a, b) => a[1].label.localeCompare(b[1].label)));
     };
 
     static prepareSystemList() {
@@ -230,7 +283,7 @@ import { TEXTURELIST, COLORSETS } from './DiceColors.js';
             .reduce((res, key) => (res[key] = obj[key], res), {});
     }
 
-    static actionSaveAs(name){
+    static actionSaveAs(name) {
         let savesObject = game.user.getFlag("dice-so-nice", "saves");
         let saves;
         if (!savesObject) {
@@ -240,7 +293,7 @@ import { TEXTURELIST, COLORSETS } from './DiceColors.js';
             saves = new Map(Object.entries(savesObject));
         }
         //save current settings first
-        
+
         let saveObject = {
             appearance: game.user.getFlag("dice-so-nice", "appearance"),
             sfxList: game.user.getFlag("dice-so-nice", "sfxList"),
@@ -253,7 +306,7 @@ import { TEXTURELIST, COLORSETS } from './DiceColors.js';
         });
     }
 
-    static async actionDeleteSave(name){
+    static async actionDeleteSave(name) {
         let savesObject = game.user.getFlag("dice-so-nice", "saves");
         let saves = new Map(Object.entries(savesObject));
         saves.delete(name);
