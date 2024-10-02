@@ -285,6 +285,15 @@ export const COLORSETS = {
 		outline: 'gray',
 		texture: 'paper'
 	},
+	'vitality': {
+		name: 'vitality',
+		description: 'DICESONICE.ColorVitality',
+		category: 'DICESONICE.DamageTypes',
+		foreground: '#F9B333',
+		background: '#FFFFFF',
+		outline: 'gray',
+		texture: 'paper'
+	},
 	'fire': {
 		name: 'fire',
 		description: 'DICESONICE.ColorFire',
@@ -321,6 +330,15 @@ export const COLORSETS = {
 		outline: 'black',
 		texture: 'cloudy'
 	},
+	'bleed': {
+		name: 'bleed',
+		description: 'DICESONICE.ColorBleed',
+		category: 'DICESONICE.DamageTypes',
+		foreground: '#ff0000',
+		background: ['#6e0d0d', '#380000', '#900909', '#5c0000', '#420000'],
+		outline: 'black',
+		texture: 'cloudy'
+	},
 	'acid': {
 		name: 'acid',
 		description: 'DICESONICE.ColorAcid',
@@ -340,9 +358,27 @@ export const COLORSETS = {
 		outline: 'black',
 		texture: 'cloudy'
 	},
+	'sonic': {
+		name: 'sonic',
+		description: 'DICESONICE.ColorSonic',
+		category: 'DICESONICE.DamageTypes',
+		foreground: '#FFC500',
+		background: '#7D7D7D',
+		outline: 'black',
+		texture: 'cloudy'
+	},
 	'lightning': {
 		name: 'lightning',
 		description: 'DICESONICE.ColorLightning',
+		category: 'DICESONICE.DamageTypes',
+		foreground: '#FFC500',
+		background: ['#f17105', '#f3ca40','#eddea4','#df9a57','#dea54b'],
+		outline: '#7D7D7D',
+		texture: 'ice'
+	},
+	'electricity': {
+		name: 'electricity',
+		description: 'DICESONICE.ColorElectricity',
 		category: 'DICESONICE.DamageTypes',
 		foreground: '#FFC500',
 		background: ['#f17105', '#f3ca40','#eddea4','#df9a57','#dea54b'],
@@ -385,6 +421,15 @@ export const COLORSETS = {
 		outline: '#570000',
 		texture: 'stars'
 	},
+	'spirit': {
+		name: 'spirit',
+		description: 'DICESONICE.ColorSpirit',
+		category: 'DICESONICE.DamageTypes',
+		foreground: 'white',
+		background: ['#5a5585', '#403b6d','#28244c'],
+		outline: '#570000',
+		texture: 'stars'
+	},
 	'psychic': {
 		name: 'psychic',
 		description: 'DICESONICE.ColorPsychic',
@@ -394,9 +439,27 @@ export const COLORSETS = {
 		outline: 'black',
 		texture: 'speckles'
 	},
+	'mental': {
+		name: 'mental',
+		description: 'DICESONICE.ColorMental',
+		category: 'DICESONICE.DamageTypes',
+		foreground: '#D6A8FF',
+		background: ['#313866','#504099','#66409E','#934FC3','#C949FC','#313866'],
+		outline: 'black',
+		texture: 'speckles'
+	},
 	'necrotic': {
 		name: 'necrotic',
 		description: 'DICESONICE.ColorNecrotic',
+		category: 'DICESONICE.DamageTypes',
+		foreground: '#ffffff',
+		background: '#6F0000',
+		outline: 'black',
+		texture: 'skulls'
+	},
+	'void': {
+		name: 'void',
+		description: 'DICESONICE.ColorVoid',
 		category: 'DICESONICE.DamageTypes',
 		foreground: '#ffffff',
 		background: '#6F0000',
