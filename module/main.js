@@ -403,3 +403,24 @@ document.addEventListener("visibilitychange", function () {
         game.dice3d.hiddenAnimationQueue = [];
     }
 });
+
+//Chat Command integration
+Hooks.on("chatCommandsReady", commands => {
+    commands.register({
+        name: "/dice3d",
+        module: "dice-so-nice",
+        aliases: ["/d3d", "/dsn"],
+        description: game.i18n.localize("DICESONICE.ChatCommandDescription"),
+        icon: "<i class='fas fa-dice-d20'></i>",
+        requiredRole: "NONE",
+        callback: async (chat, parameters, messageData) => {
+            if (game.dice3d) {
+                const dsnRoll = await new Roll(parameters).evaluate();
+                game.dice3d.showForRoll(dsnRoll, game.user, true);
+            }
+            return {};
+        },
+        autocompleteCallback: (menu, alias, parameters) => [game.chatCommands.createInfoElement(game.i18n.localize("DICESONICE.ChatCommandCompletionDescription"))],
+        closeOnComplete: true
+    });
+});
