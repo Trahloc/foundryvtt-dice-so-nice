@@ -191,6 +191,15 @@ Hooks.once('init', () => {
         requiresReload: true
     });
 
+    game.settings.register("dice-so-nice", "hide3dDiceOnSecretRolls", {
+        name: "DICESONICE.hide3dDiceOnSecretRolls",
+        hint: "DICESONICE.hide3dDiceOnSecretRollsHint",
+        scope: "world",
+        type: Boolean,
+        default: true,
+        config: true
+    });
+
     game.settings.register("dice-so-nice", "showGhostDice", {
         name: "DICESONICE.showGhostDice",
         hint: "DICESONICE.showGhostDiceHint",
@@ -228,8 +237,9 @@ Hooks.once('ready', () => {
 const shouldInterceptMessage = (chatMessage, options = {dsnCountAddedRoll: 0, dsnIndexAddedRoll: 0}) => {
     const hasInlineRoll = game.settings.get("dice-so-nice", "animateInlineRoll") && chatMessage.content.includes('inline-roll');
 
+    const hide3dDiceOnSecretRolls = game.settings.get("dice-so-nice", "hide3dDiceOnSecretRolls");
     const showGhostDice = game.settings.get("dice-so-nice", "showGhostDice");
-    const shouldShowGhostDice = showGhostDice === "1" || (showGhostDice === "2" && game.user.id === chatMessage.author.id);
+    const shouldShowGhostDice = (showGhostDice === "1" || (showGhostDice === "2" && game.user.id === chatMessage.author.id) && hide3dDiceOnSecretRolls);
     
     const isContentVisible = chatMessage.isContentVisible;
     const shouldAnimateRollTable = game.settings.get("dice-so-nice", "animateRollTable");
@@ -242,7 +252,7 @@ const shouldInterceptMessage = (chatMessage, options = {dsnCountAddedRoll: 0, ds
     //Is a roll
     let interception = (chatMessage.isRoll || hasInlineRoll) &&
     //If the content is  visible and ghost dice should  be shown
-    (isContentVisible || shouldShowGhostDice) &&
+    (isContentVisible || shouldShowGhostDice || !hide3dDiceOnSecretRolls) &&
     //If dsn is correctly enabled and the message hook is not disabled
     game.dice3d && !game.dice3d.messageHookDisabled &&
     //If it has a roll table, then check if the roll table should be animated and the roll table is displayed

@@ -715,9 +715,10 @@ export class Dice3D {
 
         let chatMessage = game.messages.get(messageID);
         if (chatMessage) {
-            if (chatMessage.whisper.length > 0)
+            const hide3dDiceOnSecretRolls = game.settings.get("dice-so-nice", "hide3dDiceOnSecretRolls");
+            if (chatMessage.whisper.length > 0 && hide3dDiceOnSecretRolls)
                 context.roll.secret = true;
-            if (!chatMessage.isContentVisible)
+            if (!chatMessage.isContentVisible && hide3dDiceOnSecretRolls)
                 context.roll.ghost = true;
         }
 
