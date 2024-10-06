@@ -79,7 +79,7 @@
     "DICESONICE.useHighDPI": "Wsparcie rozdzielczości UHD (4k, Retina...)",
     "DICESONICE.showOthersSFX": "Pokaż specjalne efekty innych graczy",
     "DICESONICE.animateRollTable": "Włącz rzuty 3D przy Tablicach Rzutów",
-    "DICESONICE.animateRollTableHint": "Pokaż rzut 3D podczas rzutów z Tablicy, kiedy to możliwe. Upewnij się, że opcja \"animuj rzuty tablic\" w ustawieniach cora jest wyłączona.",
+    "DICESONICE.animateRollTableHint": "Pokaż kość 3D podczas rzucania z Tabeli Losowej. Należy wyłączyć opcję „Animuj tabele rzutów” w ustawieniach podstawowych i wyłączyć opcję „Wyświetlaj formułę na czacie” w tabeli rzutów.",
     "DICESONICE.hideNpcRolls": "Wyłącz rzuty 3D dla BNów",
     "DICESONICE.animateInlineRoll": "Włącz kości 3D dla rzutów wewnętrznych",
     "DICESONICE.animateInlineRollHint": "Kiedy to możliwe, pokazuje kości 3D dla rzutów wewnętrznych wykrytych na czacie (formuły osadzone w środku innych bytów, np [[1d12]]).",
@@ -272,5 +272,8 @@
     "DICESONICE.onlyShowMyDice": "Pokaż tylko moje kości",
     "DICESONICE.ghostDiceDisabled": "Wyłącz kości duchów",
     "DICESONICE.resetWelcomeMessage": "Zresetuj wiadomość powitalną",
-    "DICESONICE.resetWelcomeMessageHint": "Spowoduje to zresetowanie wiadomości powitalnej dla wszystkich graczy. Wiadomość powitalna pojawi się ponownie, gdy następnym razem dołączą do tego świata."
+    "DICESONICE.resetWelcomeMessageHint": "Spowoduje to zresetowanie wiadomości powitalnej dla wszystkich graczy. Wiadomość powitalna pojawi się ponownie, gdy następnym razem dołączą do tego świata.",
+    "DICESONICE.SystemOptions": "Ustawienia systemowe",
+    "DICESONICE.forceCharacterOwnerAppearanceForInitiative": "Użyj kości właściciela do inicjatywy",
+    "DICESONICE.forceCharacterOwnerAppearanceForInitiativeHint": "Gdy opcja ta jest włączona, podczas rzutu inicjatywą z trackera walki używany jest wygląd kości właściciela postaci, niezależnie od autora rzutu (tj. MG)."
 }

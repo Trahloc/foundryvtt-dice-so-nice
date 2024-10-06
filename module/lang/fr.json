@@ -82,7 +82,7 @@
     "DICESONICE.useHighDPI": "Résolution Ultra-HD (4K, Retina…)",
     "DICESONICE.showOthersSFX": "Jouer les effets spéciaux des autres joueurs",
     "DICESONICE.animateRollTable": "Activer les dés 3D pour les 'Tables aléatoires'",
-    "DICESONICE.animateRollTableHint": "Quand possible, afficher une animation 3D lors d'un lancé sur une table aléatoire. Pensez à désactiver 'Animation des tables aléatoires' dans la configuration générale.",
+    "DICESONICE.animateRollTableHint": "Afficher une animation 3D lors d'un lancé sur une table aléatoire. 'Animation des tables aléatoires' doit être 'off' ainsi que 'Afficher la Formule dans le Chat'.",
     "DICESONICE.hideNpcRolls": "Désactiver la 3D pour les jets de PNJ",
     "DICESONICE.hideNpcRollsHint": "Ne pas afficher les dés 3D lorsqu'un PNJ lance des dés.",
     "DICESONICE.animateInlineRoll": "Activer la 3D pour les jets 'Inline'",
@@ -278,5 +278,9 @@
     "DICESONICE.openDiceEditorLabel": "Ouvrir l’Éditeur de Dé",
     "DICESONICE.forceCharacterOwnerAppearanceForInitiative": "Utiliser les dés du joueur pour l'initiative",
     "DICESONICE.forceCharacterOwnerAppearanceForInitiativeHint": "Lorsque cette option est activée, l'apparence des dés du joueur du personnage est utilisée lors des jets d'initiative, quel que soit l'auteur du jet (ex : MJ).",
-    "DICESONICE.SystemOptions": "Paramètres du système"
+    "DICESONICE.SystemOptions": "Paramètres du système",
+    "DICESONICE.hide3dDiceOnSecretRollsHint": "Ne pas montrer les dés 3D aux autres joueurs lors des jets de dés à l'aveugle.",
+    "DICESONICE.hide3dDiceOnSecretRolls": "Cacher les dés 3D sur les jets aveugle/MJ",
+    "DICESONICE.ChatCommandDescription": "Lancer des dés 3D sans créer de message",
+    "DICESONICE.ChatCommandCompletionDescription": "Entrer une formule de jet."
 }
