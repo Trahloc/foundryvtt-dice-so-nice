@@ -250,7 +250,7 @@ const shouldInterceptMessage = (chatMessage, options = {dsnCountAddedRoll: 0, ds
     const rollTableFormulaDisplayed = hasRollTableFlag && (game.tables.get(hasRollTableFlag)?.displayRoll ?? true);
 
     //Is a roll
-    let interception = (chatMessage.isRoll || hasInlineRoll) &&
+    let willTrigger3DRoll = (chatMessage.isRoll || hasInlineRoll) &&
     //If the content is  visible and ghost dice should  be shown
     (isContentVisible || shouldShowGhostDice || !hide3dDiceOnSecretRolls) &&
     //If dsn is correctly enabled and the message hook is not disabled
@@ -260,9 +260,11 @@ const shouldInterceptMessage = (chatMessage, options = {dsnCountAddedRoll: 0, ds
     //If there's at least one roll with diceterms (could be a deterministic roll without any dice like Roll("5")) or has an inline roll
     (chatMessage.rolls.slice(options.dsnIndexAddedRoll).some(roll => roll.dice.length > 0) || hasInlineRoll);
 
+    const interception = {willTrigger3DRoll: willTrigger3DRoll};
+
     Hooks.callAll("diceSoNiceMessageProcessed", chatMessage.id, interception);
 
-    return interception;
+    return interception.willTrigger3DRoll;
 };
 
 /**
