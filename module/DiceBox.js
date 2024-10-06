@@ -985,7 +985,7 @@ export class DiceBox {
 			
 			this.scene.traverse(obj => {
 				if(obj.mixer)
-					dicemesh.mixer.update(delta);
+					obj.mixer.update(delta);
 				if(obj.material?.mixer)
 					animatedMaterials.add(obj.material);
 			});
