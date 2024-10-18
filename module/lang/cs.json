@@ -58,7 +58,7 @@
     "DICESONICE.useHighDPI": "Aktivovat podporu obrazovek s 'vysokou hustotou' (4K, Retina…)",
     "DICESONICE.showOthersSFX": "Zobrazovat speciální efekty ostatních hráčů",
     "DICESONICE.animateRollTable": "Aktivovat 3D kostky pro Tabulky Hodů",
-    "DICESONICE.animateRollTableHint": "Pokud je možné, zobraz 3D kostky při hodech z Tabulky Hodů. Ujistěte se, že 'animovat tabulky hodů' v základním nastavení je vypnuto.",
+    "DICESONICE.animateRollTableHint": "Zobraz 3D kostky při hodech z Tabulky Hodů. Vyžaduje vypnutí 'animovat tabulky hodů' v základním nastavení a vypnutí 'zobrazení výsledku v chatu' v tabulce hodů.",
     "DICESONICE.hideNpcRolls": "Deaktivovat 3D kostky pro hody CP",
     "DICESONICE.hideNpcRollsHint": "Nezobrazovat 3D kostky pro žádný hod pocházející od CP.",
     "DICESONICE.animateInlineRoll": "Aktivovat 3D kostky pro Inline Hody",
@@ -269,5 +269,15 @@
     "DICESONICE.ghostDiceForAll": "Všem hráčům",
     "DICESONICE.ghostDiceForRollAuthor": "Pouze tomu co hodil",
     "DICESONICE.resetWelcomeMessage": "Obnovit uvítací zprávu",
-    "DICESONICE.resetWelcomeMessageHint": "Toto obnoví uvítací zprávu všem hráčům. Uvidí ji při dalším připojení se do světa."
+    "DICESONICE.resetWelcomeMessageHint": "Toto obnoví uvítací zprávu všem hráčům. Uvidí ji při dalším připojení se do světa.",
+    "DICESONICE.hide3dDiceOnSecretRolls": "Skryj 3D kostky při hodech PJ/Slepých",
+    "DICESONICE.SystemOptions": "Nastavení systému",
+    "DICESONICE.forceCharacterOwnerAppearanceForInitiativeHint": "Když povoleno, použije se vzhled kostek vlastníka postavy při hodu na iniciativu z bojového panelu bez ohledu na házejícího (tj.PJ).",
+    "DICESONICE.forceCharacterOwnerAppearanceForInitiative": "Použít kostku vlastníka pro iniciativu",
+    "DICESONICE.ghostDiceDisabled": "Zakázat duchařskou kostku",
+    "DICESONICE.openDiceEditorLabel": "Otevřít editor kostky",
+    "DICESONICE.hide3dDiceOnSecretRollsHint": "Nezobrazí 3D kostky ostatním hráčům při hodech PJ/Slepých.",
+    "DICESONICE.openDiceEditorButton": "Editor kostky",
+    "DICESONICE.ChatCommandDescription": "Hod 3D kostkami bez vytvoření zprávy v chatu",
+    "DICESONICE.ChatCommandCompletionDescription": "Zadej formuli hodu."
 }

@@ -82,7 +82,7 @@
     "DICESONICE.useHighDPI": "Suporte à resolução UDH (4k, Retina…)",
     "DICESONICE.showOthersSFX": "Mostrar efeitos especiais de outros jogadores",
     "DICESONICE.animateRollTable": "Ativar dados 3D nas Tabelas de Rolagem",
-    "DICESONICE.animateRollTableHint": "Quando possível, mostre um dado 3D ao rolar em uma Tabela de Rolagem. Certifique-se de desabilitar 'animar tabelas de rolagens' nas configurações principais.",
+    "DICESONICE.animateRollTableHint": "Mostrar um dado 3D ao rolar em uma Tabela de Rolagem. A opção 'Animar Tabelas de Rolagem' deve estar desabilitada nas configurações principais e 'Exibir Rolagem no Chat' deve estar desabilitada na Tabela de Rolagem.",
     "DICESONICE.hideNpcRolls": "Desabilitar dados 3D em jogadas de PNJ",
     "DICESONICE.hideNpcRollsHint": "Não mostre dados 3D para nenhum lançamento vindo de um PNJ.",
     "DICESONICE.animateInlineRoll": "Habilitar dados 3D em Rolagens Inline",
@@ -264,5 +264,13 @@
     "DICESONICE.TourMainContentEndTour": "Se quiser mais informações, consulte nossa página de ajuda na janela de Gerenciamento de Módulos. Feliz rolagem!",
     "DICESONICE.WelcomeTitle": "Dice So Nice - Seus dados 3D",
     "DICESONICE.sfxOptionsMuteSound": "Silenciar som",
-    "DICESONICE.PlayAnimationOutline": "Animação: Contorno"
+    "DICESONICE.PlayAnimationOutline": "Animação: Contorno",
+    "DICESONICE.onlyShowMyDice": "Mostrar apenas meu dado",
+    "DICESONICE.SystemOptions": "Configurações do Sistema",
+    "DICESONICE.forceCharacterOwnerAppearanceForInitiative": "Use os dados do proprietário para iniciativa",
+    "DICESONICE.forceCharacterOwnerAppearanceForInitiativeHint": "Quando ativado, use a aparência dos dados do dono do personagem ao rolar a iniciativa do rastreador de combate, independentemente do autor da rolagem (exemplo: MJ).",
+    "DICESONICE.ghostDiceDisabled": "Desabilitar Dados Fantasma",
+    "DICESONICE.ghostDiceForAll": "Para Todos Jogadores",
+    "DICESONICE.hide3dDiceOnSecretRolls": "Ocultar dados 3D em rolagens de MJ/Cega",
+    "DICESONICE.hide3dDiceOnSecretRollsHint": "Não exibe os dados 3D para outros jogadores em rolagens de MJ/Cega."
 }

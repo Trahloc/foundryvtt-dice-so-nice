@@ -275,5 +275,9 @@
     "DICESONICE.resetWelcomeMessageHint": "Spowoduje to zresetowanie wiadomości powitalnej dla wszystkich graczy. Wiadomość powitalna pojawi się ponownie, gdy następnym razem dołączą do tego świata.",
     "DICESONICE.SystemOptions": "Ustawienia systemowe",
     "DICESONICE.forceCharacterOwnerAppearanceForInitiative": "Użyj kości właściciela do inicjatywy",
-    "DICESONICE.forceCharacterOwnerAppearanceForInitiativeHint": "Gdy opcja ta jest włączona, podczas rzutu inicjatywą z trackera walki używany jest wygląd kości właściciela postaci, niezależnie od autora rzutu (tj. MG)."
+    "DICESONICE.forceCharacterOwnerAppearanceForInitiativeHint": "Gdy opcja ta jest włączona, podczas rzutu inicjatywą z trackera walki używany jest wygląd kości właściciela postaci, niezależnie od autora rzutu (tj. MG).",
+    "DICESONICE.hide3dDiceOnSecretRolls": "Ukryj kości 3D podczas rzutów ukrytych/MG",
+    "DICESONICE.hide3dDiceOnSecretRollsHint": "Nie pokazuj kości 3D innym graczom podczas ślepych/MG rzutów.",
+    "DICESONICE.ChatCommandDescription": "Rzuć kostką 3D bez tworzenia wiadomości na czacie",
+    "DICESONICE.ChatCommandCompletionDescription": "Wprowadź formułę rzutu."
 }
