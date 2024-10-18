@@ -739,8 +739,8 @@ export class DiceBox {
 
 		this.diceList.push(dicemesh);
 		if (dicemesh.startAtIteration == 0) {
-			this.scene.add(objectContainer);
-			this.dicefactory.systems.get(appearance.system).fire(DiceSystem.DICE_EVENT_TYPE.SPAWN, { dice: dicemesh });
+			//this.scene.add(objectContainer);
+			//this.dicefactory.systems.get(appearance.system).fire(DiceSystem.DICE_EVENT_TYPE.SPAWN, { dice: dicemesh });
 			await this.physicsWorker.exec('addDice', dicemesh.id);
 		}
 	}
@@ -802,7 +802,14 @@ export class DiceBox {
 		this.detectedCollides = this.soundManager.generateCollisionSounds(detectedCollides);
 	}
 
-
+	addDiceToScene() {
+		for (let i = 0; i < this.diceList.length; i++) {
+			if (this.diceList[i].startAtIteration == this.iteration) {
+				this.scene.add(this.diceList[i].parent);
+				this.dicefactory.systems.get(this.diceList[i].userData.system).fire(DiceSystem.DICE_EVENT_TYPE.SPAWN, { dice: this.diceList[i] });
+			}
+		}
+	}
 
 	//This is the render loop for the board. /!\ Not called in the showcase /!\
 	animateThrow() {
@@ -813,16 +820,15 @@ export class DiceBox {
 
 		let neededSteps = Math.floor(time_diff / this.framerate);
 
+		if(this.iteration == 0) {
+			this.addDiceToScene();
+		}
+
 		if (neededSteps && this.rolling) {
 			for (let i = 0; i < neededSteps * this.speed; i++) {
 				++this.iteration;
 				if (!(this.iteration % this.nbIterationsBetweenRolls)) {
-					for (let i = 0; i < this.diceList.length; i++) {
-						if (this.diceList[i].startAtIteration == this.iteration) {
-							this.scene.add(this.diceList[i].parent);
-							this.dicefactory.systems.get(this.diceList[i].userData.system).fire(DiceSystem.DICE_EVENT_TYPE.SPAWN, { dice: this.diceList[i] });
-						}
-					}
+					this.addDiceToScene();
 				}
 			}
 			if (this.iteration > this.iterationsNeeded)
