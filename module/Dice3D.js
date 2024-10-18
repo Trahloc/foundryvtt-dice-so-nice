@@ -576,12 +576,12 @@ export class Dice3D {
         const showMessage = () => {
             delete chatMessage._dice3danimating;
 
-            let messageElement = window.ui.chat.element.find(`.message[data-message-id="${chatMessage.id}"]`);
+            let messageElement = $(window.ui.chat.element).find(`.message[data-message-id="${chatMessage.id}"]`);
             messageElement.removeClass("dsn-hide");
 
             let messageElementPopout;
             if(window.ui.sidebar.popouts.chat){
-                messageElementPopout = window.ui.sidebar.popouts.chat.element.find(`.message[data-message-id="${chatMessage.id}"]`);
+                messageElementPopout = $(window.ui.sidebar.popouts.chat.element).find(`.message[data-message-id="${chatMessage.id}"]`);
                 messageElementPopout.removeClass("dsn-hide");
             }
             
