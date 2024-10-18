@@ -16,21 +16,21 @@ export class DiceNotation {
 			if([2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 20, 24, 30, 100].includes(die.faces)) {
 				//We flag every single die with a throw number, to queue exploded dice
 				let cnt=die.number;
-				let countExploded = 0;
+				let countExtraDice = 0;
 				let localNbThrow = 0;
 				for(let i =0; i< die.results.length; i++){
 					if(localNbThrow >= this.throws.length)
 						this.throws.push({dice:[]});
 
-					if(die.results[i].exploded)
-						countExploded++;
+					if(die.results[i].exploded || die.results[i].rerolled)
+						countExtraDice++;
 					die.results[i].indexThrow = localNbThrow;
 					if (die.results[i].discarded) continue; //Continue if die result is discarded
 					//If we have a new throw
 					if(--cnt <= 0){
 						localNbThrow++;
-						cnt = countExploded;
-						countExploded = 0;
+						cnt = countExtraDice;
+						countExtraDice = 0;
 					}
 				}
 			}
