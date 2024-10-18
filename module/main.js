@@ -436,3 +436,10 @@ Hooks.on("chatCommandsReady", commands => {
         closeOnComplete: true
     });
 });
+
+Hooks.on("collapseSidebar", (sidebar, collapsed) => {
+    if (game.dice3d) {
+        //let the time for a css repaint
+        setTimeout(() => game.dice3d.resizeAndRebuild(), 300);
+    }
+});
