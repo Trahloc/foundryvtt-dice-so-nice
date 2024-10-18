@@ -739,8 +739,6 @@ export class DiceBox {
 
 		this.diceList.push(dicemesh);
 		if (dicemesh.startAtIteration == 0) {
-			//this.scene.add(objectContainer);
-			//this.dicefactory.systems.get(appearance.system).fire(DiceSystem.DICE_EVENT_TYPE.SPAWN, { dice: dicemesh });
 			await this.physicsWorker.exec('addDice', dicemesh.id);
 		}
 	}
