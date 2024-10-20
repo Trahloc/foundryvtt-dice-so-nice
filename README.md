@@ -4,6 +4,8 @@
 [![Foundry Hub Comments](https://img.shields.io/endpoint?logoColor=white&url=https%3A%2F%2Fwww.foundryvtt-hub.com%2Fwp-json%2Fhubapi%2Fv1%2Fpackage%2Fdice-so-nice%2Fshield%2Fcomments)](https://www.foundryvtt-hub.com/package/dice-so-nice/)
 [![Translation status](https://weblate.foundryvtt-hub.com/widgets/dice-so-nice/-/main/svg-badge.svg)](https://weblate.foundryvtt-hub.com/engage/dice-so-nice/)
 
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/E1E43RA5Z)
+
 This module for Foundry VTT adds the ability to show a 3D dice simulation when a roll is made.
 
 [[_TOC_]]
