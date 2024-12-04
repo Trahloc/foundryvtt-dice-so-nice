@@ -585,10 +585,11 @@ export class Dice3D {
                 messageElementPopout.removeClass("dsn-hide");
             }
 
+            // compatibility v13 proto2 - TODO clean up consistency jquery
             const notificationElement = document.querySelector(`#chat-notifications .message[data-message-id="${chatMessage.id}"]`);
             if ( notificationElement ) {
                 notificationElement.classList.remove("dsn-hide");
-                notificationElement._lifeSpan = 0; // Reset lifespan so timeout duration starts from when the message is shown.
+                notificationElement._lifeSpan = 0; // Reset lifespan so timeout duration starts from when the message is shown. No public method yet
             }
 
             if(chatMessage._dice3dMessageHidden){
