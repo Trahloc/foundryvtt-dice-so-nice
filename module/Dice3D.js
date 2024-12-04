@@ -584,7 +584,13 @@ export class Dice3D {
                 messageElementPopout = $(window.ui.sidebar.popouts.chat.element).find(`.message[data-message-id="${chatMessage.id}"]`);
                 messageElementPopout.removeClass("dsn-hide");
             }
-            
+
+            const notificationElement = document.querySelector(`#chat-notifications .message[data-message-id="${chatMessage.id}"]`);
+            if ( notificationElement ) {
+                notificationElement.classList.remove("dsn-hide");
+                notificationElement._lifeSpan = 0; // Reset lifespan so timeout duration starts from when the message is shown.
+            }
+
             if(chatMessage._dice3dMessageHidden){
                 //first/initial rolls are done
                 chatMessage._dice3dMessageHidden = false;
