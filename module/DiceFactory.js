@@ -380,7 +380,7 @@ export class DiceFactory {
 	//Internal use, legacy
 	//See dice3d.addSystem for public API
 	addSystem(system, mode="default"){
-		if(system instanceof DiceSystem){
+		if(system.constructor.name === 'DiceSystem'){ //note: do not use instanceof, it breaks on The Forge
 			this.systems.set(system.id, system);
 			mode = system.mode;
 		} else {
