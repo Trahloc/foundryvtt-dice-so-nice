@@ -564,7 +564,7 @@ export class Dice3D {
     update(settings) {
         this.box.update(settings);
     }
-
+    
     /**
      * Parse, sort and add the dice animation to the queue for a chat message and an array of Roll
      * Used internally by the message Hooks. Not meant to be used outside of the module.
@@ -706,6 +706,17 @@ export class Dice3D {
 
         if (options.secret) {  
             context.roll.secret = true;
+        }
+
+        //If the showForRoll method was called directly from the API, we didn't get the chance to retrieve a roll appearance
+        if(context.roll.options?.appearance) { //this can only exist if the showForRoll method was called directly from the API
+            context.roll.dice.forEach(diceTerm => {
+                if(!diceTerm.options)
+                    diceTerm.options = {};
+                if(!diceTerm.options.appearance)
+                    diceTerm.options.appearance = {};
+                diceTerm.options.appearance = foundry.utils.mergeObject(diceTerm.options.appearance, context.roll.options.appearance);
+            });
         }
 
         if (speaker) { 
