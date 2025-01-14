@@ -12,6 +12,7 @@ import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { GammaCorrectionShader } from 'three/examples/jsm/shaders/GammaCorrectionShader.js';
 import { SMAAPass } from './libs/SMAAPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import Stats from 'stats-gl';
 
 import {
 	ACESFilmicToneMapping,
@@ -182,14 +183,27 @@ export class DiceBox {
 				game.dice3d.dice3dRenderers[this.config.boxType] = this.renderer;
 			}
 
+			this.stats = null;
 			if (false && this.config.boxType == "board") {
-				this.rendererStats = new RendererStats()
-
-				this.rendererStats.domElement.style.position = 'absolute';
-				this.rendererStats.domElement.style.left = '44px';
-				this.rendererStats.domElement.style.bottom = '178px';
-				this.rendererStats.domElement.style.transform = 'scale(2)';
-				document.body.appendChild(this.rendererStats.domElement);
+				this.stats = new Stats({
+					trackGPU: true,
+					trackHz: true,
+					trackCPT: true,
+					logsPerSecond: 4,
+					graphsPerSecond: 30,
+					samplesLog: 40, 
+					samplesGraph: 10, 
+					precision: 2, 
+					horizontal: true,
+					minimal: false, 
+					mode: 0
+				});
+				
+				// append the stats container to the body of the document
+				document.body.appendChild( this.stats.dom );
+				
+				// begin the performance monitor
+				this.stats.init(this.renderer);
 			}
 
 			this.container.appendChild(this.renderer.domElement);
@@ -817,6 +831,9 @@ export class DiceBox {
 		let time_diff = (time - this.last_time) / 1000;
 
 		let neededSteps = Math.floor(time_diff / this.framerate);
+
+		if(this.stats)
+			this.stats.update();
 
 		if(this.iteration == 0) {
 			this.addDiceToScene();

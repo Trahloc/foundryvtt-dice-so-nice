@@ -27,7 +27,8 @@
     "rollup": "^4.19.1",
     "rollup-plugin-copy": "^3.5.0",
     "rollup-plugin-web-worker-loader": "github:JiDW/rollup-plugin-web-worker-loader#master",
-    "three": "^0.168.0",
+    "stats-gl": "^3.6.0",
+    "three": "^0.172.0",
     "webworker-promise": "^0.5.1"
   }
 }
