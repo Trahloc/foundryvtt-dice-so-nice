@@ -663,6 +663,19 @@ export class Dice3D {
                         if(actor && actor.hasPlayerOwner) {
                             //get the user from game.users
                             author = game.users.find(user => !user.isGM && user.character?.id == actor.id);
+                            if(!author) {
+                                //if we could not find a player user, we try to find a player owner, if and only if the actor only has a single player owner (but can have multiple GMs)
+                                const ownership = {...actor.ownership}; //ie {"default": 0,"Q1Qcc8RRRcvG6QjE": 3}
+                                if(ownership.default != CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER) { //Check that the default isn't Owner
+                                    //now get all the owners that are not GMs nor the default
+                                    delete ownership.default;
+                                    const playerOwners = Object.keys(ownership).filter(key => game.users.get(key) && !game.users.get(key).isGM);
+                                    //if there is only one player owner
+                                    if(playerOwners.length == 1) {
+                                        author = game.users.get(playerOwners[0]);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
