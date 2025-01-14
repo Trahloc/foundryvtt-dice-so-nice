@@ -5,6 +5,7 @@ import { TEXTURELIST, COLORSETS } from './DiceColors.js';
 export class Utils {
 
     static DATA_FORMAT_VERSION = "4.2";
+    static RELOAD_REQUIRED_IF_MODIFIED = ["canvasZIndex", "bumpMapping", "useHighDPI", "glow", "antialiasing", "enabled"];
 
     /**
      * Check if the user's version is less than a specific target version.
@@ -297,7 +298,7 @@ export class Utils {
         let saveObject = {
             appearance: game.user.getFlag("dice-so-nice", "appearance"),
             sfxList: game.user.getFlag("dice-so-nice", "sfxList"),
-            settings: game.settings.get("dice-so-nice", "settings")
+            settings: game.user.getFlag("dice-so-nice", "settings")
         };
 
         saves.set(name, saveObject);
@@ -329,8 +330,20 @@ export class Utils {
             await game.user.setFlag("dice-so-nice", "sfxList", save.sfxList);
         }
         if (save.settings) {
+            //For each Utils.RELOAD_REQUIRED_IF_MODIFIED check if the value has changed and reload if so
+            let settings = game.user.getFlag("dice-so-nice", "settings");
+            let reloadRequired = false;
+            Utils.RELOAD_REQUIRED_IF_MODIFIED.forEach(key => {
+                if (settings.hasOwnProperty(key) && save.settings.hasOwnProperty(key) && settings[key] != save.settings[key]) {
+                    reloadRequired = true;
+                }
+            });
             await game.user.unsetFlag("dice-so-nice", "settings");
             await game.user.setFlag("dice-so-nice", "settings", save.settings);
+
+            if (reloadRequired) {
+                window.location.reload();
+            }
         }
     }
 }
