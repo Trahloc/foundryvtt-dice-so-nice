@@ -38,7 +38,7 @@ const config = {
     format: 'es',
     entryFileNames: '[name].js',
     chunkFileNames: '[name]-[hash].js',
-    sourcemap: !isProduction,
+    sourcemap: true,
     manualChunks(id) {
       if (id.includes('api.js')) {
         return 'api';
