@@ -2,7 +2,6 @@ import { DICE_MODELS } from './DiceModels.js';
 import { DiceSFXManager } from './DiceSFXManager.js';
 import { DiceSystem } from './DiceSystem.js';
 import { SoundManager } from './SoundManager.js';
-import { RendererStats } from './libs/threex.rendererstats.js';
 //import {GLTFExporter} from 'three/examples/jsm/loaders/exporters/GLTFExporter.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
@@ -858,6 +857,7 @@ export class DiceBox {
 				}
 			}
 
+			//Note: if the game is lagging, it means some collisions won't be played. Not sure if it is what we want or not
 			if (this.detectedCollides[this.iteration]) {
 				this.soundManager.playAudioSprite(...this.detectedCollides[this.iteration]);
 			}
@@ -900,22 +900,19 @@ export class DiceBox {
 
 			this.renderScene();
 		}
-		if (this.rendererStats)
-			this.rendererStats.update(this.renderer);
+
 		this.last_time = this.last_time + neededSteps * this.framerate * 1000;
 
 		// roll finished
 		if (this.throwFinished()) {
-			for(let i = 0; i < this.diceList.length; i++){
-				this.dicefactory.systems.get(this.diceList[i].userData.system).fire(DiceSystem.DICE_EVENT_TYPE.RESULT, { dice: this.diceList[i] });
-			}
 			//if animated dice still on the table, keep animating
 			if (this.running) {
+				for(let i = 0; i < this.diceList.length; i++){
+					this.dicefactory.systems.get(this.diceList[i].userData.system).fire(DiceSystem.DICE_EVENT_TYPE.RESULT, { dice: this.diceList[i] });
+				}
 				this.handleSpecialEffectsInit().then(() => {
-					this.callback(this.throws);
-					this.callback = null;
-					this.throws = null;
 					this.rolling = false;
+					this.callback(this.throws);
 					if (!this.animatedDiceDetected && !(this.allowInteractivity && (this.deadDiceList.length + this.diceList.length) > 0) && !DiceSFXManager.renderQueue.length)
 						this.removeTicker(this.animateThrow);
 				});
@@ -926,6 +923,8 @@ export class DiceBox {
 
 	async start_throw(throws, callback) {
 		if (this.rolling) return;
+		this.throws = null;
+		this.callback = null;
 		let countNewDice = 0;
 		throws.forEach(notation => {
 			let vector = { x: (Math.random() * 2 - 0.5) * this.display.currentWidth, y: -(Math.random() * 2 - 0.5) * this.display.currentHeight };
@@ -1103,9 +1102,11 @@ export class DiceBox {
 	}
 
 	async rollDice(throws, callback) {
-
-		this.camera.position.z = this.cameraHeight.far;
+		console.log("rollDice", throws);
+		//old code??
+		//this.camera.position.z = this.cameraHeight.far;
 		this.clearDice();
+
 		this.minIterations = (throws.length - 1) * this.nbIterationsBetweenRolls;
 
 		for (let j = 0; j < throws.length; j++) {

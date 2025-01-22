@@ -866,13 +866,10 @@ export class Dice3D {
      */
     _startQueueHandler() {
         this.queue = [];
-        setInterval(() => {
-            this._processQueue();
-        }, 100);
     }
 
     _processQueue() {
-        if (this.queue.length > 0 && !this.box.rolling) {
+        if (this.queue.length > 0) {
             let animate = this.queue.shift();
             animate();
         }
@@ -898,6 +895,7 @@ export class Dice3D {
                         });
                     });
                 }
+                this._processQueue();
             } else {
                 for (let item of items)
                     item.resolve(false);
