@@ -1102,7 +1102,6 @@ export class DiceBox {
 	}
 
 	async rollDice(throws, callback) {
-		console.log("rollDice", throws);
 		//old code??
 		//this.camera.position.z = this.cameraHeight.far;
 		this.clearDice();
