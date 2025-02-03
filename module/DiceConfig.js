@@ -843,7 +843,8 @@ export class DiceConfig extends FormApplication {
         let data = {
             appearance: game.user.getFlag("dice-so-nice", "appearance"),
             sfxList: game.user.getFlag("dice-so-nice", "sfxList"),
-            settings: game.user.getFlag("dice-so-nice", "settings")
+            settings: game.user.getFlag("dice-so-nice", "settings"),
+            saves: game.user.getFlag("dice-so-nice", "saves")
         };
 
         return JSON.stringify(data, null, 2);
@@ -877,6 +878,10 @@ export class DiceConfig extends FormApplication {
         if (data.settings) {
             await game.user.unsetFlag("dice-so-nice", "settings");
             await game.user.setFlag("dice-so-nice", "settings", data.settings);
+        }
+        if (data.saves) {
+            await game.user.unsetFlag("dice-so-nice", "saves");
+            await game.user.setFlag("dice-so-nice", "saves", data.saves);
         }
     }
 
@@ -1274,8 +1279,7 @@ export class DiceConfig extends FormApplication {
         }
         ui.notifications.info(game.i18n.localize("DICESONICE.saveMessage"));
 
-        let reloadRequiredIfChanged = ["canvasZIndex", "bumpMapping", "useHighDPI", "glow", "antialiasing", "enabled"];
-        let reloadRequired = reloadRequiredIfChanged.some(setting => settings[setting] != currentSettings[setting]);
+        let reloadRequired = Utils.RELOAD_REQUIRED_IF_MODIFIED.some(setting => settings[setting] != currentSettings[setting]);
 
         if (reloadRequired) {
             window.location.reload();
