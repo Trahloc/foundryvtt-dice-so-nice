@@ -564,7 +564,7 @@ export class Dice3D {
     update(settings) {
         this.box.update(settings);
     }
-
+    
     /**
      * Parse, sort and add the dice animation to the queue for a chat message and an array of Roll
      * Used internally by the message Hooks. Not meant to be used outside of the module.
@@ -663,6 +663,19 @@ export class Dice3D {
                         if(actor && actor.hasPlayerOwner) {
                             //get the user from game.users
                             author = game.users.find(user => !user.isGM && user.character?.id == actor.id);
+                            if(!author) {
+                                //if we could not find a player user, we try to find a player owner, if and only if the actor only has a single player owner (but can have multiple GMs)
+                                const ownership = {...actor.ownership}; //ie {"default": 0,"Q1Qcc8RRRcvG6QjE": 3}
+                                if(ownership.default != CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER) { //Check that the default isn't Owner
+                                    //now get all the owners that are not GMs nor the default
+                                    delete ownership.default;
+                                    const playerOwners = Object.keys(ownership).filter(key => game.users.get(key) && !game.users.get(key).isGM);
+                                    //if there is only one player owner
+                                    if(playerOwners.length == 1) {
+                                        author = game.users.get(playerOwners[0]);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -706,6 +719,17 @@ export class Dice3D {
 
         if (options.secret) {  
             context.roll.secret = true;
+        }
+
+        //If the showForRoll method was called directly from the API, we didn't get the chance to retrieve a roll appearance
+        if(context.roll.options?.appearance) { //this can only exist if the showForRoll method was called directly from the API
+            context.roll.dice.forEach(diceTerm => {
+                if(!diceTerm.options)
+                    diceTerm.options = {};
+                if(!diceTerm.options.appearance)
+                    diceTerm.options.appearance = {};
+                diceTerm.options.appearance = foundry.utils.mergeObject(diceTerm.options.appearance, context.roll.options.appearance);
+            });
         }
 
         if (speaker) { 
@@ -842,13 +866,10 @@ export class Dice3D {
      */
     _startQueueHandler() {
         this.queue = [];
-        setInterval(() => {
-            this._processQueue();
-        }, 100);
     }
 
     _processQueue() {
-        if (this.queue.length > 0 && !this.box.rolling) {
+        if (this.queue.length > 0) {
             let animate = this.queue.shift();
             animate();
         }
@@ -874,6 +895,7 @@ export class Dice3D {
                         });
                     });
                 }
+                this._processQueue();
             } else {
                 for (let item of items)
                     item.resolve(false);

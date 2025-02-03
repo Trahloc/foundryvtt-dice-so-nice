@@ -2,7 +2,6 @@ import { DICE_MODELS } from './DiceModels.js';
 import { DiceSFXManager } from './DiceSFXManager.js';
 import { DiceSystem } from './DiceSystem.js';
 import { SoundManager } from './SoundManager.js';
-import { RendererStats } from './libs/threex.rendererstats.js';
 //import {GLTFExporter} from 'three/examples/jsm/loaders/exporters/GLTFExporter.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
@@ -12,6 +11,7 @@ import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { GammaCorrectionShader } from 'three/examples/jsm/shaders/GammaCorrectionShader.js';
 import { SMAAPass } from './libs/SMAAPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import Stats from 'stats-gl';
 
 import {
 	ACESFilmicToneMapping,
@@ -182,14 +182,27 @@ export class DiceBox {
 				game.dice3d.dice3dRenderers[this.config.boxType] = this.renderer;
 			}
 
+			this.stats = null;
 			if (false && this.config.boxType == "board") {
-				this.rendererStats = new RendererStats()
-
-				this.rendererStats.domElement.style.position = 'absolute';
-				this.rendererStats.domElement.style.left = '44px';
-				this.rendererStats.domElement.style.bottom = '178px';
-				this.rendererStats.domElement.style.transform = 'scale(2)';
-				document.body.appendChild(this.rendererStats.domElement);
+				this.stats = new Stats({
+					trackGPU: true,
+					trackHz: true,
+					trackCPT: true,
+					logsPerSecond: 4,
+					graphsPerSecond: 30,
+					samplesLog: 40, 
+					samplesGraph: 10, 
+					precision: 2, 
+					horizontal: true,
+					minimal: false, 
+					mode: 0
+				});
+				
+				// append the stats container to the body of the document
+				document.body.appendChild( this.stats.dom );
+				
+				// begin the performance monitor
+				this.stats.init(this.renderer);
 			}
 
 			this.container.appendChild(this.renderer.domElement);
@@ -818,6 +831,9 @@ export class DiceBox {
 
 		let neededSteps = Math.floor(time_diff / this.framerate);
 
+		if(this.stats)
+			this.stats.update();
+
 		if(this.iteration == 0) {
 			this.addDiceToScene();
 		}
@@ -841,6 +857,7 @@ export class DiceBox {
 				}
 			}
 
+			//Note: if the game is lagging, it means some collisions won't be played. Not sure if it is what we want or not
 			if (this.detectedCollides[this.iteration]) {
 				this.soundManager.playAudioSprite(...this.detectedCollides[this.iteration]);
 			}
@@ -883,22 +900,19 @@ export class DiceBox {
 
 			this.renderScene();
 		}
-		if (this.rendererStats)
-			this.rendererStats.update(this.renderer);
+
 		this.last_time = this.last_time + neededSteps * this.framerate * 1000;
 
 		// roll finished
 		if (this.throwFinished()) {
-			for(let i = 0; i < this.diceList.length; i++){
-				this.dicefactory.systems.get(this.diceList[i].userData.system).fire(DiceSystem.DICE_EVENT_TYPE.RESULT, { dice: this.diceList[i] });
-			}
 			//if animated dice still on the table, keep animating
 			if (this.running) {
+				for(let i = 0; i < this.diceList.length; i++){
+					this.dicefactory.systems.get(this.diceList[i].userData.system).fire(DiceSystem.DICE_EVENT_TYPE.RESULT, { dice: this.diceList[i] });
+				}
 				this.handleSpecialEffectsInit().then(() => {
-					this.callback(this.throws);
-					this.callback = null;
-					this.throws = null;
 					this.rolling = false;
+					this.callback(this.throws);
 					if (!this.animatedDiceDetected && !(this.allowInteractivity && (this.deadDiceList.length + this.diceList.length) > 0) && !DiceSFXManager.renderQueue.length)
 						this.removeTicker(this.animateThrow);
 				});
@@ -909,6 +923,8 @@ export class DiceBox {
 
 	async start_throw(throws, callback) {
 		if (this.rolling) return;
+		this.throws = null;
+		this.callback = null;
 		let countNewDice = 0;
 		throws.forEach(notation => {
 			let vector = { x: (Math.random() * 2 - 0.5) * this.display.currentWidth, y: -(Math.random() * 2 - 0.5) * this.display.currentHeight };
@@ -1086,9 +1102,10 @@ export class DiceBox {
 	}
 
 	async rollDice(throws, callback) {
-
-		this.camera.position.z = this.cameraHeight.far;
+		//old code??
+		//this.camera.position.z = this.cameraHeight.far;
 		this.clearDice();
+
 		this.minIterations = (throws.length - 1) * this.nbIterationsBetweenRolls;
 
 		for (let j = 0; j < throws.length; j++) {

@@ -358,9 +358,9 @@ Hooks.on("renderChatMessage", (message, html, data) => {
             //if _dice3dRenderedInPopout is true, we need to divide by 2 the sum
             let sumOfAllHiddenRolls = message._dice3dRollsHidden.reduce((a, b) => a + b, 0) / (message._dice3dRenderedInPopout ? 2 : 1);
 
-            //use this sum to hide the rolls with nth-last-child. this selector matches the nth-last-child of the message
+            //use this sum to hide the last rolls
             //which should be the most recent rolls
-            html.find(`.dice-roll:nth-last-child(-n+${sumOfAllHiddenRolls})`).addClass("dsn-hide");
+            html.find(`.dice-roll`).slice(-sumOfAllHiddenRolls).addClass("dsn-hide");
 
             //In case _dice3dMessageHidden is still true, we hide the message as it means the original rolls are not yet finished
             if(message._dice3dMessageHidden)
