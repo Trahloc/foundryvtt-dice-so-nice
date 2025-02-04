@@ -77,6 +77,10 @@ const config = {
       targets: [{
         src: `node_modules/three/build/three.module.min.js`,
         dest: `dist/libs`
+      },
+      {
+        src: `node_modules/three/build/three.core.min.js`,
+        dest: `dist/libs`
       }]
     }),
     nodeResolve({
